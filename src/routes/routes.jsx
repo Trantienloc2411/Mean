@@ -2,6 +2,7 @@
 import { lazy } from "react";
 import { Navigate } from "react-router-dom";
 import MainLayout from "../layouts/MainLayout";
+import AdminLayout from "../layouts/AdminLayout";
 
 // Lazy load pages
 const Home = lazy(() => import("../pages/Home"));
@@ -13,7 +14,7 @@ const NotFound = lazy(() => import("../pages/NotFound"));
 export const routes = [
   {
     path: "/",
-    element: <MainLayout />,
+    element: <AdminLayout />,
     children: [
       { path: "", element: <Home /> },
       {

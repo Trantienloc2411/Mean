@@ -7,10 +7,6 @@ const App = () => {
   return (
     <div style={{ padding: "20px" }}>
       <h1>Welcome to Ant Design with React</h1>
-      <Button type="primary">Click Me</Button>
-      <CreateUser />
-      <UserList />
-      <UploadFile />
     </div>
   );
 };
