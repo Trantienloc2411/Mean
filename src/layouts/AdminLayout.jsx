@@ -1,15 +1,14 @@
 import { Outlet, useNavigate, useLocation } from "react-router-dom";
-import React, { useState } from "react";
+import { useState } from "react";
 import {
-  AppstoreOutlined,
+  
   BarChartOutlined,
-  CloudOutlined,
-  DashboardFilled,
+  CalendarOutlined,
+  DashboardOutlined,
+  FileTextOutlined,
+  SettingOutlined,
   ShopOutlined,
-  TeamOutlined,
-  UploadOutlined,
   UserOutlined,
-  VideoCameraOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu } from "antd";
 
@@ -17,18 +16,17 @@ const { Header, Content, Footer, Sider } = Layout;
 
 // Danh sách menu items với đường dẫn
 const menuItems = [
-  { key: "/dashboard", icon: <DashboardFilled />, label: "Trang quản lý" },
-  { key: "/accounts", icon: <TeamOutlined />, label: "Tài khoản" },
+  { key: "/admin/dashboard", icon: <DashboardOutlined />, label: "Dashboard" },
+  { key: "/admin/account", icon: <UserOutlined />, label: "Account" },
+  { key: "/admin/counpon", icon: <FileTextOutlined />, label: "Counpon" },
+  { key: "/admin/booking", icon: <CalendarOutlined />, label: "Booking" },
   {
-    key: "/rental-location",
-    icon: <UploadOutlined />,
-    label: "Địa điểm cho thuê",
+    key: "/admin/transaction",
+    icon: <BarChartOutlined />,
+    label: "Transaction",
   },
-  { key: "/booking", icon: <BarChartOutlined />, label: "Đặt phòng" },
-  { key: "/coupon", icon: <BarChartOutlined />, label: "Mã giảm giá" },
-  { key: "/transaction", icon: <BarChartOutlined />, label: "Giao dịch" },
-  { key: "/report", icon: <BarChartOutlined />, label: "Báo cáo" },
-  { key: "/policy", icon: <AppstoreOutlined />, label: "Chính sách" },
+  { key: "/admin/rental", icon: <ShopOutlined />, label: "Rental Location" },
+  { key: "/admin/policy", icon: <SettingOutlined />, label: "Policy" },
 ];
 
 const AdminLayout = () => {
