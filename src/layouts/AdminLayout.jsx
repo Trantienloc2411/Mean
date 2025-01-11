@@ -6,11 +6,14 @@ import {
   CalendarOutlined,
   DashboardOutlined,
   FileTextOutlined,
+  SearchOutlined,
   SettingOutlined,
   ShopOutlined,
   UserOutlined,
+  BellOutlined,
+  NodeCollapseOutlined
 } from "@ant-design/icons";
-import { Layout, Menu } from "antd";
+import { Layout, Menu, Input, Image, Button } from "antd";
 
 const { Header, Content, Footer, Sider } = Layout;
 
@@ -77,17 +80,54 @@ const AdminLayout = () => {
         <Header
           style={{
             padding: 0,
+            backgroundColor: "white"
           }}
         >
-          Header
+          <div className="header-component"
+            style={
+              {
+                padding:28,
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                display: 'flex',
+                height: 100
+              }
+            }
+          >
+            <Input size="large" placeholder="Tìm kiếm địa điểm cho thuê" prefix={<SearchOutlined/>} style={{maxWidth: 400}}></Input>
+            <div className="userOption" style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center'
+            }}>
+              <Button size="large" type="dash" icon={<BellOutlined style={{fontSize: 20}}/>}>
+              </Button>
+              <Image style={{
+                margin: 10,
+                borderRadius: 100
+              }}
+              onClick= {
+                //enter code right here
+                null
+              }
+              width={35}
+              height={35}
+              preview={false}
+              src='https://s3-alpha-sig.figma.com/img/4920/fcde/8447f632360829a3d6cf6bd47b299bab?Expires=1737331200&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=YRDul0LX5qH0qTJ~PYdbbybEnteiXecE7RrpyaJYW3rUifKmkLp4N2Z7LAVMSNvoNY5KXcmwhIqm5UWzcxWGg1waRqqC2uFYrx0jg4WoplYgOuHs9zytpNR7vXQvL-bjCmjuvVzERd36~7DsRQEsIosfV4kIoJkeosNYeCrHNIiikZCN8OKKWofulOhhq5o5klATU0sg-mX409oyDa3WtMkK2Xa7TLmSldHfhx60rkgQ143JPs5EFMTxYkG1kOrrtbQFh6MWQuqiYceftCcpNAo2bTYdrAni5P7IhcA-eSbopVix6NSUahpqvXlGnm7koWuaK3mkWk41Kpt-X53LNQ__'
+              />
+
+
+
+            </div>
+          </div>
         </Header>
 
         <Content
           style={{
             background: "#eef0f2",
-            flex: 1, // Chiếm không gian còn lại giữa Header và Footer
-            overflow: "initial",
-            padding: "24px",
+            //flex: 1, // Chiếm không gian còn lại giữa Header và Footer
+            //overflow: "initial",
+            // padding: "24px",
           }}
         >
           <Outlet />

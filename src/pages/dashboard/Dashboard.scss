@@ -1,0 +1,15 @@
+.clock-realtime {
+    height: 40px;
+    width: 100%;
+    display: flex;
+    align-items: right;
+    justify-content: right;
+    background-color: white; 
+   
+
+}
+.clock-realtime .clockContent {
+    text-align: right;
+    padding-right: 2%;
+    padding-top: 12px ;
+}
