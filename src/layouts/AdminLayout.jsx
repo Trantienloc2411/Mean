@@ -23,7 +23,7 @@ const menuItems = [
   { key: "/admin/rental", icon: <BsBuildings />, label: "Địa điểm cho thuê" },
 
   { key: "/admin/booking", icon: <CalendarOutlined />, label: "Đặt phòng" },
-  { key: "/admin/counpon", icon: <TagOutlined />, label: "Mã giảm giá" },
+  { key: "/admin/coupon", icon: <TagOutlined />, label: "Mã giảm giá" },
   {
     key: "/admin/transaction",
     icon: <BarChartOutlined />,
