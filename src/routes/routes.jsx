@@ -60,6 +60,8 @@ const PolicyApp = lazy(() => import("../pages/policyApp/PolicyApp"));
 const RentalLocation = lazy(() =>
   import("../pages/rentalLocation/RentalLocation")
 );
+const Report = lazy(() => import("../pages/report/Report"));
+
 const Transaction = lazy(() => import("../pages/transaction/Transaction"));
 const NotFound = lazy(() => import("../pages/error/NotFound"));
 
@@ -84,6 +86,7 @@ export const routes = [
       { path: "transaction", element: <Transaction /> },
       { path: "rental", element: <RentalLocation /> },
       { path: "policy", element: <PolicyApp /> },
+      { path: "report", element: <Report /> },
     ],
   },
 
