@@ -1,29 +1,26 @@
-import React, { useState, useEffect  } from 'react';
-import {EyeInvisibleFilled, EyeFilled } from '@ant-design/icons';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { EyeInvisibleFilled, EyeFilled } from '@ant-design/icons';
+import ImageCarousel from '../../../components/ImageCarousel/ImageCarousel';
 import './Login.scss';
 
 const Login = () => {
-  const [currentSlide, setCurrentSlide] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
+  const navigate = useNavigate();
   
   const images = [
-    'src/assets/beach.jpg',
-    'src/assets/lake.jpg',
-    'src/assets/mountain.jpg'
+    'src/assets/images/beach.jpg',
+    'src/assets/images/lake.jpg',
+    'src/assets/images/mountain.jpg'
   ];
-
-  useEffect(() => {
-    const timer = setInterval(() => {
-      setCurrentSlide((prevSlide) => 
-        prevSlide === images.length - 1 ? 0 : prevSlide + 1
-      );
-    }, 8000);
-
-    return () => clearInterval(timer);
-  }, [images.length]);
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    navigate('/verifycode');
   };
 
   return (
@@ -37,7 +34,7 @@ const Login = () => {
           <p className="login-description">
             Đăng nhập để truy cập tài khoản Mean của bạn
           </p>
-          <form>
+          <form onSubmit={handleSubmit}>
             <div className="form-group">
               <label>Email hoặc số điện thoại</label>
               <input 
@@ -62,7 +59,7 @@ const Login = () => {
                   {showPassword ? (
                     <EyeInvisibleFilled className="password-icon" />
                   ) : (
-                    <EyeFilled  className="password-icon" />
+                    <EyeFilled className="password-icon" />
                   )}
                 </button>
               </div>
@@ -70,13 +67,13 @@ const Login = () => {
                 Quên mật khẩu
               </a>
             </div>
-            <button type="submit" className="submit-btn">
+            <button href="/verifycode" type="submit" className="submit-btn">
               Đăng nhập
             </button>
           </form>
           <div className="signup-prompt">
-            <span>Don't have an account? </span>
-            <a href="/signup">Sign up</a>
+            <span>Chưa có tài khoản? </span>
+            <a href="/signup">Đăng ký</a>
           </div>
           <div className="copyright">
             Copyright © Mean 2025
@@ -84,24 +81,7 @@ const Login = () => {
         </div>
       </div>
       <div className="login-carousel">
-        <div className="carousel-container" 
-             style={{ transform: `translateX(-${currentSlide * 100}%)` }}>
-          {images.map((image, index) => (
-            <div key={index} className="carousel-slide">
-              <img src={image} alt={`Slide ${index + 1}`} />
-            </div>
-          ))}
-        </div>
-        <div className="carousel-dots">
-          {images.map((_, index) => (
-            <button
-              key={index}
-              className={`carousel-dot ${currentSlide === index ? 'active' : ''}`}
-              onClick={() => setCurrentSlide(index)}
-              aria-label={`Slide ${index + 1}`}
-            />
-          ))}
-        </div>
+        <ImageCarousel images={images} />
       </div>
     </div>
   );
