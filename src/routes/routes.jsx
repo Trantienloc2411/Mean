@@ -5,6 +5,7 @@ import OwnerLayout from "../layouts/OwnerLayout";
 import Signup from "../pages/auth/signup/SignUp";
 import VerifyCode from "../pages/auth/verifyCode/VerifyCode";
 import ForgotPassword from "../pages/auth/forgotPassword/ForgotPassword";
+import SetNewPassword from "../pages/auth/setNewPassword/SetNewPassword";
 
 // Lazy load pages
 const Login = lazy(() => import("../pages/auth/login/Login"));
@@ -41,6 +42,10 @@ export const routes = [
   {
     path: "/forgot-password",
     element: <ForgotPassword />,
+  },
+  {
+    path: "/set-new-password",
+    element: <SetNewPassword />,
   },
 
   // Admin layout routes

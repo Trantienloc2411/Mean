@@ -1,14 +1,20 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { LeftOutlined, EyeInvisibleFilled, EyeFilled } from '@ant-design/icons';
 import ImageCarousel from '../../../components/ImageCarousel/ImageCarousel';
 import styles from './ForgotPassword.module.scss';
 
 const ForgotPassword = () => {
+    const navigate = useNavigate();
     const images = [
         'src/assets/images/beach.jpg',
         'src/assets/images/lake.jpg',
         'src/assets/images/mountain.jpg'
     ];
+    const handleSubmit = (e) => {
+            e.preventDefault();
+            navigate('/set-new-password');
+          };
     return (
         <div className={styles['forgotpw-container']}>
             <div className={styles['forgotpw-form']}>
@@ -25,7 +31,7 @@ const ForgotPassword = () => {
                     <p className={styles['forgotpw-description']}>
                         Đừng lo lắng, điều này xảy ra với tất cả chúng ta. Nhập email của bạn bên dưới để khôi phục mật khẩu.
                     </p>
-                    <form>
+                    <form onSubmit={handleSubmit}>
                         <div className={styles['form-group']}>
                             <label>Email</label>
                             <input
