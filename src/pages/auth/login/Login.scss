@@ -1,0 +1,260 @@
+.login-container {
+    display: flex;
+    min-height: 100vh;
+    background-color: #ffffff;
+    flex-wrap: wrap; 
+}
+
+.login-form {
+    flex: 1;
+    display: flex;
+    justify-content: center;
+    padding: 0;
+    max-width: 100%; 
+}
+
+.login-content {
+    width: 100%; 
+    max-width: 700px;
+    padding: 40px;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+.brand {
+    margin-bottom: 40px;
+
+    h1 {
+        font-size: 45px;
+        color: #000000;
+        margin: 0;
+        font-weight: 600;
+    }
+}
+
+h2 {
+    font-size: 35px;
+    color: #000000;
+    margin: 0 0 16px 0;
+    font-weight: 500;
+}
+
+.login-description {
+    color: rgba(0, 0, 0, 0.55);
+    margin: 0 0 32px 0;
+    font-size: 14px;
+}
+
+.form-group {
+    margin-bottom: 24px;
+
+    label {
+        display: block;
+        margin-bottom: 8px;
+        color: rgba(0, 0, 0, 0.85);
+        font-size: 14px;
+    }
+}
+
+.form-input {
+    width: 100%;
+    padding: 10px 16px;
+    border: 1px solid #d9d9d9;
+    border-radius: 4px;
+    font-size: 16px;
+    height: 40px;
+    transition: all 0.3s;
+
+    &:hover,
+    &:focus{
+        border-color: #4E72E3;
+    }
+
+    &:focus {
+        outline: none;
+        border-color: #4E72E3; 
+    }
+
+    &:active {
+        border-color: #4E72E3; 
+        background-color: #e6f0ff;
+    }
+}
+
+.password-input-wrapper {
+    position: relative;
+
+    .toggle-password {
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        transform: translateY(-50%);
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: #4E72E3;
+        display: flex;
+        align-items: center;
+
+        .password-icon {
+            font-size: 16px;
+        }
+    }
+}
+
+.forgot-password {
+    display: block;
+    text-align: right;
+    color: #4E72E3;
+    font-size: 14px;
+    text-decoration: none;
+    margin-top: 8px;
+}
+
+.submit-btn {
+    width: 100%;
+    height: 40px;
+    background-color: #18243C;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s;
+    margin-top: 8px;
+
+    &:hover {
+        background-color: rgba(24, 36, 60, 0.7);
+    }
+}
+
+.signup-prompt {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 14px;
+    color: rgba(0, 0, 0, 0.8);
+
+    a {
+        color: #4E72E3;
+        text-decoration: none;
+        margin-left: 4px;
+        &:hover {
+            text-decoration: underline;
+        }
+    }
+    
+}
+
+.copyright {
+    text-align: center;
+    color: rgba(0, 0, 0, 0.45);
+    font-size: 14px;
+    margin-top: auto;
+    padding-bottom: 24px;
+}
+
+.login-carousel {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+
+    .carousel-container {
+        display: flex;
+        height: 100%;
+        transition: transform 0.5s ease-in-out;
+    }
+
+    .carousel-slide {
+        min-width: 100%;
+        height: 100%;
+
+        img {
+            margin-top: 40px;
+            width: 70%;
+            height: 90%;
+            object-fit: cover;
+            border-radius: 20px;
+            margin-left: 90px;
+        }
+    }
+
+    .carousel-dots {
+        position: absolute;
+        bottom: 50px;
+        left: 47%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+
+        .carousel-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.35);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+
+            &.active {
+                background-color: #4E72E3;
+                transform: scale(1.2);
+                width: 27px;
+                height: 8px;
+                transition: all 0.3s ease-in-out;
+                border-radius: 10px;
+            }
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .login-container {
+        flex-direction: column;
+    }
+    .login-carousel {
+        display: none;
+    }
+    .login-content {
+        padding: 24px;
+        min-height: auto;
+    }
+}
+
+@media (max-width: 480px) {
+    .login-content {
+        padding: 16px;
+    }
+}
+
+@media (min-width: 1920px) {
+    .login-container {
+        flex-direction: row;
+        justify-content: space-between;
+    }
+
+    .login-form {
+        max-width: 50%;
+    }
+
+    .carousel-dots {
+        bottom: 150px; 
+        left: 47%;
+        transform: translateX(-50%);
+        gap: 12px; 
+    }
+
+    .carousel-dot {
+        width: 12px; 
+        height: 12px; 
+        background-color: rgba(255, 255, 255, 0.45); 
+    }
+
+    .carousel-dot.active {
+        background-color: #4E72E3;
+        transform: scale(1.5); 
+        width: 35px; 
+        height: 13px; 
+    }
+}
+

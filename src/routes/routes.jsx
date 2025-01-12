@@ -4,7 +4,7 @@ import AdminLayout from "../layouts/AdminLayout";
 import OwnerLayout from "../layouts/OwnerLayout";
 
 // Lazy load pages
-const Login = lazy(() => import("../pages/auth/Login"));
+const Login = lazy(() => import("../pages/auth/login/Login"));
 const Dashboard = lazy(() => import("../pages/dashboard/Dashboard"));
 const Account = lazy(() => import("../pages/account/Account"));
 const Coupon = lazy(() => import("../pages/coupon/Coupon"));
