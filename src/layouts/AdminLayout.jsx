@@ -3,8 +3,6 @@ import React, { useState } from "react";
 import {
   BarChartOutlined,
   CalendarOutlined,
-  DashboardOutlined,
-  FileTextOutlined,
   SearchOutlined,
   HomeOutlined,
   InfoCircleOutlined,
@@ -14,15 +12,12 @@ import {
   TagOutlined,
   UserOutlined,
   BellOutlined,
-  NodeCollapseOutlined,
   DownOutlined,
   LogoutOutlined,
   WalletOutlined,
 } from "@ant-design/icons";
 
 import {
-  Layout,
-  Menu,
   Input,
   Image,
   Button,
@@ -30,8 +25,6 @@ import {
   Badge,
   Dropdown,
 } from "antd";
-
-const { Header, Content, Footer, Sider } = Layout;
 
 import { Layout, Menu } from "antd";
 import Logo from "../assets/images/logo.png";
