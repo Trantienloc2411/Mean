@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { EyeInvisibleFilled, EyeFilled } from '@ant-design/icons';
 import ImageCarousel from '../../../components/ImageCarousel/ImageCarousel';
-import './Login.scss';
+import styles from './Login.module.scss'; 
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -24,63 +24,63 @@ const Login = () => {
   };
 
   return (
-    <div className="login-container">
-      <div className="login-form">
-        <div className="login-content">
-          <div className="brand">
+    <div className={styles.loginContainer}>
+      <div className={styles.loginForm}>
+        <div className={styles.loginContent}>
+          <div className={styles.brand}>
             <h1>Mean</h1>
           </div>
           <h2>Đăng nhập</h2>
-          <p className="login-description">
+          <p className={styles.loginDescription}>
             Đăng nhập để truy cập tài khoản Mean của bạn
           </p>
           <form onSubmit={handleSubmit}>
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label>Email hoặc số điện thoại</label>
               <input 
                 type="email" 
                 placeholder="john.doe@gmail.com"
-                className="form-input" 
+                className={styles.formInput} 
               />
             </div>
-            <div className="form-group">
+            <div className={styles.formGroup}>
               <label>Mật khẩu</label>
-              <div className="password-input-wrapper">
+              <div className={styles.passwordInputWrapper}>
                 <input 
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••••••"
-                  className="form-input" 
+                  className={styles.formInput} 
                 />
                 <button 
                   type="button" 
-                  className="toggle-password"
+                  className={styles.togglePassword}
                   onClick={togglePasswordVisibility}
                 >
                   {showPassword ? (
-                    <EyeInvisibleFilled className="password-icon" />
+                    <EyeInvisibleFilled className={styles.passwordIcon} />
                   ) : (
-                    <EyeFilled className="password-icon" />
+                    <EyeFilled className={styles.passwordIcon} />
                   )}
                 </button>
               </div>
-              <a href="/forgot-password" className="forgot-password">
+              <a href="/forgot-password" className={styles.forgotPassword}>
                 Quên mật khẩu
               </a>
             </div>
-            <button href="/verifycode" type="submit" className="submit-btn">
+            <button href="/verifycode" type="submit" className={styles.submitBtn}>
               Đăng nhập
             </button>
           </form>
-          <div className="signup-prompt">
+          <div className={styles.signupPrompt}>
             <span>Chưa có tài khoản? </span>
             <a href="/signup">Đăng ký</a>
           </div>
-          <div className="copyright">
+          <div className={styles.copyright}>
             Copyright © Mean 2025
           </div>
         </div>
       </div>
-      <div className="login-carousel">
+      <div className={styles.loginCarousel}>
         <ImageCarousel images={images} />
       </div>
     </div>

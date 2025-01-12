@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { LeftOutlined, EyeInvisibleFilled, EyeFilled } from '@ant-design/icons';
 import ImageCarousel from '../../../components/ImageCarousel/ImageCarousel';
-import './VerifyCode.scss';
+import styles from './VerifyCode.module.scss';
 
 const VerifyCode = () => {
     const [code, setCode] = useState('');
@@ -17,59 +17,59 @@ const VerifyCode = () => {
     };
 
     return (
-        <div className="verify-container">
-            <div className="verify-form">
-                <div className="verify-content">
-                    <div className="brand">
+        <div className={styles.verifyContainer}>
+            <div className={styles.verifyForm}>
+                <div className={styles.verifyContent}>
+                    <div className={styles.brand}>
                         <h1>Mean</h1>
                     </div>
-                    <div className="back-link">
-                        <a href="/login">
+                    <div className={styles.backLink}>
+                        <a href="/">
                             <LeftOutlined /> Đăng nhập
                         </a>
                     </div>
-                    <h2>Nhập mã xác minh</h2>
-                    <p className="verify-description">
+                    <h2 className={styles.title}>Nhập mã xác minh</h2>
+                    <p className={styles.verifyDescription}>
                         Mã xác thực đã được gửi tới email của bạn.
                     </p>
                     <form>
-                        <div className="form-group">
+                        <div className={styles.formGroup}>
                             <label>Nhập mã</label>
-                            <div className="code-input-wrapper">
+                            <div className={styles.codeInputWrapper}>
                                 <input
                                     type={showCode ? "text" : "password"}
                                     value={code}
                                     onChange={(e) => setCode(e.target.value)}
                                     placeholder="7789BMGX"
-                                    className="form-input"
+                                    className={styles.formInput}
                                 />
                                 <button
                                     type="button"
-                                    className="toggle-visibility"
+                                    className={styles.toggleVisibility}
                                     onClick={toggleCodeVisibility}
                                 >
                                     {showCode ? (
-                                        <EyeInvisibleFilled className="visibility-icon" />
+                                        <EyeInvisibleFilled className={styles.visibilityIcon} />
                                     ) : (
-                                        <EyeFilled className="visibility-icon" />
+                                        <EyeFilled className={styles.visibilityIcon} />
                                     )}
                                 </button>
                             </div>
-                            <div className="verify-prompt">
+                            <div className={styles.verifyPrompt}>
                                 <span>Không nhận được mã? </span>
                                 <a href="">Gửi lại</a>
                             </div>
                         </div>
-                        <button type="submit" className="submit-btn">
+                        <button type="submit" className={styles.submitBtn}>
                             Xác thực
                         </button>
                     </form>
-                    <div className="copyright">
+                    <div className={styles.copyright}>
                         Copyright © Mean 2025
                     </div>
                 </div>
             </div>
-            <div className="verify-carousel">
+            <div className={styles.verifyCarousel}>
                 <ImageCarousel images={images} />
             </div>
         </div>

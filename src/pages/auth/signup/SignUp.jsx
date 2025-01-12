@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { EyeInvisibleFilled, EyeFilled } from '@ant-design/icons';
 import ImageCarousel from '../../../components/ImageCarousel/ImageCarousel';
-import './Signup.scss';
+import styles from './Signup.module.scss';
 
 const Signup = () => {
     const [showPassword, setShowPassword] = useState(false);
@@ -21,109 +21,109 @@ const Signup = () => {
     };
 
     return (
-        <div className="signup-container">
-            <div className="signup-carousel">
+        <div className={styles.signupContainer}>
+            <div className={styles.signupCarousel}>
                 <ImageCarousel images={images} />
             </div>
-            <div className="signup-form">
-                <div className="signup-content">
-                    <div className="brand">
+            <div className={styles.signupForm}>
+                <div className={styles.signupContent}>
+                    <div className={styles.brand}>
                         <h1>Mean</h1>
                     </div>
                     <h2>Đăng ký</h2>
-                    <p className="signup-description">
+                    <p className={styles.signupDescription}>
                         Trở thành đối tác của chúng tôi
                     </p>
                     <form>
-                        <div className="form-group">
+                        <div className={styles.formGroup}>
                             <label>Họ và tên</label>
                             <input
                                 type="text"
                                 placeholder="Zane Phạm"
-                                className="form-input"
+                                className={styles.formInput}
                             />
                         </div>
-                        <div className="form-group">
+                        <div className={styles.formGroup}>
                             <label>Email</label>
                             <input
                                 type="email"
                                 placeholder="zanepham@gmail.com"
-                                className="form-input"
+                                className={styles.formInput}
                             />
                         </div>
-                        <div className="form-group">
+                        <div className={styles.formGroup}>
                             <label>Số điện thoại</label>
                             <input
                                 type="number"
                                 placeholder="09876521"
-                                className="form-input"
+                                className={styles.formInput}
                             />
                         </div>
-                        <div className="form-group">
+                        <div className={styles.formGroup}>
                             <label>Mật khẩu</label>
-                            <div className="password-input-wrapper">
+                            <div className={styles.passwordInputWrapper}>
                                 <input
                                     type={showPassword ? "text" : "password"}
                                     placeholder="••••••••••••"
-                                    className="form-input"
+                                    className={styles.formInput}
                                 />
                                 <button
                                     type="button"
-                                    className="toggle-password"
+                                    className={styles.togglePassword}
                                     onClick={togglePasswordVisibility}
                                 >
                                     {showPassword ? (
-                                        <EyeInvisibleFilled className="password-icon" />
+                                        <EyeInvisibleFilled className={styles.passwordIcon} />
                                     ) : (
-                                        <EyeFilled className="password-icon" />
+                                        <EyeFilled className={styles.passwordIcon} />
                                     )}
                                 </button>
                             </div>
                         </div>
-                        <div className="form-group">
+                        <div className={styles.formGroup}>
                             <label>Nhập lại mật khẩu</label>
-                            <div className="password-input-wrapper">
+                            <div className={styles.passwordInputWrapper}>
                                 <input
                                     type={showConfirmPassword ? "text" : "password"}
                                     placeholder="••••••••••••"
-                                    className="form-input"
+                                    className={styles.formInput}
                                 />
                                 <button
                                     type="button"
-                                    className="toggle-password"
+                                    className={styles.togglePassword}
                                     onClick={toggleConfirmPasswordVisibility}
                                 >
                                     {showConfirmPassword ? (
-                                        <EyeInvisibleFilled className="password-icon" />
+                                        <EyeInvisibleFilled className={styles.passwordIcon} />
                                     ) : (
-                                        <EyeFilled className="password-icon" />
+                                        <EyeFilled className={styles.passwordIcon} />
                                     )}
                                 </button>
                             </div>
                         </div>
-                        <div className="form-group terms-group">
-                            <label className="checkbox-label">
+                        <div className={`${styles.formGroup} ${styles.termsGroup}`}>
+                            <label className={styles.checkboxLabel}>
                                 <input
                                     type="checkbox"
-                                    className="checkbox-input"
+                                    className={styles.checkboxInput}
                                 />
-                                <span className="checkbox-text">
+                                <span className={styles.checkboxText}>
                                     Tôi đồng ý với tất cả các{' '}
-                                    <a href="/terms" className="link-text">Điều khoản</a>
+                                    <a href="/terms" className={styles.linkText}>Điều khoản</a>
                                     {' '}và{' '}
-                                    <a href="/privacy" className="link-text">Chính sách bảo mật</a>
+                                    <a href="/privacy" className={styles.linkText}>Chính sách bảo mật</a>
                                 </span>
                             </label>
                         </div>
-                        <button type="submit" className="submit-btn">
+                        <button type="submit" className={styles.submitBtn}>
                             Tạo tài khoản
                         </button>
                     </form>
-                    <div className="login-prompt">
+                    <div className={styles.loginPrompt}>
                         <span>Đã có tài khoản? </span>
                         <a href="/">Đăng nhập</a>
                     </div>
-                    <div className="copyright">
+                    <div className={styles.copyright}>
                         Copyright © Mean 2025
                     </div>
                 </div>
