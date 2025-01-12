@@ -1,3 +1,3 @@
 export default function Report() {
-  return <div>Report</div>;
+  return <div>Reporádasdast</div>;
 }
