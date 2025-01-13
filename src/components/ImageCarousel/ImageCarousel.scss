@@ -1,0 +1,93 @@
+.carousel {
+    flex: 1;
+    position: relative;
+    overflow: hidden;
+    height: 100vh; 
+
+    .carousel-container {
+        display: flex;
+        height: 100%;
+        transition: transform 0.5s ease-in-out;
+    }
+
+    .carousel-slide {
+        min-width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 40px;
+
+        img {
+            width: 85%;
+            height: calc(100vh - 80px);
+            object-fit: cover;
+            border-radius: 20px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    }
+
+    .carousel-dots {
+        position: absolute;
+        bottom: 50px;
+        left: 50%;
+        transform: translateX(-50%);
+        display: flex;
+        gap: 8px;
+
+        .carousel-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background-color: rgba(255, 255, 255, 0.35);
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s;
+
+            &.active {
+                background-color: #4E72E3;
+                transform: scale(1.2);
+                width: 27px;
+                height: 8px;
+                transition: all 0.3s ease-in-out;
+                border-radius: 10px;
+            }
+        }
+    }
+}
+
+@media (max-width: 768px) {
+    .carousel {
+        display: none;
+    }
+}
+
+@media (min-width: 1920px) {
+    .carousel {
+        .carousel-slide {
+            img {
+                width: 90%; 
+            }
+        }
+        
+        .carousel-dots {
+            bottom: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            gap: 12px;
+        }
+
+        .carousel-dot {
+            width: 12px;
+            height: 12px;
+            background-color: rgba(255, 255, 255, 0.45);
+
+            &.active {
+                background-color: #4E72E3;
+                transform: scale(1.5);
+                width: 35px;
+                height: 12px;
+            }
+        }
+    }
+}
