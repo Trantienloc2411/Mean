@@ -1,27 +1,29 @@
 import {
-  HistoryOutlined,
-  LineChartOutlined,
-  RiseOutlined,
-  TeamOutlined,
-} from "@ant-design/icons";
-import { Card } from "antd";
-
-
+    LoadingOutlined,
+    FileDoneOutlined,
+    StopOutlined,
+    CheckOutlined,
+    TeamOutlined,
+  } from "@ant-design/icons";
+  import { Card } from "antd";
+  
 export default function Overview(props) {
-  const {
-    totalUser,
-    totalTransaction,
-    totalRevenue,
-    totalProfit
-  } = props;
-  return (
-    <div>
-      <div className="card-list">
+    const {
+        totalUser,
+        totalWaiting,
+        totalConfirmed,
+        totalCompleted,
+        totalCanceled
+    } = props;
+
+
+    return(
+        <div className="card-list">
         <div className="card-container">
           <Card style={{ height: 130 }}>
             <div className="card-row">
               <div className="card-content">
-                <p>Tổng người dùng</p>
+                <p>Tổng</p>
                 <h2>{totalUser}</h2>
               </div>
               <div className="icon-wrapper">
@@ -35,16 +37,16 @@ export default function Overview(props) {
           <Card style={{ height: 130 }}>
             <div className="card-row">
               <div className="card-content">
-                <p>Tổng giao dịch</p>
-                <h2>{totalTransaction}</h2>
+                <p>Đang chờ xử lí</p>
+                <h2>{totalWaiting}</h2>
               </div>
               <div
                 className="icon-wrapper"
                 style={{
-                  backgroundColor: "#ffded1",
+                  backgroundColor: "#D3D0CEFF",
                 }}
               >
-                <HistoryOutlined style={{ color: "#ff9066" }} />
+                <LoadingOutlined spin='true'  style={{ color: "#8F8D8CFF" }} />
               </div>
             </div>
           </Card>
@@ -54,8 +56,8 @@ export default function Overview(props) {
           <Card style={{ height: 130 }}>
             <div className="card-row">
               <div className="card-content">
-                <p>Tổng doanh thu</p>
-                <h2>{totalRevenue}</h2>
+                <p>Đã xác nhận</p>
+                <h2>{totalConfirmed}</h2>
               </div>
               <div
                 className="icon-wrapper"
@@ -63,7 +65,7 @@ export default function Overview(props) {
                   backgroundColor: "#d9f7e8",
                 }}
               >
-                <LineChartOutlined style={{ color: "#4ad991" }} />
+                <FileDoneOutlined  style={{ color: "#4ad991" }} />
               </div>
             </div>
           </Card>
@@ -72,21 +74,39 @@ export default function Overview(props) {
           <Card style={{ height: 130 }}>
             <div className="card-row">
               <div className="card-content">
-                <p>Tổng lợi nhuận</p>
-                <h2>{totalProfit}</h2>
+                <p>Đã hoàn tất</p>
+                <h2>{totalCompleted}</h2>
               </div>
               <div
                 className="icon-wrapper"
                 style={{
-                  backgroundColor: "#d9f7e8",
+                  backgroundColor: "#A3F7F7FF",
                 }}
               >
-                <RiseOutlined style={{ color: "#4ad991" }} />
+                <CheckOutlined  style={{ color: "#6CCAF0FF" }} />
+              </div>
+            </div>
+          </Card>
+        </div>
+        <div className="card-container">
+          <Card style={{ height: 130 }}>
+            <div className="card-row">
+              <div className="card-content">
+                <p>Đã huỷ</p>
+                <h2>{totalCanceled}</h2>
+              </div>
+              <div
+                className="icon-wrapper"
+                style={{
+                  backgroundColor: "#ffded1",
+                }}
+              >
+                <StopOutlined  style={{ color: "#ff9066" }} />
               </div>
             </div>
           </Card>
         </div>
       </div>
-    </div>
-  );
+    
+);
 }
