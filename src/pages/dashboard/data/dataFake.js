@@ -29,109 +29,23 @@ export const placeLove =
         placeName: 'Tây Nguyên Paradise',
         bookedCount : 120000,
         ratingAverage: 4.7
-    },
-    {
-        key: 6,
-        placeName: 'Tây Nguyên Paradise',
-        bookedCount : 120000,
-        ratingAverage: 4.7
-    },
-    {
-        key: 7,
-        placeName: 'Tây Nguyên Paradise',
-        bookedCount : 120000,
-        ratingAverage: 4.7
-    },
-    {
-        key: 8,
-        placeName: 'Tây Nguyên Paradise',
-        bookedCount : 120000,
-        ratingAverage: 4.7
-    },
-    {
-        key: 9,
-        placeName: 'Tây Nguyên Paradise',
-        bookedCount : 120000,
-        ratingAverage: 4.7
-    },
-    {
-        key: 10,
-        placeName: 'Tây Nguyên Paradise',
-        bookedCount : 120000,
-        ratingAverage: 4.7
-    },
-    {
-        key: 11,
-        placeName: 'Tây Nguyên Paradise',
-        bookedCount : 120000,
-        ratingAverage: 4.7
     }
 ];
 
 export const reviewList = [
     {
-        name: 'Mark',
+        title: 'Mark',
         content: 'The services are so good',
         rating: '5'
     },
     {
-        name: 'Mark',
+        title: 'Mark',
         content: 'The services are so good',
         rating: '5'
     },
     {
-        name: 'Mark',
+        title: 'Mark',
         content: 'The services are so good',
         rating: '5'
     },
-    {
-        name: 'Mark',
-        content: 'The services are so good',
-        rating: '5'
-    },
-    {
-        name: 'Mark',
-        content: 'The services are so good',
-        rating: '5'
-    },
-    {
-        name: 'Mark',
-        content: 'The services are so good',
-        rating: '5'
-    },
-    {
-        name: 'Mark',
-        content: 'The services are so good',
-        rating: '5'
-    },
-    {
-        name: 'Mark',
-        content: 'The services are so good',
-        rating: '5'
-    },
-    {
-        name: 'Mark',
-        content: 'The services are so good',
-        rating: '5'
-    },
-    {
-        name: 'Mark',
-        content: 'The services are so good',
-        rating: '5'
-    },
-    {
-        name: 'Mark',
-        content: 'The services are so good',
-        rating: '5'
-    },
-    {
-        name: 'Mark',
-        content: 'The services are so good',
-        rating: '5'
-    },
-    {
-        name: 'Mark',
-        content: 'The services are so good',
-        rating: '5'
-    }
 ];

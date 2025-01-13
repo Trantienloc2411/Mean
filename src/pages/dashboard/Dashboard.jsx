@@ -1,6 +1,8 @@
 import "../dashboard/Dashboard.scss";
 import { useState, useEffect } from "react";
-import { Card, Space, Table, List } from "antd";
+import { Card, Space } from "antd";
+import Table from "./components/Table";
+import ReviewList from "./components/List";
 import {
   TeamOutlined,
   HistoryOutlined,
@@ -59,7 +61,7 @@ export default function Dashboard() {
 
       <div className="content-container">
         <h1>Tổng quan</h1>
-        <Overview />
+        <Overview  totalUser='100' totalTransaction='10' totalRevenue='100' totalProfit='10'/>
         <h1>Hoạt động tuần</h1>
         {/* chart here */}
         <div>
@@ -73,38 +75,19 @@ export default function Dashboard() {
             </h1>
             <div className="table-container">
               <Table
-                columns={columnPlace}
-                dataSource={placeLove.slice(0, 5)}
-                pagination={false}
+                tableColumn={columnPlace}
+                tableData={placeLove}
+                isPagination={false}
               />
             </div>
           </div>
 
           <div className="list-review-customer-container">
             <h1 className="section-title">Đánh giá khách hàng</h1>
-            <List
-              style={{
-                backgroundColor: "white",
-                padding: 20,
-                borderRadius: 12,
-                width: "100%", // Changed to take full width of container
-              }}
-              itemLayout="horizontal"
-              dataSource={reviewList.slice(0, 3)}
-              renderItem={(item, index) => (
-                <List.Item>
-                  <List.Item.Meta
-                    title={
-                      <div style={{ fontWeight: "bold" }}>{item.name}</div>
-                    }
-                    description={<div>{item.content}</div>}
-                  />
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <span style={{ marginRight: 4 }}>{item.rating}</span>
-                    <StarFilled style={{ color: "#FFD700" }} />
-                  </div>
-                </List.Item>
-              )}
+            <ReviewList
+              itemLayout={'horizontal'}
+              dataSource={reviewList}
+
             />
           </div>
         </div>
