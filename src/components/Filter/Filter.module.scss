@@ -1,0 +1,28 @@
+.filterContainer {
+    padding: 16px;
+    background: white;
+    width: 600px;
+    display: grid;
+    gap: 20px;
+    border-radius: 8px;
+    box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 
+                0 6px 16px 0 rgba(0, 0, 0, 0.08), 
+                0 9px 28px 8px rgba(0, 0, 0, 0.05);
+  }
+  
+  .filterGroup {
+    padding: 12px;
+    background: #fafafa;
+    border-radius: 6px;
+  
+    h4 {
+      margin-bottom: 12px;
+      color: #1f1f1f;
+    }
+  }
+  
+  .checkboxGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
