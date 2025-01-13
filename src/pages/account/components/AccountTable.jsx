@@ -1,8 +1,9 @@
 import { MoreOutlined } from "@ant-design/icons";
 import { Dropdown } from "antd";
 import { Menu } from "antd";
-import { Button, Table, Tag } from "antd";
+import { Table, Tag } from "antd";
 
+// eslint-disable-next-line react/prop-types
 export default function AccountTable({ data, loading }) {
   const columns = [
     {
@@ -29,14 +30,14 @@ export default function AccountTable({ data, loading }) {
     {
       title: "Vai trò",
       dataIndex: "role",
-      align:"center",
+      align: "center",
       key: "role",
-      filters: [
-        { text: "Admin", value: "Admin" },
-        { text: "Người dùng", value: "Người dùng" },
-        { text: "Quản lý", value: "Quản lý" },
-      ],
-      onFilter: (value, record) => record.role === value,
+      // filters: [
+      //   { text: "Admin", value: "Admin" },
+      //   { text: "Người dùng", value: "Người dùng" },
+      //   { text: "Quản lý", value: "Quản lý" },
+      // ],
+      // onFilter: (value, record) => record.role === value,
       render: (role) => {
         let color =
           role === "Admin" ? "red" : role === "Quản lý" ? "blue" : "green";
@@ -46,14 +47,14 @@ export default function AccountTable({ data, loading }) {
     {
       title: "Trạng thái",
       dataIndex: "status",
-      align:"center",
+      align: "center",
       key: "status",
-      filters: [
-        { text: "Hoạt động", value: "Hoạt động" },
-        { text: "Chờ xác nhận", value: "Chờ xác nhận" },
-        { text: "Đã khóa", value: "Đã khóa" },
-      ],
-      onFilter: (value, record) => record.status === value,
+      // filters: [
+      //   { text: "Hoạt động", value: "Hoạt động" },
+      //   { text: "Chờ xác nhận", value: "Chờ xác nhận" },
+      //   { text: "Đã khóa", value: "Đã khóa" },
+      // ],
+      // onFilter: (value, record) => record.status === value,
       render: (status) => {
         let color =
           status === "Hoạt động"
@@ -67,13 +68,13 @@ export default function AccountTable({ data, loading }) {
     {
       title: "Phê duyệt",
       dataIndex: "approve",
-      align:"center",
+      align: "center",
       key: "approve",
-      filters: [
-        { text: "Đã phê duyệt", value: "Đã phê duyệt" },
-        { text: "Chưa phê duyệt", value: "Chưa phê duyệt" },
-      ],
-      onFilter: (value, record) => record.approve === value,
+      // filters: [
+      //   { text: "Đã phê duyệt", value: "Đã phê duyệt" },
+      //   { text: "Chưa phê duyệt", value: "Chưa phê duyệt" },
+      // ],
+      // onFilter: (value, record) => record.approve === value,
       render: (approve) => {
         let color = approve === "Đã phê duyệt" ? "green" : "red";
         return <Tag color={color}>{approve}</Tag>;
@@ -82,7 +83,7 @@ export default function AccountTable({ data, loading }) {
     {
       title: "Action",
       key: "action",
-      align:"center",
+      align: "center",
       render: (text, record) => (
         <Dropdown
           overlay={
@@ -126,7 +127,6 @@ export default function AccountTable({ data, loading }) {
         columns={columns}
         rowKey="id"
       />
-      ;
     </div>
   );
 }

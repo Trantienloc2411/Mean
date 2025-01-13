@@ -1,23 +1,60 @@
 import { useState, useEffect } from "react";
-import { Input } from "antd";
+import { Button, Input } from "antd";
 import OverviewAccount from "./components/OverviewAccount";
-import { SearchOutlined } from "@ant-design/icons";
+import { FilterOutlined, SearchOutlined } from "@ant-design/icons";
 import AccountTable from "./components/AccountTable";
 import { useGetUsersQuery } from "../../features/user/userApiSlice";
+import FilterModal from "./components/FilterModal";
+import { Flex } from "antd";
 
 export default function Account() {
   const { data: users, error, isLoading } = useGetUsersQuery();
   const [searchValue, setSearchValue] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
+  const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
+  const [selectedFilters, setSelectedFilters] = useState({
+    roles: [],
+    statuses: [],
+    approves: [],
+  });
 
   useEffect(() => {
     if (users) {
-      const result = users.filter((user) =>
-        user.phoneNumber.includes(searchValue)
-      );
+      const result = users.filter((user) => {
+        const matchesSearch = user.phoneNumber.includes(searchValue);
+        const matchesRole =
+          selectedFilters.roles.length === 0 ||
+          selectedFilters.roles.includes(user.role);
+        const matchesStatus =
+          selectedFilters.statuses.length === 0 ||
+          selectedFilters.statuses.includes(user.status);
+        const matchesApprove =
+          selectedFilters.approves.length === 0 ||
+          selectedFilters.approves.includes(user.approve);
+
+        return matchesSearch && matchesRole && matchesStatus && matchesApprove;
+      });
       setFilteredUsers(result);
     }
-  }, [searchValue, users]);
+  }, [searchValue, selectedFilters, users]);
+
+  const handleFilterChange = (key, values) => {
+    setSelectedFilters((prevFilters) => ({
+      ...prevFilters,
+      [key]: values,
+    }));
+  };
+
+  const resetFilters = () => {
+    setSelectedFilters({
+      roles: [],
+      statuses: [],
+      approves: [],
+    });
+  };
+
+  const openFilterModal = () => setIsFilterModalVisible(true);
+  const closeFilterModal = () => setIsFilterModalVisible(false);
 
   if (error) return <p>Error: {error.message}</p>;
 
@@ -29,15 +66,28 @@ export default function Account() {
       </div>
       <div style={{ marginTop: 20 }}>
         <h1 style={{ fontSize: 20 }}>Danh sách tài khoản</h1>
-        <Input
-          prefix={<SearchOutlined />}
-          placeholder="Tìm kiếm bằng số điện thoại"
-          style={{ width: 400, marginBottom: 20 }}
-          value={searchValue}
-          onChange={(e) => setSearchValue(e.target.value)} // Cập nhật giá trị search
-        />
+        <Flex gap={30}>
+          <Input
+            prefix={<SearchOutlined />}
+            placeholder="Tìm kiếm bằng số điện thoại"
+            style={{ width: 300, marginBottom: 20 }}
+            value={searchValue}
+            onChange={(e) => setSearchValue(e.target.value)}
+          />
+          <Button onClick={openFilterModal}>
+            <FilterOutlined />
+            Bộ lọc
+          </Button>
+        </Flex>
         <AccountTable loading={isLoading} data={filteredUsers} />
       </div>
+      <FilterModal
+        visible={isFilterModalVisible}
+        onClose={closeFilterModal}
+        filters={selectedFilters}
+        onFilterChange={handleFilterChange}
+        onReset={resetFilters}
+      />
     </div>
   );
 }
