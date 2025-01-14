@@ -10,7 +10,7 @@ const CardDashboard = ({
   backgroundColorIcon = "#d0cfff",
   colorIcon = "#8280FF",
   height = 100,
-  width = 230,
+  width = 250,
 }) => {
   const containerStyles = {
     height: `${height}px`,
@@ -75,7 +75,7 @@ CardDashboard.defaultProps = {
   backgroundColorIcon: "#d0cfff",
   colorIcon: "#8280FF",
   height: 100,
-  width: 230,
+  width: 250,
 };
 
 // Prop Type Checking
