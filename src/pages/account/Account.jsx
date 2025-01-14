@@ -6,7 +6,7 @@ import AccountTable from "./components/AccountTable";
 import { useGetUsersQuery } from "../../features/user/userApiSlice";
 import FilterModal from "./components/FilterModal";
 import { Flex } from "antd";
-import { RoleEnum, StatusEnum, ApproveEnum } from "../../enums/accountEnums"; // Import enum từ file enums
+import { RoleEnum, StatusEnum, ApproveEnum } from "../../enums/accountEnums";
 
 export default function Account() {
   const { data: users, error, isLoading } = useGetUsersQuery();
@@ -19,7 +19,7 @@ export default function Account() {
     approves: [],
   });
 
-  useEffect(() => {
+  const handleSearch = () => {
     if (users) {
       const result = users.filter((user) => {
         const matchesSearch = user.phoneNumber.includes(searchValue);
@@ -37,7 +37,12 @@ export default function Account() {
       });
       setFilteredUsers(result);
     }
-  }, [searchValue, selectedFilters, users]);
+  };
+
+  useEffect(() => {
+    // Lọc ngay khi có sự thay đổi về users hoặc selectedFilters
+    handleSearch();
+  }, [selectedFilters, users]);
 
   const handleFilterChange = (key, values) => {
     setSelectedFilters((prevFilters) => ({
@@ -68,14 +73,18 @@ export default function Account() {
       <div style={{ marginTop: 20 }}>
         <h1 style={{ fontSize: 20 }}>Danh sách tài khoản</h1>
         <div style={{ background: "#fff", borderRadius: 20, padding: 20 }}>
-          <Flex gap={30}>
-            <Input
-              prefix={<SearchOutlined />}
-              placeholder="Tìm kiếm bằng số điện thoại"
-              style={{ width: 300, marginBottom: 10 }}
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-            />
+          <Flex justify="space-between">
+            <div>
+              <Input
+                prefix={<SearchOutlined />}
+                placeholder="Tìm kiếm bằng số điện thoại"
+                style={{ width: 300, marginBottom: 10 }}
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                onPressEnter={handleSearch} // Thực hiện tìm kiếm khi nhấn Enter
+              />
+              <Button style={{marginLeft:10}} onClick={handleSearch}>Tìm kiếm</Button>
+            </div>
             <Button onClick={openFilterModal}>
               <FilterOutlined />
               Bộ lọc

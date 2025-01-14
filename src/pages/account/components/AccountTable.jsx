@@ -68,7 +68,7 @@ export default function AccountTable({ data, loading }) {
       align: "center",
       render: (text, record) => (
         <Dropdown
-          menu={
+          overlay={
             <Menu>
               <Menu.Item key="1" onClick={() => handleViewDetails(record)}>
                 Xem chi tiết
@@ -104,6 +104,7 @@ export default function AccountTable({ data, loading }) {
   return (
     <div style={{ marginTop: 10 }}>
       <Table
+        scroll={{ x: "max-content" }}
         dataSource={data}
         loading={loading}
         columns={columns}
