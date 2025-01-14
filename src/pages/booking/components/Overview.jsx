@@ -7,7 +7,7 @@ import {
 } from "@ant-design/icons";
 import React from 'react';
 import { Card } from "antd";
-import CardModify from "../../../components/Card/Card.jsx";
+import CardDashboard from "../../../components/Card/CardDashboard.jsx";
 import styles from '../components/Overview.module.scss';
 export default function Overview(props) {
   const {
@@ -25,44 +25,54 @@ export default function Overview(props) {
       flexDirection: "row",
       justifyContent: "space-between"
     }}>
-      <CardModify
+      <CardDashboard
         title={"Tổng"}
         value={"100"}
         iconName={<TeamOutlined />}
         backgroundColorIcon={"#e5e4ff"}
         colorIcon={"#8280FF"}
-      ></CardModify>
+        width='300'
+        height='120'
+      ></CardDashboard>
 
-      <CardModify
+      <CardDashboard
         title={"Đang chờ xử lí"}
         value={"100"}
         iconName={<LoadingOutlined spin='true' style={{ color: "#8F8D8CFF" }} />}
         backgroundColorIcon={"#D3D0CEFF"}
         colorIcon={"#8F8D8CFF"}
-      ></CardModify>
-      <CardModify
+        width='300'
+        height='120'
+      ></CardDashboard>
+      <CardDashboard
         title={"Đã xác nhận"}
         value={"100"}
         iconName={<FileDoneOutlined style={{ color: "#4ad991" }} />}
         backgroundColorIcon={"#d9f7e8"}
         colorIcon={"#4ad991"}
-      ></CardModify>
+        width='300'
+        height='120'
+      ></CardDashboard>
 
-      <CardModify
+      <CardDashboard
         title={"Đã hoàn tất"}
         value={"100"}
         iconName={<CheckOutlined style={{ color: "#6CCAF0FF" }} />}
         backgroundColorIcon={"#A3F7F7FF"}
         colorIcon={"#6CCAF0FF"}
-      ></CardModify>
-      
-      <CardModify
+        width='300'
+        height='120'
+      ></CardDashboard>
+
+      <CardDashboard
         title={"Đã huỷ"}
         value={"100"}
         iconName={<StopOutlined style={{ color: "#ff9066" }} />}
         backgroundColorIcon={"#ffded1"}
         colorIcon={"#ff9066"}
-      ></CardModify>
+        width='300'
+        height='120'
+      ></CardDashboard>
     </div>
 
   );
