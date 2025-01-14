@@ -10,9 +10,9 @@ export default function FilterModal({
   onFilterChange,
   onReset,
 }) {
-  const roles = ["Admin", "Người dùng", "Quản lý", "role 4"];
-  const statuses = ["status 1", "status 2", "status 3"];
-  const approves = ["approve 1", "approve 2", "approve 3"];
+  const roles = ["Admin", "Người dùng", "Quản lý"];
+  const statuses = ["Hoạt động", "Chờ xác nhận", "Đã khóa"];
+  const approves = ["Đã phê duyệt", "Chưa phê duyệt"];
 
   const handleTagChange = (key, value, checked) => {
     const updatedValues = checked
