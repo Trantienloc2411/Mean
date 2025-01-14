@@ -3,7 +3,7 @@ import PropTypes from "prop-types";
 import { FaUserFriends } from "react-icons/fa";
 import { Flex } from "antd";
 
-const Card = ({
+const CardDashboard = ({
   title,
   value,
   iconName,
@@ -68,7 +68,7 @@ const Card = ({
 };
 
 // Default Props
-Card.defaultProps = {
+CardDashboard.defaultProps = {
   title: "Default Title",
   value: 0,
   iconName: <FaUserFriends />,
@@ -79,7 +79,7 @@ Card.defaultProps = {
 };
 
 // Prop Type Checking
-Card.propTypes = {
+CardDashboard.propTypes = {
   title: PropTypes.string.isRequired,
   value: PropTypes.oneOfType([PropTypes.string, PropTypes.number]).isRequired,
   iconName: PropTypes.element,
@@ -89,4 +89,4 @@ Card.propTypes = {
   width: PropTypes.number,
 };
 
-export default Card;
+export default CardDashboard;
