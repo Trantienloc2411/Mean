@@ -6,7 +6,7 @@ import {
 } from "@ant-design/icons";
 import { Card } from "antd";
 
-
+import CardDashboard from "../../../components/Card/CardDashboard.jsx";
 export default function Overview(props) {
   const {
     totalUser,
@@ -17,75 +17,45 @@ export default function Overview(props) {
   return (
     <div>
       <div className="card-list">
-        <div className="card-container">
-          <Card style={{ height: 130 }}>
-            <div className="card-row">
-              <div className="card-content">
-                <p>Tổng người dùng</p>
-                <h2>{totalUser}</h2>
-              </div>
-              <div className="icon-wrapper">
-                <TeamOutlined />
-              </div>
-            </div>
-          </Card>
-        </div>
+        <CardDashboard
+          title={"Tổng người dùng"}
+          value={totalUser}
+          iconName={<TeamOutlined />}
+          backgroundColorIcon={"#e5e4ff"}
+          colorIcon={"#8280FF"}
+          width='400'
+          height='150'
+        ></CardDashboard>
 
-        <div className="card-container">
-          <Card style={{ height: 130 }}>
-            <div className="card-row">
-              <div className="card-content">
-                <p>Tổng giao dịch</p>
-                <h2>{totalTransaction}</h2>
-              </div>
-              <div
-                className="icon-wrapper"
-                style={{
-                  backgroundColor: "#ffded1",
-                }}
-              >
-                <HistoryOutlined style={{ color: "#ff9066" }} />
-              </div>
-            </div>
-          </Card>
-        </div>
+        <CardDashboard
+          title={"Tổng giao dịch"}
+          value={totalTransaction}
+          iconName={<HistoryOutlined style={{ color: "#ff9066" }} />}
+          backgroundColorIcon={"#ffded1"}
+          colorIcon={"#ff9066"}
+          width='400'
+          height='150'
+        ></CardDashboard>
 
-        <div className="card-container">
-          <Card style={{ height: 130 }}>
-            <div className="card-row">
-              <div className="card-content">
-                <p>Tổng doanh thu</p>
-                <h2>{totalRevenue}</h2>
-              </div>
-              <div
-                className="icon-wrapper"
-                style={{
-                  backgroundColor: "#d9f7e8",
-                }}
-              >
-                <LineChartOutlined style={{ color: "#4ad991" }} />
-              </div>
-            </div>
-          </Card>
-        </div>
-        <div className="card-container">
-          <Card style={{ height: 130 }}>
-            <div className="card-row">
-              <div className="card-content">
-                <p>Tổng lợi nhuận</p>
-                <h2>{totalProfit}</h2>
-              </div>
-              <div
-                className="icon-wrapper"
-                style={{
-                  backgroundColor: "#d9f7e8",
-                }}
-              >
-                <RiseOutlined style={{ color: "#4ad991" }} />
-              </div>
-            </div>
-          </Card>
-        </div>
+        <CardDashboard
+          title={"Tổng doanh thu"}
+          value={totalRevenue}
+          iconName={<LineChartOutlined style={{ color: "#4ad991" }} />}
+          backgroundColorIcon={"#d9f7e8"}
+          colorIcon={"#4ad991"}
+          width='400'
+          height='150'
+        ></CardDashboard>
+
+        <CardDashboard
+          title={"Tổng lợi nhuận"}
+          value={totalProfit}
+          iconName={<RiseOutlined style={{ color: "#FEC53D" }} />}
+          backgroundColorIcon={"#fff3d6"}
+          colorIcon={"#FEC53D"}
+          width='400'
+          height='150'
+        ></CardDashboard>
       </div>
     </div>
   );

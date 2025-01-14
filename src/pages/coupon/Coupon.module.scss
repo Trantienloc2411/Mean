@@ -1,0 +1,17 @@
+.contentContainer {
+    padding: 20px;
+    .contentTable{
+        background-color: white;
+        padding: 20px;
+        border-radius: 20px;
+        .tool{
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-direction: row;
+            .searchFilter{
+                
+            }
+        }
+    }
+}
