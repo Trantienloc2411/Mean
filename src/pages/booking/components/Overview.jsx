@@ -1,112 +1,69 @@
 import {
-    LoadingOutlined,
-    FileDoneOutlined,
-    StopOutlined,
-    CheckOutlined,
-    TeamOutlined,
-  } from "@ant-design/icons";
-  import { Card } from "antd";
-  
+  LoadingOutlined,
+  FileDoneOutlined,
+  StopOutlined,
+  CheckOutlined,
+  TeamOutlined
+} from "@ant-design/icons";
+import React from 'react';
+import { Card } from "antd";
+import CardModify from "../../../components/Card/Card.jsx";
+import styles from '../components/Overview.module.scss';
 export default function Overview(props) {
-    const {
-        totalUser,
-        totalWaiting,
-        totalConfirmed,
-        totalCompleted,
-        totalCanceled
-    } = props;
+  const {
+    totalUser,
+    totalWaiting,
+    totalConfirmed,
+    totalCompleted,
+    totalCanceled
+  } = props;
 
 
-    return(
-        <div className="card-list">
-        <div className="card-container">
-          <Card style={{ height: 130 }}>
-            <div className="card-row">
-              <div className="card-content">
-                <p>Tổng</p>
-                <h2>{totalUser}</h2>
-              </div>
-              <div className="icon-wrapper">
-                <TeamOutlined />
-              </div>
-            </div>
-          </Card>
-        </div>
+  return (
+    <div className="cardList" style={{
+      display: "flex",
+      flexDirection: "row",
+      justifyContent: "space-between"
+    }}>
+      <CardModify
+        title={"Tổng"}
+        value={"100"}
+        iconName={<TeamOutlined />}
+        backgroundColorIcon={"#e5e4ff"}
+        colorIcon={"#8280FF"}
+      ></CardModify>
 
-        <div className="card-container">
-          <Card style={{ height: 130 }}>
-            <div className="card-row">
-              <div className="card-content">
-                <p>Đang chờ xử lí</p>
-                <h2>{totalWaiting}</h2>
-              </div>
-              <div
-                className="icon-wrapper"
-                style={{
-                  backgroundColor: "#D3D0CEFF",
-                }}
-              >
-                <LoadingOutlined spin='true'  style={{ color: "#8F8D8CFF" }} />
-              </div>
-            </div>
-          </Card>
-        </div>
+      <CardModify
+        title={"Đang chờ xử lí"}
+        value={"100"}
+        iconName={<LoadingOutlined spin='true' style={{ color: "#8F8D8CFF" }} />}
+        backgroundColorIcon={"#D3D0CEFF"}
+        colorIcon={"#8F8D8CFF"}
+      ></CardModify>
+      <CardModify
+        title={"Đã xác nhận"}
+        value={"100"}
+        iconName={<FileDoneOutlined style={{ color: "#4ad991" }} />}
+        backgroundColorIcon={"#d9f7e8"}
+        colorIcon={"#4ad991"}
+      ></CardModify>
 
-        <div className="card-container">
-          <Card style={{ height: 130 }}>
-            <div className="card-row">
-              <div className="card-content">
-                <p>Đã xác nhận</p>
-                <h2>{totalConfirmed}</h2>
-              </div>
-              <div
-                className="icon-wrapper"
-                style={{
-                  backgroundColor: "#d9f7e8",
-                }}
-              >
-                <FileDoneOutlined  style={{ color: "#4ad991" }} />
-              </div>
-            </div>
-          </Card>
-        </div>
-        <div className="card-container">
-          <Card style={{ height: 130 }}>
-            <div className="card-row">
-              <div className="card-content">
-                <p>Đã hoàn tất</p>
-                <h2>{totalCompleted}</h2>
-              </div>
-              <div
-                className="icon-wrapper"
-                style={{
-                  backgroundColor: "#A3F7F7FF",
-                }}
-              >
-                <CheckOutlined  style={{ color: "#6CCAF0FF" }} />
-              </div>
-            </div>
-          </Card>
-        </div>
-        <div className="card-container">
-          <Card style={{ height: 130 }}>
-            <div className="card-row">
-              <div className="card-content">
-                <p>Đã huỷ</p>
-                <h2>{totalCanceled}</h2>
-              </div>
-              <div
-                className="icon-wrapper"
-                style={{
-                  backgroundColor: "#ffded1",
-                }}
-              >
-                <StopOutlined  style={{ color: "#ff9066" }} />
-              </div>
-            </div>
-          </Card>
-        </div>
-      </div>
-    
-);
+      <CardModify
+        title={"Đã hoàn tất"}
+        value={"100"}
+        iconName={<CheckOutlined style={{ color: "#6CCAF0FF" }} />}
+        backgroundColorIcon={"#A3F7F7FF"}
+        colorIcon={"#6CCAF0FF"}
+      ></CardModify>
+      
+      <CardModify
+        title={"Đã huỷ"}
+        value={"100"}
+        iconName={<StopOutlined style={{ color: "#ff9066" }} />}
+        backgroundColorIcon={"#ffded1"}
+        colorIcon={"#ff9066"}
+      ></CardModify>
+    </div>
+
+  );
 }

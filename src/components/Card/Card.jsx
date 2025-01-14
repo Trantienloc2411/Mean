@@ -1,18 +1,22 @@
 import styles from '../Card/Card.module.scss';
-
-export default function Card(props) {
+import { Card } from "antd";
+import React from 'react';
+export default function CardModify(props) {
     const {
         title,
         value,
         iconName,
-        backgroundColorIcon,
-        colorIcon
+        backgroundColorIcon = "#e5e4ff",
+        colorIcon = "#fff"
     } = props;
 
     const iconStyles = {
         fontSize: '24px',  // You can adjust this as needed
         color: colorIcon
     };
+
+    console.log({ backgroundColorIcon, colorIcon });
+
 
     const wrapperStyles = {
         backgroundColor: backgroundColorIcon,
