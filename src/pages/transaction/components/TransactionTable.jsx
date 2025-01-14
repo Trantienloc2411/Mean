@@ -1,7 +1,15 @@
+import { MoreOutlined } from "@ant-design/icons";
+import { Dropdown } from "antd";
+import { Menu } from "antd";
 import { Tag } from "antd";
 import { Table } from "antd";
 
 export default function TransactionTable({ data, loading }) {
+  const statusMapping = {
+    active: "Hoạt động",
+    pending: "Chờ xác nhận",
+    inactive: "Hủy",
+  };
   const columns = [
     {
       title: "No.",
@@ -39,19 +47,8 @@ export default function TransactionTable({ data, loading }) {
       dataIndex: "status",
       align: "center",
       key: "status",
-      // filters: [
-      //   { text: "Hoạt động", value: "Hoạt động" },
-      //   { text: "Chờ xác nhận", value: "Chờ xác nhận" },
-      //   { text: "Đã khóa", value: "Đã khóa" },
-      // ],
-      // onFilter: (value, record) => record.status === value,
-      render: (status) => {
-        const statusMapping = {
-          active: "Hoạt động",
-          pending: "Chờ xác nhận",
-          inactive: "Không hoạt động",
-        };
 
+      render: (status) => {
         let color =
           status === "active"
             ? "green"
@@ -66,18 +63,25 @@ export default function TransactionTable({ data, loading }) {
       },
     },
     {
-      title: "Phê duyệt",
-      dataIndex: "approve",
+      title: "Loại giao dịch",
+      dataIndex: "typeTransaction",
       align: "center",
-      key: "approve",
-      // filters: [
-      //   { text: "Đã phê duyệt", value: "Đã phê duyệt" },
-      //   { text: "Chưa phê duyệt", value: "Chưa phê duyệt" },
-      // ],
-      // onFilter: (value, record) => record.approve === value,
-      render: (approve) => {
-        let color = approve === "Đã phê duyệt" ? "green" : "red";
-        return <Tag color={color}>{approve}</Tag>;
+      key: "typeTransaction",
+
+      render: (typeTransaction) => {
+        // Mapping trạng thái giao dịch sang tiếng Việt và màu sắc
+        const transactionMapping = {
+          deposit: { display: "Tiền cọc", color: "blue" },
+          full_payment: { display: "Trả full", color: "green" },
+          refund: { display: "Hoàn tiền", color: "red" },
+          final_payment: { display: "Thanh toán cuối", color: "orange" },
+        };
+
+        // Lấy giá trị tương ứng hoặc sử dụng mặc định
+        const { display = "Không xác định", color = "gray" } =
+          transactionMapping[typeTransaction] || {};
+
+        return <Tag color={color}>{display}</Tag>;
       },
     },
     {

@@ -6,6 +6,7 @@ import AccountTable from "./components/AccountTable";
 import { useGetUsersQuery } from "../../features/user/userApiSlice";
 import FilterModal from "./components/FilterModal";
 import { Flex } from "antd";
+import { RoleEnum, StatusEnum, ApproveEnum } from "../../enums/accountEnums"; // Import enum từ file enums
 
 export default function Account() {
   const { data: users, error, isLoading } = useGetUsersQuery();
@@ -66,20 +67,22 @@ export default function Account() {
       </div>
       <div style={{ marginTop: 20 }}>
         <h1 style={{ fontSize: 20 }}>Danh sách tài khoản</h1>
-        <Flex gap={30}>
-          <Input
-            prefix={<SearchOutlined />}
-            placeholder="Tìm kiếm bằng số điện thoại"
-            style={{ width: 300, marginBottom: 20 }}
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-          />
-          <Button onClick={openFilterModal}>
-            <FilterOutlined />
-            Bộ lọc
-          </Button>
-        </Flex>
-        <AccountTable loading={isLoading} data={filteredUsers} />
+        <div style={{ background: "#fff", borderRadius: 20, padding: 20 }}>
+          <Flex gap={30}>
+            <Input
+              prefix={<SearchOutlined />}
+              placeholder="Tìm kiếm bằng số điện thoại"
+              style={{ width: 300, marginBottom: 10 }}
+              value={searchValue}
+              onChange={(e) => setSearchValue(e.target.value)}
+            />
+            <Button onClick={openFilterModal}>
+              <FilterOutlined />
+              Bộ lọc
+            </Button>
+          </Flex>
+          <AccountTable loading={isLoading} data={filteredUsers} />
+        </div>
       </div>
       <FilterModal
         visible={isFilterModalVisible}

@@ -1,6 +1,4 @@
-/* eslint-disable react/prop-types */
 import { Modal, Tag, Button } from "antd";
-
 const { CheckableTag } = Tag;
 
 export default function FilterModal({
@@ -9,10 +7,16 @@ export default function FilterModal({
   filters,
   onFilterChange,
   onReset,
+  statuses, // Trạng thái
+  transactionTypes, // Loại giao dịch
 }) {
-  const roles = ["Admin", "Người dùng", "Quản lý"];
-  const statuses = ["Hoạt động", "Chờ xác nhận", "Đã khóa"];
-  const approves = ["Đã phê duyệt", "Chưa phê duyệt"];
+  // const statuses = ["active", "pending", "inactive", "cancel"];
+  // const transactionTypes = [
+  //   "deposit",
+  //   "full_payment",
+  //   "refund",
+  //   "final_payment",
+  // ];
 
   const handleTagChange = (key, value, checked) => {
     const updatedValues = checked
@@ -32,9 +36,6 @@ export default function FilterModal({
         <Button key="reset" onClick={onReset}>
           Reset
         </Button>,
-        // <Button key="cancel" onClick={onClose}>
-        //   Hủy
-        // </Button>,
         <Button
           key="apply"
           style={{ background: "#4880FF", color: "#fff" }}
@@ -44,20 +45,6 @@ export default function FilterModal({
         </Button>,
       ]}
     >
-      <div style={{ marginBottom: 20 }}>
-        <h3>Vai trò</h3>
-        <div>
-          {roles.map((role) => (
-            <CheckableTag
-              key={role}
-              checked={filters?.roles.includes(role)}
-              onChange={(checked) => handleTagChange("roles", role, checked)}
-            >
-              {role}
-            </CheckableTag>
-          ))}
-        </div>
-      </div>
       <div style={{ marginBottom: 20 }}>
         <h3>Trạng thái</h3>
         <div>
@@ -74,18 +61,18 @@ export default function FilterModal({
           ))}
         </div>
       </div>
-      <div>
-        <h3>Phê duyệt</h3>
+      <div style={{ marginBottom: 20 }}>
+        <h3>Loại giao dịch</h3>
         <div>
-          {approves.map((approve) => (
+          {transactionTypes.map((type) => (
             <CheckableTag
-              key={approve}
-              checked={filters.approves.includes(approve)}
+              key={type}
+              checked={filters.transactionTypes.includes(type)}
               onChange={(checked) =>
-                handleTagChange("approves", approve, checked)
+                handleTagChange("transactionTypes", type, checked)
               }
             >
-              {approve}
+              {type}
             </CheckableTag>
           ))}
         </div>

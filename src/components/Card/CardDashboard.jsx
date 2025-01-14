@@ -67,17 +67,6 @@ const CardDashboard = ({
   );
 };
 
-// Default Props
-CardDashboard.defaultProps = {
-  title: "Default Title",
-  value: 0,
-  iconName: <FaUserFriends />,
-  backgroundColorIcon: "#d0cfff",
-  colorIcon: "#8280FF",
-  height: 100,
-  width: 250,
-};
-
 // Prop Type Checking
 CardDashboard.propTypes = {
   title: PropTypes.string.isRequired,
