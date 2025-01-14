@@ -1,95 +1,64 @@
-/* eslint-disable react/prop-types */
 import { Modal, Tag, Button } from "antd";
-
 const { CheckableTag } = Tag;
+import { RoleEnum, StatusEnum, ApproveEnum } from "../../../enums/accountEnums"; // Import enums
+
+// Helper function to render CheckableTags for any enum
+const renderTags = (enumData, filters, key, onFilterChange) => (
+  <div style={{ marginBottom: 20 }}>
+    {Object.entries(enumData).map(([value, { label }]) => (
+      <CheckableTag
+        key={value}
+        checked={filters[key].includes(value)} // Check based on the key
+        onChange={(checked) => {
+          const updatedValues = checked
+            ? [...filters[key], value]
+            : filters[key].filter((item) => item !== value);
+          onFilterChange(key, updatedValues);
+        }}
+      >
+        {label}
+      </CheckableTag>
+    ))}
+  </div>
+);
 
 export default function FilterModal({
   visible,
   onClose,
-  filters,
-  onFilterChange,
+  filters, // filters hiện tại, sẽ được dùng để hiển thị trạng thái
+  onFilterChange, // hàm dùng để thay đổi filter khi người dùng chọn
   onReset,
+  onApplyFilters, // hàm áp dụng filter
 }) {
-  const roles = ["Admin", "Người dùng", "Quản lý"];
-  const statuses = ["Hoạt động", "Chờ xác nhận", "Đã khóa"];
-  const approves = ["Đã phê duyệt", "Chưa phê duyệt"];
-
-  const handleTagChange = (key, value, checked) => {
-    const updatedValues = checked
-      ? [...filters[key], value]
-      : filters[key].filter((item) => item !== value);
-
-    onFilterChange(key, updatedValues);
+  const handleApply = () => {
+    onApplyFilters(); // Áp dụng bộ lọc
+    onClose(); // Đóng modal sau khi áp dụng
   };
 
   return (
     <Modal
       title="Bộ lọc"
-      visible={visible}
-      onOk={onClose}
+      open={visible}
       onCancel={onClose}
       footer={[
         <Button key="reset" onClick={onReset}>
           Reset
         </Button>,
-        // <Button key="cancel" onClick={onClose}>
-        //   Hủy
-        // </Button>,
         <Button
           key="apply"
           style={{ background: "#4880FF", color: "#fff" }}
-          onClick={onClose}
+          onClick={handleApply} // Áp dụng bộ lọc khi nhấn "Áp dụng"
         >
           Áp dụng
         </Button>,
       ]}
     >
-      <div style={{ marginBottom: 20 }}>
-        <h3>Vai trò</h3>
-        <div>
-          {roles.map((role) => (
-            <CheckableTag
-              key={role}
-              checked={filters?.roles.includes(role)}
-              onChange={(checked) => handleTagChange("roles", role, checked)}
-            >
-              {role}
-            </CheckableTag>
-          ))}
-        </div>
-      </div>
-      <div style={{ marginBottom: 20 }}>
-        <h3>Trạng thái</h3>
-        <div>
-          {statuses.map((status) => (
-            <CheckableTag
-              key={status}
-              checked={filters.statuses.includes(status)}
-              onChange={(checked) =>
-                handleTagChange("statuses", status, checked)
-              }
-            >
-              {status}
-            </CheckableTag>
-          ))}
-        </div>
-      </div>
-      <div>
-        <h3>Phê duyệt</h3>
-        <div>
-          {approves.map((approve) => (
-            <CheckableTag
-              key={approve}
-              checked={filters.approves.includes(approve)}
-              onChange={(checked) =>
-                handleTagChange("approves", approve, checked)
-              }
-            >
-              {approve}
-            </CheckableTag>
-          ))}
-        </div>
-      </div>
+      <h3>Vai trò</h3>
+      {renderTags(RoleEnum, filters, "roles", onFilterChange)}
+      <h3>Trạng thái</h3>
+      {renderTags(StatusEnum, filters, "statuses", onFilterChange)}
+      <h3>Phê duyệt</h3>
+      {renderTags(ApproveEnum, filters, "approves", onFilterChange)}
     </Modal>
   );
 }

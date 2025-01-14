@@ -1,7 +1,6 @@
 import { MoreOutlined } from "@ant-design/icons";
-import { Dropdown } from "antd";
-import { Menu } from "antd";
-import { Table, Tag } from "antd";
+import { Dropdown, Menu, Table, Tag } from "antd";
+import { RoleEnum, StatusEnum, ApproveEnum } from "../../../enums/accountEnums"; // Import enum từ file khác
 
 // eslint-disable-next-line react/prop-types
 export default function AccountTable({ data, loading }) {
@@ -28,60 +27,43 @@ export default function AccountTable({ data, loading }) {
       key: "email",
     },
     {
-      title: "Vai trò",
+      title: "Loại",
       dataIndex: "role",
-      align: "center",
       key: "role",
-      // filters: [
-      //   { text: "Admin", value: "Admin" },
-      //   { text: "Người dùng", value: "Người dùng" },
-      //   { text: "Quản lý", value: "Quản lý" },
-      // ],
-      // onFilter: (value, record) => record.role === value,
       render: (role) => {
-        let color =
-          role === "Admin" ? "red" : role === "Quản lý" ? "blue" : "green";
-        return <Tag color={color}>{role}</Tag>;
+        const roleData = RoleEnum[role];
+        return roleData ? (
+          <Tag color={roleData.color}>{roleData.label}</Tag>
+        ) : null;
       },
     },
+
     {
-      title: "Trạng thái",
+      title: "Trạng Thái",
       dataIndex: "status",
       align: "center",
       key: "status",
-      // filters: [
-      //   { text: "Hoạt động", value: "Hoạt động" },
-      //   { text: "Chờ xác nhận", value: "Chờ xác nhận" },
-      //   { text: "Đã khóa", value: "Đã khóa" },
-      // ],
-      // onFilter: (value, record) => record.status === value,
       render: (status) => {
-        let color =
-          status === "Hoạt động"
-            ? "green"
-            : status === "Chờ xác nhận"
-            ? "orange"
-            : "volcano";
-        return <Tag color={color}>{status}</Tag>;
+        const statusData = StatusEnum[status];
+        return statusData ? (
+          <Tag color={statusData.color}>{statusData.label}</Tag>
+        ) : null;
       },
     },
     {
-      title: "Phê duyệt",
+      title: "Xác thực",
       dataIndex: "approve",
       align: "center",
       key: "approve",
-      // filters: [
-      //   { text: "Đã phê duyệt", value: "Đã phê duyệt" },
-      //   { text: "Chưa phê duyệt", value: "Chưa phê duyệt" },
-      // ],
-      // onFilter: (value, record) => record.approve === value,
       render: (approve) => {
-        let color = approve === "Đã phê duyệt" ? "green" : "red";
-        return <Tag color={color}>{approve}</Tag>;
+        const approveData = ApproveEnum[approve];
+        return approveData ? (
+          <Tag color={approveData.color}>{approveData.label}</Tag>
+        ) : null;
       },
     },
     {
-      title: "Action",
+      title: "",
       key: "action",
       align: "center",
       render: (text, record) => (
@@ -122,6 +104,7 @@ export default function AccountTable({ data, loading }) {
   return (
     <div style={{ marginTop: 10 }}>
       <Table
+        scroll={{ x: "max-content" }}
         dataSource={data}
         loading={loading}
         columns={columns}

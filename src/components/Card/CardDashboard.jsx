@@ -10,7 +10,7 @@ const CardDashboard = ({
   backgroundColorIcon = "#d0cfff",
   colorIcon = "#8280FF",
   height = 100,
-  width = 230,
+  width = 250,
 }) => {
   const containerStyles = {
     height: `${height}px`,
@@ -65,17 +65,6 @@ const CardDashboard = ({
       </Flex>
     </div>
   );
-};
-
-// Default Props
-CardDashboard.defaultProps = {
-  title: "Default Title",
-  value: 0,
-  iconName: <FaUserFriends />,
-  backgroundColorIcon: "#d0cfff",
-  colorIcon: "#8280FF",
-  height: 100,
-  width: 230,
 };
 
 // Prop Type Checking
