@@ -25,15 +25,20 @@ const renderTags = (enumData, filters, key, onFilterChange) => (
 export default function FilterModal({
   visible,
   onClose,
-  filters,
-  onFilterChange,
+  filters, // filters hiện tại, sẽ được dùng để hiển thị trạng thái
+  onFilterChange, // hàm dùng để thay đổi filter khi người dùng chọn
   onReset,
+  onApplyFilters, // hàm áp dụng filter
 }) {
+  const handleApply = () => {
+    onApplyFilters(); // Áp dụng bộ lọc
+    onClose(); // Đóng modal sau khi áp dụng
+  };
+
   return (
     <Modal
       title="Bộ lọc"
       open={visible}
-      onOk={onClose}
       onCancel={onClose}
       footer={[
         <Button key="reset" onClick={onReset}>
@@ -42,18 +47,18 @@ export default function FilterModal({
         <Button
           key="apply"
           style={{ background: "#4880FF", color: "#fff" }}
-          onClick={onClose}
+          onClick={handleApply} // Áp dụng bộ lọc khi nhấn "Áp dụng"
         >
           Áp dụng
         </Button>,
       ]}
     >
       <h3>Vai trò</h3>
-      {renderTags(RoleEnum, filters, "roles", onFilterChange)}{" "}
+      {renderTags(RoleEnum, filters, "roles", onFilterChange)}
       <h3>Trạng thái</h3>
-      {renderTags(StatusEnum, filters, "statuses", onFilterChange)}{" "}
+      {renderTags(StatusEnum, filters, "statuses", onFilterChange)}
       <h3>Phê duyệt</h3>
-      {renderTags(ApproveEnum, filters, "approves", onFilterChange)}{" "}
+      {renderTags(ApproveEnum, filters, "approves", onFilterChange)}
     </Modal>
   );
 }

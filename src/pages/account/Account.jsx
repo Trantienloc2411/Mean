@@ -18,6 +18,12 @@ export default function Account() {
     statuses: [],
     approves: [],
   });
+  const [tempFilters, setTempFilters] = useState({
+    // State để lưu trữ tạm thời các lựa chọn filter
+    roles: [],
+    statuses: [],
+    approves: [],
+  });
 
   const handleSearch = () => {
     if (users) {
@@ -40,19 +46,18 @@ export default function Account() {
   };
 
   useEffect(() => {
-    // Lọc ngay khi có sự thay đổi về users hoặc selectedFilters
     handleSearch();
-  }, [selectedFilters, users]);
+  }, [selectedFilters, users]); // Chỉ lọc khi selectedFilters thay đổi
 
   const handleFilterChange = (key, values) => {
-    setSelectedFilters((prevFilters) => ({
+    setTempFilters((prevFilters) => ({
       ...prevFilters,
-      [key]: values,
+      [key]: values, // Chỉ thay đổi filter tạm thời mà không ảnh hưởng đến dữ liệu
     }));
   };
 
   const resetFilters = () => {
-    setSelectedFilters({
+    setTempFilters({
       roles: [],
       statuses: [],
       approves: [],
@@ -61,6 +66,12 @@ export default function Account() {
 
   const openFilterModal = () => setIsFilterModalVisible(true);
   const closeFilterModal = () => setIsFilterModalVisible(false);
+
+  const applyFilters = () => {
+    setSelectedFilters(tempFilters); // Cập nhật filter chính thức sau khi nhấn "Áp dụng"
+    handleSearch(); // Lọc dữ liệu khi áp dụng bộ lọc
+    closeFilterModal(); // Đóng modal sau khi áp dụng bộ lọc
+  };
 
   if (error) return <p>Error: {error.message}</p>;
 
@@ -81,9 +92,11 @@ export default function Account() {
                 style={{ width: 300, marginBottom: 10 }}
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
-                onPressEnter={handleSearch} // Thực hiện tìm kiếm khi nhấn Enter
+                onPressEnter={handleSearch}
               />
-              <Button style={{marginLeft:10}} onClick={handleSearch}>Tìm kiếm</Button>
+              <Button style={{ marginLeft: 10 }} onClick={handleSearch}>
+                Tìm kiếm
+              </Button>
             </div>
             <Button onClick={openFilterModal}>
               <FilterOutlined />
@@ -96,9 +109,10 @@ export default function Account() {
       <FilterModal
         visible={isFilterModalVisible}
         onClose={closeFilterModal}
-        filters={selectedFilters}
+        filters={tempFilters} // Truyền filter tạm thời vào modal
         onFilterChange={handleFilterChange}
         onReset={resetFilters}
+        onApplyFilters={applyFilters} // Truyền hàm applyFilters vào modal
       />
     </div>
   );
