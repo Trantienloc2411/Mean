@@ -29,6 +29,11 @@ export const routes = [
   // Trang login (home)
   {
     path: "/",
+    // element: <Login />,
+    element: <Navigate to="/admin/dashboard" replace />,
+  },
+  {
+    path: "/login",
     element: <Login />,
   },
   {
