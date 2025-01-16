@@ -7,11 +7,15 @@ import ReportDetail from "./components/ReportDetail/ReportDetail";
 import ReplyReport from "./components/ReplyReport/ReplyReport";
 import { reportData } from "./data/fakeData";
 import debounce from "lodash/debounce";
+import dayjs from 'dayjs';
+import customParseFormat from 'dayjs/plugin/customParseFormat';
+
+dayjs.extend(customParseFormat);
 
 export default function Report() {
   const [selectedValues, setSelectedValues] = useState({
     status: [],
-    dateRange: [],
+    date: null,
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState(reportData);
@@ -38,6 +42,7 @@ export default function Report() {
       setIsReplyModalOpen(true);
     }
   };
+
   const columns = [
     {
       title: "No.",
@@ -104,16 +109,17 @@ export default function Report() {
     setSearchTerm(value);
   }, 500);
 
-  const handleFilterChange = (filterName, newValues) => {
+  const handleFilterChange = (filterName, newValue) => {
     setSelectedValues(prev => ({
       ...prev,
-      [filterName]: newValues
+      [filterName]: newValue
     }));
   };
 
   useEffect(() => {
     let filtered = [...reportData];
 
+    // Search filter
     if (searchTerm) {
       filtered = filtered.filter(item =>
         item.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -126,9 +132,20 @@ export default function Report() {
         selectedValues.status.includes(item.status)
       );
     }
+    if (selectedValues.date) {
+      const selectedDate = dayjs(selectedValues.date).format('DD/MM/YYYY');
+      filtered = filtered.filter(item => {
+        const itemDate = item.createdAt.split(' ')[1]; 
+        return itemDate === selectedDate;
+      });
+    }
 
     setFilteredData(filtered);
   }, [searchTerm, selectedValues]);
+
+  const getActiveFiltersCount = () => {
+    return selectedValues.status.length + (selectedValues.date ? 1 : 0);
+  };
 
   return (
     <div className={styles.container}>
@@ -153,8 +170,7 @@ export default function Report() {
           >
             <Button icon={<FilterOutlined />}>
               Lọc
-              {Object.values(selectedValues).flat().length > 0 &&
-                ` (${Object.values(selectedValues).flat().length})`}
+              {getActiveFiltersCount() > 0 && ` (${getActiveFiltersCount()})`}
             </Button>
           </Dropdown>
         </div>
@@ -167,13 +183,37 @@ export default function Report() {
           total: filteredData.length,
           pageSize: 7,
           showSizeChanger: false,
-          showTitle: false,
-          showTotal: false,
-          prevIcon: () => "Previous",
-          nextIcon: () => "Next",
+          className: styles.customPagination,
+          itemRender: (page, type, originalElement) => {
+            const totalPages = Math.ceil(filteredData.length / 7);
+
+            if (type === "prev") {
+              return (
+                <button
+                  className={styles.paginationButton}
+                  disabled={page === 0} 
+                >
+                  « Trước
+                </button>
+              );
+            }
+            if (type === "next") {
+              return (
+                <button
+                  className={styles.paginationButton}
+                  disabled={page >= totalPages} 
+                >
+                  Tiếp »
+                </button>
+              );
+            }
+            return originalElement;
+          },
         }}
+
         className={styles.reportTable}
       />
+
 
       <ReportDetail
         isOpen={isDetailModalOpen}

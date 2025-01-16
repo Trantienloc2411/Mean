@@ -1,4 +1,4 @@
-import { Modal, Tag } from 'antd';
+import { Modal } from 'antd';
 import styles from './ReportDetail.module.scss';
 
 export default function ReportDetail({ isOpen, onClose, report }) {
@@ -17,9 +17,9 @@ export default function ReportDetail({ isOpen, onClose, report }) {
         <div className={styles.header}>
           <div className={styles.mainInfo}>
             <h3>{report.locationName}</h3>
-            <Tag className={`${styles.status} ${styles[report.status.toLowerCase()]}`}>
+            <span className={`${styles.status} ${styles[report.status.toLowerCase()]}`}>
               {report.status === 'Reviewed' ? 'Đã xem' : 'Chưa xem'}
-            </Tag>
+            </span>
           </div>
           <span className={styles.date}>{report.createdAt}</span>
         </div>
