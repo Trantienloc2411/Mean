@@ -14,6 +14,16 @@ const Account = lazy(() => import("../pages/account/Account"));
 const Coupon = lazy(() => import("../pages/coupon/Coupon"));
 const Booking = lazy(() => import("../pages/booking/Booking"));
 const Owner = lazy(() => import("../pages/owner/Owner"));
+
+// owner pages
+const TypeRoomOwner = lazy(() => import("../pages/owner/components/TypeRoom/TypeRoom.jsx"));
+const BookingOwner = lazy(() => import("../pages/owner/components/Booking/Booking.jsx"));
+const InformationOwner = lazy(() => import("../pages/owner/components/Information/Information.jsx"));
+const OverviewOwner = lazy(() => import("../pages/owner/components/Overview/Overview.jsx"));
+const PlaceOwner  = lazy(() => import("../pages/owner/components/Place/Place.jsx"));
+const PolicyOwner  = lazy(() => import("../pages/owner/components/Policy/Policy.jsx"));
+const SettingOwner  = lazy(() => import("../pages/owner/components/Setting/Setting.jsx"));
+
 // const Customer = lazy(() => import("../pages/customer/Customer"));
 const PolicyApp = lazy(() => import("../pages/policyApp/PolicyApp"));
 const RentalLocation = lazy(() =>
@@ -77,14 +87,13 @@ export const routes = [
     children: [
       { path: "", element: <Navigate to="/owner/dashboard" replace /> }, // Chuyển hướng từ /admin sang /admin/dashboard
       { path: "owners", element: <Owner /> },
-      { path: "dashboard", element: <Dashboard /> },
-      { path: "account", element: <Account /> },
-      { path: "coupon", element: <Coupon /> },
-      { path: "booking", element: <Booking /> },
-      { path: "transaction", element: <Transaction /> },
-      { path: "rental", element: <RentalLocation /> },
-      { path: "policy", element: <PolicyApp /> },
-      { path: "report", element: <Report /> },
+      { path: "dashboard", element: <OverviewOwner /> },
+      { path: "booking", element: <BookingOwner /> },
+      { path: "information", element: <InformationOwner /> },
+      { path: "location", element: <PlaceOwner /> },
+      { path: "type-room", element: <TypeRoomOwner /> },
+      { path: "policy", element: <PolicyOwner /> },
+      { path: "setting", element: <SettingOwner /> },
       {
         path: "*",
         element: <NotFound />,
