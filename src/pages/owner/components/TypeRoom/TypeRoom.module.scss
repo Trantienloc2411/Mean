@@ -1,0 +1,20 @@
+.container {
+    display: flex;
+    height: 100vh;
+  }
+  
+  .sidebar {
+    width: 150px; 
+    background-color: #f4f4f4;
+    padding: 10px;
+  }
+  
+  .mainContent {
+    flex: 1;
+    padding: 20px;
+  }
+  
+  .tabs {
+    width: 100%;
+  }
+  
