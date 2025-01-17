@@ -3,9 +3,10 @@ import { Table, Button, Input, Dropdown } from "antd";
 import { MoreOutlined, PlusOutlined, FilterOutlined } from "@ant-design/icons";
 import styles from "./RoomTypeManagement.module.scss";
 import DeleteRoomTypeModal from "./components/DeleteRoomTypeModal/DeleteRoomTypeModal";
-import AddRoomTypeModal from "./components/AddRoomTypeModal/AddRoomTypeModal.jsx";
+import AddRoomTypeModal from "./components/AddRoomTypeModal/AddRoomTypeModal";
 import UpdateRoomTypeModal from "./components/UpdateRoomTypeModal/UpdateRoomTypeModal";
 import DetailRoomTypeModal from "./components/DetailRoomTypeModal/DetailRoomTypeModal";
+import Filter from "./components/Filter/Filter";
 import { roomTypeData } from "./data/fakeData.js";
 import debounce from "lodash/debounce";
 
@@ -49,6 +50,17 @@ const RoomTypeManagement = () => {
       },
     },
   ];
+
+  const handleFilterChange = (filterType, value) => {
+    setSelectedValues(prev => ({
+      ...prev,
+      [filterType]: value
+    }));
+  };
+
+  const getActiveFiltersCount = () => {
+    return selectedValues.maxOccupancy.length + selectedValues.priceRange.length;
+  };
 
   const handleDeleteConfirm = () => {
     setFilteredData((prevData) =>
@@ -162,14 +174,28 @@ const RoomTypeManagement = () => {
               onChange={(e) => debouncedSearch(e.target.value)}
               style={{ width: "250px" }}
             />
-            <Button icon={<FilterOutlined />}>Lọc</Button>
+            <Dropdown
+              trigger={["click"]}
+              dropdownRender={() => (
+                <Filter
+                  selectedValues={selectedValues}
+                  onFilterChange={handleFilterChange}
+                />
+              )}
+            >
+              <Button icon={<FilterOutlined />}>
+                Lọc
+                {getActiveFiltersCount() > 0 && ` (${getActiveFiltersCount()})`}
+              </Button>
+            </Dropdown>
           </div>
           <Button
             type="primary"
             onClick={() => setIsAddModalOpen(true)}
             icon={<PlusOutlined />}
+            className={styles.addRoomButton}
           >
-            Tạo loại phòng mới
+            Thêm loại phòng
           </Button>
         </div>
 
@@ -180,6 +206,31 @@ const RoomTypeManagement = () => {
             total: filteredData.length,
             pageSize: 7,
             showSizeChanger: false,
+            className: styles.customPagination,
+            itemRender: (page, type, originalElement) => {
+              const totalPages = Math.ceil(filteredData.length / 7);
+              if (type === "prev") {
+                return (
+                  <button
+                    className={styles.paginationButton}
+                    disabled={page === 0}
+                  >
+                    « Trước
+                  </button>
+                );
+              }
+              if (type === "next") {
+                return (
+                  <button
+                    className={styles.paginationButton}
+                    disabled={page >= totalPages}
+                  >
+                    Tiếp »
+                  </button>
+                );
+              }
+              return originalElement;
+            },
           }}
           className={styles.reportTable}
         />

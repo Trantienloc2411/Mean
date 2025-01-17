@@ -1,33 +1,77 @@
 .contentContainer {
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
+    padding: 24px;
 
     h1 {
-        margin-bottom: 20px;
+      margin-bottom: 24px;
+      font-size: 24px;
+      font-weight: 600;
     }
 
     .contentTable {
-        background-color: white;
-        padding: 20px;
-        border-radius: 20px;
-        display: flex;
-        flex-direction: column;
+      background: white;
+      padding: 24px;
+      border-radius: 8px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
 
-        .tool {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+      .tool {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 24px;
 
         .searchFilter {
-            display: flex;
-            align-items: center;
-            gap: 10px;
+          display: flex;
+          gap: 16px;
+          align-items: center;
+
+          .filterWrapper {
+            position: relative;
+          }
         }
+
+        .addRoomButton {
+          background-color: #fff;
+          color: #667085;
+          border-radius: 8px;
+          display: flex;
+          align-items: center;
+          gap: 4px;
+          padding: 10px 16px;
+          font-weight: 500;
+          border: 1px solid #667085;
+
+          &:hover {
+            background-color: #e4e6ea;
+            border-color: #525c70;
+          }
+        }
+      }
     }
 }
+
+.status {
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 14px;
+    display: inline-block;
+  
+    &.active {
+      background: #ecffec;
+      color: #41C588;
+    }
+  
+    &.paused {
+      background: #fff7e6;
+      color: #fa8c16;
+    }
+  
+    &.expired {
+      background: #fff1f0;
+      color: #f5222d;
+    }
+  }
+  
+
 
 .reportTable {
     :global {
@@ -113,3 +157,122 @@
         }
     }
 }
+
+.paginationButton {
+    display: inline-flex;
+    align-items: center;
+    height: 100%;
+    background: white;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    padding: 4px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+
+    &:hover {
+        border-color: #667085;
+        color: #667085;
+    }
+
+    &:disabled {
+        background: #f5f5f5;
+        color: rgba(0, 0, 0, 0.25);
+        border-color: #d9d9d9;
+        cursor: not-allowed;
+    }
+}
+
+:global {
+    .ant-modal-title {
+      font-weight: 600;
+    }
+  
+    .ant-modal-footer {
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+  
+    .ant-form-item-label {
+      font-weight: 500;
+    }
+  
+    .ant-input,
+    .ant-select-selector {
+      border-radius: 6px;
+    }
+  
+    .ant-btn {
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+  
+      &.ant-btn-primary {
+        background: #1890ff;
+        
+        &:hover {
+          background: #40a9ff;
+        }
+      }
+  
+      &.ant-btn-default {
+        &:hover {
+          color: #1890ff;
+          border-color: #1890ff;
+        }
+      }
+    }
+  
+    .ant-table {
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    }
+  
+    .ant-input-search {
+      .ant-input {
+        &:hover,
+        &:focus {
+          border-color: #1890ff;
+        }
+      }
+  
+      .ant-input-group-addon {
+        .ant-btn {
+          border-radius: 0 6px 6px 0;
+        }
+      }
+    }
+  
+    .ant-select {
+      &:hover,
+      &.ant-select-focused {
+        .ant-select-selector {
+          border-color: #1890ff !important;
+        }
+      }
+    }
+  
+    .ant-dropdown-menu {
+      border-radius: 6px;
+      padding: 4px;
+  
+      .ant-dropdown-menu-item {
+        border-radius: 4px;
+        padding: 8px 12px;
+  
+        &:hover {
+          background: #f5f5f5;
+        }
+  
+        &-danger {
+          color: #ff4d4f;
+  
+          &:hover {
+            background: #fff1f0;
+          }
+        }
+      }
+    }
+  }
