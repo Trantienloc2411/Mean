@@ -1,0 +1,43 @@
+.contentContainer {
+    width: 100%;
+    padding: 24px;
+    max-width: 1440px;
+    margin: 0 auto;
+    display: flex;
+
+
+    .infoHorizontal {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-around; // Ensures proper spacing between items
+        align-items: flex-start;       // Aligns items to the top
+        width: 100%;
+        gap: 24px;
+
+        .infoVertical {
+            flex: 0 0 auto;  // Prevents shrinking or growing
+            width: 400px;    // Fixed width
+            display: flex;
+            flex-direction: column;
+            gap: 24px;
+        }
+
+        .companySection {
+            flex: 1;         // Takes up remaining space
+            max-width: calc(100% - 424px); // Ensures it doesn't overlap when `gap` is applied
+        }
+    }
+
+    // Responsive behavior
+    @media (max-width: 1024px) {
+        .infoHorizontal {
+            flex-direction: column;
+
+            .infoVertical,
+            .companySection {
+                flex: none;
+                width: 100%;
+            }
+        }
+    }
+}
