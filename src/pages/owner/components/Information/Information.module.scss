@@ -9,7 +9,7 @@
     .infoHorizontal {
         display: flex;
         flex-direction: row;
-        justify-content: space-between; // Ensures proper spacing between items
+        justify-content: space-around; // Ensures proper spacing between items
         align-items: flex-start;       // Aligns items to the top
         width: 100%;
         gap: 24px;

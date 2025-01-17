@@ -13,7 +13,10 @@ export default function Information() {
 
     return (
         <div className="contentContainer">
-            <div className="infoHorizontal">
+            <div className="infoHorizontal" style={{
+                display: 'flex',
+                justifyContent: 'space-around'
+            }}>
                 <div className="infoVertical" style={{width: '45%'}}>
                     <AccountInfo
                         initialData={userInfo}
