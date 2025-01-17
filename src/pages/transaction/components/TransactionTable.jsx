@@ -3,13 +3,17 @@ import { Dropdown } from "antd";
 import { Menu } from "antd";
 import { Tag } from "antd";
 import { Table } from "antd";
+import {
+  TransactionStatusEnum,
+  TransactionTypeEnum,
+} from "../../../enums/transactionEnums";
+import TransactionDetailModal from "./TransactionDetailModal";
+import { useState } from "react";
 
 export default function TransactionTable({ data, loading }) {
-  const statusMapping = {
-    active: "Hoạt động",
-    pending: "Chờ xác nhận",
-    inactive: "Hủy",
-  };
+  const [isDetailModalVisible, setDetailModalVisible] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+
   const columns = [
     {
       title: "No.",
@@ -47,19 +51,10 @@ export default function TransactionTable({ data, loading }) {
       dataIndex: "status",
       align: "center",
       key: "status",
-
       render: (status) => {
-        let color =
-          status === "active"
-            ? "green"
-            : status === "pending"
-            ? "orange"
-            : "volcano";
-
-        // Lấy trạng thái hiển thị tiếng Việt
-        const displayStatus = statusMapping[status] || "Không xác định";
-
-        return <Tag color={color}>{displayStatus}</Tag>;
+        const { label = "Không xác định", color = "gray" } =
+          TransactionStatusEnum[status.toUpperCase()] || {};
+        return <Tag color={color}>{label}</Tag>;
       },
     },
     {
@@ -67,21 +62,10 @@ export default function TransactionTable({ data, loading }) {
       dataIndex: "typeTransaction",
       align: "center",
       key: "typeTransaction",
-
       render: (typeTransaction) => {
-        // Mapping trạng thái giao dịch sang tiếng Việt và màu sắc
-        const transactionMapping = {
-          deposit: { display: "Tiền cọc", color: "blue" },
-          full_payment: { display: "Trả full", color: "green" },
-          refund: { display: "Hoàn tiền", color: "red" },
-          final_payment: { display: "Thanh toán cuối", color: "orange" },
-        };
-
-        // Lấy giá trị tương ứng hoặc sử dụng mặc định
-        const { display = "Không xác định", color = "gray" } =
-          transactionMapping[typeTransaction] || {};
-
-        return <Tag color={color}>{display}</Tag>;
+        const { label = "Không xác định", color = "gray" } =
+          TransactionTypeEnum[typeTransaction.toUpperCase()] || {};
+        return <Tag color={color}>{label}</Tag>;
       },
     },
     {
@@ -112,7 +96,8 @@ export default function TransactionTable({ data, loading }) {
   ];
 
   const handleViewDetails = (record) => {
-    console.log("Xem chi tiết:", record);
+    setSelectedTransaction(record);
+    setDetailModalVisible(true);
   };
 
   const handleChangeStatus = (record) => {
@@ -130,6 +115,11 @@ export default function TransactionTable({ data, loading }) {
         loading={loading}
         columns={columns}
         rowKey="id"
+      />
+      <TransactionDetailModal
+        visible={isDetailModalVisible}
+        onClose={() => setDetailModalVisible(false)}
+        transaction={selectedTransaction}
       />
     </div>
   );
