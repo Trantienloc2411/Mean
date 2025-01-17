@@ -7,8 +7,13 @@ import {
   TransactionStatusEnum,
   TransactionTypeEnum,
 } from "../../../enums/transactionEnums";
+import TransactionDetailModal from "./TransactionDetailModal";
+import { useState } from "react";
 
 export default function TransactionTable({ data, loading }) {
+  const [isDetailModalVisible, setDetailModalVisible] = useState(false);
+  const [selectedTransaction, setSelectedTransaction] = useState(null);
+
   const columns = [
     {
       title: "No.",
@@ -91,7 +96,8 @@ export default function TransactionTable({ data, loading }) {
   ];
 
   const handleViewDetails = (record) => {
-    console.log("Xem chi tiết:", record);
+    setSelectedTransaction(record);
+    setDetailModalVisible(true);
   };
 
   const handleChangeStatus = (record) => {
@@ -109,6 +115,11 @@ export default function TransactionTable({ data, loading }) {
         loading={loading}
         columns={columns}
         rowKey="id"
+      />
+      <TransactionDetailModal
+        visible={isDetailModalVisible}
+        onClose={() => setDetailModalVisible(false)}
+        transaction={selectedTransaction}
       />
     </div>
   );

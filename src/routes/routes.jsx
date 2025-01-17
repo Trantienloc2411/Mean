@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { lazy } from "react";
 import { Navigate } from "react-router-dom";
 import AdminLayout from "../layouts/AdminLayout";
@@ -13,6 +14,7 @@ const Dashboard = lazy(() => import("../pages/dashboard/Dashboard"));
 const Account = lazy(() => import("../pages/account/Account"));
 const Coupon = lazy(() => import("../pages/coupon/Coupon"));
 const Booking = lazy(() => import("../pages/booking/Booking"));
+const Notification = lazy(() => import("../pages/notification/Notification.jsx"));
 const Owner = lazy(() => import("../pages/owner/Owner"));
 
 // owner pages
@@ -77,6 +79,7 @@ export const routes = [
       { path: "rental", element: <RentalLocation /> },
       { path: "policy", element: <PolicyApp /> },
       { path: "report", element: <Report /> },
+      { path: "notification", element: <Notification /> },
     ],
   },
 
