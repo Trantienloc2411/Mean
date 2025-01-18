@@ -1,24 +1,39 @@
 import { Modal, Tag, Button } from "antd";
 const { CheckableTag } = Tag;
 import { RoleEnum, StatusEnum, ApproveEnum } from "../../../enums/accountEnums"; // Import enums
+import { ConfigProvider } from "antd";
 
 // Helper function to render CheckableTags for any enum
 const renderTags = (enumData, filters, key, onFilterChange) => (
   <div style={{ marginBottom: 20 }}>
-    {Object.entries(enumData).map(([value, { label }]) => (
-      <CheckableTag
-        key={value}
-        checked={filters[key].includes(value)} // Check based on the key
-        onChange={(checked) => {
-          const updatedValues = checked
-            ? [...filters[key], value]
-            : filters[key].filter((item) => item !== value);
-          onFilterChange(key, updatedValues);
-        }}
-      >
-        {label}
-      </CheckableTag>
-    ))}
+    <ConfigProvider
+      theme={{
+        token: {
+          // colorPrimaryHover: "#333",
+          // colorPrimary: "#333",
+        },
+      }}
+    >
+      {Object.entries(enumData).map(([value, { label }]) => (
+        <CheckableTag
+          style={{
+            padding: "4px 10px",
+            border: "1px solid #999",
+            fontWeight: 600,
+          }}
+          key={value}
+          checked={filters[key].includes(value)} // Check based on the key
+          onChange={(checked) => {
+            const updatedValues = checked
+              ? [...filters[key], value]
+              : filters[key].filter((item) => item !== value);
+            onFilterChange(key, updatedValues);
+          }}
+        >
+          {label}
+        </CheckableTag>
+      ))}
+    </ConfigProvider>
   </div>
 );
 
@@ -54,6 +69,7 @@ export default function FilterModal({
       ]}
     >
       <h3>Vai trò</h3>
+
       {renderTags(RoleEnum, filters, "roles", onFilterChange)}
       <h3>Trạng thái</h3>
       {renderTags(StatusEnum, filters, "statuses", onFilterChange)}

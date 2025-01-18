@@ -1,6 +1,5 @@
 import React from "react";
 import PropTypes from "prop-types";
-import { FaUserFriends } from "react-icons/fa";
 import { Flex } from "antd";
 
 const CardDashboard = ({

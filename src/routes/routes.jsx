@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { lazy } from "react";
 import { Navigate } from "react-router-dom";
 import AdminLayout from "../layouts/AdminLayout";
@@ -13,16 +14,33 @@ const Dashboard = lazy(() => import("../pages/dashboard/Dashboard"));
 const Account = lazy(() => import("../pages/account/Account"));
 const Coupon = lazy(() => import("../pages/coupon/Coupon"));
 const Booking = lazy(() => import("../pages/booking/Booking"));
+const Notification = lazy(() =>
+  import("../pages/notification/Notification.jsx")
+);
 const Owner = lazy(() => import("../pages/owner/Owner"));
 
 // owner pages
-const TypeRoomOwner = lazy(() => import("../pages/owner/components/TypeRoom/TypeRoom.jsx"));
-const BookingOwner = lazy(() => import("../pages/owner/components/Booking/Booking.jsx"));
-const InformationOwner = lazy(() => import("../pages/owner/components/Information/Information.jsx"));
-const OverviewOwner = lazy(() => import("../pages/owner/components/Overview/Overview.jsx"));
-const PlaceOwner  = lazy(() => import("../pages/owner/components/Place/Place.jsx"));
-const PolicyOwner  = lazy(() => import("../pages/owner/components/Policy/Policy.jsx"));
-const SettingOwner  = lazy(() => import("../pages/owner/components/Setting/Setting.jsx"));
+const TypeRoomOwner = lazy(() =>
+  import("../pages/owner/childPage/TypeRoom/TypeRoom.jsx")
+);
+const BookingOwner = lazy(() =>
+  import("../pages/owner/childPage/Booking/Booking.jsx")
+);
+const InformationOwner = lazy(() =>
+  import("../pages/owner/childPage/Information/Information.jsx")
+);
+const OverviewOwner = lazy(() =>
+  import("../pages/owner/childPage/Overview/Overview.jsx")
+);
+const PlaceOwner = lazy(() =>
+  import("../pages/owner/childPage/Place/Place.jsx")
+);
+const PolicyOwner = lazy(() =>
+  import("../pages/owner/childPage/Policy/Policy.jsx")
+);
+const SettingOwner = lazy(() =>
+  import("../pages/owner/childPage/Setting/Setting.jsx")
+);
 
 // const Customer = lazy(() => import("../pages/customer/Customer"));
 const PolicyApp = lazy(() => import("../pages/policyApp/PolicyApp"));
@@ -77,6 +95,7 @@ export const routes = [
       { path: "rental", element: <RentalLocation /> },
       { path: "policy", element: <PolicyApp /> },
       { path: "report", element: <Report /> },
+      { path: "notification", element: <Notification /> },
     ],
   },
 
