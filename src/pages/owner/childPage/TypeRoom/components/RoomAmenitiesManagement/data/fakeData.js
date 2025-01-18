@@ -9,12 +9,12 @@ export const amenitiesData = [
       No: 2, 
       name: 'Điều hoà', 
       description: 'Điều hoà 2 chiều với công suất 12000 BTU, tích hợp chế độ tiết kiệm điện và lọc không khí',
-      status: 'Paused'
+      status: 'Inactive'
     },
     { 
       No: 3, 
       name: 'Minibar', 
       description: 'Tủ lạnh mini được trang bị sẵn đồ uống và snack',
-      status: 'Expired'
+      status: 'Active'
     }
   ];

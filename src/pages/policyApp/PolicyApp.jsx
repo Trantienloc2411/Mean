@@ -253,6 +253,7 @@ export default function PolicyApp() {
             type="primary"
             onClick={() => setIsAddModalOpen(true)}
             icon={<PlusOutlined />}
+            className={styles.addRoomButton}
           >
             Tạo chính sách mới
           </Button>

@@ -7,8 +7,7 @@ const DetailAmenityModal = ({ isOpen, onCancel, amenity }) => {
   const getStatusDisplay = (status) => {
     const statusMap = {
       'Active': { text: 'Đang hoạt động', className: styles.active },
-      'Paused': { text: 'Tạm dừng', className: styles.paused },
-      'Expired': { text: 'Hết hạn', className: styles.expired }
+      'Inactive': { text: 'Không hoạt động', className: styles.inactive },
     };
     const { text, className } = statusMap[status] || {};
     return <span className={`${styles.status} ${className}`}>{text}</span>;

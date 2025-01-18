@@ -23,6 +23,24 @@
             }
         }
     }
+
+    .addRoomButton {
+        background-color: #fff;
+        color: #667085;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 10px 16px;
+        font-weight: 500;
+        border: 1px solid #667085;
+
+        &:hover {
+            background-color: #e4e6ea !important;
+            border-color: #525c70 !important;
+            color: black !important;
+        }
+    }
 }
 
 .status {
@@ -30,23 +48,23 @@
     border-radius: 16px;
     font-size: 14px;
     display: inline-block;
-  
+
     &.active {
-      background: #ecffec;
-      color: #41C588;
+        background: #ecffec;
+        color: #41C588;
     }
-  
+
     &.paused {
-      background: #fff7e6;
-      color: #fa8c16;
+        background: #fff7e6;
+        color: #fa8c16;
     }
-  
+
     &.expired {
-      background: #fff1f0;
-      color: #f5222d;
+        background: #fff1f0;
+        color: #f5222d;
     }
-  }
-  
+}
+
 
 .reportTable {
     :global {
@@ -74,8 +92,8 @@
                     transition: all 0.2s;
 
                     &:hover {
-                        border-color: #1677ff;
-                        color: #1677ff;
+                        background-color: #e4e6ea;
+                        border-color: #525c70;
                     }
                 }
 
@@ -112,7 +130,7 @@
                     background: transparent;
 
                     a {
-                        color: #1677ff;
+                        color: #e4e6ea;
                     }
                 }
 
@@ -120,7 +138,7 @@
                     background: #F7F9FC;
 
                     a {
-                        color: #1677ff;
+                        color: #e4e6ea;
                         font-weight: 500;
                     }
 

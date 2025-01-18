@@ -1,23 +1,22 @@
-import { useState, useEffect } from "react";
-import { Table, Button, Input, Dropdown } from "antd";
-import { MoreOutlined, PlusOutlined, FilterOutlined } from "@ant-design/icons";
-import styles from "./RoomTypeManagement.module.scss";
-import DeleteRoomTypeModal from "./components/DeleteRoomTypeModal/DeleteRoomTypeModal";
-import AddRoomTypeModal from "./components/AddRoomTypeModal/AddRoomTypeModal";
-import UpdateRoomTypeModal from "./components/UpdateRoomTypeModal/UpdateRoomTypeModal";
-import DetailRoomTypeModal from "./components/DetailRoomTypeModal/DetailRoomTypeModal";
-import Filter from "./components/Filter/Filter";
-import { roomTypeData } from "./data/fakeData.js";
-import debounce from "lodash/debounce";
+import { useState, useEffect } from 'react';
+import { Table, Button, Input, Dropdown } from 'antd';
+import { MoreOutlined, PlusOutlined, FilterOutlined } from '@ant-design/icons';
+import styles from './RoomAmenitiesManagement.module.scss';
+import DeleteAmenityModal from './components/DeleteAmenityModal/DeleteAmenityModal.jsx';
+import AddAmenityModal from './components/AddAmenityModal/AddAmenityModal.jsx';
+import UpdateAmenityModal from './components/UpdateAmenityModal/UpdateAmenityModal.jsx';
+import DetailAmenityModal from './components/DetailAmenityModal/DetailAmenityModal.jsx';
+import Filter from './components/Filter/Filter.jsx';
+import debounce from 'lodash/debounce';
+import { amenitiesData } from './data/fakeData.js';
 
-const RoomTypeManagement = () => {
+const RoomAmenitiesManagement = () => {
   const [selectedValues, setSelectedValues] = useState({
-    maxOccupancy: [],
-    priceRange: [],
+    status: [],
   });
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredData, setFilteredData] = useState(roomTypeData);
-  const [selectedRoomType, setSelectedRoomType] = useState(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filteredData, setFilteredData] = useState(amenitiesData);
+  const [selectedAmenity, setSelectedAmenity] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
@@ -25,68 +24,68 @@ const RoomTypeManagement = () => {
 
   const menuItems = [
     {
-      key: "1",
-      label: "Chi tiết",
+      key: '1',
+      label: 'Chi tiết',
       onClick: (record) => {
-        setSelectedRoomType(record);
+        setSelectedAmenity(record);
         setIsDetailModalOpen(true);
       },
     },
     {
-      key: "2",
-      label: "Chỉnh sửa",
+      key: '2',
+      label: 'Chỉnh sửa',
       onClick: (record) => {
-        setSelectedRoomType(record);
+        setSelectedAmenity(record);
         setIsUpdateModalOpen(true);
       },
     },
     {
-      key: "3",
-      label: "Xoá",
+      key: '3',
+      label: 'Xoá',
       danger: true,
       onClick: (record) => {
-        setSelectedRoomType(record);
+        setSelectedAmenity(record);
         setIsDeleteModalOpen(true);
       },
     },
   ];
 
   const handleFilterChange = (filterType, value) => {
-    setSelectedValues(prev => ({
+    setSelectedValues((prev) => ({
       ...prev,
-      [filterType]: value
+      [filterType]: value,
     }));
   };
 
   const getActiveFiltersCount = () => {
-    return selectedValues.maxOccupancy.length + selectedValues.priceRange.length;
+    return Object.values(selectedValues).flat().length;
   };
 
   const handleDeleteConfirm = () => {
     setFilteredData((prevData) =>
-      prevData.filter((item) => item.No !== selectedRoomType?.No)
+      prevData.filter((item) => item.No !== selectedAmenity?.No)
     );
     setIsDeleteModalOpen(false);
-    setSelectedRoomType(null);
+    setSelectedAmenity(null);
   };
 
-  const handleAddRoomType = (values) => {
-    const newRoomType = {
+  const handleAddAmenity = (values) => {
+    const newAmenity = {
       ...values,
       No: filteredData.length + 1,
     };
-    setFilteredData((prevData) => [...prevData, newRoomType]);
+    setFilteredData((prevData) => [...prevData, newAmenity]);
     setIsAddModalOpen(false);
   };
 
-  const handleUpdateRoomType = (values) => {
+  const handleUpdateAmenity = (values) => {
     setFilteredData((prevData) =>
       prevData.map((item) =>
-        item.No === selectedRoomType.No ? { ...item, ...values } : item
+        item.No === selectedAmenity.No ? { ...item, ...values } : item
       )
     );
     setIsUpdateModalOpen(false);
-    setSelectedRoomType(null);
+    setSelectedAmenity(null);
   };
 
   const debouncedSearch = debounce((value) => {
@@ -94,7 +93,7 @@ const RoomTypeManagement = () => {
   }, 500);
 
   useEffect(() => {
-    let filtered = [...roomTypeData];
+    let filtered = [...amenitiesData];
 
     if (searchTerm) {
       filtered = filtered.filter((item) =>
@@ -102,52 +101,67 @@ const RoomTypeManagement = () => {
       );
     }
 
-    if (selectedValues.maxOccupancy?.length > 0) {
+    if (selectedValues.status?.length > 0) {
       filtered = filtered.filter((item) =>
-        selectedValues.maxOccupancy.includes(item.maxOccupancy)
+        selectedValues.status.includes(item.status)
       );
-    }
-
-    if (selectedValues.priceRange?.length > 0) {
-      filtered = filtered.filter((item) => {
-        return selectedValues.priceRange.some((range) => {
-          const [min, max] = range.split("-").map(Number);
-          if (max === undefined) return item.hourlyRate >= min;
-          return item.hourlyRate >= min && item.hourlyRate <= max;
-        });
-      });
     }
 
     setFilteredData(filtered);
   }, [searchTerm, selectedValues]);
 
+  const filterGroups = [
+    {
+      name: 'status',
+      title: 'Trạng thái',
+      options: [
+        { label: <span className={`${styles.status} ${styles.active}`}>Đang hoạt động</span>, value: 'Active' },
+        { label: <span className={`${styles.status} ${styles.inactive}`}>Không hoạt động</span>, value: 'Inactive' },
+      ],
+    },
+  ];
+
   const columns = [
-    { title: "No.", dataIndex: "No", key: "No", align: "center" },
-    { title: "Tên loại phòng", dataIndex: "name", key: "name", align: "left" },
     {
-      title: "Số người tối đa",
-      dataIndex: "maxOccupancy",
-      key: "maxOccupancy",
-      align: "center",
+      title: 'No.',
+      dataIndex: 'No',
+      key: 'No',
+      align: 'center',
     },
     {
-      title: "Tiện ích đi kèm",
-      dataIndex: "amenities",
-      key: "amenities",
-      align: "center",
-      render: (amenities) => `${amenities.length} tiện ích`,
+      title: 'Tên tiện ích',
+      dataIndex: 'name',
+      key: 'name',
+      align: 'left',
     },
     {
-      title: "Giá phòng theo giờ",
-      dataIndex: "hourlyRate",
-      key: "hourlyRate",
-      align: "right",
-      render: (price) => `${price.toLocaleString()}đ`,
+      title: 'Mô tả',
+      dataIndex: 'description',
+      key: 'description',
+      align: 'left',
+      ellipsis: true,
+      width: '40%',
     },
     {
-      title: "",
-      key: "operation",
-      align: "center",
+      title: 'Trạng thái',
+      dataIndex: 'status',
+      key: 'status',
+      align: 'center',
+      render: (status) => {
+        const isActive = status === 'Active';
+        return (
+          <span
+            className={`${styles.status} ${isActive ? styles.active : styles.inactive}`}
+          >
+            {isActive ? 'Đang hoạt động' : 'Không hoạt động'}
+          </span>
+        );
+      },
+    },
+    {
+      title: '',
+      key: 'operation',
+      align: 'center',
       render: (_, record) => (
         <Dropdown
           menu={{
@@ -165,19 +179,20 @@ const RoomTypeManagement = () => {
 
   return (
     <div className={styles.contentContainer}>
-      <h1>Quản lý Loại Phòng</h1>
+      <h1>Tiện ích Phòng</h1>
       <div className={styles.contentTable}>
         <div className={styles.tool}>
           <div className={styles.searchFilter}>
             <Input
-              placeholder="Tìm kiếm tên loại phòng"
+              placeholder="Tìm kiếm tên tiện ích"
               onChange={(e) => debouncedSearch(e.target.value)}
-              style={{ width: "250px" }}
+              style={{ width: '250px' }}
             />
             <Dropdown
-              trigger={["click"]}
+              trigger={['click']}
               dropdownRender={() => (
                 <Filter
+                  filterGroups={filterGroups}
                   selectedValues={selectedValues}
                   onFilterChange={handleFilterChange}
                 />
@@ -195,7 +210,7 @@ const RoomTypeManagement = () => {
             icon={<PlusOutlined />}
             className={styles.addRoomButton}
           >
-            Thêm loại phòng
+            Thêm tiện ích
           </Button>
         </div>
 
@@ -209,7 +224,7 @@ const RoomTypeManagement = () => {
             className: styles.customPagination,
             itemRender: (page, type, originalElement) => {
               const totalPages = Math.ceil(filteredData.length / 7);
-              if (type === "prev") {
+              if (type === 'prev') {
                 return (
                   <button
                     className={styles.paginationButton}
@@ -219,7 +234,7 @@ const RoomTypeManagement = () => {
                   </button>
                 );
               }
-              if (type === "next") {
+              if (type === 'next') {
                 return (
                   <button
                     className={styles.paginationButton}
@@ -235,43 +250,43 @@ const RoomTypeManagement = () => {
           className={styles.reportTable}
         />
 
-        <AddRoomTypeModal
+        <AddAmenityModal
           isOpen={isAddModalOpen}
           onCancel={() => setIsAddModalOpen(false)}
-          onConfirm={handleAddRoomType}
+          onConfirm={handleAddAmenity}
         />
 
-        <UpdateRoomTypeModal
+        <UpdateAmenityModal
           isOpen={isUpdateModalOpen}
           onCancel={() => {
             setIsUpdateModalOpen(false);
-            setSelectedRoomType(null);
+            setSelectedAmenity(null);
           }}
-          onConfirm={handleUpdateRoomType}
-          initialValues={selectedRoomType}
+          onConfirm={handleUpdateAmenity}
+          initialValues={selectedAmenity}
         />
 
-        <DetailRoomTypeModal
+        <DetailAmenityModal
           isOpen={isDetailModalOpen}
-          roomType={selectedRoomType}
+          amenity={selectedAmenity}
           onCancel={() => {
             setIsDetailModalOpen(false);
-            setSelectedRoomType(null);
+            setSelectedAmenity(null);
           }}
         />
 
-        <DeleteRoomTypeModal
+        <DeleteAmenityModal
           isOpen={isDeleteModalOpen}
           onCancel={() => {
             setIsDeleteModalOpen(false);
-            setSelectedRoomType(null);
+            setSelectedAmenity(null);
           }}
           onConfirm={handleDeleteConfirm}
-          roomTypeName={selectedRoomType?.name}
+          amenityName={selectedAmenity?.name}
         />
       </div>
     </div>
   );
 };
 
-export default RoomTypeManagement;
+export default RoomAmenitiesManagement;
