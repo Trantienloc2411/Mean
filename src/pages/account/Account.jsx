@@ -6,7 +6,6 @@ import AccountTable from "./components/AccountTable";
 import { useGetUsersQuery } from "../../features/user/userApiSlice";
 import FilterModal from "./components/FilterModal";
 import { Flex } from "antd";
-import { RoleEnum, StatusEnum, ApproveEnum } from "../../enums/accountEnums";
 
 export default function Account() {
   const { data: users, error, isLoading } = useGetUsersQuery();
@@ -19,16 +18,16 @@ export default function Account() {
     approves: [],
   });
   const [tempFilters, setTempFilters] = useState({
-    // State để lưu trữ tạm thời các lựa chọn filter
     roles: [],
     statuses: [],
     approves: [],
   });
 
-  const handleSearch = () => {
+  const handleSearch = (value) => {
+    setSearchValue(value); // Cập nhật giá trị ô tìm kiếm
     if (users) {
       const result = users.filter((user) => {
-        const matchesSearch = user.phoneNumber.includes(searchValue);
+        const matchesSearch = user.phoneNumber.includes(value); // Dùng giá trị hiện tại để lọc
         const matchesRole =
           selectedFilters.roles.length === 0 ||
           selectedFilters.roles.includes(user.role);
@@ -46,13 +45,13 @@ export default function Account() {
   };
 
   useEffect(() => {
-    handleSearch();
-  }, [selectedFilters, users]); // Chỉ lọc khi selectedFilters thay đổi
+    handleSearch(searchValue); // Lọc khi bộ lọc thay đổi
+  }, [selectedFilters, users]);
 
   const handleFilterChange = (key, values) => {
     setTempFilters((prevFilters) => ({
       ...prevFilters,
-      [key]: values, // Chỉ thay đổi filter tạm thời mà không ảnh hưởng đến dữ liệu
+      [key]: values,
     }));
   };
 
@@ -68,9 +67,9 @@ export default function Account() {
   const closeFilterModal = () => setIsFilterModalVisible(false);
 
   const applyFilters = () => {
-    setSelectedFilters(tempFilters); // Cập nhật filter chính thức sau khi nhấn "Áp dụng"
-    handleSearch(); // Lọc dữ liệu khi áp dụng bộ lọc
-    closeFilterModal(); // Đóng modal sau khi áp dụng bộ lọc
+    setSelectedFilters(tempFilters);
+    handleSearch(searchValue);
+    closeFilterModal();
   };
 
   if (error) return <p>Error: {error.message}</p>;
@@ -84,19 +83,15 @@ export default function Account() {
       <div style={{ marginTop: 20 }}>
         <h1 style={{ fontSize: 20 }}>Danh sách tài khoản</h1>
         <div style={{ background: "#fff", borderRadius: 20, padding: 20 }}>
-          <Flex justify="space-between">
+          <Flex gap={30}>
             <div>
               <Input
                 prefix={<SearchOutlined />}
                 placeholder="Tìm kiếm bằng số điện thoại"
                 style={{ width: 300, marginBottom: 10 }}
                 value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                onPressEnter={handleSearch}
+                onChange={(e) => handleSearch(e.target.value)} // Gọi hàm tìm kiếm mỗi khi thay đổi giá trị
               />
-              <Button style={{ marginLeft: 10 }} onClick={handleSearch}>
-                Tìm kiếm
-              </Button>
             </div>
             <Button onClick={openFilterModal}>
               <FilterOutlined />
@@ -109,10 +104,10 @@ export default function Account() {
       <FilterModal
         visible={isFilterModalVisible}
         onClose={closeFilterModal}
-        filters={tempFilters} // Truyền filter tạm thời vào modal
+        filters={tempFilters}
         onFilterChange={handleFilterChange}
         onReset={resetFilters}
-        onApplyFilters={applyFilters} // Truyền hàm applyFilters vào modal
+        onApplyFilters={applyFilters}
       />
     </div>
   );
