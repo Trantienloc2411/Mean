@@ -1,0 +1,23 @@
+.modalForm {
+    padding: 20px 0;
+  
+    :global {
+      .ant-form-item {
+        margin-bottom: 24px;
+      }
+  
+      .ant-input,
+      .ant-picker {
+        border-radius: 6px;
+      }
+  
+      .ant-radio-group {
+        display: flex;
+        gap: 16px;
+      }
+  
+      .ant-checkbox-wrapper {
+        margin-top: 8px;
+      }
+    }
+  }

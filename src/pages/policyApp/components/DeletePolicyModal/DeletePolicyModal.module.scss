@@ -1,0 +1,15 @@
+.deleteModal {
+    :global {
+      .ant-modal-content {
+        padding: 24px;
+      }
+  
+      .ant-modal-header {
+        margin-bottom: 16px;
+      }
+  
+      .ant-modal-footer {
+        margin-top: 24px;
+      }
+    }
+  }

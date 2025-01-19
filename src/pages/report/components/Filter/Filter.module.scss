@@ -1,0 +1,47 @@
+.filterContainer {
+  background: white;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  min-width: 250px;
+}
+
+.filterGroup {
+  margin-bottom: 16px;
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+  
+  h4 {
+    margin-bottom: 12px;
+    font-weight: 500;
+  }
+}
+
+.statusCheckboxes {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  :global(.ant-checkbox-wrapper) {
+    margin-left: 0;
+  }
+}
+
+.status {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 14px;
+  display: inline-block;
+  
+  &.reviewed {
+    background: #e6f4ff;
+    color: #1677ff;
+  }
+  
+  &.pending {
+    background: #fff7e6;
+    color: #fa8c16;
+  }
+}
