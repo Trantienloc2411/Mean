@@ -75,24 +75,33 @@ const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
           label="Ngày bắt đầu"
           rules={[{ required: true, message: 'Vui lòng chọn ngày bắt đầu' }]}
         >
-          <DatePicker 
-            style={{ width: '100%' }}
-            format="DD/MM/YYYY"
-            placeholder="dd/mm/yyyy"
-          />
+          <DatePicker style={{ width: '100%' }} format="HH:mm DD/MM/YYYY" placeholder="dd/mm/yyyy" showTime />
         </Form.Item>
 
         <Form.Item
           name="endDate"
           label="Ngày kết thúc"
-          rules={[{ required: true, message: 'Vui lòng chọn ngày kết thúc' }]}
+          rules={[
+            { required: true, message: 'Vui lòng chọn ngày kết thúc' },
+            ({ getFieldValue }) => ({
+              validator(_, value) {
+                const startDate = getFieldValue('startDate');
+                if (!value || !startDate || value.isAfter(startDate)) {
+                  return Promise.resolve();
+                }
+                return Promise.reject(new Error('Ngày kết thúc phải sau ngày bắt đầu (bao gồm cả giờ phút)'));
+              },
+            }),
+          ]}
         >
           <DatePicker
             style={{ width: '100%' }}
-            format="DD/MM/YYYY"
+            format="HH:mm DD/MM/YYYY"
             placeholder="dd/mm/yyyy"
+            showTime
           />
         </Form.Item>
+
 
         <Form.Item
           name="isActive"

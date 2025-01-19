@@ -91,26 +91,46 @@ export default function PolicyApp() {
   };
 
   const handleAddPolicy = (values) => {
-    const newPolicy = {
-      ...values,
-      No: filteredData.length + 1,
-      StartTime: values.StartTime.format('HH:mm DD/MM/YYYY'),
-      EndTime: values.EndTime.format('HH:mm DD/MM/YYYY'),
-    };
-    setFilteredData(prevData => [...prevData, newPolicy]);
-    setIsAddModalOpen(false);
+    try {
+      console.log("StartTime:", values.startTime, "EndTime:", values.endTime);
+      console.log("Filtered Data Before:", filteredData);
+  
+      const newPolicy = {
+        ...values,
+        No: filteredData.length + 1,
+        Name: values.name,
+        Description: values.description,
+        Value: values.value,
+        Unit: values.unit === 'percent' ? 'Percent' : 'VND',
+        CreatedDate: dayjs().format('HH:mm DD/MM/YYYY'),
+        StartTime: dayjs(values.startDate).format('HH:mm DD/MM/YYYY'),
+        EndTime: dayjs(values.endDate).format('HH:mm DD/MM/YYYY'),
+        Status: values.isActive ? 'Active' : 'Paused',
+        IsActive: values.isActive || false
+      };
+  
+      console.log("New Policy:", newPolicy);
+  
+      setFilteredData(prevData => [...prevData, newPolicy]);
+      setIsAddModalOpen(false);
+      console.log("Modal đã đóng");
+  
+    } catch (error) {
+      console.error("Lỗi khi thêm chính sách:", error);
+    }
   };
-
+  
+  
   const handleUpdatePolicy = (values) => {
     setFilteredData(prevData =>
       prevData.map(item =>
         item.No === selectedPolicy.No
           ? {
-              ...item,
-              ...values,
-              StartTime: values.StartTime,
-              EndTime: values.EndTime,
-            }
+            ...item,
+            ...values,
+            StartTime: values.StartTime,
+            EndTime: values.EndTime,
+          }
           : item
       )
     );
