@@ -81,7 +81,7 @@ export default function Policy() {
     const newPolicy = {
       ...values,
       No: filteredData.length + 1,
-      CreatedDate: values.CreatedDate.format('HH:mm DD/MM/YYYY'),
+      CreatedDate: values.CreatedDate,
       ApplyDate: values.ApplyDate.format('HH:mm DD/MM/YYYY'),
       EndDate: values.EndDate.format('HH:mm DD/MM/YYYY'),
     };
@@ -94,12 +94,12 @@ export default function Policy() {
       prevData.map(item =>
         item.No === selectedPolicy.No
           ? {
-              ...item,
-              ...values,
-              CreatedDate: values.CreatedDate,
-              ApplyDate: values.ApplyDate,
-              EndDate: values.EndDate,
-            }
+            ...item,
+            ...values,
+            CreatedDate: values.CreatedDate,
+            ApplyDate: values.ApplyDate.format('HH:mm DD/MM/YYYY'),
+            EndDate: values.EndDate.format('HH:mm DD/MM/YYYY'),
+          }
           : item
       )
     );

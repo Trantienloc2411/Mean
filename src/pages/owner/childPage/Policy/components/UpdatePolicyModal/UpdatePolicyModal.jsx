@@ -13,7 +13,6 @@ const UpdatePolicyModal = ({ isOpen, onCancel, onConfirm, initialValues }) => {
 
         return {
             ...initialValues,
-            CreatedDate: initialValues.CreatedDate ? dayjs(initialValues.CreatedDate, "HH:mm DD/MM/YYYY") : null,
             ApplyDate: initialValues.ApplyDate ? dayjs(initialValues.ApplyDate, "HH:mm DD/MM/YYYY") : null,
             EndDate: initialValues.EndDate ? dayjs(initialValues.EndDate, "HH:mm DD/MM/YYYY") : null,
         };
@@ -22,6 +21,13 @@ const UpdatePolicyModal = ({ isOpen, onCancel, onConfirm, initialValues }) => {
     useEffect(() => {
         form.setFieldsValue(getInitialValues());
     }, [initialValues, form]);
+
+    const handleSubmit = (values) => {
+        onConfirm({
+            ...values,
+            CreatedDate: initialValues.CreatedDate
+        });
+    };
 
     return (
         <Modal
@@ -33,7 +39,7 @@ const UpdatePolicyModal = ({ isOpen, onCancel, onConfirm, initialValues }) => {
         >
             <Form
                 form={form}
-                onFinish={onConfirm}
+                onFinish={handleSubmit}
                 initialValues={getInitialValues()}
             >
                 <Form.Item
@@ -51,13 +57,12 @@ const UpdatePolicyModal = ({ isOpen, onCancel, onConfirm, initialValues }) => {
                     <TextArea rows={4} placeholder="Nhập mô tả tiện ích" />
                 </Form.Item>
                 <Form.Item
-                    name="CreatedDate"
                     label="Ngày tạo"
-                    rules={[{ required: true, message: 'Vui lòng chọn ngày tạo!' }]}
                 >
-                    <DatePicker
-                        format="HH:mm DD/MM/YYYY"
-                        showTime={{ format: 'HH:mm' }}
+                    <Input 
+                        value={initialValues?.CreatedDate}
+                        disabled
+                        style={{ backgroundColor: '#f5f5f5', color: '#000' }}
                     />
                 </Form.Item>
                 <Form.Item
