@@ -13,8 +13,12 @@ const UpdatePolicyModal = ({ isOpen, onCancel, onConfirm, initialValues }) => {
 
         return {
             ...initialValues,
-            ApplyDate: initialValues.ApplyDate ? dayjs(initialValues.ApplyDate, "HH:mm DD/MM/YYYY") : null,
-            EndDate: initialValues.EndDate ? dayjs(initialValues.EndDate, "HH:mm DD/MM/YYYY") : null,
+            ApplyDate: initialValues.ApplyDate
+                ? dayjs(initialValues.ApplyDate, "HH:mm DD/MM/YYYY")
+                : null,
+            EndDate: initialValues.EndDate
+                ? dayjs(initialValues.EndDate, "HH:mm DD/MM/YYYY")
+                : null,
         };
     };
 
@@ -25,7 +29,7 @@ const UpdatePolicyModal = ({ isOpen, onCancel, onConfirm, initialValues }) => {
     const handleSubmit = (values) => {
         onConfirm({
             ...values,
-            CreatedDate: initialValues.CreatedDate
+            CreatedDate: initialValues.CreatedDate,
         });
     };
 
@@ -59,7 +63,7 @@ const UpdatePolicyModal = ({ isOpen, onCancel, onConfirm, initialValues }) => {
                 <Form.Item
                     label="Ngày tạo"
                 >
-                    <Input 
+                    <Input
                         value={initialValues?.CreatedDate}
                         disabled
                         style={{ backgroundColor: '#f5f5f5', color: '#000' }}
@@ -78,7 +82,22 @@ const UpdatePolicyModal = ({ isOpen, onCancel, onConfirm, initialValues }) => {
                 <Form.Item
                     name="EndDate"
                     label="Ngày kết thúc"
-                    rules={[{ required: true, message: 'Vui lòng chọn ngày kết thúc!' }]}
+                    rules={[
+                        { required: true, message: 'Vui lòng chọn ngày kết thúc!' },
+                        ({ getFieldValue }) => ({
+                            validator(_, value) {
+                                const applyDate = getFieldValue('ApplyDate');
+                                if (!value || !applyDate || value.isAfter(applyDate)) {
+                                    return Promise.resolve();
+                                }
+                                return Promise.reject(
+                                    new Error(
+                                        'Ngày kết thúc phải lớn hơn ngày áp dụng (bao gồm cả giờ phút).'
+                                    )
+                                );
+                            },
+                        }),
+                    ]}
                 >
                     <DatePicker
                         format="HH:mm DD/MM/YYYY"
