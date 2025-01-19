@@ -33,7 +33,7 @@ const OverviewOwner = lazy(() =>
   import("../pages/owner/childPage/Overview/Overview.jsx")
 );
 const PlaceOwner = lazy(() =>
-  import("../pages/owner/childPage/Place/Place.jsx")
+  import("../pages/owner/childPage/rentalLocation/RentalLocation.jsx")
 );
 const PolicyOwner = lazy(() =>
   import("../pages/owner/childPage/Policy/Policy.jsx")
