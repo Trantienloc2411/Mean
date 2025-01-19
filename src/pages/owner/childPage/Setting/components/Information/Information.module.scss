@@ -1,0 +1,16 @@
+.content{
+    display: flex;
+    padding: 20px;
+    
+    .profileSection{
+        display: flex;
+        align-items: center;
+        flex-direction: column;
+        padding: 10px;
+
+    }
+    .infoForm{
+        padding-left: 10%;
+        width: 80%;
+    }
+}
