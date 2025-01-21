@@ -7,6 +7,7 @@ import Signup from "../pages/auth/signup/SignUp";
 import VerifyCode from "../pages/auth/verifyCode/VerifyCode";
 import ForgotPassword from "../pages/auth/forgotPassword/ForgotPassword";
 import SetNewPassword from "../pages/auth/setNewPassword/SetNewPassword";
+import { element } from "prop-types";
 
 // Lazy load pages
 const Login = lazy(() => import("../pages/auth/login/Login"));
@@ -35,6 +36,22 @@ const OverviewOwner = lazy(() =>
 const PlaceOwner = lazy(() =>
   import("../pages/owner/childPage/Place/Place.jsx")
 );
+
+const AccommodationDetail = lazy(() =>
+  import(
+    "../pages/owner/childPage/Place/childPage/AccomodationDetail/AccomodationDetail.jsx"
+  )
+);
+
+const AccommodationEdit = lazy(() =>
+  import(
+    "../pages/owner/childPage/Place/childPage/AccomodationEdit/AccomodationEdit.jsx"
+  )
+);
+
+const AccommodationCreate = lazy(() => 
+    import("../pages/owner/childPage/Place/childPage/AccomodationCreate/AccomodationCreate.jsx"))
+
 const PolicyOwner = lazy(() =>
   import("../pages/owner/childPage/Policy/Policy.jsx")
 );
@@ -47,6 +64,7 @@ const PolicyApp = lazy(() => import("../pages/policyApp/PolicyApp"));
 const RentalLocation = lazy(() =>
   import("../pages/rentalLocation/RentalLocation")
 );
+
 const Report = lazy(() => import("../pages/report/Report"));
 
 const Transaction = lazy(() => import("../pages/transaction/Transaction"));
@@ -110,6 +128,9 @@ export const routes = [
       { path: "booking", element: <BookingOwner /> },
       { path: "information", element: <InformationOwner /> },
       { path: "location", element: <PlaceOwner /> },
+      { path: "location/AccomodationDetail", element: <AccommodationDetail /> },
+      { path: "location/AccomodationEdit", element: <AccommodationEdit /> },
+      { path: "location/AccomodationCreate", element: <AccommodationCreate/>},
       { path: "type-room", element: <TypeRoomOwner /> },
       { path: "policy", element: <PolicyOwner /> },
       { path: "setting", element: <SettingOwner /> },
