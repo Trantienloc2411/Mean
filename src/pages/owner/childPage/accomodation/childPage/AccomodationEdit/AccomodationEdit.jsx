@@ -1,21 +1,14 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import styles from "../AccomodationCreate/AccomodationCreate.module.scss";
-import {
-  Button,
-  Input,
-  InputNumber,
-  Switch,
-  Checkbox,
-  Row,
-  Col,
-  Form,
-  Select,
-} from "antd";
+import styles from "./AccomodationEdit.module.scss";
+import { Button, Input, InputNumber, Switch, Checkbox, Row, Col, Form, Select } from "antd";
 import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import { Upload } from "antd";
 import { InboxOutlined } from "@ant-design/icons";
-export default function AccommodationCreate() {
+
+export default function AccommodationEdit() {
+  const location = useLocation();
+  const roomData = location.state.data;
   const navigate = useNavigate();
 
   const { Option } = Select;
@@ -54,19 +47,23 @@ export default function AccommodationCreate() {
           Trở về
         </Button>
       </div>
-      <h2>Tạo thông tin phòng</h2>
+      <h2>Chỉnh sửa thông tin phòng</h2>
       <Form
         onFinish={handleSaveAction}
-
+        initialValues={{
+          roomName: roomData.roomName,
+          roomType: "standard", // You may adjust the default value accordingly
+          description: roomData.description,
+          maxPeople: roomData.maxPeople,
+          price: roomData.price,
+          amenities: [], // Populate this based on roomData.amenities if available
+        }}
       >
         <div className={styles.component}>
           <div className={styles.valueInput}>
             <div className={styles.leftSide}>
               <h3>Tên phòng</h3>
-              <Form.Item
-                name="roomName"
-                rules={[{ required: true, message: "Please input room name!" }]}
-              >
+              <Form.Item name="roomName" rules={[{ required: true, message: 'Please input room name!' }]}>
                 <Input placeholder="Tên phòng" />
               </Form.Item>
               <h3 style={{ marginTop: 20 }}>Loại phòng</h3>
@@ -81,10 +78,7 @@ export default function AccommodationCreate() {
                   <Option value="suite">Suite</Option>
                 </Select>
               </Form.Item>
-              <div
-                className={styles.switchOption}
-                style={{ alignItems: "baseline", display: "flex" }}
-              >
+              <div className={styles.switchOption} style={{alignItems: "baseline", display: "flex"}}>
                 <h3 style={{ marginBottom: 0 }}>Trạng thái phòng</h3>
                 <Form.Item name="status" valuePropName="checked">
                   <Switch

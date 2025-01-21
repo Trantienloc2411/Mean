@@ -1,7 +1,7 @@
 import { ArrowLeftOutlined } from "@ant-design/icons";
 import { Button, Tooltip } from "antd";
 import { Image } from "antd";
-import styles from "../AccomodationDetail/AccomodationDetail.module.scss";
+import styles from "./AccomodationDetail.module.scss";
 import Tag from "../../components/Tag";
 import { Navigate, useNavigate } from "react-router-dom";
 
@@ -28,7 +28,7 @@ export default function AccommodationDetail(props) {
   const navigate = useNavigate();
 
   const handleEditNavigate = () => {
-    navigate("../location/AccomodationEdit", {
+    navigate("../location/accomodation-edit", {
       state: {
         data: {
           roomName,
