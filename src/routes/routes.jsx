@@ -32,27 +32,26 @@ const InformationOwner = lazy(() =>
 const OverviewOwner = lazy(() =>
   import("../pages/owner/childPage/Overview/Overview.jsx")
 );
+const PlaceOwner = lazy(() =>
+  import("../pages/owner/childPage/accomodation/Accomodation.jsx")
 const RentalLocationOwner = lazy(() =>
   import("../pages/owner/childPage/rentalLocation/RentalLocation.jsx")
 );
 
 const AccommodationDetail = lazy(() =>
   import(
-    "../pages/owner/childPage/Place/childPage/AccomodationDetail/AccomodationDetail.jsx"
+    "../pages/owner/childPage/accomodation/childPage/AccomodationDetail/AccomodationDetail.jsx"
   )
 );
 
 const AccommodationEdit = lazy(() =>
   import(
-    "../pages/owner/childPage/Place/childPage/AccomodationEdit/AccomodationEdit.jsx"
+    "../pages/owner/childPage/accomodation/childPage/AccomodationEdit/AccomodationEdit.jsx"
   )
 );
 
-const AccommodationCreate = lazy(() =>
-  import(
-    "../pages/owner/childPage/Place/childPage/AccomodationCreate/AccomodationCreate.jsx"
-  )
-);
+const AccommodationCreate = lazy(() => 
+    import("../pages/owner/childPage/accomodation/childPage/AccomodationCreate/AccomodationCreate.jsx"))
 
 const PolicyOwner = lazy(() =>
   import("../pages/owner/childPage/Policy/Policy.jsx")
@@ -129,10 +128,10 @@ export const routes = [
       { path: "dashboard", element: <OverviewOwner /> },
       { path: "booking", element: <BookingOwner /> },
       { path: "information", element: <InformationOwner /> },
-      { path: "rental-location", element: <RentalLocationOwner /> },
-      { path: "location/AccomodationDetail", element: <AccommodationDetail /> },
-      { path: "location/AccomodationEdit", element: <AccommodationEdit /> },
-      { path: "location/AccomodationCreate", element: <AccommodationCreate /> },
+      { path: "location", element: <PlaceOwner /> },
+      { path: "location/accomodation-detail/", element: <AccommodationDetail/> },
+      { path: "location/accomodation-edit", element: <AccommodationEdit /> },
+      { path: "location/accomodation-create", element: <AccommodationCreate/>},
       { path: "type-room", element: <TypeRoomOwner /> },
       { path: "policy", element: <PolicyOwner /> },
       { path: "setting", element: <SettingOwner /> },

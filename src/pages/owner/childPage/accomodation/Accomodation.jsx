@@ -1,16 +1,16 @@
 import { Button, Tooltip } from "antd";
-import styles from "../Place/Place.module.scss";
+import styles from "./Accomodation.module.scss";
 import { useNavigate } from "react-router-dom";
-export default function Place(props) {
+export default function Accommodation(props) {
   const navigate = useNavigate();
 
   const handleNavigate = () => {
-    navigate("./AccomodationDetail");
+    navigate("./accomodation-detail");
   };
 
 
   const handleCreateNavigate = () => {
-    navigate("./AccomodationCreate");
+    navigate("./accomodation-create");
   }
   return (
     <>
