@@ -6,6 +6,17 @@ import NotificationPanel from "./NotificationPanel";
 
 export default function HeaderAdmin() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
+  const [time, setTime] = useState(new Date());
+
+  useEffect(() => {
+    const intervalId = setInterval(() => {
+      setTime(new Date());
+    }, 1000);
+
+    // Cleanup interval on component unmount
+    return () => clearInterval(intervalId);
+  }, []);
+
   const notifications = [
     {
       Id: 1,
@@ -99,6 +110,9 @@ export default function HeaderAdmin() {
             gap: "15px",
           }}
         >
+          <div>
+            {time.toLocaleTimeString()} {time.toLocaleDateString()}
+          </div>
           {/* Notification Icon */}
           <NotificationIcon
             ref={iconRef} // Reference for icon

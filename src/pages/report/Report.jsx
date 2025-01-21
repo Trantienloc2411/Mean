@@ -7,8 +7,8 @@ import ReportDetail from "./components/ReportDetail/ReportDetail";
 import ReplyReport from "./components/ReplyReport/ReplyReport";
 import { reportData } from "./data/fakeData";
 import debounce from "lodash/debounce";
-import dayjs from 'dayjs';
-import customParseFormat from 'dayjs/plugin/customParseFormat';
+import dayjs from "dayjs";
+import customParseFormat from "dayjs/plugin/customParseFormat";
 
 dayjs.extend(customParseFormat);
 
@@ -25,20 +25,20 @@ export default function Report() {
 
   const items = [
     {
-      key: '1',
-      label: 'Chi tiết',
+      key: "1",
+      label: "Chi tiết",
     },
     {
-      key: '2',
-      label: 'Trả lời'
-    }
+      key: "2",
+      label: "Trả lời",
+    },
   ];
 
   const handleMenuClick = (key, record) => {
     setSelectedReport(record);
-    if (key === '1') {
+    if (key === "1") {
       setIsDetailModalOpen(true);
-    } else if (key === '2') {
+    } else if (key === "2") {
       setIsReplyModalOpen(true);
     }
   };
@@ -48,19 +48,19 @@ export default function Report() {
       title: "No.",
       dataIndex: "id",
       key: "id",
-      width: 70
+      width: 70,
     },
     {
       title: "Khách hàng",
       dataIndex: "customerName",
       key: "customerName",
-      width: 120
+      width: 120,
     },
     {
       title: "Tên địa điểm",
       dataIndex: "locationName",
       key: "locationName",
-      width: 150
+      width: 150,
     },
     {
       title: "Content",
@@ -71,13 +71,13 @@ export default function Report() {
         <div className={styles.truncatedContent}>
           {text.length > 100 ? `${text.substring(0, 100)}...` : text}
         </div>
-      )
+      ),
     },
     {
       title: "Ngày tạo",
       dataIndex: "createdAt",
       key: "createdAt",
-      width: 150
+      width: 150,
     },
     {
       title: "Trạng thái",
@@ -86,7 +86,7 @@ export default function Report() {
       width: 120,
       render: (status) => (
         <span className={`${styles.status} ${styles[status.toLowerCase()]}`}>
-          {status === 'Reviewed' ? 'Đã xem' : 'Chưa xem'}
+          {status === "Reviewed" ? "Đã xem" : "Chưa xem"}
         </span>
       ),
     },
@@ -95,14 +95,16 @@ export default function Report() {
       key: "action",
       width: 50,
       render: (_, record) => (
-        <Dropdown menu={{
-          items,
-          onClick: ({ key }) => handleMenuClick(key, record)
-        }}>
+        <Dropdown
+          menu={{
+            items,
+            onClick: ({ key }) => handleMenuClick(key, record),
+          }}
+        >
           <MoreOutlined className={styles.actionIcon} />
         </Dropdown>
       ),
-    }
+    },
   ];
 
   const handleSearch = debounce((value) => {
@@ -110,9 +112,9 @@ export default function Report() {
   }, 500);
 
   const handleFilterChange = (filterName, newValue) => {
-    setSelectedValues(prev => ({
+    setSelectedValues((prev) => ({
       ...prev,
-      [filterName]: newValue
+      [filterName]: newValue,
     }));
   };
 
@@ -121,21 +123,22 @@ export default function Report() {
 
     // Search filter
     if (searchTerm) {
-      filtered = filtered.filter(item =>
-        item.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.locationName.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (item) =>
+          item.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.locationName.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     if (selectedValues.status?.length > 0) {
-      filtered = filtered.filter(item =>
+      filtered = filtered.filter((item) =>
         selectedValues.status.includes(item.status)
       );
     }
     if (selectedValues.date) {
-      const selectedDate = dayjs(selectedValues.date).format('DD/MM/YYYY');
-      filtered = filtered.filter(item => {
-        const itemDate = item.createdAt.split(' ')[1]; 
+      const selectedDate = dayjs(selectedValues.date).format("DD/MM/YYYY");
+      filtered = filtered.filter((item) => {
+        const itemDate = item.createdAt.split(" ")[1];
         return itemDate === selectedDate;
       });
     }
@@ -191,7 +194,7 @@ export default function Report() {
               return (
                 <button
                   className={styles.paginationButton}
-                  disabled={page === 0} 
+                  disabled={page === 0}
                 >
                   « Trước
                 </button>
@@ -201,7 +204,7 @@ export default function Report() {
               return (
                 <button
                   className={styles.paginationButton}
-                  disabled={page >= totalPages} 
+                  disabled={page >= totalPages}
                 >
                   Tiếp »
                 </button>
@@ -210,10 +213,8 @@ export default function Report() {
             return originalElement;
           },
         }}
-
         className={styles.reportTable}
       />
-
 
       <ReportDetail
         isOpen={isDetailModalOpen}
@@ -226,7 +227,7 @@ export default function Report() {
         onClose={() => setIsReplyModalOpen(false)}
         report={selectedReport}
         onSubmit={(reply) => {
-          console.log('Reply submitted:', reply);
+          console.log("Reply submitted:", reply);
           setIsReplyModalOpen(false);
         }}
       />

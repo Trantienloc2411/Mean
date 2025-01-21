@@ -1,9 +1,13 @@
-import React from "react";
+import  { useState } from "react";
 import { MoreOutlined } from "@ant-design/icons";
-import { Dropdown, Menu, Table, Tag } from "antd";
+import { Dropdown, Menu, Table, Tag, Modal } from "antd";
 import { RentalLocationStatusEnum } from "../../../enums/rentalLocationEnums"; // Import enum
 
 export default function RentalLocationTable({ data, loading }) {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [modalContent, setModalContent] = useState({ title: "", content: "" });
+  const [currentRecord, setCurrentRecord] = useState(null);
+
   const columns = [
     {
       title: "No.",
@@ -57,10 +61,10 @@ export default function RentalLocationTable({ data, loading }) {
                 Xem chi tiết
               </Menu.Item>
               <Menu.Item key="2" onClick={() => handleChangeStatus(record)}>
-                Thay đổi trạng thái
+                Vô hiệu hóa hoạt động
               </Menu.Item>
-              <Menu.Item key="3" onClick={() => handleDelete(record)}>
-                Xóa
+              <Menu.Item key="3" onClick={() => handleStopActivity(record)}>
+                Dừng hoạt động
               </Menu.Item>
             </Menu>
           }
@@ -77,20 +81,54 @@ export default function RentalLocationTable({ data, loading }) {
   };
 
   const handleChangeStatus = (record) => {
-    console.log("Thay đổi trạng thái cho:", record);
+    setModalContent({
+      title: "Xác nhận vô hiệu hóa hoạt động",
+      content: `Bạn có chắc chắn muốn vô hiệu hóa hoạt động của địa điểm "${record.name}"?`,
+    });
+    setCurrentRecord(record);
+    setIsModalVisible(true);
   };
 
-  const handleDelete = (record) => {
-    console.log("Xóa địa điểm:", record);
+  const handleStopActivity = (record) => {
+    setModalContent({
+      title: "Xác nhận dừng hoạt động",
+      content: `Bạn có chắc chắn muốn dừng hoạt động của địa điểm "${record.name}"?`,
+    });
+    setCurrentRecord(record);
+    setIsModalVisible(true);
+  };
+
+  const handleConfirm = () => {
+    console.log(
+      `${modalContent.title} - Thao tác đã được thực hiện cho địa điểm:`,
+      currentRecord
+    );
+    setIsModalVisible(false);
+  };
+
+  const handleCancel = () => {
+    setIsModalVisible(false);
   };
 
   return (
-    <Table
-      scroll={{ x: "max-content" }}
-      dataSource={data}
-      loading={loading}
-      columns={columns}
-      rowKey="id"
-    />
+    <>
+      <Table
+        scroll={{ x: "max-content" }}
+        dataSource={data}
+        loading={loading}
+        columns={columns}
+        rowKey="id"
+      />
+      <Modal
+        title={modalContent.title}
+        visible={isModalVisible}
+        onOk={handleConfirm}
+        onCancel={handleCancel}
+        okText="Xác nhận"
+        cancelText="Hủy bỏ"
+      >
+        <p>{modalContent.content}</p>
+      </Modal>
+    </>
   );
 }
