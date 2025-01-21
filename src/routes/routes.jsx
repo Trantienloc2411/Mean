@@ -7,7 +7,6 @@ import Signup from "../pages/auth/signup/SignUp";
 import VerifyCode from "../pages/auth/verifyCode/VerifyCode";
 import ForgotPassword from "../pages/auth/forgotPassword/ForgotPassword";
 import SetNewPassword from "../pages/auth/setNewPassword/SetNewPassword";
-import { element } from "prop-types";
 
 // Lazy load pages
 const Login = lazy(() => import("../pages/auth/login/Login"));
@@ -33,7 +32,7 @@ const InformationOwner = lazy(() =>
 const OverviewOwner = lazy(() =>
   import("../pages/owner/childPage/Overview/Overview.jsx")
 );
-const PlaceOwner = lazy(() =>
+const RentalLocationOwner = lazy(() =>
   import("../pages/owner/childPage/rentalLocation/RentalLocation.jsx")
 );
 
@@ -49,8 +48,11 @@ const AccommodationEdit = lazy(() =>
   )
 );
 
-const AccommodationCreate = lazy(() => 
-    import("../pages/owner/childPage/Place/childPage/AccomodationCreate/AccomodationCreate.jsx"))
+const AccommodationCreate = lazy(() =>
+  import(
+    "../pages/owner/childPage/Place/childPage/AccomodationCreate/AccomodationCreate.jsx"
+  )
+);
 
 const PolicyOwner = lazy(() =>
   import("../pages/owner/childPage/Policy/Policy.jsx")
@@ -127,10 +129,10 @@ export const routes = [
       { path: "dashboard", element: <OverviewOwner /> },
       { path: "booking", element: <BookingOwner /> },
       { path: "information", element: <InformationOwner /> },
-      { path: "location", element: <PlaceOwner /> },
+      { path: "rental-location", element: <RentalLocationOwner /> },
       { path: "location/AccomodationDetail", element: <AccommodationDetail /> },
       { path: "location/AccomodationEdit", element: <AccommodationEdit /> },
-      { path: "location/AccomodationCreate", element: <AccommodationCreate/>},
+      { path: "location/AccomodationCreate", element: <AccommodationCreate /> },
       { path: "type-room", element: <TypeRoomOwner /> },
       { path: "policy", element: <PolicyOwner /> },
       { path: "setting", element: <SettingOwner /> },

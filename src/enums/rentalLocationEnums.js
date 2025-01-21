@@ -4,5 +4,5 @@ export const RentalLocationStatusEnum = {
   Resend: { label: "Gửi lại yêu cầu", color: "gold" },
   Inactive: { label: "Không hoạt động", color: "gray" },
   Paused: { label: "Tạm dừng", color: "blue" },
-  Locked: { label: "Khóa", color: "volcano" },
+  Locked: { label: "Khóa", color: "#333" },
 };

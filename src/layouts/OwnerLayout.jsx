@@ -16,7 +16,7 @@ const { Header, Content } = Layout;
 const menuItems = [
   { key: "/owner/dashboard", icon: <HomeOutlined />, label: "Tổng quan" },
   { key: "/owner/information", icon: <UserOutlined />, label: "Thông tin" },
-  { key: "/owner/location", icon: <BsBuildings />, label: "Địa điểm" },
+  { key: "/owner/rental-location", icon: <BsBuildings />, label: "Địa điểm" },
   { key: "/owner/booking", icon: <CalendarOutlined />, label: "Đặt phòng" },
   { key: "/owner/type-room", icon: <TagOutlined />, label: "Loại phòng" },
   { key: "/owner/policy", icon: <BarChartOutlined />, label: "Chính sách" },
