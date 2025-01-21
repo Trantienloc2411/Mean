@@ -1,21 +1,13 @@
 import "../dashboard/Dashboard.scss";
 import { useState, useEffect } from "react";
-import { Card, Space } from "antd";
 import Table from "./components/Table";
 import ReviewList from "./components/List";
-import {
-  TeamOutlined,
-  HistoryOutlined,
-  LineChartOutlined,
-  RiseOutlined,
-  StarFilled,
-} from "@ant-design/icons";
 
 import { placeLove, reviewList } from "./data/dataFake";
 import Overview from "./components/Overview";
 
 export default function Dashboard() {
-  const [time, setTime] = useState(new Date());
+  // const [time, setTime] = useState(new Date());
 
   const columnPlace = [
     {
@@ -42,26 +34,31 @@ export default function Dashboard() {
     },
   ];
 
-  useEffect(() => {
-    const intervalId = setInterval(() => {
-      setTime(new Date());
-    }, 1000);
+  // useEffect(() => {
+  //   const intervalId = setInterval(() => {
+  //     setTime(new Date());
+  //   }, 1000);
 
-    // Cleanup interval on component unmount
-    return () => clearInterval(intervalId);
-  }, []);
+  //   // Cleanup interval on component unmount
+  //   return () => clearInterval(intervalId);
+  // }, []);
 
   return (
     <>
-      <div className="clock-realtime">
+      {/* <div className="clock-realtime">
         <p className="clockContent">
           {time.toLocaleTimeString()} {time.toLocaleDateString()}
         </p>
-      </div>
+      </div> */}
 
       <div className="content-container">
         <h1>Tổng quan</h1>
-        <Overview  totalUser='100' totalTransaction='10' totalRevenue='100' totalProfit='10'/>
+        <Overview
+          totalUser="100"
+          totalTransaction="10"
+          totalRevenue="100"
+          totalProfit="10"
+        />
         <h1>Hoạt động tuần</h1>
         {/* chart here */}
         <div>
@@ -84,11 +81,7 @@ export default function Dashboard() {
 
           <div className="list-review-customer-container">
             <h1 className="section-title">Đánh giá khách hàng</h1>
-            <ReviewList
-              itemLayout={'horizontal'}
-              dataSource={reviewList}
-
-            />
+            <ReviewList itemLayout={"horizontal"} dataSource={reviewList} />
           </div>
         </div>
       </div>
