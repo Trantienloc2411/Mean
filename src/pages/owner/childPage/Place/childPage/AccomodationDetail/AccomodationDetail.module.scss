@@ -1,0 +1,122 @@
+.content {
+    padding: 10px;
+    .btnReturn {
+        max-width: 30px;
+        margin-bottom:20px;
+    }
+    .header{
+        display: flex;
+        justify-content: start; /* Align items to the left horizontally */
+        align-items: center;   /* Center items vertically */
+        gap: 5%;  
+        margin-bottom: 20px;
+        h2{
+            margin-bottom: 0 ;
+        }
+    }
+    .body{
+        display: flex;
+        flex-direction: row;
+        gap: 20%;
+        .description {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+        }
+        .contentAmenity{
+            margin-right: 30px;
+            .amenities {
+                display: grid;
+                grid-template-columns: repeat(auto-fill, minmax(min-content, max-content));
+                gap: 8px;
+                display: flex;
+                flex-wrap: wrap;
+                align-items: center;
+                gap: 8px;
+                width: 60%;
+            }
+
+        }
+        
+    }
+    .imagesGrid {
+        display: grid;
+        grid-template-areas: 
+          "main top-right top-right-end"
+          "main bottom-right bottom-right-end";
+        grid-template-columns: 1.5fr 1fr 1fr;
+        grid-template-rows: repeat(2, 200px);
+        gap: 12px;
+        margin-top: 20px;
+      
+        .imageContainer {
+          position: relative;
+          width: 100%;
+          height: 100%;
+          overflow: hidden;
+          border-radius: 8px;
+      
+          // First image (large)
+          &:nth-child(1) {
+            grid-area: main;
+          }
+      
+          // Second image
+          &:nth-child(2) {
+            grid-area: top-right;
+          }
+      
+          // Third image
+          &:nth-child(3) {
+            grid-area: top-right-end;
+          }
+      
+          // Fourth image
+          &:nth-child(4) {
+            grid-area: bottom-right;
+          }
+      
+          // Fifth image (with overlay)
+          &:nth-child(5) {
+            grid-area: bottom-right-end;
+          }
+      
+          :global {
+            .ant-image {
+              width: 100%;
+              height: 100%;
+      
+              img {
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+              }
+            }
+          }
+      
+          .remainingOverlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+      
+            &:hover {
+              background: rgba(0, 0, 0, 0.7);
+            }
+      
+            span {
+              color: white;
+              font-size: 24px;
+              font-weight: bold;
+            }
+          }
+        }
+      }
+}

@@ -16,6 +16,8 @@ export default function Overview(props) {
                     colorIcon="#8280FF"
                     height='100'
                     width='300'
+                    
+
                 />
 
                 <CardDashboard
