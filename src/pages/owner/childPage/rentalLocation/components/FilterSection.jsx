@@ -1,5 +1,6 @@
-import { Input, Tag } from "antd";
+import { Input, Checkbox } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
+import { RentalLocationStatusEnum } from "../../../../../enums/rentalLocationEnums"; // Import enums
 
 export default function FilterSection({
   searchValue,
@@ -10,10 +11,11 @@ export default function FilterSection({
   return (
     <div
       style={{
-        flex: 3,
+        flex: 2,
         background: "#f5f5f5",
         padding: "20px",
         borderRadius: "8px",
+        minHeight: "80vh",
       }}
     >
       <h2>Bộ lọc</h2>
@@ -25,15 +27,15 @@ export default function FilterSection({
         style={{ marginBottom: "20px" }}
       />
       <h3>Trạng thái</h3>
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "10px" }}>
-        {["Active", "Paused", "Locked"].map((status) => (
-          <Tag.CheckableTag
-            key={status}
-            checked={filters.statuses.includes(status)}
-            onChange={() => onFilterChange(status)}
+      <div style={{ display: "flex", flexDirection: "column", gap: "10px" }}>
+        {Object.entries(RentalLocationStatusEnum).map(([key, { label }]) => (
+          <Checkbox
+            key={key}
+            checked={filters.statuses.includes(key)}
+            onChange={() => onFilterChange(key)}
           >
-            {status}
-          </Tag.CheckableTag>
+            {label}
+          </Checkbox>
         ))}
       </div>
     </div>

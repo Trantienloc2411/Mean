@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import FilterSection from "./components/FilterSection";
 import RentalLocationList from "./components/RentalLocationList";
+import { useEffect } from "react";
 export default function RentalLocation() {
   const [searchValue, setSearchValue] = useState("");
   const [filters, setFilters] = useState({
@@ -16,7 +17,8 @@ export default function RentalLocation() {
         id: 1,
         name: "Địa điểm A",
         address: "123 Đường ABC, Quận 1",
-        image: "https://via.placeholder.com/150",
+        image:
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwYgiVoOmUOj4hQwS1JUACNUmk5eBphBUDjA&s",
         rating: 4.5,
         openHours: "8:00 - 22:00",
         status: "Active",
@@ -25,7 +27,8 @@ export default function RentalLocation() {
         id: 2,
         name: "Địa điểm B",
         address: "456 Đường XYZ, Quận 2",
-        image: "https://via.placeholder.com/150",
+        image:
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwYgiVoOmUOj4hQwS1JUACNUmk5eBphBUDjA&s",
         rating: 4.0,
         openHours: "9:00 - 21:00",
         status: "Paused",
@@ -34,7 +37,8 @@ export default function RentalLocation() {
         id: 3,
         name: "Địa điểm C",
         address: "789 Đường LMN, Quận 3",
-        image: "https://via.placeholder.com/150",
+        image:
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwYgiVoOmUOj4hQwS1JUACNUmk5eBphBUDjA&s",
         rating: 3.5,
         openHours: "7:00 - 20:00",
         status: "Locked",
@@ -71,14 +75,17 @@ export default function RentalLocation() {
   };
 
   return (
-    <div style={{ display: "flex", gap: "20px", padding: "20px" }}>
-      <FilterSection
-        searchValue={searchValue}
-        filters={filters}
-        onSearch={handleSearch}
-        onFilterChange={handleFilterChange}
-      />
-      <RentalLocationList locations={filteredLocations} />
+    <div>
+      <h2>Địa điểm cho thuê</h2>
+      <div style={{ display: "flex", gap: "20px", padding: "20px" }}>
+        <FilterSection
+          searchValue={searchValue}
+          filters={filters}
+          onSearch={handleSearch}
+          onFilterChange={handleFilterChange}
+        />
+        <RentalLocationList locations={filteredLocations} />
+      </div>
     </div>
   );
 }

@@ -17,12 +17,12 @@ const NotificationDetailModal = ({ visible, notification, onClose }) => {
       ]}
       width={600}
     >
-     <Flex align="center" justify="space-between">
+      <Flex align="center" justify="space-between">
         <Title level={4}>{notification.Title}</Title>
         <Text type="secondary">
           {dayjs(notification.CreateDate).format("HH:mm DD/MM/YYYY")}
         </Text>
-     </Flex>
+      </Flex>
       <Text>{notification.Content}</Text>
       <Divider />
       <Tag color={notification.isRead ? "green" : "volcano"}>

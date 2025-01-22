@@ -16,7 +16,6 @@ import { Layout, Menu } from "antd";
 import Logo from "../assets/images/logo.png";
 import { BsBuildings } from "react-icons/bs";
 import HeaderAdmin from "../components/layouts/header/HeaderAdmin";
-import { useEffect } from "react";
 const { Header, Content, Sider } = Layout;
 
 // Danh sách menu items với đường dẫn

@@ -9,6 +9,7 @@ import {
 import { Layout, Menu } from "antd";
 import Logo from "../assets/images/logo.png";
 import { BsBuildings } from "react-icons/bs";
+import HeaderSimple from "../components/layouts/header/HeaderSimple";
 
 const { Header, Content } = Layout;
 
@@ -16,7 +17,7 @@ const { Header, Content } = Layout;
 const menuItems = [
   { key: "/owner/dashboard", icon: <HomeOutlined />, label: "Tổng quan" },
   { key: "/owner/information", icon: <UserOutlined />, label: "Thông tin" },
-  { key: "/owner/location", icon: <BsBuildings />, label: "Địa điểm" },
+  { key: "/owner/rental-location", icon: <BsBuildings />, label: "Địa điểm" },
   { key: "/owner/booking", icon: <CalendarOutlined />, label: "Đặt phòng" },
   { key: "/owner/type-room", icon: <TagOutlined />, label: "Loại phòng" },
   { key: "/owner/policy", icon: <BarChartOutlined />, label: "Chính sách" },
@@ -32,44 +33,13 @@ const OwnerLayout = () => {
       {/* Header với Navbar */}
       <Header
         style={{
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "space-between",
           background: "#ffffff",
           padding: "0 16px",
           boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
         }}
       >
-        {/* Logo */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-          }}
-        >
-          <img
-            src={Logo} // Đường dẫn tới logo của bạn
-            alt="Mean Logo"
-            style={{
-              height: "40px",
-              width: "40px",
-              marginRight: "8px",
-            }}
-          />
-          <span
-            style={{
-              fontSize: "20px",
-              fontWeight: "500",
-              color: "#2F7BEB",
-            }}
-          >
-            Mean
-          </span>
-        </div>
-
-        {/* Menu Navbar */}
+        <HeaderSimple />
       </Header>
-
       {/* Content */}
       <Layout
         style={{
