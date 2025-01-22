@@ -3,11 +3,13 @@ import { useState, useEffect, useRef } from "react";
 import Avatar from "./Avatar";
 import NotificationIcon from "./NotificationIcon";
 import NotificationPanel from "./NotificationPanel";
+import LogoHeader from "../../LogoHeader";
+import { useNavigate } from "react-router-dom";
 
-export default function HeaderAdmin() {
+export default function HeaderSimple() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [time, setTime] = useState(new Date());
-
+  const navigate = useNavigate();
   useEffect(() => {
     const intervalId = setInterval(() => {
       setTime(new Date());
@@ -18,6 +20,51 @@ export default function HeaderAdmin() {
   }, []);
 
   const notifications = [
+    {
+      Id: 1,
+      Title: "Prepare for Your Adventure!",
+      Content:
+        "It's time to complete your travel preparations. Check the list and ensure everything is ready!",
+      CreateDate: "2023-02-02",
+      isRead: false, // false: chưa đọc, true: đã đọc
+      Type: "Travel", // Loại thông báo, có thể là Travel, Alert, Update, v.v.
+    },
+    {
+      Id: 1,
+      Title: "Prepare for Your Adventure!",
+      Content:
+        "It's time to complete your travel preparations. Check the list and ensure everything is ready!",
+      CreateDate: "2023-02-02",
+      isRead: false, // false: chưa đọc, true: đã đọc
+      Type: "Travel", // Loại thông báo, có thể là Travel, Alert, Update, v.v.
+    },
+    {
+      Id: 1,
+      Title: "Prepare for Your Adventure!",
+      Content:
+        "It's time to complete your travel preparations. Check the list and ensure everything is ready!",
+      CreateDate: "2023-02-02",
+      isRead: false, // false: chưa đọc, true: đã đọc
+      Type: "Travel", // Loại thông báo, có thể là Travel, Alert, Update, v.v.
+    },
+    {
+      Id: 1,
+      Title: "Prepare for Your Adventure!",
+      Content:
+        "It's time to complete your travel preparations. Check the list and ensure everything is ready!",
+      CreateDate: "2023-02-02",
+      isRead: false, // false: chưa đọc, true: đã đọc
+      Type: "Travel", // Loại thông báo, có thể là Travel, Alert, Update, v.v.
+    },
+    {
+      Id: 1,
+      Title: "Prepare for Your Adventure!",
+      Content:
+        "It's time to complete your travel preparations. Check the list and ensure everything is ready!",
+      CreateDate: "2023-02-02",
+      isRead: false, // false: chưa đọc, true: đã đọc
+      Type: "Travel", // Loại thông báo, có thể là Travel, Alert, Update, v.v.
+    },
     {
       Id: 1,
       Title: "Prepare for Your Adventure!",
@@ -100,7 +147,9 @@ export default function HeaderAdmin() {
         }}
       >
         {/* <SearchField /> Search Field Component */}
-        <div></div>
+        <div onClick={() => navigate("/")}>
+          <LogoHeader />
+        </div>
         <div
           className="userOption"
           style={{

@@ -2,15 +2,19 @@ import { Tag, Button } from "antd";
 import { Flex } from "antd";
 import { RentalLocationStatusEnum } from "../../../../../enums/rentalLocationEnums"; // Import enums
 import { IoLocationOutline } from "react-icons/io5";
+import { StarFilled } from "@ant-design/icons";
+import { useNavigate } from "react-router-dom";
 
 export default function RentalLocationList({ locations }) {
+  const navigate = useNavigate();
+
   return (
     <div style={{ flex: 8 }}>
       <h2>Danh sách địa điểm</h2>
       <div>
         {locations.map((item, index) => (
           <div key={index} style={{ marginBottom: "20px" }}>
-            <Flex gap={20} align="center" justify="space-between">
+            <Flex gap={20} justify="space-between">
               <Flex gap={20} align="center">
                 <div>
                   <img
@@ -21,7 +25,7 @@ export default function RentalLocationList({ locations }) {
                     alt={item.name}
                     style={{
                       width: "200px",
-                      height: "150px",
+                      height: "120px",
                       objectFit: "cover",
                       borderRadius: "8px",
                     }}
@@ -51,17 +55,20 @@ export default function RentalLocationList({ locations }) {
                     <IoLocationOutline style={{ fontSize: 16 }} />
                     <p style={{ margin: 0 }}>{item.address}</p>
                   </Flex>
-                  <p style={{ margin: 0 }}>
-                    <strong>Rate: 4.8 (ngôi sao)</strong> {item.openHours}
-                  </p>
+                  <Flex gap={10} align="center">
+                    <StarFilled style={{ color: "#ffc907" }} />
+                    <p style={{ margin: 0 }}>4.8 (500 đánh giá) </p>
+                  </Flex>
                 </Flex>
               </Flex>
-              <Button
-                type="primary"
-                onClick={() => alert(`Viewing details of ${item.name}`)}
-              >
-                View Details
-              </Button>
+              <Flex justify="flex-end" align="flex-end">
+                <Button
+                  type="primary"
+                  onClick={() => navigate(`/rental-location/${item?.id}`)}
+                >
+                  View Details
+                </Button>
+              </Flex>
             </Flex>
           </div>
         ))}

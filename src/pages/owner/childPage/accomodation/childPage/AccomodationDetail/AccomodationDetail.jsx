@@ -28,7 +28,7 @@ export default function AccommodationDetail(props) {
   const navigate = useNavigate();
 
   const handleEditNavigate = () => {
-    navigate("../location/accomodation-edit", {
+    navigate("/accomodation/edit/2", {
       state: {
         data: {
           roomName,
@@ -45,7 +45,7 @@ export default function AccommodationDetail(props) {
     });
   };
 
-  const handleBackNavigate  = () => {
+  const handleBackNavigate = () => {
     navigate("../location");
   };
   const imageLink =
@@ -64,9 +64,9 @@ export default function AccommodationDetail(props) {
   return (
     <div className={styles.content}>
       <div className={styles.btnReturn}>
-        <Button  
-        onClick={handleBackNavigate}
-        icon={<ArrowLeftOutlined />}>Trở về</Button>
+        <Button onClick={handleBackNavigate} icon={<ArrowLeftOutlined />}>
+          Trở về
+        </Button>
       </div>
       <div className={styles.header}>
         <h2>{roomName}</h2>

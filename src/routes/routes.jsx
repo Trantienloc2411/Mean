@@ -7,6 +7,7 @@ import Signup from "../pages/auth/signup/SignUp";
 import VerifyCode from "../pages/auth/verifyCode/VerifyCode";
 import ForgotPassword from "../pages/auth/forgotPassword/ForgotPassword";
 import SetNewPassword from "../pages/auth/setNewPassword/SetNewPassword";
+import SimpleLayout from "../layouts/SimpleLayout.jsx";
 
 // Lazy load pages
 const Login = lazy(() => import("../pages/auth/login/Login"));
@@ -32,10 +33,17 @@ const InformationOwner = lazy(() =>
 const OverviewOwner = lazy(() =>
   import("../pages/owner/childPage/Overview/Overview.jsx")
 );
-const PlaceOwner = lazy(() =>
-  import("../pages/owner/childPage/accomodation/Accomodation.jsx")
+// const PlaceOwner = lazy(() =>
+//   import("../pages/owner/childPage/accomodation/Accomodation.jsx")
+// );
+
 const RentalLocationOwner = lazy(() =>
   import("../pages/owner/childPage/rentalLocation/RentalLocation.jsx")
+);
+const RentalLocationDetail = lazy(() =>
+  import(
+    "../pages/owner/childPage/rentalLocation/detail/RentalLocationDetail.jsx"
+  )
 );
 
 const AccommodationDetail = lazy(() =>
@@ -50,8 +58,11 @@ const AccommodationEdit = lazy(() =>
   )
 );
 
-const AccommodationCreate = lazy(() => 
-    import("../pages/owner/childPage/accomodation/childPage/AccomodationCreate/AccomodationCreate.jsx"))
+const AccommodationCreate = lazy(() =>
+  import(
+    "../pages/owner/childPage/accomodation/childPage/AccomodationCreate/AccomodationCreate.jsx"
+  )
+);
 
 const PolicyOwner = lazy(() =>
   import("../pages/owner/childPage/Policy/Policy.jsx")
@@ -114,7 +125,6 @@ export const routes = [
       { path: "rental", element: <RentalLocation /> },
       { path: "policy", element: <PolicyApp /> },
       { path: "report", element: <Report /> },
-      { path: "notification", element: <Notification /> },
     ],
   },
 
@@ -128,10 +138,9 @@ export const routes = [
       { path: "dashboard", element: <OverviewOwner /> },
       { path: "booking", element: <BookingOwner /> },
       { path: "information", element: <InformationOwner /> },
-      { path: "location", element: <PlaceOwner /> },
-      { path: "location/accomodation-detail/", element: <AccommodationDetail/> },
-      { path: "location/accomodation-edit", element: <AccommodationEdit /> },
-      { path: "location/accomodation-create", element: <AccommodationCreate/>},
+      { path: "rental-location", element: <RentalLocationOwner /> },
+      // { path: "rental-location/:id", element: <RentalLocationDetail /> },
+
       { path: "type-room", element: <TypeRoomOwner /> },
       { path: "policy", element: <PolicyOwner /> },
       { path: "setting", element: <SettingOwner /> },
@@ -141,8 +150,29 @@ export const routes = [
       },
     ],
   },
-
-  // Not found route
+  {
+    path: "/",
+    element: <SimpleLayout />,
+    children: [
+      {
+        path: "/rental-location/:id",
+        element: <RentalLocationDetail />, // Component này không nằm trong OwnerLayout
+      },
+      {
+        path: "accomodation/:id",
+        element: <AccommodationDetail />,
+      },
+      {
+        path: "accomodation/edit/:id",
+        element: <AccommodationEdit />,
+      },
+      {
+        path: "accomodation/create",
+        element: <AccommodationCreate />,
+      },
+      { path: "notification", element: <Notification /> },
+    ],
+  },
   {
     path: "*",
     element: <Navigate to="/404" replace />,

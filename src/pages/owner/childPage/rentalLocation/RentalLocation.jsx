@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
+import { useState } from "react";
 import FilterSection from "./components/FilterSection";
 import RentalLocationList from "./components/RentalLocationList";
+import { useEffect } from "react";
 export default function RentalLocation() {
   const [searchValue, setSearchValue] = useState("");
   const [filters, setFilters] = useState({
