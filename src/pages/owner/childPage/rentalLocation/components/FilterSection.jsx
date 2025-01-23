@@ -1,7 +1,8 @@
 import { Input, Checkbox } from "antd";
 import { SearchOutlined } from "@ant-design/icons";
 import { RentalLocationStatusEnum } from "../../../../../enums/rentalLocationEnums"; // Import enums
-
+import { Typography } from "antd";
+const { Text } = Typography;
 export default function FilterSection({
   searchValue,
   filters,
@@ -18,7 +19,7 @@ export default function FilterSection({
         minHeight: "80vh",
       }}
     >
-      <h2>Bộ lọc</h2>
+      <Typography.Title level={4}>Bộ lọc</Typography.Title>
       <Input
         prefix={<SearchOutlined />}
         placeholder="Tìm kiếm theo tên địa điểm"

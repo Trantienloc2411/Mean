@@ -45,7 +45,9 @@ const RentalLocationDetail = lazy(() =>
     "../pages/owner/childPage/rentalLocation/detail/RentalLocationDetail.jsx"
   )
 );
-
+const RentalCreate = lazy(() =>
+  import("../pages/owner/childPage/rentalLocation/create/RentalCreate.jsx")
+);
 const AccommodationDetail = lazy(() =>
   import(
     "../pages/owner/childPage/accomodation/childPage/AccomodationDetail/AccomodationDetail.jsx"
@@ -157,6 +159,10 @@ export const routes = [
       {
         path: "/rental-location/:id",
         element: <RentalLocationDetail />, // Component này không nằm trong OwnerLayout
+      },
+      {
+        path: "/rental-location/create",
+        element: <RentalCreate />, // Component này không nằm trong OwnerLayout
       },
       {
         path: "accomodation/:id",
