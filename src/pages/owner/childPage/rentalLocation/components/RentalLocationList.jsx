@@ -4,13 +4,22 @@ import { RentalLocationStatusEnum } from "../../../../../enums/rentalLocationEnu
 import { IoLocationOutline } from "react-icons/io5";
 import { StarFilled } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
+import { IoIosAdd } from "react-icons/io";
 
 export default function RentalLocationList({ locations }) {
   const navigate = useNavigate();
 
   return (
     <div style={{ flex: 8 }}>
-      <h2>Danh sách địa điểm</h2>
+      <Flex justify="space-between">
+        <h2>Danh sách địa điểm</h2>
+        <Button
+          onClick={() => navigate("/rental-location/create")}
+          icon={<IoIosAdd />}
+        >
+          Thêm địa điểm mới
+        </Button>
+      </Flex>
       <div>
         {locations.map((item, index) => (
           <div key={index} style={{ marginBottom: "20px" }}>
