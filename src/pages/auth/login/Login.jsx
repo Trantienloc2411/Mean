@@ -1,26 +1,70 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { EyeInvisibleFilled, EyeFilled } from '@ant-design/icons';
-import ImageCarousel from '../../../components/ImageCarousel/ImageCarousel';
-import styles from './Login.module.scss'; 
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { EyeInvisibleFilled, EyeFilled } from "@ant-design/icons";
+import { notification } from "antd";
+import ImageCarousel from "../../../components/ImageCarousel/ImageCarousel";
+import styles from "./Login.module.scss";
+import { useDispatch } from "react-redux";
+import {
+  useLazyGetRoleByIdQuery,
+  useLazyGetUserQuery,
+  useLoginMutation,
+} from "../../../redux/services/authApi";
+import {
+  setCredentials,
+  setRole,
+  setUser,
+} from "../../../redux/slices/authSlice";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
-  
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const dispatch = useDispatch();
+  const [login, { isLoading }] = useLoginMutation();
+  const [getUserById] = useLazyGetUserQuery();
+  const [getRoleById] = useLazyGetRoleByIdQuery();
+
   const images = [
-    'src/assets/images/beach.jpg',
-    'src/assets/images/lake.jpg',
-    'src/assets/images/mountain.jpg'
+    "src/assets/images/beach.jpg",
+    "src/assets/images/lake.jpg",
+    "src/assets/images/mountain.jpg",
   ];
 
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    navigate('/verifycode');
+
+    try {
+      const { data } = await login({ email, password });
+
+      if (data?.accessToken) {
+        dispatch(setCredentials(data));
+        notification.success({
+          message: "Đăng nhập thành công",
+          description: "Chào mừng bạn đến với Mean!",
+        });
+        const { data: userData } = await getUserById(data?._id);
+
+        const { data: roleData } = await getRoleById(userData?.getUser?.roleID);
+        dispatch(setUser(userData?.getUser));
+        dispatch(setRole(roleData));
+
+        // navigate("/");
+      } else {
+        throw new Error("Đăng nhập thất bại");
+      }
+    } catch (err) {
+      notification.error({
+        message: "Đăng nhập thất bại",
+        description:
+          err.message || "Vui lòng kiểm tra lại tài khoản và mật khẩu.",
+      });
+    }
   };
 
   return (
@@ -37,22 +81,26 @@ const Login = () => {
           <form onSubmit={handleSubmit}>
             <div className={styles.formGroup}>
               <label>Email hoặc số điện thoại</label>
-              <input 
-                type="email" 
+              <input
+                type="email"
                 placeholder="john.doe@gmail.com"
-                className={styles.formInput} 
+                className={styles.formInput}
+                value={email}
+                onChange={(e) => setEmail(e.target.value)} // Cập nhật state email
               />
             </div>
             <div className={styles.formGroup}>
               <label>Mật khẩu</label>
               <div className={styles.passwordInputWrapper}>
-                <input 
+                <input
                   type={showPassword ? "text" : "password"}
                   placeholder="••••••••••••"
-                  className={styles.formInput} 
+                  className={styles.formInput}
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)} // Cập nhật state password
                 />
-                <button 
-                  type="button" 
+                <button
+                  type="button"
                   className={styles.togglePassword}
                   onClick={togglePasswordVisibility}
                 >
@@ -67,17 +115,19 @@ const Login = () => {
                 Quên mật khẩu
               </a>
             </div>
-            <button href="/verifycode" type="submit" className={styles.submitBtn}>
-              Đăng nhập
+            <button
+              type="submit"
+              className={styles.submitBtn}
+              disabled={isLoading} // Vô hiệu hóa khi đang loading
+            >
+              {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>
           </form>
           <div className={styles.signupPrompt}>
             <span>Chưa có tài khoản? </span>
             <a href="/signup">Đăng ký</a>
           </div>
-          <div className={styles.copyright}>
-            Copyright © Mean 2025
-          </div>
+          <div className={styles.copyright}>Copyright © Mean 2025</div>
         </div>
       </div>
       <div className={styles.loginCarousel}>

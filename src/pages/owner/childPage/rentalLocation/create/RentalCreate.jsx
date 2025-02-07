@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import { Form, Input, Button, Upload, message, Row, Col, Image } from "antd";
 import { InboxOutlined, SaveOutlined } from "@ant-design/icons";
 
