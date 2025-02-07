@@ -3,11 +3,10 @@ import { Input, message } from "antd";
 import OverviewAccount from "./components/OverviewAccount";
 import { SearchOutlined } from "@ant-design/icons";
 import AccountTable from "./components/AccountTable";
-import { useGetUsersQuery } from "../../features/user/userApiSlice";
 import FilterAccount from "./components/FilterAccount";
 
 export default function Account() {
-  const { data: users, error, isLoading } = useGetUsersQuery();
+  const { data: users, error, isLoading } = [];
   const [searchValue, setSearchValue] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({
