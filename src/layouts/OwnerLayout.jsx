@@ -26,7 +26,7 @@ const menuItems = [
 ];
 
 const OwnerLayout = () => {
-  useAppInit();
+  // useAppInit();
   const navigate = useNavigate(); // Để điều hướng khi người dùng click Menu
   const location = useLocation(); // Để lấy path hiện tại
 

@@ -1,12 +1,4 @@
 import { apiSlice } from "./apiSlice";
-import {
-  saveToken,
-  removeToken,
-  saveUserId,
-  removeRole,
-  removeUserId,
-  saveRole,
-} from "../../utils/storage";
 
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -16,34 +8,6 @@ export const authApi = apiSlice.injectEndpoints({
         method: "POST",
         body: credentials,
       }),
-      async onQueryStarted(args, { queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          if (data?.accessToken) {
-            saveToken(data.accessToken);
-            saveUserId(data._id);
-          }
-        } catch (err) {
-          console.error("Login failed", err);
-        }
-      },
-    }),
-
-    logout: builder.mutation({
-      query: () => ({
-        url: "/logout",
-        method: "POST",
-      }),
-      async onQueryStarted(args, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          removeToken();
-          removeRole();
-          removeUserId();
-        } catch (err) {
-          console.error("Logout failed", err);
-        }
-      },
     }),
 
     getUser: builder.query({
@@ -54,28 +18,20 @@ export const authApi = apiSlice.injectEndpoints({
     getRoleById: builder.query({
       query: (roleId) => `/role/${roleId}`,
       providesTags: ["Role"],
-      async onQueryStarted(args, { queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          console.log(data.roleName);
-
-          if (data) {
-            saveRole(data.roleName);
-            // saveUserId(data._id);
-          }
-        } catch (err) {
-          console.error("Login failed", err);
-        }
-      },
     }),
+
+    // logout: builder.mutation({
+    //   query: () => ({
+    //     url: "/logout",
+    //     method: "POST",
+    //   }),
+    // }),
   }),
 });
 
 export const {
   useLoginMutation,
   useLogoutMutation,
-  // useGetUserQuery,
-  // useGetRoleByIdQuery,
   useLazyGetUserQuery,
   useLazyGetRoleByIdQuery,
 } = authApi;

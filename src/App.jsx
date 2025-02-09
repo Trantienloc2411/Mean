@@ -2,13 +2,16 @@ import { Suspense } from "react";
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import { routes } from "./routes/routes";
 import Loading from "./components/Loading";
+import { AuthProvider } from "./contexts/AuthContext";
 
 function App() {
   const router = createBrowserRouter(routes);
 
   return (
     <Suspense fallback={<Loading />}>
-      <RouterProvider router={router} />
+      <AuthProvider>
+        <RouterProvider router={router} />
+      </AuthProvider>
     </Suspense>
   );
 }

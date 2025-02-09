@@ -37,7 +37,7 @@ const menuItems = [
 ];
 
 const AdminLayout = () => {
-  useAppInit();
+  // useAppInit();
   const navigate = useNavigate(); // Để điều hướng khi người dùng click Menu
   const location = useLocation(); // Để lấy path hiện tại
   const [collapsed, setCollapsed] = useState(false); // Trạng thái thu nhỏ/mở rộng của sidebar

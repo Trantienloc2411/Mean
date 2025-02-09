@@ -84,39 +84,101 @@ const Report = lazy(() => import("../pages/report/Report"));
 
 const Transaction = lazy(() => import("../pages/transaction/Transaction"));
 const NotFound = lazy(() => import("../pages/error/NotFound"));
+import {
+  ProtectedRoute,
+  AdminRoute,
+  OwnerRoute,
+  NotAuthRoute,
+} from "./ProtectedRoute";
+import NotAuthLayout from "../layouts/NotAuthLayout.jsx";
 
 // Define routes
 export const routes = [
-  // Trang login (home)
   {
     path: "/",
-    // element: <Login />,
-    element: <Navigate to="/admin/dashboard" replace />,
+    element: <Navigate to="/login" replace />,
   },
+
+  // {
+  //   path: "/signup",
+  //   element: <Signup />,
+  // },
+  // {
+  //   path: "/verifycode",
+  //   element: <VerifyCode />,
+  // },
+  // {
+  //   path: "/forgot-password",
+  //   element: <ForgotPassword />,
+  // },
+  // {
+  //   path: "/set-new-password",
+  //   element: <SetNewPassword />,
+  // },
+  // {
+  //   path: "/",
+  //   element: <NotAuthRoute />,
+  //   children: [
+  //     {
+  //       path: "/login",
+  //       element: <Login />,
+  //     },
+  //     {
+  //       path: "signup",
+  //       element: <Signup />,
+  //     },
+  //     {
+  //       path: "verifycode",
+  //       element: <VerifyCode />,
+  //     },
+  //     {
+  //       path: "forgot-password",
+  //       element: <ForgotPassword />,
+  //     },
+  //     {
+  //       path: "set-new-password",
+  //       element: <SetNewPassword />,
+  //     },
+  //   ],
+  // },
   {
-    path: "/login",
-    element: <Login />,
-  },
-  {
-    path: "/signup",
-    element: <Signup />,
-  },
-  {
-    path: "/verifycode",
-    element: <VerifyCode />,
-  },
-  {
-    path: "/forgot-password",
-    element: <ForgotPassword />,
-  },
-  {
-    path: "/set-new-password",
-    element: <SetNewPassword />,
+    path: "/",
+    element: (
+      <NotAuthRoute>
+        <NotAuthLayout />
+      </NotAuthRoute>
+    ),
+    children: [
+      {
+        path: "/login",
+        element: <Login />,
+      },
+      {
+        path: "/signup",
+        element: <Signup />,
+      },
+      {
+        path: "/verifycode",
+        element: <VerifyCode />,
+      },
+      {
+        path: "/forgot-password",
+        element: <ForgotPassword />,
+      },
+      {
+        path: "/set-new-password",
+        element: <SetNewPassword />,
+      },
+    ],
   },
 
   {
     path: "/admin",
-    element: <AdminLayout />,
+    element: (
+      <AdminRoute>
+        <AdminLayout />
+      </AdminRoute>
+    ),
     children: [
       { path: "", element: <Navigate to="/admin/dashboard" replace /> }, // Chuyển hướng từ /admin sang /admin/dashboard
       { path: "dashboard", element: <Dashboard /> },
@@ -130,10 +192,13 @@ export const routes = [
     ],
   },
 
-
   {
     path: "/owner",
-    element: <OwnerLayout />,
+    element: (
+      <OwnerRoute>
+        <OwnerLayout />
+      </OwnerRoute>
+    ),
     children: [
       { path: "", element: <Navigate to="/owner/dashboard" replace /> }, // Chuyển hướng từ /admin sang /admin/dashboard
       { path: "owners", element: <Owner /> },
@@ -154,7 +219,11 @@ export const routes = [
   },
   {
     path: "/",
-    element: <SimpleLayout />,
+    element: (
+      <ProtectedRoute>
+        <SimpleLayout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: "/rental-location/:id",
