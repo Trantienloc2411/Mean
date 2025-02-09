@@ -20,3 +20,14 @@ export const getUserId = () => {
 export const removeUserId = () => {
   localStorage.removeItem("userId");
 };
+export const saveRole = (roleName) => {
+  localStorage.setItem("role", roleName);
+};
+
+export const getRole = () => {
+  return localStorage.getItem("role");
+};
+
+export const removeRole = () => {
+  localStorage.removeItem("role");
+};

@@ -10,6 +10,7 @@ import { Layout, Menu } from "antd";
 import Logo from "../assets/images/logo.png";
 import { BsBuildings } from "react-icons/bs";
 import HeaderSimple from "../components/layouts/header/HeaderSimple";
+import useAppInit from "../hooks/useAppInit";
 
 const { Header, Content } = Layout;
 
@@ -25,6 +26,7 @@ const menuItems = [
 ];
 
 const OwnerLayout = () => {
+  useAppInit();
   const navigate = useNavigate(); // Để điều hướng khi người dùng click Menu
   const location = useLocation(); // Để lấy path hiện tại
 

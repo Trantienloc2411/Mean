@@ -1,5 +1,12 @@
 import { apiSlice } from "./apiSlice";
-import { saveToken, removeToken, saveUserId } from "../../utils/storage";
+import {
+  saveToken,
+  removeToken,
+  saveUserId,
+  removeRole,
+  removeUserId,
+  saveRole,
+} from "../../utils/storage";
 
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -31,6 +38,8 @@ export const authApi = apiSlice.injectEndpoints({
         try {
           await queryFulfilled;
           removeToken();
+          removeRole();
+          removeUserId();
         } catch (err) {
           console.error("Logout failed", err);
         }
@@ -45,6 +54,19 @@ export const authApi = apiSlice.injectEndpoints({
     getRoleById: builder.query({
       query: (roleId) => `/role/${roleId}`,
       providesTags: ["Role"],
+      async onQueryStarted(args, { queryFulfilled }) {
+        try {
+          const { data } = await queryFulfilled;
+          console.log(data.roleName);
+
+          if (data) {
+            saveRole(data.roleName);
+            // saveUserId(data._id);
+          }
+        } catch (err) {
+          console.error("Login failed", err);
+        }
+      },
     }),
   }),
 });

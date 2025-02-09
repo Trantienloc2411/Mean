@@ -114,7 +114,6 @@ export const routes = [
     element: <SetNewPassword />,
   },
 
-  // Admin layout routes
   {
     path: "/admin",
     element: <AdminLayout />,
@@ -131,7 +130,7 @@ export const routes = [
     ],
   },
 
-  // Owner layout routes
+
   {
     path: "/owner",
     element: <OwnerLayout />,

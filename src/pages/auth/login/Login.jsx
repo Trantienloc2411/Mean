@@ -44,17 +44,16 @@ const Login = () => {
 
       if (data?.accessToken) {
         dispatch(setCredentials(data));
-        notification.success({
-          message: "Đăng nhập thành công",
-          description: "Chào mừng bạn đến với Mean!",
-        });
         const { data: userData } = await getUserById(data?._id);
-
         const { data: roleData } = await getRoleById(userData?.getUser?.roleID);
         dispatch(setUser(userData?.getUser));
         dispatch(setRole(roleData));
 
-        // navigate("/");
+        notification.success({
+          message: "Đăng nhập thành công",
+          description: "Chào mừng bạn đến với Mean!",
+        });
+        navigate("/");
       } else {
         throw new Error("Đăng nhập thất bại");
       }

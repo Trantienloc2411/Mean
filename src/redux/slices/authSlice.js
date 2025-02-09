@@ -1,12 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getToken, getUserId, removeToken } from "../../utils/storage";
+import { getRole, getToken, getUserId, removeToken } from "../../utils/storage";
 
 const initialState = {
   token: getToken(),
   userId: getUserId(), // Ban đầu không có user
   isAuthenticated: !!getToken(),
   user: null, // Ban đầu không có user
-  role: null,
+  role: getRole(),
 };
 
 const authSlice = createSlice({

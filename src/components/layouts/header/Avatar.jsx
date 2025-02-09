@@ -7,8 +7,21 @@ import {
   WalletOutlined,
 } from "@ant-design/icons";
 import { Image } from "antd";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { message } from "antd";
+import { logout } from "../../../redux/slices/authSlice";
 
 export default function Avatar() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+
+  // const handleLogout = () => {
+  //   dispatch(logout()); // Xóa token và user trong Redux
+  //   message.success("Bạn đã đăng xuất thành công!");
+  //   // navigate("/login"); // Chuyển hướng về trang đăng nhập
+  // };
+
   const items = [
     {
       key: "1",
@@ -33,6 +46,7 @@ export default function Avatar() {
       label: "Đăng xuất",
       icon: <LogoutOutlined />,
       danger: true,
+      // onclick: handleLogout(),
     },
   ];
 
