@@ -20,12 +20,12 @@ export const authApi = apiSlice.injectEndpoints({
       providesTags: ["Role"],
     }),
 
-    // logout: builder.mutation({
-    //   query: () => ({
-    //     url: "/logout",
-    //     method: "POST",
-    //   }),
-    // }),
+    logout: builder.mutation({
+      query: () => ({
+        url: "/user/logout", 
+        method: "POST",
+      }),
+    }),
   }),
 });
 
