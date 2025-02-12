@@ -11,16 +11,16 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { removeToken } from "../../../utils/storage";
 import { setCredentials, setLogout } from "../../../redux/slices/authSlice";
-import { useLogoutMutation } from "../../../redux/services/authApi";
+// import { useLogoutQuery } from "../../../redux/services/authApi";
 
 export default function Avatar() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [logout] = useLogoutMutation();
+  // const { logout } = useLogoutQuery();
 
   const handleLogout = async () => {
     // try {
-    // await logout().unwrap();
+    //   await logout().unwrap();
     dispatch(setLogout()); // Reset auth state
     removeToken();
     navigate("/login");

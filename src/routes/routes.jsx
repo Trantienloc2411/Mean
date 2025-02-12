@@ -73,7 +73,16 @@ const SettingOwner = lazy(() =>
   import("../pages/owner/childPage/Setting/Setting.jsx")
 );
 
-// const Customer = lazy(() => import("../pages/customer/Customer"));
+const CustomerInformation = lazy(() =>
+  import("../pages/customer/information/Customer.jsx")
+);
+
+const CustomerBookingHistory = lazy(() =>
+  import("../pages/customer/historyBooking/Booking.jsx")
+);
+const CustomerSetting = lazy(() =>
+  import("../pages/customer/setting/Setting.jsx")
+);
 const PolicyApp = lazy(() => import("../pages/policyApp/PolicyApp"));
 const RentalLocation = lazy(() =>
   import("../pages/rentalLocation/RentalLocation")
@@ -89,8 +98,10 @@ import {
   AdminRoute,
   OwnerRoute,
   NotAuthRoute,
+  CustomerRoute,
 } from "./ProtectedRoute";
 import NotAuthLayout from "../layouts/NotAuthLayout.jsx";
+import CustomerLayout from "../layouts/CustomerLayout.jsx";
 
 // Define routes
 export const routes = [
@@ -99,48 +110,6 @@ export const routes = [
     element: <Navigate to="/login" replace />,
   },
 
-  // {
-  //   path: "/signup",
-  //   element: <Signup />,
-  // },
-  // {
-  //   path: "/verifycode",
-  //   element: <VerifyCode />,
-  // },
-  // {
-  //   path: "/forgot-password",
-  //   element: <ForgotPassword />,
-  // },
-  // {
-  //   path: "/set-new-password",
-  //   element: <SetNewPassword />,
-  // },
-  // {
-  //   path: "/",
-  //   element: <NotAuthRoute />,
-  //   children: [
-  //     {
-  //       path: "/login",
-  //       element: <Login />,
-  //     },
-  //     {
-  //       path: "signup",
-  //       element: <Signup />,
-  //     },
-  //     {
-  //       path: "verifycode",
-  //       element: <VerifyCode />,
-  //     },
-  //     {
-  //       path: "forgot-password",
-  //       element: <ForgotPassword />,
-  //     },
-  //     {
-  //       path: "set-new-password",
-  //       element: <SetNewPassword />,
-  //     },
-  //   ],
-  // },
   {
     path: "/",
     element: (
@@ -171,7 +140,15 @@ export const routes = [
       },
     ],
   },
-
+  // {
+  //   path: "/customer",
+  //   element: (
+  //     <CustomerRoute>
+  //       <CustomerLayout />
+  //     </CustomerRoute>
+  //   ),
+  //   children: [{ path: "/", element: <CustomerInformation /> }],
+  // },
   {
     path: "/admin",
     element: (
@@ -191,7 +168,19 @@ export const routes = [
       { path: "report", element: <Report /> },
     ],
   },
-
+  {
+    path: "/",
+    element: (
+      <AdminRoute>
+        <CustomerLayout />
+      </AdminRoute>
+    ),
+    children: [
+      { path: "customer/:id", element: <CustomerInformation /> },
+      { path: "customer/:id/booking", element: <CustomerBookingHistory /> },
+      { path: "customer/:id/setting", element: <CustomerSetting /> },
+    ],
+  },
   {
     path: "/owner",
     element: (

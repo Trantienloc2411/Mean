@@ -4,38 +4,46 @@ import OverviewAccount from "./components/OverviewAccount";
 import { SearchOutlined } from "@ant-design/icons";
 import AccountTable from "./components/AccountTable";
 import FilterAccount from "./components/FilterAccount";
+import {
+  useGetRolesQuery,
+  useGetUsersQuery,
+} from "../../redux/services/userApi";
 
 export default function Account() {
-  const { data: users, error, isLoading } = [];
+  const { data: users, error, isLoading } = useGetUsersQuery();
+  const { data: roles } = useGetRolesQuery();
   const [searchValue, setSearchValue] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({
     roles: [],
-    statuses: [],
-    approves: [],
   });
+
+  // Hàm lấy tên role từ roleID
+  const getRoleName = (roleID) => {
+    const role = roles?.find((r) => r._id === roleID);
+    return role ? role.roleName : "Unknown";
+  };
 
   useEffect(() => {
     if (users) {
-      const filtered = users.filter((user) => {
-        const matchesSearch = user.phoneNumber
-          .toLowerCase()
-          .includes(searchValue.toLowerCase());
-        const matchesRole =
-          selectedFilters.roles.length === 0 ||
-          selectedFilters.roles.includes(user.role);
-        const matchesStatus =
-          selectedFilters.statuses.length === 0 ||
-          selectedFilters.statuses.includes(user.status);
-        const matchesApprove =
-          selectedFilters.approves.length === 0 ||
-          selectedFilters.approves.includes(user.approve);
+      const filtered = users
+        .map((user) => ({
+          ...user,
+          roleName: getRoleName(user.roleID),
+        }))
+        .filter((user) => {
+          const matchesSearch =
+            user.phone?.toLowerCase().includes(searchValue.toLowerCase()) ??
+            false;
+          const matchesRole =
+            selectedFilters.roles.length === 0 ||
+            selectedFilters.roles.includes(user.roleID);
 
-        return matchesSearch && matchesRole && matchesStatus && matchesApprove;
-      });
+          return matchesSearch && matchesRole;
+        });
       setFilteredUsers(filtered);
     }
-  }, [users, searchValue, selectedFilters]);
+  }, [users, searchValue, selectedFilters, roles]);
 
   const handleFilterChange = (key, values) => {
     setSelectedFilters((prev) => ({ ...prev, [key]: values }));
@@ -44,8 +52,6 @@ export default function Account() {
   const resetFilters = () => {
     setSelectedFilters({
       roles: [],
-      statuses: [],
-      approves: [],
     });
   };
 
@@ -69,12 +75,12 @@ export default function Account() {
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
             />
-            <FilterAccount
+            {/* <FilterAccount
               filters={selectedFilters}
               onFilterChange={handleFilterChange}
               onReset={resetFilters}
               onApplyFilters={(filters) => setSelectedFilters(filters)}
-            />
+            /> */}
           </div>
           <AccountTable loading={isLoading} data={filteredUsers} />
         </div>

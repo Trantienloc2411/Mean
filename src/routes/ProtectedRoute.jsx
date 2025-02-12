@@ -55,10 +55,22 @@ export const AdminRoute = ({ children }) => {
 
   return children;
 };
+export const CustomerRoute = ({ children }) => {
+  const { isAuthenticated, role } = useSelector((state) => state.auth);
 
+  if (!isAuthenticated) {
+    return <Navigate to="/login" state={{ from: location }} replace />;
+  }
+
+  if (role !== "Staff") {
+    return <Navigate to="/404" replace />;
+  }
+
+  return children;
+};
 export const OwnerRoute = ({ children }) => {
   const { isAuthenticated, role } = useSelector((state) => state.auth);
-  
+
   // const location = useLocation();
 
   // console.log("Owner Check:", {
