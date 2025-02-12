@@ -1,4 +1,4 @@
-import  { useState } from "react";
+import { useState } from "react";
 import { Dropdown, Menu, Button, Checkbox } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 import { RoleEnum, StatusEnum, ApproveEnum } from "../../../enums/accountEnums"; // Import enums
@@ -44,13 +44,13 @@ export default function FilterAccount({
             onFilterChange("roles", updatedRoles)
           )}
         </Menu.ItemGroup>
-  
+
         <Menu.ItemGroup title="Trạng thái">
           {renderCheckboxes(StatusEnum, filters.statuses, (updatedStatuses) =>
             onFilterChange("statuses", updatedStatuses)
           )}
         </Menu.ItemGroup>
-  
+
         <Menu.ItemGroup title="Phê duyệt">
           {renderCheckboxes(ApproveEnum, filters.approves, (updatedApproves) =>
             onFilterChange("approves", updatedApproves)

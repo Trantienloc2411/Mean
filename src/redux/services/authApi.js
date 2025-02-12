@@ -20,10 +20,10 @@ export const authApi = apiSlice.injectEndpoints({
       providesTags: ["Role"],
     }),
 
-    logout: builder.mutation({
+    logout: builder.query({
       query: () => ({
-        url: "/user/logout", 
-        method: "POST",
+        url: "/user/logout",
+        method: "GET",
       }),
     }),
   }),
@@ -31,7 +31,7 @@ export const authApi = apiSlice.injectEndpoints({
 
 export const {
   useLoginMutation,
-  useLogoutMutation,
+  useLogoutQuery,
   useLazyGetUserQuery,
   useLazyGetRoleByIdQuery,
 } = authApi;

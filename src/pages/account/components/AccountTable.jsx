@@ -1,9 +1,16 @@
 import { MoreOutlined } from "@ant-design/icons";
 import { Dropdown, Menu, Table, Tag } from "antd";
-import { RoleEnum, StatusEnum, ApproveEnum } from "../../../enums/accountEnums"; // Import enum từ file khác
 
 // eslint-disable-next-line react/prop-types
 export default function AccountTable({ data, loading }) {
+  console.log(data);
+  const roleColors = {
+    Staff: "blue",
+    Owner: "gold",
+    Customer: "green",
+    Unknown: "gray",
+  };
+
   const columns = [
     {
       title: "No.",
@@ -13,13 +20,13 @@ export default function AccountTable({ data, loading }) {
     },
     {
       title: "Tên",
-      dataIndex: "name",
-      key: "name",
+      dataIndex: "fullName",
+      key: "fullName",
     },
     {
       title: "Số điện thoại",
-      dataIndex: "phoneNumber",
-      key: "phoneNumber",
+      dataIndex: "phone",
+      key: "phone",
     },
     {
       title: "Email",
@@ -28,40 +35,52 @@ export default function AccountTable({ data, loading }) {
     },
     {
       title: "Loại",
-      dataIndex: "role",
-      key: "role",
+      dataIndex: "roleName",
+      key: "roleName",
       render: (role) => {
-        const roleData = RoleEnum[role];
-        return roleData ? (
-          <Tag color={roleData.color}>{roleData.label}</Tag>
-        ) : null;
+        const color = roleColors[role] || "gray";
+        return <Tag color={color}>{role}</Tag>;
       },
     },
 
     {
       title: "Trạng Thái",
-      dataIndex: "status",
+      dataIndex: "isActive",
       align: "center",
-      key: "status",
-      render: (status) => {
-        const statusData = StatusEnum[status];
-        return statusData ? (
-          <Tag color={statusData.color}>{statusData.label}</Tag>
-        ) : null;
+      key: "isActive",
+      render: (isActive) => {
+        return isActive ? (
+          <Tag color="green">Hoạt động</Tag>
+        ) : (
+          <Tag color="red">Không Hoạt động</Tag>
+        );
       },
     },
     {
       title: "Xác thực",
-      dataIndex: "approve",
+      dataIndex: "isVerified", // Chỉ cần đặt một giá trị đại diện (có thể không cần)
       align: "center",
       key: "approve",
-      render: (approve) => {
-        const approveData = ApproveEnum[approve];
-        return approveData ? (
-          <Tag color={approveData.color}>{approveData.label}</Tag>
-        ) : null;
+      render: (_, record) => {
+        const { isVerifiedEmail, isVerifiedPhone } = record;
+
+        return (
+          <>
+            {isVerifiedEmail ? (
+              <Tag color="green">Email</Tag>
+            ) : (
+              <Tag color="red">Email</Tag>
+            )}
+            {isVerifiedPhone ? (
+              <Tag color="green">Phone</Tag>
+            ) : (
+              <Tag color="red">Phone</Tag>
+            )}
+          </>
+        );
       },
     },
+
     {
       title: "",
       key: "action",
