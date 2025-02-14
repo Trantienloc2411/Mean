@@ -8,7 +8,7 @@ import { IoIosAdd } from "react-icons/io";
 
 export default function RentalLocationList({ locations }) {
   const navigate = useNavigate();
-
+  
   return (
     <div style={{ flex: 8 }}>
       <Flex justify="space-between">

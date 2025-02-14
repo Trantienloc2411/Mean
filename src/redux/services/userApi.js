@@ -7,16 +7,16 @@ export const userApi = apiSlice.injectEndpoints({
       providesTags: ["User"],
     }),
     GetRoles: builder.query({
-        query: () => "/role/all-roles",
-        providesTags: ["User"],
-      }),
+      query: () => "/role/all-roles",
+      providesTags: ["User"],
+    }),
     getUserById: builder.query({
       query: (id) => `/user/${id}`,
       providesTags: ["User"],
     }),
     createUser: builder.mutation({
       query: (newUser) => ({
-        url: "/user",
+        url: "/user/register",
         method: "POST",
         body: newUser,
       }),
@@ -37,6 +37,20 @@ export const userApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["User"],
     }),
+    activeUser: builder.mutation({
+      query: (id) => ({
+        url: `/user/active/${id}`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["User"],
+    }),
+    blockUser: builder.mutation({
+      query: (id) => ({
+        url: `/user/block-user/${id}`,
+        method: "PUT",
+      }),
+      invalidatesTags: ["User"],
+    }),
   }),
 });
 
@@ -47,4 +61,6 @@ export const {
   useCreateUserMutation,
   useUpdateUserMutation,
   useDeleteUserMutation,
+  useActiveUserMutation,
+  useBlockUserMutation,
 } = userApi;

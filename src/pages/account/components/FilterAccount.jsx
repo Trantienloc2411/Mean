@@ -1,82 +1,132 @@
-import { useState } from "react";
-import { Dropdown, Menu, Button, Checkbox } from "antd";
+import { useState, useMemo } from "react";
+import { Dropdown, Button, Checkbox, Divider, Space } from "antd";
 import { DownOutlined } from "@ant-design/icons";
-import { RoleEnum, StatusEnum, ApproveEnum } from "../../../enums/accountEnums"; // Import enums
-import { Flex } from "antd";
-
-// Helper function to render checkbox items for any enum
-const renderCheckboxes = (enumData, selectedValues, onChange) =>
-  Object.entries(enumData).map(([value, { label }]) => (
-    <Menu.Item key={value}>
-      <Checkbox
-        checked={selectedValues.includes(value)}
-        onChange={(e) => {
-          const isChecked = e.target.checked;
-          const updatedValues = isChecked
-            ? [...selectedValues, value]
-            : selectedValues.filter((item) => item !== value);
-          onChange(updatedValues);
-        }}
-      >
-        {label}
-      </Checkbox>
-    </Menu.Item>
-  ));
 
 export default function FilterAccount({
+  roles,
   filters,
   onFilterChange,
   onReset,
   onApplyFilters,
 }) {
-  const [visible, setVisible] = useState(false);
+  const [open, setOpen] = useState(false);
+
+  const handleRoleChange = (role) => {
+    const updatedRoles = filters.roles.includes(role)
+      ? filters.roles.filter((r) => r !== role)
+      : [...filters.roles, role];
+    onFilterChange("roles", updatedRoles);
+  };
 
   const handleApply = () => {
     onApplyFilters(filters);
-    setVisible(false);
+    setOpen(false);
   };
 
-  const menu = (
-    <Menu>
-      <Flex>
-        <Menu.ItemGroup title="Vai trò">
-          {renderCheckboxes(RoleEnum, filters.roles, (updatedRoles) =>
-            onFilterChange("roles", updatedRoles)
-          )}
-        </Menu.ItemGroup>
+  const filterContent = useMemo(
+    () => (
+      <div
+        style={{
+          padding: "10px",
+          // width: 350,
+          background: "#fff",
+          borderRadius: 8,
+        }}
+      >
+        {/* Bộ lọc vai trò */}
+        <strong>Vai trò</strong>
+        <div style={{ gap: 20, display: "flex" }}>
+          {roles.map((role) => (
+            <Checkbox
+              key={role}
+              checked={filters.roles.includes(role)}
+              onChange={() => handleRoleChange(role)}
+              // style={{ display: "block", marginLeft: 8 }}
+            >
+              {role}
+            </Checkbox>
+          ))}
+        </div>
 
-        <Menu.ItemGroup title="Trạng thái">
-          {renderCheckboxes(StatusEnum, filters.statuses, (updatedStatuses) =>
-            onFilterChange("statuses", updatedStatuses)
-          )}
-        </Menu.ItemGroup>
+        <Divider style={{ margin: "8px 0" }} />
 
-        <Menu.ItemGroup title="Phê duyệt">
-          {renderCheckboxes(ApproveEnum, filters.approves, (updatedApproves) =>
-            onFilterChange("approves", updatedApproves)
-          )}
-        </Menu.ItemGroup>
-      </Flex>
+        {/* Bộ lọc trạng thái hoạt động */}
+        <strong>Trạng thái hoạt động</strong>
+        <div style={{ marginBottom: 8, marginLeft: 8 }}>
+          <Checkbox
+            checked={filters.isActive === true}
+            onChange={() =>
+              onFilterChange(
+                "isActive",
+                filters.isActive === true ? null : true
+              )
+            }
+          >
+            Hoạt động
+          </Checkbox>
+          <Checkbox
+            checked={filters.isActive === false}
+            onChange={() =>
+              onFilterChange(
+                "isActive",
+                filters.isActive === false ? null : false
+              )
+            }
+            style={{ marginLeft: 8 }}
+          >
+            Không hoạt động
+          </Checkbox>
+        </div>
 
-      <Menu.Divider />
+        <Divider style={{ margin: "8px 0" }} />
 
-      <Menu.Item>
-        <Button onClick={onReset} style={{ marginRight: 8 }}>
-          Reset
-        </Button>
-        <Button type="primary" onClick={handleApply}>
-          Áp dụng
-        </Button>
-      </Menu.Item>
-    </Menu>
+        {/* Bộ lọc xác thực tài khoản */}
+        <strong>Xác thực tài khoản</strong>
+        <div style={{ marginBottom: 8, marginLeft: 8 }}>
+          <Checkbox
+            checked={filters.isVerified === true}
+            onChange={() =>
+              onFilterChange(
+                "isVerified",
+                filters.isVerified === true ? null : true
+              )
+            }
+          >
+            Đã xác thực
+          </Checkbox>
+          <Checkbox
+            checked={filters.isVerified === false}
+            onChange={() =>
+              onFilterChange(
+                "isVerified",
+                filters.isVerified === false ? null : false
+              )
+            }
+            style={{ marginLeft: 8 }}
+          >
+            Chưa xác thực
+          </Checkbox>
+        </div>
+
+        <Divider style={{ margin: "8px 0" }} />
+
+        <Space style={{ display: "flex", justifyContent: "space-between" }}>
+          <Button onClick={onReset}>Reset</Button>
+          <Button type="primary" onClick={handleApply}>
+            Áp dụng
+          </Button>
+        </Space>
+      </div>
+    ),
+    [roles, filters]
   );
 
   return (
     <Dropdown
-      overlay={menu}
+      overlay={filterContent}
       trigger={["click"]}
-      visible={visible}
-      onVisibleChange={(flag) => setVisible(flag)}
+      open={open}
+      onOpenChange={setOpen}
     >
       <Button>
         Bộ lọc <DownOutlined />

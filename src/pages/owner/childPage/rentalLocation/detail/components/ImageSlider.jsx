@@ -3,7 +3,7 @@ import { Image, Row, Col } from "antd";
 
 const ImageGallery = ({ images = [] }) => {
   const validImages = Array.isArray(images) ? images : [];
-
+  console.log(images);
   if (validImages.length === 0) {
     return (
       <div style={{ textAlign: "center", padding: "20px" }}>

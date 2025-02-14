@@ -1,5 +1,5 @@
-import { useState, useEffect } from "react";
-import { Input, message } from "antd";
+import { useState, useEffect, useMemo } from "react";
+import { Button, Input, message } from "antd";
 import OverviewAccount from "./components/OverviewAccount";
 import { SearchOutlined } from "@ant-design/icons";
 import AccountTable from "./components/AccountTable";
@@ -8,28 +8,40 @@ import {
   useGetRolesQuery,
   useGetUsersQuery,
 } from "../../redux/services/userApi";
+import CreateAccountForm from "./components/CreateAccountForm";
+import { useLazyRefreshTokenQuery } from "../../redux/services/authApi";
 
 export default function Account() {
   const { data: users, error, isLoading } = useGetUsersQuery();
   const { data: roles } = useGetRolesQuery();
+  const [openCreateUser, setOpenCreateUser] = useState(false);
+  const [refreshToken, { isFetching }] = useLazyRefreshTokenQuery();
+
   const [searchValue, setSearchValue] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
   const [selectedFilters, setSelectedFilters] = useState({
     roles: [],
+    isActive: null,
+    isVerified: null,
   });
 
-  // Hàm lấy tên role từ roleID
-  const getRoleName = (roleID) => {
-    const role = roles?.find((r) => r._id === roleID);
-    return role ? role.roleName : "Unknown";
-  };
+  // Tạo một object lookup roleID -> roleName
+  const roleMap = useMemo(() => {
+    return (
+      roles?.reduce((acc, role) => {
+        acc[role._id] = role.roleName;
+        return acc;
+      }, {}) || {}
+    );
+  }, [roles]);
 
   useEffect(() => {
     if (users) {
       const filtered = users
         .map((user) => ({
           ...user,
-          roleName: getRoleName(user.roleID),
+          roleName: roleMap[user.roleID] || "Unknown",
+          isVerified: user.isVerifiedEmail || user.isVerifiedPhone,
         }))
         .filter((user) => {
           const matchesSearch =
@@ -37,13 +49,31 @@ export default function Account() {
             false;
           const matchesRole =
             selectedFilters.roles.length === 0 ||
-            selectedFilters.roles.includes(user.roleID);
+            selectedFilters.roles.includes(user.roleName);
+          const matchesActive =
+            selectedFilters.isActive === null ||
+            user.isActive === selectedFilters.isActive;
+          const matchesVerified =
+            selectedFilters.isVerified === null ||
+            user.isVerified === selectedFilters.isVerified;
 
-          return matchesSearch && matchesRole;
+          return (
+            matchesSearch && matchesRole && matchesActive && matchesVerified
+          );
         });
       setFilteredUsers(filtered);
     }
-  }, [users, searchValue, selectedFilters, roles]);
+  }, [users, searchValue, selectedFilters, roleMap]);
+
+  const handleRefreshToken = async () => {
+    try {
+      const result = await refreshToken().unwrap();
+      console.log(result);
+      message.success("Refresh Thành Công!");
+    } catch {
+      message.error("Lỗi Refresh Token!");
+    }
+  };
 
   const handleFilterChange = (key, values) => {
     setSelectedFilters((prev) => ({ ...prev, [key]: values }));
@@ -52,6 +82,8 @@ export default function Account() {
   const resetFilters = () => {
     setSelectedFilters({
       roles: [],
+      isActive: null,
+      isVerified: null,
     });
   };
 
@@ -66,6 +98,13 @@ export default function Account() {
       <OverviewAccount />
       <div style={{ marginTop: 20 }}>
         <h1 style={{ fontSize: 20 }}>Danh sách tài khoản</h1>
+        <Button
+          type="primary"
+          onClick={handleRefreshToken}
+          loading={isFetching}
+        >
+          Refresh Token
+        </Button>
         <div style={{ background: "#fff", borderRadius: 20, padding: 20 }}>
           <div style={{ display: "flex", gap: 20 }}>
             <Input
@@ -75,16 +114,26 @@ export default function Account() {
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
             />
-            {/* <FilterAccount
+            <FilterAccount
+              users={users}
+              roles={roles?.map((role) => role.roleName) || []} // Truyền roleName vào filter
               filters={selectedFilters}
               onFilterChange={handleFilterChange}
               onReset={resetFilters}
               onApplyFilters={(filters) => setSelectedFilters(filters)}
-            /> */}
+            />
+            <Button type="primary" onClick={() => setOpenCreateUser(true)}>
+              + Tạo tài khoản
+            </Button>
           </div>
           <AccountTable loading={isLoading} data={filteredUsers} />
         </div>
       </div>
+      <CreateAccountForm
+        open={openCreateUser}
+        onClose={() => setOpenCreateUser(false)}
+        roles={roles || []}
+      />
     </div>
   );
 }

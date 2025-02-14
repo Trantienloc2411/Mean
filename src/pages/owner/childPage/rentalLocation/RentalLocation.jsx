@@ -1,8 +1,15 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import FilterSection from "./components/FilterSection";
 import RentalLocationList from "./components/RentalLocationList";
-import { useEffect } from "react";
+import { useGetAllRentalLocationQuery } from "../../../../redux/services/rentalApi";
+
 export default function RentalLocation() {
+  const {
+    data: rentalData,
+    isLoading,
+    isError,
+  } = useGetAllRentalLocationQuery();
+
   const [searchValue, setSearchValue] = useState("");
   const [filters, setFilters] = useState({
     statuses: [],
@@ -10,44 +17,15 @@ export default function RentalLocation() {
   const [rentalLocations, setRentalLocations] = useState([]);
   const [filteredLocations, setFilteredLocations] = useState([]);
 
+  // Khi có dữ liệu từ API, cập nhật vào state
   useEffect(() => {
-    // Dữ liệu mẫu
-    const data = [
-      {
-        id: 1,
-        name: "Địa điểm A",
-        address: "123 Đường ABC, Quận 1",
-        image:
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwYgiVoOmUOj4hQwS1JUACNUmk5eBphBUDjA&s",
-        rating: 4.5,
-        openHours: "8:00 - 22:00",
-        status: "Active",
-      },
-      {
-        id: 2,
-        name: "Địa điểm B",
-        address: "456 Đường XYZ, Quận 2",
-        image:
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwYgiVoOmUOj4hQwS1JUACNUmk5eBphBUDjA&s",
-        rating: 4.0,
-        openHours: "9:00 - 21:00",
-        status: "Paused",
-      },
-      {
-        id: 3,
-        name: "Địa điểm C",
-        address: "789 Đường LMN, Quận 3",
-        image:
-          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTwYgiVoOmUOj4hQwS1JUACNUmk5eBphBUDjA&s",
-        rating: 3.5,
-        openHours: "7:00 - 20:00",
-        status: "Locked",
-      },
-    ];
-    setRentalLocations(data);
-    setFilteredLocations(data);
-  }, []);
+    if (rentalData?.data) {
+      setRentalLocations(rentalData.data);
+      setFilteredLocations(rentalData.data);
+    }
+  }, [rentalData]);
 
+  console.log (rentalData);
   const handleSearch = (value) => {
     setSearchValue(value);
     applyFilters(value, filters);
@@ -57,6 +35,7 @@ export default function RentalLocation() {
     const updatedStatuses = filters.statuses.includes(status)
       ? filters.statuses.filter((s) => s !== status)
       : [...filters.statuses, status];
+
     setFilters({ statuses: updatedStatuses });
     applyFilters(searchValue, { statuses: updatedStatuses });
   };
@@ -73,6 +52,9 @@ export default function RentalLocation() {
     });
     setFilteredLocations(filtered);
   };
+
+  // if (isLoading) return <p>Loading...</p>;
+  // if (isError) return <p>Error loading rental locations.</p>;
 
   return (
     <div>

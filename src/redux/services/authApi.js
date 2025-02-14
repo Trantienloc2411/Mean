@@ -7,6 +7,14 @@ export const authApi = apiSlice.injectEndpoints({
         url: "/user/login",
         method: "POST",
         body: credentials,
+        credentials: "include",
+      }),
+    }),
+    refreshToken: builder.query({
+      query: () => ({
+        url: "/user/refresh",
+        method: "GET",
+        credentials: "include",
       }),
     }),
 
@@ -34,4 +42,5 @@ export const {
   useLogoutQuery,
   useLazyGetUserQuery,
   useLazyGetRoleByIdQuery,
+  useLazyRefreshTokenQuery,
 } = authApi;
