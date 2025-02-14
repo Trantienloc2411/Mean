@@ -1,34 +1,10 @@
-import { Dropdown, Menu, Button, Tag } from "antd";
+import { Dropdown, Menu, Button, Checkbox, Flex } from "antd";
 import { DownOutlined } from "@ant-design/icons";
-const { CheckableTag } = Tag;
-import { RentalLocationStatusEnum } from "../../../enums/rentalLocationEnums"; // Import enums
-import { Checkbox } from "antd";
-import { Flex } from "antd";
 
-// Helper function to render CheckableTags for any enum
-const renderTags = (enumData, filters, key, onFilterChange) =>
-  Object.entries(enumData).map(([value, { label }]) => (
-    <Checkbox
-      style={
-        {
-          // padding: "4px 10px",
-          // border: "1px solid #999",
-          // fontWeight: 600,
-          // marginBottom: 10,
-        }
-      }
-      key={value}
-      checked={filters[key].includes(value)} // Check based on the key
-      onChange={(checked) => {
-        const updatedValues = checked
-          ? [...filters[key], value]
-          : filters[key].filter((item) => item !== value);
-        onFilterChange(key, updatedValues);
-      }}
-    >
-      {label}
-    </Checkbox>
-  ));
+const statusOptions = [
+  { value: "Active", label: "Hoạt động" },
+  { value: "Paused", label: "Không hoạt động" },
+];
 
 export default function FilterRentalLocation({
   filters,
@@ -36,16 +12,26 @@ export default function FilterRentalLocation({
   onReset,
   onApplyFilters,
 }) {
+  const handleStatusChange = (checked, value) => {
+    const updatedValues = checked
+      ? [...filters.statuses, value]
+      : filters.statuses.filter((item) => item !== value);
+    onFilterChange("statuses", updatedValues);
+  };
+
   const menu = (
-    <Menu style={{ padding: "16px", minWidth: "250px" }}>
+    <Menu style={{ padding: 16, minWidth: 250 }}>
       <Menu.ItemGroup title="Trạng thái">
         <Flex vertical>
-          {renderTags(
-            RentalLocationStatusEnum,
-            filters,
-            "statuses",
-            onFilterChange
-          )}
+          {statusOptions.map(({ value, label }) => (
+            <Checkbox
+              key={value}
+              checked={filters.statuses.includes(value)}
+              onChange={(e) => handleStatusChange(e.target.checked, value)}
+            >
+              {label}
+            </Checkbox>
+          ))}
         </Flex>
       </Menu.ItemGroup>
       <Menu.Divider />
