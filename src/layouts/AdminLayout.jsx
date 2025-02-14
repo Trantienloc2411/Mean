@@ -4,7 +4,7 @@ import {
   BarChartOutlined,
   CalendarOutlined,
   HomeOutlined,
-  InfoCircleOutlined,
+  InfoCircleOutlined, 
   LeftOutlined,
   RightOutlined,
   SettingOutlined,
@@ -16,7 +16,6 @@ import { Layout, Menu } from "antd";
 import Logo from "../assets/images/logo.png";
 import { BsBuildings } from "react-icons/bs";
 import HeaderAdmin from "../components/layouts/header/HeaderAdmin";
-import useAppInit from "../hooks/useAppInit";
 const { Header, Content, Sider } = Layout;
 
 // Danh sách menu items với đường dẫn
@@ -37,7 +36,6 @@ const menuItems = [
 ];
 
 const AdminLayout = () => {
-  // useAppInit();
   const navigate = useNavigate(); // Để điều hướng khi người dùng click Menu
   const location = useLocation(); // Để lấy path hiện tại
   const [collapsed, setCollapsed] = useState(false); // Trạng thái thu nhỏ/mở rộng của sidebar
