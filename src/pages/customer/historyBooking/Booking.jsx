@@ -8,6 +8,7 @@ import {
   MoreOutlined,
   LeftOutlined,
   RightOutlined,  
+  SearchOutlined
 } from "@ant-design/icons";
 import styles from "./Booking.module.scss";
 
@@ -359,7 +360,7 @@ export default function Booking() {
           placeholder="Tìm kiếm tên khách hàng"
           value={searchText}
           onChange={handleSearchChange}
-          prefix={<span className="search-icon">🔍</span>}
+          prefix={<span className="search-icon"><SearchOutlined /></span>}
         />
         <Button icon={<FilterOutlined />}>Lọc</Button>
       </div>
