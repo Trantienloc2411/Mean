@@ -10,6 +10,22 @@ export const authApi = apiSlice.injectEndpoints({
         credentials: "include",
       }),
     }),
+    forgetPasswordToken: builder.mutation({
+      query: (credentials) => ({
+        url: "/user/forgot-password-token",
+        method: "POST",
+        body: credentials,
+        // credentials: "include",
+      }),
+    }),
+    resetPasswordToken: builder.mutation({
+      query: (credentials) => ({
+        url: "/user/reset-password/{token}",
+        method: "PUT",
+        body: credentials,
+        // credentials: "include",
+      }),
+    }),
     refreshToken: builder.query({
       query: () => ({
         url: "/user/refresh",
@@ -43,4 +59,6 @@ export const {
   useLazyGetUserQuery,
   useLazyGetRoleByIdQuery,
   useLazyRefreshTokenQuery,
+  useForgetPasswordTokenMutation,
+  useResetPasswordTokenMutation,
 } = authApi;
