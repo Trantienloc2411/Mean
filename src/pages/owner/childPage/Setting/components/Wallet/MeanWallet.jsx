@@ -17,7 +17,13 @@ const MeanWallet = ({ walletData, transactionData }) => {
       title: "Loại giao dịch",
       dataIndex: "type",
       key: "type",
-      render: (type) => <Tag color="green">{type}</Tag>,
+      render: (type) => {
+        return (
+          <span className={`${styles.type} ${styles[type.toLowerCase()]}`}>
+            {type}
+          </span>
+        );
+      }
     },
     {
       title: "Ngày tạo",
@@ -34,21 +40,23 @@ const MeanWallet = ({ walletData, transactionData }) => {
       dataIndex: "status",
       key: "status",
       render: (status) => {
-        let color = "";
+        let className = '';
         switch (status) {
-          case "Active":
-            color = "green";
+          case 'Active':
+            className = styles.active;
             break;
-          case "Paused":
-            color = "orange";
+          case 'Paused':
+            className = styles.paused;
             break;
-          case "Expired":
-            color = "red";
+          case 'Expired':
+            className = styles.expired;
             break;
           default:
-            color = "blue";
+            break;
         }
-        return <Tag color={color}>{status}</Tag>;
+        return <span className={`${styles.status} ${className}`}>
+          {status === 'Active' ? 'Đang hoạt động' : status === 'Paused' ? 'Tạm dừng' : 'Hết hạn'}
+        </span>;
       },
     },
     {

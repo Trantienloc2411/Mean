@@ -1,7 +1,7 @@
 import  { useState } from "react";
 import { MoreOutlined } from "@ant-design/icons";
 import { Dropdown, Menu, Table, Tag, Modal } from "antd";
-import { RentalLocationStatusEnum } from "../../../enums/rentalLocationEnums"; // Import enum
+import styles from "./Table.module.scss";
 
 export default function RentalLocationTable({ data, loading }) {
   const [isModalVisible, setIsModalVisible] = useState(false);
@@ -41,11 +41,20 @@ export default function RentalLocationTable({ data, loading }) {
       dataIndex: "status",
       key: "status",
       render: (status) => {
-        const statusData = RentalLocationStatusEnum[status];
-        return statusData ? (
-          <Tag color={statusData.color}>{statusData.label}</Tag>
-        ) : (
-          <Tag color="default">Không xác định</Tag>
+        return (
+          <span className={`${styles.status} ${styles[status.toLowerCase()]}`}>
+                      {status === "Active"
+                        ? "Đang hoạt động"
+                        : status === "Pending"
+                        ? "Chờ xét duyệt"
+                        : status === "Suspended"
+                        ? "Tạm dừng"
+                        : status === "UnderReview" 
+                        ? "Đang xét duyệt"
+                        : status === "Inactive"
+                        ? "Không hoạt động"
+                        : status}
+          </span>
         );
       },
     },

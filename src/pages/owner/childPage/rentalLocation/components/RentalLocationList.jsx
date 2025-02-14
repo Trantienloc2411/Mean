@@ -48,8 +48,8 @@ export default function RentalLocationList({ locations }) {
                     <Tag
                       style={{
                         background:
-                          RentalLocationStatusEnum[item.status]?.color,
-                        color: "#fff",
+                        RentalLocationStatusEnum[item.status]?.bgColor,
+                        color: RentalLocationStatusEnum[item.status]?.color,
                         borderRadius: 20,
                         fontSize: 12,
                         fontWeight: 700,
