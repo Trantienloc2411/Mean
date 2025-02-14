@@ -1,12 +1,12 @@
 import { createSlice } from "@reduxjs/toolkit";
-import { getToken, getUserId, removeToken } from "../../utils/storage";
+import { getRole, getToken, getUserId, removeToken } from "../../utils/storage";
 
 const initialState = {
   token: getToken(),
-  userId: getUserId(), // Ban đầu không có user
+  userId: getUserId(),
   isAuthenticated: !!getToken(),
-  user: null, // Ban đầu không có user
-  role: null,
+  user: null,
+  role: getRole(),
 };
 
 const authSlice = createSlice({
@@ -16,23 +16,24 @@ const authSlice = createSlice({
     setCredentials: (state, action) => {
       state.token = action.payload.accessToken;
       state.isAuthenticated = true;
-      state.userId = action.payload._id; // Lưu thông tin user vào Redux
+      state.userId = action.payload._id;
     },
     setUser: (state, action) => {
-      state.user = action.payload; // Cập nhật user khi cần
+      state.user = action.payload;
     },
     setRole: (state, action) => {
-      state.role = action.payload; // Cập nhật user khi cần
+      state.role = action.payload;
     },
-    logout: (state) => {
+    setLogout: (state) => {
       removeToken();
       state.token = null;
       state.isAuthenticated = false;
-      state.user = null; // Xóa thông tin user khi logout
-      state.role = null; // Xóa thông tin user khi logout
+      state.user = null;
+      state.role = null;
     },
   },
 });
 
-export const { setCredentials, setUser, setRole, logout } = authSlice.actions;
+export const { setCredentials, setUser, setRole, setLogout } =
+  authSlice.actions;
 export default authSlice.reducer;

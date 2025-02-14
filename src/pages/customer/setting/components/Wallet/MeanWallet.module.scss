@@ -1,0 +1,87 @@
+.content {
+    padding: 24px;
+    
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  }
+  .headerContent {
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        align-items: center;
+        h2 {
+            align-content: start;
+        }
+  }
+  
+  .walletSection {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 5px;
+    
+  }
+  
+  .walletCard {
+    flex: 1;
+    padding: 8px;
+    border-radius: 8px;
+    text-align: center;
+    color: #fff;
+    font-weight: bold;    
+  
+    div {
+      &:first-child {
+        font-size: 16px;
+        margin-bottom: 8px;
+      }
+  
+      &:last-child {
+        font-size: 24px;
+      }
+    }
+  }
+  
+  .topUpButton {
+    align-self: flex-start;
+    background-color: #1890ff;
+    border: none;
+    color: #fff;
+    font-weight: bold;
+    border-radius: 8px;
+    padding: 8px 16px;
+  
+    &:hover {
+      background-color: #40a9ff;
+    }
+  }
+  
+  .ant-table {
+    border-radius: 8px;
+  }
+  
+  .ant-table-thead > tr > th {
+    background-color: #f5f5f5;
+    font-weight: bold;
+    text-align: center;
+  }
+  
+  .ant-table-tbody > tr > td {
+    text-align: center;
+  }
+  
+  .ant-tag {
+    font-size: 14px;
+    font-weight: bold;
+    border-radius: 8px;
+  }
+  
+  .ant-btn-link {
+    padding: 0;
+    color: #1890ff;
+  
+    &:hover {
+      color: #40a9ff;
+    }
+  }
+  

@@ -1,0 +1,159 @@
+.bookingInformation {
+    padding: 24px;
+    background: #fff;
+
+    h1 {
+        font-size: 24px;
+        margin-bottom: 24px;
+        font-weight: 500;
+    }
+
+    .searchSection {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 24px;
+        flex-direction: row;
+
+        .ant-input-affix-wrapper {
+            width: 25%;
+            max-width: 100px;
+            border-radius: 8px;
+        }
+
+        .ant-btn {
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    }
+
+    .ant-table {
+        .ant-table-thead > tr > th {
+            background: #f8f9fa;
+            font-weight: 500;
+        }
+
+        .ant-table-tbody > tr > td {
+            padding: 16px;
+        }
+
+        .amount {
+            font-weight: 500;
+        }
+    }
+
+    .ant-tag {
+        border-radius: 16px;
+        padding: 2px 12px;
+        font-size: 12px;
+        border: none;
+
+        &.ant-tag-blue {
+            background: #e6f4ff;
+            color: #1677ff;
+        }
+
+        &.ant-tag-green {
+            background: #f6ffed;
+            color: #52c41a;
+        }
+
+        &.ant-tag-pink {
+            background: #fff0f6;
+            color: #eb2f96;
+        }
+
+        &.ant-tag-orange {
+            background: #fff7e6;
+            color: #fa8c16;
+        }
+
+        &.ant-tag-red {
+            background: #fff1f0;
+            color: #f5222d;
+        }
+    }
+
+    .ant-pagination {
+        margin-top: 24px;
+
+        .ant-pagination-item {
+            border-radius: 8px;
+
+            &-active {
+                background: #1677ff;
+                border-color: #1677ff;
+
+                a {
+                    color: #fff;
+                }
+            }
+        }
+
+        .ant-btn {
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+    }
+    .eKey {
+        padding: 4px 12px;
+        border-radius: 16px;
+        font-size: 12px;
+        display: inline-block;
+        &.have{
+            background: #e6f4ff;
+            color: #1677ff;
+        }
+        &.none{
+            background: #fff7e6;
+            color: #fa8c16;
+        }
+    }
+    .status {
+        padding: 4px 12px;
+        border-radius: 16px;
+        font-size: 12px;
+        display: inline-block;
+        &.confirmed{
+            background: #e6f4ff;
+            color: #1677ff;
+        }
+        &.pending{
+            background: #fff7e6;
+            color: #fa8c16;
+        }
+        &.cancel{
+            background: #fff1f0;
+            color: #f5222d;
+        }
+        &.complete{
+            background: #f6ffed;
+            color: #52c41a;
+        }
+    }
+    .payment{
+        padding: 4px 12px;
+        border-radius: 16px;
+        font-size: 12px;
+        display: inline-block;
+        &.deposited{
+            background: #e6f4ff;
+            color: #1677ff;
+        }
+        &.unpaid{
+            background: #fff7e6;
+            color: #fa8c16;
+        }
+        &.fullypaid{
+            background: #f6ffed;
+            color: #52c41a;
+        }
+        &.refund{
+            background: #fff1f0;
+            color: #f5222d;
+        }
+    }
+}

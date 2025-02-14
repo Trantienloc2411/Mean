@@ -1,21 +1,20 @@
 import { Modal, Form, Input, InputNumber, Select, Button } from 'antd';
+import { useGetAllServicesQuery } from '../../../../../../../../redux/services/serviceApi';
+import { useGetAllRentalLocationsQuery } from '../../../../../../../../redux/services/rentalLocationApi';
 import styles from './AddRoomTypeModal.module.scss';
 
 const { TextArea } = Input;
 const { Option } = Select;
 
-const amenitiesList = [
-  "TV", "Smart TV", "Điều hoà", "Wifi", "Wifi tốc độ cao", 
-  "Tủ lạnh mini", "Minibar", "Két sắt", "Bồn tắm", "Bếp mini", 
-  "Máy giặt", "Ban công", "View thành phố"
-];
-
 const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
   const [form] = Form.useForm();
+  const { data: services, isLoading, error } = useGetAllServicesQuery();
+  const { data: rentalLocations, isLoading: isLoadingRentalLocations } = useGetAllRentalLocationsQuery();
 
   const handleSubmit = () => {
     form.validateFields()
       .then((values) => {
+        console.log("Dữ liệu được thêm:", values);
         onConfirm(values);
         form.resetFields();
       })
@@ -23,6 +22,7 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
         console.log('Validate Failed:', info);
       });
   };
+
 
   return (
     <Modal
@@ -46,6 +46,31 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
         className={styles.modalForm}
       >
         <Form.Item
+          name="rentalLocationId"
+          label="Địa điểm thuê"
+          rules={[{ required: true, message: 'Vui lòng chọn ID địa điểm thuê' }]}
+        >
+          <Select placeholder="Chọn địa điểm thuê" loading={isLoadingRentalLocations}>
+            {rentalLocations?.data?.map(location => (
+              <Option key={location.id} value={location.id}>{location.name}</Option>
+            ))}
+          </Select>
+        </Form.Item>
+
+        <Form.Item
+          name="serviceId"
+          label="Dịch vụ"
+          rules={[{ required: true, message: 'Vui lòng chọn dịch vụ' }]}
+        >
+          <Select placeholder="Chọn dịch vụ" loading={isLoading}>
+            {services?.data?.map(service => (
+              <Option key={service.id} value={service.id}>{service.name}</Option>
+            ))}
+
+          </Select>
+        </Form.Item>
+
+        <Form.Item
           name="name"
           label="Tên loại phòng"
           rules={[{ required: true, message: 'Vui lòng nhập tên loại phòng' }]}
@@ -62,77 +87,36 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
 
         <div className={styles.formRow}>
           <Form.Item
-            name="maxOccupancy"
+            name="maxPeopleNumber"
             label="Số người tối đa"
             rules={[{ required: true, message: 'Vui lòng nhập số người tối đa' }]}
           >
-            <InputNumber min={1} placeholder="2" />
+            <InputNumber min={1} placeholder="4" />
           </Form.Item>
 
           <Form.Item
-            name="area"
-            label="Diện tích (m²)"
-            rules={[{ required: true, message: 'Vui lòng nhập diện tích' }]}
+            name="basePrice"
+            label="Giá cơ bản"
+            rules={[{ required: true, message: 'Vui lòng nhập giá cơ bản' }]}
           >
-            <InputNumber min={1} placeholder="20" addonAfter="m²" />
-          </Form.Item>
-        </div>
-
-        <div className={styles.formRow}>
-          <Form.Item
-            name="hourlyRate"
-            label="Giá theo giờ"
-            rules={[{ required: true, message: 'Vui lòng nhập giá theo giờ' }]}
-          >
-            <InputNumber 
-              min={0}
-              step={10000}
-              placeholder="100000"
-              formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              parser={value => value.replace(/\$\s?|(,*)/g, '')}
-              addonAfter="VNĐ"
-            />
-          </Form.Item>
-
-          <Form.Item
-            name="dailyRate"
-            label="Giá theo ngày"
-            rules={[{ required: true, message: 'Vui lòng nhập giá theo ngày' }]}
-          >
-            <InputNumber 
-              min={0}
-              step={100000}
-              placeholder="500000"
-              formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              parser={value => value.replace(/\$\s?|(,*)/g, '')}
-              addonAfter="VNĐ"
-            />
+            <InputNumber min={0} step={100000} placeholder="200000" addonAfter="VNĐ" />
           </Form.Item>
         </div>
 
         <Form.Item
-          name="bedType"
-          label="Loại giường"
-          rules={[{ required: true, message: 'Vui lòng chọn loại giường' }]}
+          name="overtimeHourlyPrice"
+          label="Giá phụ trội theo giờ"
+          rules={[{ required: true, message: 'Vui lòng nhập giá phụ trội theo giờ' }]}
         >
-          <Select placeholder="Chọn loại giường">
-            <Option value="single">1 giường đơn</Option>
-            <Option value="double">1 giường đôi</Option>
-            <Option value="twin">2 giường đơn</Option>
-            <Option value="2double">2 giường đôi</Option>
-          </Select>
+          <InputNumber min={0} step={10000} placeholder="20000" addonAfter="VNĐ" />
         </Form.Item>
 
-        <Form.Item
+        {/* <Form.Item
           name="amenities"
           label="Tiện ích đi kèm"
           rules={[{ required: true, message: 'Vui lòng chọn ít nhất một tiện ích' }]}
         >
-          <Select
-            mode="multiple"
-            placeholder="Chọn tiện ích"
-            style={{ width: '100%' }}
-          >
+          <Select mode="multiple" placeholder="Chọn tiện ích" style={{ width: '100%' }}>
             {amenitiesList.map(amenity => (
               <Option key={amenity} value={amenity}>{amenity}</Option>
             ))}
@@ -143,12 +127,8 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
           name="additionalFeatures"
           label="Tính năng bổ sung"
         >
-          <Select
-            mode="tags"
-            placeholder="Nhập tính năng bổ sung"
-            style={{ width: '100%' }}
-          />
-        </Form.Item>
+          <Select mode="tags" placeholder="Nhập tính năng bổ sung" style={{ width: '100%' }} />
+        </Form.Item> */}
       </Form>
     </Modal>
   );

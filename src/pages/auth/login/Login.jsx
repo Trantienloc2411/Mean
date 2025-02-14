@@ -15,6 +15,7 @@ import {
   setRole,
   setUser,
 } from "../../../redux/slices/authSlice";
+import { saveToken, saveUserId, saveRole } from "../../../utils/storage";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -40,25 +41,36 @@ const Login = () => {
     e.preventDefault();
 
     try {
-      const { data } = await login({ email, password });
+      const result = await login({ email, password }).unwrap();
+      console.log("Login response:", result);
 
-      if (data?.accessToken) {
-        dispatch(setCredentials(data));
+      if (result?.accessToken) {
+        // Lưu thông tin vào localStorage
+        saveToken(result.accessToken);
+        saveUserId(result._id);
+        dispatch(setCredentials(result));
+
+        // Lấy thông tin user
+        const userData = await getUserById(result._id).unwrap();
+        if (userData?.getUser) {
+          dispatch(setUser(userData.getUser));
+
+          // Lấy role của user
+          const roleData = await getRoleById(userData.getUser.roleID).unwrap();
+          if (roleData?.roleName) {
+            saveRole(roleData.roleName);
+            dispatch(setRole(roleData.roleName));
+          }
+          navigate("/");
+        }
+
         notification.success({
           message: "Đăng nhập thành công",
           description: "Chào mừng bạn đến với Mean!",
         });
-        const { data: userData } = await getUserById(data?._id);
-
-        const { data: roleData } = await getRoleById(userData?.getUser?.roleID);
-        dispatch(setUser(userData?.getUser));
-        dispatch(setRole(roleData));
-
-        // navigate("/");
-      } else {
-        throw new Error("Đăng nhập thất bại");
       }
     } catch (err) {
+      console.error("Login failed:", err);
       notification.error({
         message: "Đăng nhập thất bại",
         description:
@@ -86,7 +98,7 @@ const Login = () => {
                 placeholder="john.doe@gmail.com"
                 className={styles.formInput}
                 value={email}
-                onChange={(e) => setEmail(e.target.value)} // Cập nhật state email
+                onChange={(e) => setEmail(e.target.value)}
               />
             </div>
             <div className={styles.formGroup}>
@@ -97,7 +109,7 @@ const Login = () => {
                   placeholder="••••••••••••"
                   className={styles.formInput}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)} // Cập nhật state password
+                  onChange={(e) => setPassword(e.target.value)}
                 />
                 <button
                   type="button"
@@ -118,7 +130,7 @@ const Login = () => {
             <button
               type="submit"
               className={styles.submitBtn}
-              disabled={isLoading} // Vô hiệu hóa khi đang loading
+              disabled={isLoading}
             >
               {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>

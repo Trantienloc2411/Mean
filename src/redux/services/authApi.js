@@ -1,5 +1,4 @@
 import { apiSlice } from "./apiSlice";
-import { saveToken, removeToken, saveUserId } from "../../utils/storage";
 
 export const authApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
@@ -8,33 +7,15 @@ export const authApi = apiSlice.injectEndpoints({
         url: "/user/login",
         method: "POST",
         body: credentials,
+        credentials: "include",
       }),
-      async onQueryStarted(args, { queryFulfilled }) {
-        try {
-          const { data } = await queryFulfilled;
-          if (data?.accessToken) {
-            saveToken(data.accessToken);
-            saveUserId(data._id);
-          }
-        } catch (err) {
-          console.error("Login failed", err);
-        }
-      },
     }),
-
-    logout: builder.mutation({
+    refreshToken: builder.query({
       query: () => ({
-        url: "/logout",
-        method: "POST",
+        url: "/user/refresh",
+        method: "GET",
+        credentials: "include",
       }),
-      async onQueryStarted(args, { queryFulfilled }) {
-        try {
-          await queryFulfilled;
-          removeToken();
-        } catch (err) {
-          console.error("Logout failed", err);
-        }
-      },
     }),
 
     getUser: builder.query({
@@ -46,14 +27,20 @@ export const authApi = apiSlice.injectEndpoints({
       query: (roleId) => `/role/${roleId}`,
       providesTags: ["Role"],
     }),
+
+    logout: builder.query({
+      query: () => ({
+        url: "/user/logout",
+        method: "GET",
+      }),
+    }),
   }),
 });
 
 export const {
   useLoginMutation,
-  useLogoutMutation,
-  // useGetUserQuery,
-  // useGetRoleByIdQuery,
+  useLogoutQuery,
   useLazyGetUserQuery,
   useLazyGetRoleByIdQuery,
+  useLazyRefreshTokenQuery,
 } = authApi;

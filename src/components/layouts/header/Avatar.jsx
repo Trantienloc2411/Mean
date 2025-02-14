@@ -1,4 +1,4 @@
-import { Dropdown } from "antd";
+import { Dropdown, message } from "antd";
 import {
   DownOutlined,
   LogoutOutlined,
@@ -7,8 +7,30 @@ import {
   WalletOutlined,
 } from "@ant-design/icons";
 import { Image } from "antd";
+import { useDispatch } from "react-redux";
+import { useNavigate } from "react-router-dom";
+import { removeToken } from "../../../utils/storage";
+import { setCredentials, setLogout } from "../../../redux/slices/authSlice";
+// import { useLogoutQuery } from "../../../redux/services/authApi";
 
 export default function Avatar() {
+  const dispatch = useDispatch();
+  const navigate = useNavigate();
+  // const { logout } = useLogoutQuery();
+
+  const handleLogout = async () => {
+    // try {
+    //   await logout().unwrap();
+    dispatch(setLogout()); // Reset auth state
+    removeToken();
+    navigate("/login");
+    message.success("Bạn đã đăng xuất thành công!");
+    // } catch (error) {
+    // console.error("Logout failed:", error);
+    // message.error("Đăng xuất thất bại, vui lòng thử lại!");
+    // }
+  };
+
   const items = [
     {
       key: "1",
@@ -33,6 +55,7 @@ export default function Avatar() {
       label: "Đăng xuất",
       icon: <LogoutOutlined />,
       danger: true,
+      onClick: handleLogout, // Gán trực tiếp hàm xử lý logout
     },
   ];
 

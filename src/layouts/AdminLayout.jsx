@@ -4,7 +4,7 @@ import {
   BarChartOutlined,
   CalendarOutlined,
   HomeOutlined,
-  InfoCircleOutlined,
+  InfoCircleOutlined, 
   LeftOutlined,
   RightOutlined,
   SettingOutlined,

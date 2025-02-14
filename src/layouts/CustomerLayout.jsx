@@ -1,61 +1,33 @@
 import { Outlet, useNavigate, useLocation, useParams } from "react-router-dom";
 import {
   BarChartOutlined,
-  CalendarOutlined,
   HomeOutlined,
-  TagOutlined,
   UserOutlined,
 } from "@ant-design/icons";
 import { Layout, Menu } from "antd";
-import Logo from "../assets/images/logo.png";
-import { BsBuildings } from "react-icons/bs";
 import HeaderSimple from "../components/layouts/header/HeaderSimple";
-import useAppInit from "../hooks/useAppInit";
 
 const { Header, Content } = Layout;
 
-const OwnerLayout = () => {
-  // useAppInit();
+const CustomerLayout = () => {
+  const navigate = useNavigate(); // Để điều hướng khi người dùng click Menu
+  const location = useLocation(); // Để lấy path hiện tại
+
   const { id } = useParams(); // Lấy ID từ URL
+
   const menuItems = [
+    { key: `/customer/${id}`, icon: <UserOutlined />, label: "Thông tin" },
     {
-      key: `/owner/${id}/dashboard`,
+      key: `/customer/${id}/booking`,
       icon: <HomeOutlined />,
-      label: "Tổng quan",
-    },
-    {
-      key: `/owner/${id}/information`,
-      icon: <UserOutlined />,
-      label: "Thông tin",
-    },
-    {
-      key: `/owner/${id}/rental-location`,
-      icon: <BsBuildings />,
-      label: "Địa điểm",
-    },
-    {
-      key: `/owner/${id}/booking`,
-      icon: <CalendarOutlined />,
       label: "Đặt phòng",
     },
     {
-      key: `/owner/${id}/type-room`,
-      icon: <TagOutlined />,
-      label: "Loại phòng",
-    },
-    {
-      key: `/owner/${id}/policy`,
-      icon: <BarChartOutlined />,
-      label: "Chính sách",
-    },
-    {
-      key: `/owner/${id}/setting`,
+      key: `/customer/${id}/setting`,
       icon: <BarChartOutlined />,
       label: "Cài đặt",
     },
   ];
-  const navigate = useNavigate(); // Để điều hướng khi người dùng click Menu
-  const location = useLocation(); // Để lấy path hiện tại
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -112,4 +84,4 @@ const OwnerLayout = () => {
   );
 };
 
-export default OwnerLayout;
+export default CustomerLayout;
