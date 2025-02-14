@@ -84,4 +84,35 @@
       color: #40a9ff;
     }
   }
+
+  .status {
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    display: inline-block;
+
+    &.active {
+        background: #ecffec;
+        color: #41C588;
+    }
+
+    &.paused {
+        background: #fff7e6;
+        color: #fa8c16;
+    }
+
+    &.expired {
+        background: #fff1f0;
+        color: #f5222d;
+    }
+}
+
+.type{
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  display: inline-block;
+  background: #ecffec;
+  color: #41C588;
+}
   

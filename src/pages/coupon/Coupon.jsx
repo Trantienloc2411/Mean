@@ -230,26 +230,12 @@ export default function Coupon() {
       dataIndex: "Status",
       key: "status",
       align: 'center',
-      render: (_, { Status }) => {
-        // Define status-to-color mapping
-        let color = "";
-        let text = Status;
-
-        switch (Status) {
-          case "Active":
-            color = "green"; // Green for Complete
-            text = "Đang hoạt động";
-            break;
-          case "Inactive":
-            color = "red"; // Red for Cancel
-            text = "Hết hạn";
-            break;
-          default:
-            color = "default"; // Fallback color for unknown statuses
-            text = "Unknown";
-        }
-
-        return <Tag color={color}>{text}</Tag>;
+      render: ( Status ) => {
+        return (
+          <span className={`${styles.status} ${styles[Status.toLowerCase()]}`}>
+            {Status === "Active" ? "Đang hoạt động" : "Hết hạn"}
+          </span>
+        );
       },
     },
     {

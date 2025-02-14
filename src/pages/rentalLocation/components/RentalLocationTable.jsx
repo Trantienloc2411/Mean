@@ -1,8 +1,11 @@
 import { useState } from "react";
 import { MoreOutlined } from "@ant-design/icons";
-import { Dropdown, Menu, Table, Tag } from "antd";
+
+import { Dropdown, Menu, Table, Tag, Modal } from "antd";
+import styles from "./Table.module.scss";
 import { useNavigate } from "react-router-dom";
 import ModalViewDetailRental from "./ModalViewDetailRental";
+
 
 export default function RentalLocationTable({ data, loading }) {
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
@@ -45,9 +48,24 @@ export default function RentalLocationTable({ data, loading }) {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
-      render: (status) => (
-        <Tag color={mapStatus(status).color}>{mapStatus(status).label}</Tag>
-      ),
+
+      render: (status) => {
+        return (
+          <span className={`${styles.status} ${styles[status.toLowerCase()]}`}>
+                      {status === "Active"
+                        ? "Đang hoạt động"
+                        : status === "Pending"
+                        ? "Chờ xét duyệt"
+                        : status === "Suspended"
+                        ? "Tạm dừng"
+                        : status === "UnderReview" 
+                        ? "Đang xét duyệt"
+                        : status === "Inactive"
+                        ? "Không hoạt động"
+                        : status}
+          </span>
+        );
+      },
     },
     {
       title: "Hành động",

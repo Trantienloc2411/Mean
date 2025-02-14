@@ -18,16 +18,17 @@ export default function StatusInfo(props) {
   const colorFalse = {
     backgroundColor: '#FBDED1',
     color: '#f69871',
-    padding: '2px 8px',
-    borderRadius: '4px',
+    padding: '4px 12px',
+    borderRadius: '16px',
     display: 'inline-block'
   };
   const colorTrue = {
     backgroundColor: '#e6f7f0',
     color: '#52c41a',
-    padding: '2px 8px',
-    borderRadius: '4px',
+    padding: '4px 12px',
+    borderRadius: '16px',
     display: 'inline-block'
+    
   }
 
   const statusInfo = [
