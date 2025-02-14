@@ -13,15 +13,10 @@ export const rentalApi = apiSlice.injectEndpoints({
           : [{ type: "RentalList", id: "LIST" }],
     }),
     getRentalLocationById: builder.query({
-      query: (id) => `rental-location/${id}`, // API endpoint for a specific rental location
+      query: (id) => `rental-location/${id}`,
     }),
   }),
 });
 
-export const { 
-  useGetAllRentalLocationQuery,
-  useGetRentalLocationByIdQuery, 
-
-
-
- } = rentalApi;
+export const { useGetAllRentalLocationQuery, useGetRentalLocationByIdQuery } =
+  rentalApi;

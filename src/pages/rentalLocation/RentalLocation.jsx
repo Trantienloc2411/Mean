@@ -1,63 +1,24 @@
 import { useState, useEffect } from "react";
 import { Button, Input } from "antd";
-import { Flex } from "antd"; // Nếu không tồn tại, cần dùng styled-components hoặc CSS cho layout
+import { Flex } from "antd";
 import OverviewLocation from "./components/OverviewLocation";
-import { FilterOutlined, SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined } from "@ant-design/icons";
 import RentalLocationTable from "./components/RentalLocationTable";
 import FilterRentalLocation from "./components/FilterRentalLocation";
+import { useGetAllRentalLocationQuery } from "../../redux/services/rentalApi";
 
 export default function RentalLocation() {
+  const { data, isLoading } = useGetAllRentalLocationQuery();
+  const allLocations = data?.success ? data.data : [];
+
   const [searchValue, setSearchValue] = useState("");
   const [filteredLocations, setFilteredLocations] = useState([]);
-  const [allLocations, setAllLocations] = useState([]);
-  const [isLoading, setIsLoading] = useState(false);
-  const [filters, setFilters] = useState({
-    statuses: [],
-  });
+
+  const [filters, setFilters] = useState({ statuses: [] });
 
   useEffect(() => {
-    // Fetch initial data
-    fetchRentalLocations();
-  }, []);
-
-  const fetchRentalLocations = async () => {
-    setIsLoading(true);
-    try {
-      // Dữ liệu tạm
-      const data = [
-        {
-          id: 1,
-          name: "Địa điểm A",
-          representative: "Nguyễn Văn A",
-          address: "123 Đường ABC, Quận 1",
-          roomCount: 10,
-          status: "Active",
-        },
-        {
-          id: 2,
-          name: "Địa điểm B",
-          representative: "Trần Văn B",
-          address: "456 Đường XYZ, Quận 2",
-          roomCount: 5,
-          status: "Paused",
-        },
-        {
-          id: 3,
-          name: "Địa điểm C",
-          representative: "Lê Thị C",
-          address: "789 Đường LMN, Quận 3",
-          roomCount: 15,
-          status: "Locked",
-        },
-      ];
-      setAllLocations(data);
-      setFilteredLocations(data);
-    } catch (error) {
-      console.error("Error fetching rental locations:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
+    setFilteredLocations(allLocations);
+  }, [allLocations]);
 
   const handleSearch = (value) => {
     setSearchValue(value);
@@ -112,7 +73,7 @@ export default function RentalLocation() {
               onApplyFilters={() => applyFilters(searchValue, filters)}
             />
           </Flex>
-
+          {/* Truyền toàn bộ dữ liệu vào table */}
           <RentalLocationTable data={filteredLocations} loading={isLoading} />
         </div>
       </div>
