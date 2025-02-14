@@ -76,9 +76,11 @@ export default function AccountTable({ data, loading }) {
               <Menu.Item key="1" onClick={() => handleViewModel(record)}>
                 Xem
               </Menu.Item>
-              <Menu.Item key="2" onClick={() => handleViewDetails(record)}>
-                Xem Chi Tiết
-              </Menu.Item>
+              {record.roleName == "Staff" ? null : (
+                <Menu.Item key="2" onClick={() => handleViewDetails(record)}>
+                  Xem Chi Tiết
+                </Menu.Item>
+              )}
               {record.isActive ? (
                 <Menu.Item key="3" onClick={() => handleBlockUser(record)}>
                   Khóa tài khoản
@@ -106,7 +108,11 @@ export default function AccountTable({ data, loading }) {
     setIsDetailOpen(true);
   };
   const handleViewDetails = (user) => {
-    navigate(`/customer/${user._id}`);
+    if (user.roleName == "Customer") {
+      navigate(`/customer/${user._id}`);
+    } else if (user.roleName == "Owner") {
+      navigate(`/owner/${user._id}/dashboard`);
+    }
   };
   const handleActiveUser = async (user) => {
     try {

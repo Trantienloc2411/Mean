@@ -98,7 +98,6 @@ import {
   AdminRoute,
   OwnerRoute,
   NotAuthRoute,
-  CustomerRoute,
 } from "./ProtectedRoute";
 import NotAuthLayout from "../layouts/NotAuthLayout.jsx";
 import CustomerLayout from "../layouts/CustomerLayout.jsx";
@@ -182,7 +181,7 @@ export const routes = [
     ],
   },
   {
-    path: "/owner",
+    path: "/owner/:id",
     element: (
       <OwnerRoute>
         <OwnerLayout />
