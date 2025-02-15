@@ -2,7 +2,7 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 export const NotAuthRoute = ({ children }) => {
-  const { isAuthenticated, role } = useSelector((state) => state.auth);
+  const { isAuthenticated, role, userId } = useSelector((state) => state.auth);
   // const location = useLocation();
   // console.log("Auth Check:", {
   //   isAuthenticated,
@@ -11,8 +11,11 @@ export const NotAuthRoute = ({ children }) => {
   // });
 
   if (isAuthenticated) {
-    if (role == "Staff") {
+    if (role === "Staff") {
       return <Navigate to="/admin/dashboard" replace />;
+    }
+    if (role === "Owner") {
+      return <Navigate to={`/owner/${userId}/dashboard`} replace />;
     }
   }
 
@@ -55,29 +58,17 @@ export const AdminRoute = ({ children }) => {
 
   return children;
 };
-export const CustomerRoute = ({ children }) => {
-  const { isAuthenticated, role } = useSelector((state) => state.auth);
 
-  if (!isAuthenticated) {
-    return <Navigate to="/login" state={{ from: location }} replace />;
-  }
-
-  if (role !== "Staff") {
-    return <Navigate to="/404" replace />;
-  }
-
-  return children;
-};
 export const OwnerRoute = ({ children }) => {
   const { isAuthenticated, role } = useSelector((state) => state.auth);
 
-  // const location = useLocation();
+  const location = useLocation();
 
-  // console.log("Owner Check:", {
-  //   isAuthenticated,
-  //   role,
-  //   path: location.pathname,
-  // });
+  console.log("Owner Check:", {
+    isAuthenticated,
+    role,
+    path: location.pathname,
+  });
   if (!isAuthenticated) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }

@@ -4,7 +4,7 @@ import {
   BarChartOutlined,
   CalendarOutlined,
   HomeOutlined,
-  InfoCircleOutlined, 
+  InfoCircleOutlined,
   LeftOutlined,
   RightOutlined,
   SettingOutlined,
@@ -78,26 +78,31 @@ const AdminLayout = () => {
             transition: "all 0.3s",
           }}
         >
-          <img
-            src={Logo} // Đường dẫn tới logo của bạn
-            alt="Mean Logo"
-            style={{
-              height: "40px",
-              width: "40px",
-            }}
-          />
-          {!collapsed && (
-            <span
+          <div
+            style={{ cursor: "pointer" }}
+            onClick={() => navigate("/admin/dashboard")} // Điều hướng khi click
+          >
+            <img
+              src={Logo} // Đường dẫn tới logo của bạn
+              alt="Mean Logo"
               style={{
-                marginLeft: "8px",
-                fontSize: "26px",
-                fontWeight: "500",
-                color: "#2F7BEB",
+                height: "40px",
+                width: "40px",
               }}
-            >
-              Mean
-            </span>
-          )}
+            />
+            {!collapsed && (
+              <span
+                style={{
+                  marginLeft: "8px",
+                  fontSize: "26px",
+                  fontWeight: "500",
+                  color: "#2F7BEB",
+                }}
+              >
+                Mean
+              </span>
+            )}
+          </div>
         </div>
 
         <Menu
