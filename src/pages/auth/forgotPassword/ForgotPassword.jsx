@@ -24,7 +24,7 @@ const ForgotPassword = () => {
         const result = await forgetPasswordToken({ email }).unwrap();
         if (result) {
           notification.success({
-            message: "Vui lòng kiểm tra email",
+            message: "Vui lòng kiểm tra hồm thư email",
             // description: "Chào mừng bạn đến với Mean!",
           });
           navigate("/login");
@@ -32,7 +32,8 @@ const ForgotPassword = () => {
       } catch (err) {
         notification.error({
           message: "Đăng nhập thất bại",
-          description: err.message || "Vui lòng kiểm tra lại email.",
+          // description: err.message || "Vui lòng kiểm tra lại email.",
+          description: err.data.message || "Vui lòng kiểm tra lại email.",
         });
       }
     },

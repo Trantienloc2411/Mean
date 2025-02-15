@@ -165,7 +165,7 @@ export default function HeaderSimple() {
           </div>
           {/* Notification Icon */}
           <NotificationIcon
-            ref={iconRef} // Reference for icon
+            // ref={iconRef} // Reference for icon
             count={notifications.length}
             onClick={(e) => {
               e.stopPropagation(); // Ngừng propagate event lên trên

@@ -188,7 +188,7 @@ export const routes = [
       </OwnerRoute>
     ),
     children: [
-      { path: "", element: <Navigate to="/owner/dashboard" replace /> }, // Chuyển hướng từ /admin sang /admin/dashboard
+      { path: "", element: <Navigate to="/owner/:id/dashboard" replace /> }, // Chuyển hướng từ /admin sang /admin/dashboard
       { path: "owners", element: <Owner /> },
       { path: "dashboard", element: <OverviewOwner /> },
       { path: "booking", element: <BookingOwner /> },
