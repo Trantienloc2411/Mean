@@ -5,11 +5,17 @@ import NotificationIcon from "./NotificationIcon";
 import NotificationPanel from "./NotificationPanel";
 import LogoHeader from "../../LogoHeader";
 import { useNavigate } from "react-router-dom";
+import { useSelector } from "react-redux";
+import { useGetUserQuery } from "../../../redux/services/authApi";
 
 export default function HeaderSimple() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [time, setTime] = useState(new Date());
   const navigate = useNavigate();
+  const userId = useSelector((state) => state.auth.userId);
+
+  const { data: userData, isLoading } = useGetUserQuery(userId);
+  // console.log(userData);
   useEffect(() => {
     const intervalId = setInterval(() => {
       setTime(new Date());
@@ -172,7 +178,7 @@ export default function HeaderSimple() {
               setIsNotificationOpen((prev) => !prev); // Toggle notification panel
             }}
           />
-          <Avatar /> {/* Avatar Component */}
+          <Avatar userData={userData} /> {/* Avatar Component */}
         </div>
       </div>
 

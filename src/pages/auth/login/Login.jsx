@@ -57,6 +57,7 @@ const Login = () => {
 
           // Lấy role của user
           const roleData = await getRoleById(userData.getUser.roleID).unwrap();
+          console.log(roleData);
           if (roleData?.roleName) {
             saveRole(roleData.roleName);
             dispatch(setRole(roleData.roleName));
