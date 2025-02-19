@@ -18,6 +18,22 @@ export const authApi = apiSlice.injectEndpoints({
         // credentials: "include",
       }),
     }),
+    sendOtpEmail: builder.mutation({
+      query: (credentials) => ({
+        url: "/user/send-otp",
+        method: "POST",
+        body: credentials,
+        // credentials: "include",
+      }),
+    }),
+    verifyEmail: builder.mutation({
+      query: (credentials) => ({
+        url: "/user/verify-email",
+        method: "POST",
+        body: credentials,
+        // credentials: "include",
+      }),
+    }),
     resetPasswordToken: builder.mutation({
       query: (credentials) => ({
         url: "/user/reset-password/{token}",
@@ -62,4 +78,6 @@ export const {
   useLazyRefreshTokenQuery,
   useForgetPasswordTokenMutation,
   useResetPasswordTokenMutation,
+  useSendOtpEmailMutation,
+  useVerifyEmailMutation,
 } = authApi;

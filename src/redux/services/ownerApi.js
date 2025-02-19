@@ -5,7 +5,10 @@ export const rentalApi = apiSlice.injectEndpoints({
     getOwnerById: builder.query({
       query: (id) => `owner/${id}`,
     }),
+    getOwnerDetailByUserId: builder.query({
+      query: (id) => `owner/detail-owner/${id}`,
+    }),
   }),
 });
 
-export const { useLazyGetOwnerByIdQuery } = rentalApi;
+export const { useLazyGetOwnerByIdQuery ,useGetOwnerDetailByUserIdQuery} = rentalApi;

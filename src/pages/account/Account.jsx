@@ -9,14 +9,14 @@ import {
   useGetUsersQuery,
 } from "../../redux/services/userApi";
 import CreateAccountForm from "./components/CreateAccountForm";
-import { useLazyRefreshTokenQuery } from "../../redux/services/authApi";
+// import { useLazyRefreshTokenQuery } from "../../redux/services/authApi";
 import { IoCreate } from "react-icons/io5";
 
 export default function Account() {
   const { data: users, error, isLoading } = useGetUsersQuery();
   const { data: roles } = useGetRolesQuery();
   const [openCreateUser, setOpenCreateUser] = useState(false);
-  const [refreshToken, { isFetching }] = useLazyRefreshTokenQuery();
+  // const [refreshToken, { isFetching }] = useLazyRefreshTokenQuery();
 
   const [searchValue, setSearchValue] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -134,6 +134,7 @@ export default function Account() {
             <Button
               icon={<IoCreate />}
               type="primary"
+              style={{ background: "#2f7beb" }}
               onClick={() => setOpenCreateUser(true)}
             >
               Tạo tài khoản

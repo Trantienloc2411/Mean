@@ -9,6 +9,7 @@ import {
   useLazyGetRoleByIdQuery,
   useLazyGetUserQuery,
   useLoginMutation,
+  useSendOtpEmailMutation,
 } from "../../../redux/services/authApi";
 import {
   setCredentials,
@@ -16,6 +17,7 @@ import {
   setUser,
 } from "../../../redux/slices/authSlice";
 import { saveToken, saveUserId, saveRole } from "../../../utils/storage";
+import { message } from "antd";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -23,10 +25,11 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const dispatch = useDispatch();
-  const [login, { isLoading }] = useLoginMutation();
+  const [login, { isLoading: isLoadingLogin }] = useLoginMutation();
   const [getUserById] = useLazyGetUserQuery();
   const [getRoleById] = useLazyGetRoleByIdQuery();
-
+  const [sendOTP, { isLoading: isLoadingSendOTP }] = useSendOtpEmailMutation();
+  const [isLoading, setIsLoading] = useState(false);
   const images = [
     "src/assets/images/beach.jpg",
     "src/assets/images/lake.jpg",
@@ -39,32 +42,61 @@ const Login = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    setIsLoading(true);
 
     try {
-      const result = await login({ email, password }).unwrap();
-      console.log("Login response:", result);
+      const loginResult = await login({ email, password }).unwrap();
+      console.log("Login response:", loginResult);
 
-      if (result?.accessToken) {
-        const userData = await getUserById(result._id).unwrap();
+      if (loginResult?.accessToken) {
+        const userData = await getUserById(loginResult._id).unwrap();
 
         console.log(userData);
-        if (!userData?.getUser.isActive)
-          return notification.error({
+
+        if (!userData?.getUser.isActive) {
+          notification.error({
             message: "Tài khoản bị khóa",
             description:
               "Vui lòng liên hệ quản trị viên để biết thêm chi tiết.",
           });
+          setIsLoading(false);
+          return;
+        }
 
         if (userData?.getUser) {
           const roleData = await getRoleById(userData.getUser.roleID).unwrap();
-          console.log(roleData);
+
+          if (!userData?.getUser.isVerifiedEmail) {
+            const response = await sendOTP({
+              email: userData?.getUser.email,
+            }).unwrap();
+
+            console.log(response);
+            notification.success({
+              message: response.message,
+              description: "Xin hay kiểm tra email của bạn.",
+            });
+            setIsLoading(false);
+
+            navigate("/verifycode", {
+              state: {
+                email: userData?.getUser.email,
+                loginResult,
+                userData,
+                roleData,
+              },
+            });
+            return;
+          }
+
           if (roleData?.roleName) {
-            saveToken(result.accessToken);
-            saveUserId(result._id);
-            dispatch(setCredentials(result));
+            saveToken(loginResult.accessToken);
+            saveUserId(loginResult._id);
+            dispatch(setCredentials(loginResult));
             dispatch(setUser(userData.getUser));
             saveRole(roleData.roleName);
             dispatch(setRole(roleData.roleName));
+            setIsLoading(false);
           }
           navigate("/");
         }
@@ -73,9 +105,11 @@ const Login = () => {
           message: "Đăng nhập thành công",
           description: "Chào mừng bạn đến với Mean!",
         });
+        setIsLoading(false);
       }
     } catch (err) {
       console.error("Login failed:", err);
+      setIsLoading(false);
       notification.error({
         message: "Đăng nhập thất bại",
         description:
