@@ -22,6 +22,9 @@ export default function CustomerProfile() {
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrT_BjEyf_LEpcvb225JX2qFCJcLz5-0RXLg&s",
     isActive: userData?.getUser.isActive,
     messageIsActive: userData?.getUser.isActive ? "Hoạt động" : "Bị khóa",
+    messageToolTip: userData?.getUser.isActive
+      ? "Tài khoản hoạt động"
+      : "Tài khoản bị khóa",
     isVerify:
       userData?.getUser.isVerifiedEmail && userData?.getUser.isVerifiedPhone,
     messageIsVerify:
@@ -68,10 +71,10 @@ export default function CustomerProfile() {
           <div className={styles.statusContainer}>
             <span className={styles.statusLabel}>Trạng thái tài khoản:</span>
             <div className={styles.statusWrapper}>
-              <Tag color="green" style={{marginLeft:10 ,borderRadius:20}}>
+              <Tag color="green" style={{ marginLeft: 10, borderRadius: 20 }}>
                 {userInfo.messageIsActive}
               </Tag>
-              <Tooltip title="Tài khoản của bạn đang hoạt động bình thường.">
+              <Tooltip title={userInfo.messageToolTip}>
                 <InfoCircleOutlined className={styles.infoIcon} />
               </Tooltip>
             </div>

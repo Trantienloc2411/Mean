@@ -45,20 +45,24 @@ const Login = () => {
       console.log("Login response:", result);
 
       if (result?.accessToken) {
-        // Lưu thông tin vào localStorage
-        saveToken(result.accessToken);
-        saveUserId(result._id);
-        dispatch(setCredentials(result));
-
-        // Lấy thông tin user
         const userData = await getUserById(result._id).unwrap();
-        if (userData?.getUser) {
-          dispatch(setUser(userData.getUser));
 
-          // Lấy role của user
+        console.log(userData);
+        if (!userData?.getUser.isActive)
+          return notification.error({
+            message: "Tài khoản bị khóa",
+            description:
+              "Vui lòng liên hệ quản trị viên để biết thêm chi tiết.",
+          });
+
+        if (userData?.getUser) {
           const roleData = await getRoleById(userData.getUser.roleID).unwrap();
           console.log(roleData);
           if (roleData?.roleName) {
+            saveToken(result.accessToken);
+            saveUserId(result._id);
+            dispatch(setCredentials(result));
+            dispatch(setUser(userData.getUser));
             saveRole(roleData.roleName);
             dispatch(setRole(roleData.roleName));
           }
