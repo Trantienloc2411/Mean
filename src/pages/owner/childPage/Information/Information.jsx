@@ -1,37 +1,72 @@
-import styles from '../Information/Information.module.scss';
-import AccountInfo from './Components/AccountInfo/AccountInfo';
-import AccountStatus from './Components/AccountStatus/AccountStatus';
-import CompanyInfo from './Components/CompanyInfo/CompanyInfo';
-export default function Information() {
-    
-    const userInfo = {
-        fullName: "Alexa Rawles",
-        email: "example@email.com",
-        phone: "0987654321",
-        avatar: "https://s3-alpha-sig.figma.com/img/4920/fcde/8447f632360829a3d6cf6bd47b299bab?Expires=1737331200&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=YRDul0LX5qH0qTJ~PYdbbybEnteiXecE7RrpyaJYW3rUifKmkLp4N2Z7LAVMSNvoNY5KXcmwhIqm5UWzcxWGg1waRqqC2uFYrx0jg4WoplYgOuHs9zytpNR7vXQvL-bjCmjuvVzERd36~7DsRQEsIosfV4kIoJkeosNYeCrHNIiikZCN8OKKWofulOhhq5o5klATU0sg-mX409oyDa3WtMkK2Xa7TLmSldHfhx60rkgQ143JPs5EFMTxYkG1kOrrtbQFh6MWQuqiYceftCcpNAo2bTYdrAni5P7IhcA-eSbopVix6NSUahpqvXlGnm7koWuaK3mkWk41Kpt-X53LNQ__"
-    }
+import { useParams } from "react-router-dom";
+import styles from "../Information/Information.module.scss";
+import AccountInfo from "./Components/AccountInfo/AccountInfo";
+import AccountStatus from "./Components/AccountStatus/AccountStatus";
+import CompanyInfo from "./Components/CompanyInfo/CompanyInfo";
+import { useGetUserQuery } from "../../../../redux/services/authApi";
+import { Skeleton } from "antd";
+import { message } from "antd";
 
+export default function Information() {
+  const { id } = useParams();
+  const { data: userData, isLoading } = useGetUserQuery(id);
+
+  if (isLoading) {
     return (
-        <div className="contentContainer">
-            <div className="infoHorizontal" style={{
-                display: 'flex',
-                justifyContent: 'space-around'
-            }}>
-                <div className="infoVertical" style={{width: '45%'}}>
-                    <AccountInfo
-                        initialData={userInfo}
-                    />
-                    <AccountStatus
-                        isAccountActive={true}
-                        tooltipAccountStatus='Tài khoản đã được kích hoạt thành công'
-                        isAccountVerified={true}
-                        tooltipAccountVerified='Tài khoản đã được xác thực'
-                    />
-                </div>
-                <div className="companySection" style={{width: '45%'}}>
-                    <CompanyInfo />
-                </div>
-            </div>
-        </div>
+      <div
+        className="loadingContainer"
+        style={{ textAlign: "center", padding: "20px" }}
+      >
+        <Skeleton />
+      </div>
     );
+  }
+  console.log(userData);
+
+  const userInfo = {
+    fullName: userData?.getUser.fullName,
+    email: userData?.getUser.email,
+    phone: userData?.getUser.phone,
+    avatar:
+      userData?.getUser.avatarUrl?.[0] ||
+      "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrT_BjEyf_LEpcvb225JX2qFCJcLz5-0RXLg&s",
+    isActive: userData?.getUser.isActive,
+    messageIsActive: userData?.getUser.isActive
+      ? "Tài khoản đang hoạt thành công "
+      : "Tài khoản đang bị khóa",
+    isVerifiedEmail: userData?.getUser.isVerifiedEmail,
+    isVerifiedPhone: userData?.getUser.isVerifiedPhone,
+    isVerify:
+      userData?.getUser.isVerifiedEmail && userData?.getUser.isVerifiedPhone,
+    messageIsVerify:
+      userData?.getUser.isVerifiedEmail && userData?.getUser.isVerifiedPhone
+        ? "Đã xác thực "
+        : "Số điện thoại/Email chưa xác thực",
+  };
+
+  return (
+    <div className="contentContainer">
+      <div
+        className="infoHorizontal"
+        style={{
+          display: "flex",
+          justifyContent: "space-around",
+        }}
+      >
+        <div className="infoVertical" style={{ width: "45%" }}>
+          <AccountInfo initialData={userInfo} />
+          <AccountStatus
+            isAccountActive={userInfo.isActive}
+            tooltipAccountStatus={userInfo.messageIsActive}
+            isAccountVerified={userInfo.isVerify}
+            tooltipAccountVerified={userInfo.messageIsVerify}
+            userInfo={userInfo}
+          />
+        </div>
+        <div className="companySection" style={{ width: "45%" }}>
+          <CompanyInfo />
+        </div>
+      </div>
+    </div>
+  );
 }

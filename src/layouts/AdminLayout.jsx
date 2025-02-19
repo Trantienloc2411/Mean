@@ -128,6 +128,7 @@ const AdminLayout = () => {
             width: `calc(100% - ${collapsed ? "80px" : "200px"})`,
             padding: "0 20px",
             backgroundColor: "#fff",
+            boxShadow: "0px 4px 5px 0px rgba(0, 0, 0, 0.1)",
           }}
         >
           <HeaderAdmin />

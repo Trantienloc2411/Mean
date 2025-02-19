@@ -57,6 +57,7 @@ export const {
   useLoginMutation,
   useLogoutQuery,
   useLazyGetUserQuery,
+  useGetUserQuery,
   useLazyGetRoleByIdQuery,
   useLazyRefreshTokenQuery,
   useForgetPasswordTokenMutation,
