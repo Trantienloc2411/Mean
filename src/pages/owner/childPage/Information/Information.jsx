@@ -1,17 +1,16 @@
 import { useParams } from "react-router-dom";
-import styles from "../Information/Information.module.scss";
 import AccountInfo from "./Components/AccountInfo/AccountInfo";
 import AccountStatus from "./Components/AccountStatus/AccountStatus";
 import CompanyInfo from "./Components/CompanyInfo/CompanyInfo";
-import { useGetUserQuery } from "../../../../redux/services/authApi";
 import { Skeleton } from "antd";
-import { message } from "antd";
+import { useGetOwnerDetailByUserIdQuery } from "../../../../redux/services/ownerApi";
 
 export default function Information() {
   const { id } = useParams();
-  const { data: userData, isLoading } = useGetUserQuery(id);
-
-  if (isLoading) {
+  const { data: ownerDetail, isLoading: ownerLoading } =
+    useGetOwnerDetailByUserIdQuery(id);
+  const userData = ownerDetail?.userId;
+  if (ownerLoading) {
     return (
       <div
         className="loadingContainer"
@@ -21,27 +20,39 @@ export default function Information() {
       </div>
     );
   }
-  console.log(userData);
-
   const userInfo = {
-    fullName: userData?.getUser.fullName,
-    email: userData?.getUser.email,
-    phone: userData?.getUser.phone,
+    isApproved: ownerDetail?.isApproved,
+    note: ownerDetail?.note,
+    fullName: userData?.fullName,
+    email: userData?.email,
+    phone: userData?.phone,
     avatar:
-      userData?.getUser.avatarUrl?.[0] ||
+      userData?.avatarUrl?.[0] ||
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrT_BjEyf_LEpcvb225JX2qFCJcLz5-0RXLg&s",
-    isActive: userData?.getUser.isActive,
-    messageIsActive: userData?.getUser.isActive
+    isActive: userData?.isActive,
+    messageIsActive: userData?.isActive
       ? "Tài khoản đang hoạt thành công "
       : "Tài khoản đang bị khóa",
-    isVerifiedEmail: userData?.getUser.isVerifiedEmail,
-    isVerifiedPhone: userData?.getUser.isVerifiedPhone,
+    isVerifiedEmail: userData?.isVerifiedEmail,
+    // isVerifiedPhone: userData?.isVerifiedPhone,
     isVerify:
-      userData?.getUser.isVerifiedEmail && userData?.getUser.isVerifiedPhone,
+      // userData?.isVerifiedEmail && userData?.isVerifiedPhone,
+      userData?.isVerifiedEmail,
     messageIsVerify:
-      userData?.getUser.isVerifiedEmail && userData?.getUser.isVerifiedPhone
+      // userData?.isVerifiedEmail && userData?.isVerifiedPhone
+      userData?.isVerifiedEmail
         ? "Đã xác thực "
         : "Số điện thoại/Email chưa xác thực",
+  };
+  const companyInfo = {
+    businessLicensesFile:
+      ownerDetail?.businessInformationId.businessLicensesFile,
+    citizenIdentification:
+      ownerDetail?.businessInformationId.citizenIdentification,
+    companyAddress: ownerDetail?.businessInformationId.companyAddress,
+    companyName: ownerDetail?.businessInformationId.companyName,
+    representativeName: ownerDetail?.businessInformationId.representativeName,
+    taxCode: ownerDetail?.businessInformationId.taxID,
   };
 
   return (
@@ -60,11 +71,13 @@ export default function Information() {
             tooltipAccountStatus={userInfo.messageIsActive}
             isAccountVerified={userInfo.isVerify}
             tooltipAccountVerified={userInfo.messageIsVerify}
+            isApproved={userInfo.isApproved}
+            note={userInfo.note}
             userInfo={userInfo}
           />
         </div>
         <div className="companySection" style={{ width: "45%" }}>
-          <CompanyInfo />
+          <CompanyInfo companyInfo={companyInfo} />
         </div>
       </div>
     </div>
