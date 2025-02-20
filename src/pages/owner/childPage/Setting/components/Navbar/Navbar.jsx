@@ -1,11 +1,14 @@
 import { Menu } from "antd";
 import styles from "../Navbar/NavBar.module.scss";
-import { UserOutlined, LockOutlined, BankOutlined, WalletOutlined } from '@ant-design/icons';
+import {
+  UserOutlined,
+  LockOutlined,
+  BankOutlined,
+  WalletOutlined,
+  BookOutlined,
+} from "@ant-design/icons";
 export default function NavBar(props) {
-
-    const {activeKey,
-        onSelect
-    } = props;
+  const { activeKey, onSelect } = props;
 
   return (
     <div className={styles.sidebar}>
@@ -18,6 +21,9 @@ export default function NavBar(props) {
       >
         <Menu.Item key="accountInfo" icon={<UserOutlined />}>
           Thông tin tài khoản
+        </Menu.Item>
+        <Menu.Item key="businessInfo" icon={<BookOutlined />}>
+          Thông tin kinh doanh
         </Menu.Item>
         <Menu.Item key="changePassword" icon={<LockOutlined />}>
           Đổi mật khẩu

@@ -1,15 +1,9 @@
 import React from "react";
 import { Form, Menu, Input, Button } from "antd";
-import {
-  UserOutlined,
-  LockOutlined,
-  BankOutlined,
-  WalletOutlined,
-} from "@ant-design/icons";
-import styles from "../ChangePassword/ChangePassword.module.scss";
-export default function ChangePassword(props) {
-  const { onChangePassword } = props;
 
+import styles from "../ChangePassword/ChangePassword.module.scss";
+import { message } from "antd";
+export default function ChangePassword() {
   const [form] = Form.useForm();
 
   const handleSave = () => {

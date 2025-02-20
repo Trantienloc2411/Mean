@@ -8,6 +8,7 @@ import BankAccount from "./components/BankAccount/BankAccount";
 import MeanWallet from "./components/Wallet/MeanWallet";
 import { useGetOwnerDetailByUserIdQuery } from "../../../../redux/services/ownerApi";
 import { useParams } from "react-router-dom";
+import BusinessInformation from "./components/BusinessInformation/BusinessInformation";
 
 const { Content } = Layout;
 
@@ -19,7 +20,10 @@ export default function Setting() {
     isLoading: ownerLoading,
     refetch,
   } = useGetOwnerDetailByUserIdQuery(id);
+  console.log(ownerDetail);
+
   const [userInfo, setUserInfo] = useState(null);
+  const [businessInfo, setBusinessInfo] = useState(null);
 
   useEffect(() => {
     if (ownerDetail) {
@@ -44,6 +48,20 @@ export default function Setting() {
           ? "Đã xác thực "
           : "Số điện thoại/Email chưa xác thực",
       });
+      setBusinessInfo({
+        businessLicensesFile:
+          ownerDetail?.businessInformationId.businessLicensesFile,
+        citizenIdentification:
+          ownerDetail?.businessInformationId.citizenIdentification,
+        companyAddress: ownerDetail?.businessInformationId.companyAddress,
+        companyName: ownerDetail?.businessInformationId.companyName,
+        id: ownerDetail?.businessInformationId.id,
+        representativeName:
+          ownerDetail?.businessInformationId.representativeName,
+        taxID: ownerDetail?.businessInformationId.taxID,
+        updatedAt: ownerDetail?.businessInformationId.updatedAt,
+        createdAt: ownerDetail?.businessInformationId.createdAt,
+      });
     }
   }, [ownerDetail]);
 
@@ -66,6 +84,10 @@ export default function Setting() {
     switch (activeComponent) {
       case "accountInfo":
         return <Information refetch={refetch} userData={userInfo} />;
+      case "businessInfo":
+        return (
+          <BusinessInformation refetch={refetch} businessData={businessInfo} />
+        );
       case "changePassword":
         return <ChangePassword onChangePassword={handlePasswordChange} />;
       case "bankAccount":

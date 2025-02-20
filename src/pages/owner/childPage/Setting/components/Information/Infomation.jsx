@@ -12,38 +12,26 @@ export default function Information({ userData, refetch }) {
   const [updateUser] = useUpdateUserMutation();
   const { id } = useParams();
   const [uploading, setUploading] = useState(false);
-
-  const handleUploadAvatar = async (file) => {
-    setUploading(true);
-    const fileName = `avatars/${id}-${Date.now()}`; // Tạo tên file duy nhất
-    const { data, error } = await supabase.storage
-      .from("avatars") // Thay bằng tên bucket trong Supabase
-      .upload(fileName, file);
-
-    if (error) {
-      message.error("Upload ảnh thất bại!");
-      setUploading(false);
-      return null;
-    }
-
-    // Lấy URL ảnh sau khi upload
-    const { data: publicUrl } = supabase.storage
-      .from("avatars")
-      .getPublicUrl(fileName);
-
-    setUploading(false);
-    return publicUrl.publicUrl;
-  };
-
   const handleSave = async () => {
     if (uploading) return; // Không cho phép lưu khi đang upload
+    const phoneRegex = /^[0-9]{10}$/;
+    if (!phoneRegex.test(formData.phone)) {
+      message.error("Số điện thoại phải có đúng 10 số!");
+      return;
+    }
+    const birthDate = dayjs(formData.doB, "DD/MM/YYYY");
+    const age = dayjs().diff(birthDate, "year");
+    if (age < 18) {
+      message.error("Bạn phải trên 18 tuổi!");
+      return;
+    }
+
     try {
       const updatedData = {
         fullName: formData.fullName,
-        email: formData.email,
         phone: formData.phone,
         doB: formData.doB,
-        avatarUrl: formData.avatar,
+        avatar: formData.avatar,
       };
 
       await updateUser({ id: id, updatedUser: updatedData }).unwrap();
@@ -53,12 +41,47 @@ export default function Information({ userData, refetch }) {
       await refetch(); // Gọi lại API để cập nhật dữ liệu mới
     } catch (error) {
       message.error("Cập nhật thất bại, vui lòng thử lại!");
+      setFormData(userData); // Khôi phục lại dữ liệu cũ khi cập nhật thất bại
     }
+  };
+
+  const handleCancel = async () => {
+    setFormData(userData);
+    setIsEditing(false);
+  };
+
+  const handleUploadAvatar = async (file) => {
+    setUploading(true);
+    const fileName = `avatars/${id}-${Date.now()}`;
+    const { data, error } = await supabase.storage
+      .from("avatars")
+      .upload(fileName, file);
+
+    if (error) {
+      message.error("Upload ảnh thất bại!");
+      setUploading(false);
+      return null;
+    }
+
+    const { data: publicUrl } = supabase.storage
+      .from("avatars")
+      .getPublicUrl(fileName);
+
+    setUploading(false);
+
+    if (publicUrl?.publicUrl) {
+      setFormData((prev) => ({
+        ...prev,
+        avatar: publicUrl.publicUrl,
+      }));
+    }
+
+    return publicUrl?.publicUrl;
   };
 
   return (
     <div>
-      <h2>Thông tin tài khoản</h2>
+      <h3 style={{ fontSize: 24 }}>Thông tin tài khoản</h3>
       <div>
         <div style={{ display: "grid", gridTemplateColumns: "20% auto" }}>
           <div
@@ -111,7 +134,8 @@ export default function Information({ userData, refetch }) {
                 onChange={(e) =>
                   setFormData({ ...formData, email: e.target.value })
                 }
-                disabled={!isEditing || uploading}
+                // disabled={!isEditing || uploading}
+                disabled={true}
               />
             </Form.Item>
 
@@ -137,13 +161,28 @@ export default function Information({ userData, refetch }) {
             </Form.Item>
 
             {isEditing ? (
-              <Button type="primary" onClick={handleSave} disabled={uploading}>
-                {uploading ? "Đang tải..." : "Lưu"}
-              </Button>
+              <div
+                style={{ display: "flex", justifyContent: "end", gap: "20px" }}
+              >
+                <Button
+                  type="primary"
+                  onClick={handleSave}
+                  disabled={uploading}
+                >
+                  {uploading ? "Đang tải..." : "Lưu"}
+                </Button>
+                <Button type="default" onClick={() => handleCancel()}>
+                  Thoát
+                </Button>
+              </div>
             ) : (
-              <Button type="default" onClick={() => setIsEditing(true)}>
-                Chỉnh sửa
-              </Button>
+              <div
+                style={{ display: "flex", justifyContent: "end", gap: "20px" }}
+              >
+                <Button type="default" onClick={() => setIsEditing(true)}>
+                  Chỉnh sửa
+                </Button>
+              </div>
             )}
           </Form>
         </div>
