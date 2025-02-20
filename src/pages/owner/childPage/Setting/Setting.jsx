@@ -1,92 +1,104 @@
-import { Layout } from 'antd';
-import styles from '../Setting/Setting.module.scss';
-import NavBar from './components/Navbar/Navbar'
-import { useState } from 'react';
-import Information from './components/Information/Infomation';
-import ChangePassword from './components/ChangePassword/ChangePassword';
-import BankAccount from './components/BankAccount/BankAccount';
-import MeanWallet from './components/Wallet/MeanWallet';
+import { Layout, Skeleton } from "antd";
+import styles from "../Setting/Setting.module.scss";
+import NavBar from "./components/Navbar/Navbar";
+import { useState, useEffect } from "react";
+import Information from "./components/Information/Infomation";
+import ChangePassword from "./components/ChangePassword/ChangePassword";
+import BankAccount from "./components/BankAccount/BankAccount";
+import MeanWallet from "./components/Wallet/MeanWallet";
+import { useGetOwnerDetailByUserIdQuery } from "../../../../redux/services/ownerApi";
+import { useParams } from "react-router-dom";
+
 const { Content } = Layout;
-export default function Setting(props) { 
 
-    const [activeComponent, setActiveComponent] = useState('accountInfo');
-    const [userData, setUserData] = useState({
-      name: 'Alexa Rowles',
-      email: 'example@email.com',
-      phone: '08987654321',
-      dob: '20/12/2003',
-      avatar: null,
-    });
+export default function Setting() {
+  const [activeComponent, setActiveComponent] = useState("accountInfo");
+  const { id } = useParams();
+  const {
+    data: ownerDetail,
+    isLoading: ownerLoading,
+    refetch,
+  } = useGetOwnerDetailByUserIdQuery(id);
+  const [userInfo, setUserInfo] = useState(null);
 
-    const walletData = {
-      availableBalance: "900,000 vnd",
-      pendingBalance: "20,000 vnd",
-      userName: "Alexa Rawles",
-    };
-    
-    const transactionData = [
-      {
-        key: "1",
-        transactionCode: "200afkjlafasdf",
-        type: "Tiền booking",
-        createdAt: "14:30:45 21/12/2023",
-        amount: "200,000 vnd",
-        status: "Expired",
-      },
-      {
-        key: "2",
-        transactionCode: "123123dsfsdf",
-        type: "Tiền nạp",
-        createdAt: "14:30:45 21/12/2023",
-        amount: "200,000 vnd",
-        status: "Paused",
-      },
-      {
-        key: "3",
-        transactionCode: "200afkjl121eafasdf",
-        type: "Tiền nạp",
-        createdAt: "14:30:45 21/12/2023",
-        amount: "200,000 vnd",
-        status: "Active",
-      },
-      {
-        key: "4",
-        transactionCode: "4dad200afkjlafasdf",
-        type: "Tiền nạp",
-        createdAt: "14:30:45 21/12/2023",
-        amount: "200,000 vnd",
-        status: "Active",
-      },
-    ];
-  
-    const handlePasswordChange = (passwordData) => {
-      console.log('Password changed:', passwordData);
-    };
+  useEffect(() => {
+    if (ownerDetail) {
+      const userData = ownerDetail?.userId;
+      setUserInfo({
+        isApproved: ownerDetail?.isApproved,
+        note: ownerDetail?.note,
+        fullName: userData?.fullName,
+        doB: userData?.doB,
+        email: userData?.email,
+        phone: userData?.phone,
+        avatar:
+          userData?.avatarUrl?.[0] ||
+          "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrT_BjEyf_LEpcvb225JX2qFCJcLz5-0RXLg&s",
+        isActive: userData?.isActive,
+        messageIsActive: userData?.isActive
+          ? "Tài khoản đang hoạt thành công "
+          : "Tài khoản đang bị khóa",
+        isVerifiedEmail: userData?.isVerifiedEmail,
+        isVerify: userData?.isVerifiedEmail,
+        messageIsVerify: userData?.isVerifiedEmail
+          ? "Đã xác thực "
+          : "Số điện thoại/Email chưa xác thực",
+      });
+    }
+  }, [ownerDetail]);
 
-    const renderComponent = () => {
-        switch (activeComponent) {
-          case 'accountInfo':
-            return <Information userData={userData} onUpdate={setUserData} />;
-          case 'changePassword':
-            return <ChangePassword onChangePassword={handlePasswordChange} />;
-          case 'bankAccount':
-            return <BankAccount />;
-          case 'meanWallet':
-            return <MeanWallet walletData={walletData} transactionData={transactionData} />;
-          default:
-            return <AccountInfo userData={userData} onUpdate={setUserData} />;
-        }
-      };
-    
-      return (
-        <Layout className={styles.settingsPage}>
-          <NavBar  activeKey={activeComponent} onSelect={setActiveComponent} />
-          <Content style={{
-            backgroundColor: 'white',
-            padding: 20,
-            boxShadow: "0.02px 3px 2px #CBCBCBFF",
-            borderRadius: 10
-          }} className={styles.mainContent}>{renderComponent()}</Content>
-        </Layout>
-      );
+  if (ownerLoading || !userInfo) {
+    return (
+      <div
+        className="loadingContainer"
+        style={{ textAlign: "center", padding: "20px" }}
+      >
+        <Skeleton />
+      </div>
+    );
+  }
+
+  const handlePasswordChange = (passwordData) => {
+    console.log("Password changed:", passwordData);
+  };
+
+  const renderComponent = () => {
+    switch (activeComponent) {
+      case "accountInfo":
+        return <Information refetch={refetch} userData={userInfo} />;
+      case "changePassword":
+        return <ChangePassword onChangePassword={handlePasswordChange} />;
+      case "bankAccount":
+        return <BankAccount />;
+      case "meanWallet":
+        return (
+          <MeanWallet
+            walletData={{
+              availableBalance: "900,000 vnd",
+              pendingBalance: "20,000 vnd",
+              userName: "Alexa Rawles",
+            }}
+          />
+        );
+      default:
+        return <Information refetch={refetch} userData={userInfo} />;
+    }
+  };
+
+  return (
+    <Layout className={styles.settingsPage}>
+      <NavBar activeKey={activeComponent} onSelect={setActiveComponent} />
+      <Content
+        style={{
+          backgroundColor: "white",
+          padding: 20,
+          boxShadow: "0.02px 3px 2px #CBCBCBFF",
+          borderRadius: 10,
+        }}
+        className={styles.mainContent}
+      >
+        {renderComponent()}
+      </Content>
+    </Layout>
+  );
 }

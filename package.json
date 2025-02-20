@@ -12,6 +12,7 @@
   "dependencies": {
     "@ant-design/icons": "^5.5.2",
     "@reduxjs/toolkit": "^2.5.0",
+    "@supabase/supabase-js": "^2.48.1",
     "antd": "^5.22.7",
     "cloudinary-core": "^2.13.1",
     "cloudinary-react": "^1.8.1",
