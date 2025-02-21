@@ -1,23 +1,38 @@
 import { useState, useEffect } from "react";
 import FilterSection from "./components/FilterSection";
 import RentalLocationList from "./components/RentalLocationList";
-import { useGetAllRentalLocationQuery } from "../../../../redux/services/rentalApi";
+import { useParams } from "react-router-dom";
+import { useGetRentalLocationByOwnerIdQuery } from "../../../../redux/services/rentalApi";
+import { useGetOwnerDetailByUserIdQuery } from "../../../../redux/services/ownerApi";
+import { Spin } from "antd";
+import { LoadingOutlined } from "@ant-design/icons";
+import { Image } from "antd";
 
 export default function RentalLocation() {
+  const { id } = useParams();
+
+  // Lấy thông tin chủ sở hữu
+  const {
+    data: ownerDetailData,
+    isLoading: ownerDetailIsLoading,
+    isError: ownerDetailIsError,
+  } = useGetOwnerDetailByUserIdQuery(id);
+
+  const ownerId = ownerDetailData?.id;
+
+  // Lấy danh sách địa điểm cho thuê theo ownerId
   const {
     data: rentalData,
-    isLoading,
-    isError,
-  } = useGetAllRentalLocationQuery();
+    isLoading: rentalIsLoading,
+    isError: rentalIsError,
+  } = useGetRentalLocationByOwnerIdQuery(ownerId, { skip: !ownerId });
 
   const [searchValue, setSearchValue] = useState("");
-  const [filters, setFilters] = useState({
-    statuses: [],
-  });
+  const [filters, setFilters] = useState({ statuses: [] });
   const [rentalLocations, setRentalLocations] = useState([]);
   const [filteredLocations, setFilteredLocations] = useState([]);
 
-  // Khi có dữ liệu từ API, cập nhật vào state
+  // Cập nhật dữ liệu khi rentalData thay đổi
   useEffect(() => {
     if (rentalData?.data) {
       setRentalLocations(rentalData.data);
@@ -25,7 +40,6 @@ export default function RentalLocation() {
     }
   }, [rentalData]);
 
-  console.log (rentalData);
   const handleSearch = (value) => {
     setSearchValue(value);
     applyFilters(value, filters);
@@ -53,8 +67,12 @@ export default function RentalLocation() {
     setFilteredLocations(filtered);
   };
 
-  // if (isLoading) return <p>Loading...</p>;
-  // if (isError) return <p>Error loading rental locations.</p>;
+  if (ownerDetailIsLoading || rentalIsLoading)
+    return (
+      <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} />
+    );
+
+  if (ownerDetailIsError || rentalIsError) return <p>Lỗi khi tải dữ liệu.</p>;
 
   return (
     <div>

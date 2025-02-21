@@ -72,14 +72,16 @@ export default function AccountStatus({ userData, refetch }) {
 
   return (
     <Card title="Trạng thái tài khoản" style={{ marginTop: 20 }}>
-      <Flex vertical align="start" gap={10}>
-        <div>
-          <strong style={{ marginRight: 10 }}>Trạng thái hoạt động:</strong>
-          {userData.isActive ? (
-            <Tag color="green">Hoạt động</Tag>
-          ) : (
-            <Tag color="red">Bị khóa</Tag>
-          )}
+      <Flex vertical gap={20}>
+        <Flex>
+          <div>
+            <strong style={{ marginRight: 10 }}>Trạng thái hoạt động:</strong>
+            {userData.isActive ? (
+              <Tag color="green">Hoạt động</Tag>
+            ) : (
+              <Tag color="red">Bị khóa</Tag>
+            )}
+          </div>
           <Button
             type="text"
             danger={userData.isActive}
@@ -89,31 +91,34 @@ export default function AccountStatus({ userData, refetch }) {
             }}
             icon={<EditOutlined />}
           />
-        </div>
+        </Flex>
 
-        <div>
-          <strong style={{ marginRight: 10 }}>Xác thực:</strong>
-          {userData.isVerify ? (
-            <Tag color="blue">Đã xác thực</Tag>
-          ) : (
-            <Tag color="orange">Chưa xác thực</Tag>
-          )}
-        </div>
-
-        <div>
-          <strong style={{ marginRight: 10 }}>Phê duyệt:</strong>
-          {userData.isApproved ? (
-            <Tag color="green">Đã phê duyệt</Tag>
-          ) : (
-            <Tag color="red">Chưa phê duyệt</Tag>
-          )}
+        <Flex>
+          <div>
+            <strong style={{ marginRight: 10 }}>Phê duyệt:</strong>
+            {userData.isApproved ? (
+              <Tag color="green">Đã phê duyệt</Tag>
+            ) : (
+              <Tag color="red">Chưa phê duyệt</Tag>
+            )}
+          </div>
           <Button
             type="text"
             icon={<EditOutlined />}
             onClick={() => setModalVisible(true)}
           />
-        </div>
+        </Flex>
 
+        <Flex>
+          <div>
+            <strong style={{ marginRight: 10 }}>Xác thực:</strong>
+            {userData.isVerify ? (
+              <Tag color="blue">Đã xác thực</Tag>
+            ) : (
+              <Tag color="orange">Chưa xác thực</Tag>
+            )}
+          </div>
+        </Flex>
         {!userData.isApproved && userData.note && (
           <p>
             <strong>Lý do chưa phê duyệt:</strong> {userData.note}
