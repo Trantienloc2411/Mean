@@ -32,7 +32,7 @@ export const customFetchBaseQuery = async (args, api, extraOptions) => {
 
     if (refreshResult.data) {
       const newAccessToken = refreshResult.data.accessToken;
-      console.log(newAccessToken);
+      // console.log(newAccessToken);
 
       saveToken(newAccessToken);
       result = await baseQuery(args, api, extraOptions);

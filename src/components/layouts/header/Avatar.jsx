@@ -34,24 +34,24 @@ export default function Avatar({ userData }) {
   };
 
   const items = [
-    {
-      key: "1",
-      label: "Hồ sơ",
-      icon: <UserOutlined />,
-    },
-    {
-      key: "2",
-      label: "Ví Mean",
-      icon: <WalletOutlined />,
-    },
+    // {
+    //   key: "1",
+    //   label: "Hồ sơ",
+    //   icon: <UserOutlined />,
+    // },
+    // {
+    //   key: "2",
+    //   label: "Ví Mean",
+    //   icon: <WalletOutlined />,
+    // },
     {
       key: "3",
       label: "Cài đặt",
       icon: <SettingOutlined />,
     },
-    {
-      type: "divider",
-    },
+    // {
+    // type: "divider",
+    // },
     {
       key: "4",
       label: "Đăng xuất",

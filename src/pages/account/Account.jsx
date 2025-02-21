@@ -9,13 +9,14 @@ import {
   useGetUsersQuery,
 } from "../../redux/services/userApi";
 import CreateAccountForm from "./components/CreateAccountForm";
-import { useLazyRefreshTokenQuery } from "../../redux/services/authApi";
+// import { useLazyRefreshTokenQuery } from "../../redux/services/authApi";
+import { IoCreate } from "react-icons/io5";
 
 export default function Account() {
   const { data: users, error, isLoading } = useGetUsersQuery();
   const { data: roles } = useGetRolesQuery();
   const [openCreateUser, setOpenCreateUser] = useState(false);
-  const [refreshToken, { isFetching }] = useLazyRefreshTokenQuery();
+  // const [refreshToken, { isFetching }] = useLazyRefreshTokenQuery();
 
   const [searchValue, setSearchValue] = useState("");
   const [filteredUsers, setFilteredUsers] = useState([]);
@@ -65,15 +66,15 @@ export default function Account() {
     }
   }, [users, searchValue, selectedFilters, roleMap]);
 
-  const handleRefreshToken = async () => {
-    try {
-      const result = await refreshToken().unwrap();
-      console.log(result);
-      message.success("Refresh Thành Công!");
-    } catch {
-      message.error("Lỗi Refresh Token!");
-    }
-  };
+  // const handleRefreshToken = async () => {
+  //   try {
+  //     const result = await refreshToken().unwrap();
+  //     console.log(result);
+  //     message.success("Refresh Thành Công!");
+  //   } catch {
+  //     message.error("Lỗi Refresh Token!");
+  //   }
+  // };
 
   const handleFilterChange = (key, values) => {
     setSelectedFilters((prev) => ({ ...prev, [key]: values }));
@@ -98,34 +99,48 @@ export default function Account() {
       <OverviewAccount />
       <div style={{ marginTop: 20 }}>
         <h1 style={{ fontSize: 20 }}>Danh sách tài khoản</h1>
-        <Button
+        {/* <Button
           type="primary"
           onClick={handleRefreshToken}
           loading={isFetching}
         >
           Refresh Token
-        </Button>
+        </Button> */}
         <div style={{ background: "#fff", borderRadius: 20, padding: 20 }}>
-          <div style={{ display: "flex", gap: 20 }}>
-            <Input
-              prefix={<SearchOutlined />}
-              placeholder="Tìm kiếm bằng số điện thoại"
-              style={{ width: 300 }}
-              value={searchValue}
-              onChange={(e) => setSearchValue(e.target.value)}
-            />
-            <FilterAccount
-              users={users}
-              roles={roles?.map((role) => role.roleName) || []} // Truyền roleName vào filter
-              filters={selectedFilters}
-              onFilterChange={handleFilterChange}
-              onReset={resetFilters}
-              onApplyFilters={(filters) => setSelectedFilters(filters)}
-            />
-            <Button type="primary" onClick={() => setOpenCreateUser(true)}>
-              + Tạo tài khoản
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center",
+            }}
+          >
+            <div style={{ display: "flex", gap: 20, flexGrow: 1 }}>
+              <Input
+                prefix={<SearchOutlined />}
+                placeholder="Tìm kiếm bằng số điện thoại"
+                style={{ width: 300 }}
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+              />
+              <FilterAccount
+                users={users}
+                roles={roles?.map((role) => role.roleName) || []} // Truyền roleName vào filter
+                filters={selectedFilters}
+                onFilterChange={handleFilterChange}
+                onReset={resetFilters}
+                onApplyFilters={(filters) => setSelectedFilters(filters)}
+              />
+            </div>
+            <Button
+              icon={<IoCreate />}
+              type="primary"
+              style={{ background: "#2f7beb" }}
+              onClick={() => setOpenCreateUser(true)}
+            >
+              Tạo tài khoản
             </Button>
           </div>
+
           <AccountTable loading={isLoading} data={filteredUsers} />
         </div>
       </div>

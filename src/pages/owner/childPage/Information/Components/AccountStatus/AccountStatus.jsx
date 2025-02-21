@@ -7,6 +7,8 @@ const { Text } = Typography;
 
 export default function StatusInfo({
   userInfo,
+  isApproved,
+  note,
   isAccountActive,
   tooltipAccountStatus,
   isAccountVerified,
@@ -29,15 +31,24 @@ export default function StatusInfo({
 
   const statusInfo = [
     {
-      label: "Trạng thái tài khoản:",
+      label: "Trạng thái hoạt động:",
+      status: isAccountActive,
       value: isAccountActive ? "Hoạt động" : "Không hoạt động",
       tooltip: tooltipAccountStatus,
       valueStyle: isAccountActive ? colorTrue : colorFalse,
     },
     {
       label: "Trạng thái xác thực:",
+      status: isAccountVerified,
       value: isAccountVerified ? "Đã xác thực" : "Chưa xác thực",
       tooltip: tooltipAccountVerified,
+      valueStyle: isAccountVerified ? colorTrue : colorFalse,
+    },
+    {
+      label: "Trạng thái Phê duyệt:",
+      status: isApproved,
+      value: isApproved ? "Phê duyệt" : "Chưa phê duyệt",
+      tooltip: note,
       valueStyle: isAccountVerified ? colorTrue : colorFalse,
     },
   ];
@@ -55,15 +66,24 @@ export default function StatusInfo({
           {statusInfo.map((item, index) => (
             <div
               key={index}
-              style={{ display: "flex", alignItems: "center", gap: "8px" }}
+              style={{
+                display: "grid",
+                gridTemplateColumns: "150px auto auto", // Đảm bảo label và value đều nhau
+                alignItems: "center",
+                gap: "8px",
+              }}
             >
               <Text>{item.label}</Text>
-              <span style={item.valueStyle}>{item.value}</span>
-              <Tooltip title={item.tooltip}>
-                <InfoCircleOutlined
-                  style={{ color: "#1890ff", cursor: "pointer" }}
-                />
-              </Tooltip>
+              <span style={{ ...item.valueStyle, maxWidth: "120px" ,textAlign: "center"}}>
+                {item.value}
+              </span>
+              {item.status ? null : (
+                <Tooltip title={item.tooltip}>
+                  <InfoCircleOutlined
+                    style={{ color: "#1890ff", cursor: "pointer" }}
+                  />
+                </Tooltip>
+              )}
             </div>
           ))}
         </Space>
