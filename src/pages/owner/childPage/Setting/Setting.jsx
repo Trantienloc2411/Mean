@@ -20,7 +20,6 @@ export default function Setting() {
     isLoading: ownerLoading,
     refetch,
   } = useGetOwnerDetailByUserIdQuery(id);
-  console.log(ownerDetail);
 
   const [userInfo, setUserInfo] = useState(null);
   const [businessInfo, setBusinessInfo] = useState(null);
@@ -76,10 +75,6 @@ export default function Setting() {
     );
   }
 
-  const handlePasswordChange = (passwordData) => {
-    console.log("Password changed:", passwordData);
-  };
-
   const renderComponent = () => {
     switch (activeComponent) {
       case "accountInfo":
@@ -89,7 +84,7 @@ export default function Setting() {
           <BusinessInformation refetch={refetch} businessData={businessInfo} />
         );
       case "changePassword":
-        return <ChangePassword onChangePassword={handlePasswordChange} />;
+        return <ChangePassword />;
       case "bankAccount":
         return <BankAccount />;
       case "meanWallet":

@@ -42,6 +42,14 @@ export const authApi = apiSlice.injectEndpoints({
         // credentials: "include",
       }),
     }),
+    updatePassword: builder.mutation({
+      query: (credentials) => ({
+        url: "/user/password",
+        method: "PUT",
+        body: credentials,
+        // credentials: "include",
+      }),
+    }),
     refreshToken: builder.query({
       query: () => ({
         url: "/user/refresh",
@@ -80,4 +88,5 @@ export const {
   useResetPasswordTokenMutation,
   useSendOtpEmailMutation,
   useVerifyEmailMutation,
+  useUpdatePasswordMutation,
 } = authApi;

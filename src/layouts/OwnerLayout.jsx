@@ -10,7 +10,7 @@ import { Layout, Menu } from "antd";
 import Logo from "../assets/images/logo.png";
 import { BsBuildings } from "react-icons/bs";
 import HeaderSimple from "../components/layouts/header/HeaderSimple";
-import useAppInit from "../hooks/useAppInit";
+import { MdOutlinePolicy } from "react-icons/md";
 
 const { Header, Content } = Layout;
 
@@ -45,7 +45,7 @@ const OwnerLayout = () => {
     },
     {
       key: `/owner/${id}/policy`,
-      icon: <BarChartOutlined />,
+      icon: <MdOutlinePolicy />,
       label: "Chính sách",
     },
     {
