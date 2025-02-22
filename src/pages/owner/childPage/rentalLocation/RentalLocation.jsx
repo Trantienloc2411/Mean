@@ -75,7 +75,7 @@ export default function RentalLocation() {
   if (ownerDetailIsError || rentalIsError) return <p>Lỗi khi tải dữ liệu.</p>;
 
   return (
-    <div>
+    <div style={{ padding: "20px" }}>
       <h2>Địa điểm cho thuê</h2>
       <div style={{ display: "flex", gap: "20px", padding: "20px" }}>
         <FilterSection
