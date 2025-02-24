@@ -74,7 +74,13 @@ export default function StatusInfo({
               }}
             >
               <Text>{item.label}</Text>
-              <span style={{ ...item.valueStyle, maxWidth: "120px" ,textAlign: "center"}}>
+              <span
+                style={{
+                  ...item.valueStyle,
+                  maxWidth: "120px",
+                  textAlign: "center",
+                }}
+              >
                 {item.value}
               </span>
               {item.status ? null : (

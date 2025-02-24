@@ -12,9 +12,22 @@ import SettingRentalLocation from "./components/SettingRentalLocation";
 export default function RentalLocationDetail() {
   const { id } = useParams(); // Get ID from URL
   const { data: rental, isLoading, error } = useGetRentalLocationByIdQuery(id);
-
-  if (isLoading) return <Spin size="large" />;
+  if (isLoading)
+    return (
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          height: "100vh",
+        }}
+      >
+        <Spin size="large" />
+      </div>
+    );
   if (error) return <p>Failed to load rental location.</p>;
+  const rentalData = rental.data;
+  console.log(rentalData);
 
   const items = [
     {
@@ -22,15 +35,14 @@ export default function RentalLocationDetail() {
       label: "Thông tin",
       children: (
         <>
-          <TitleAndDescription item={rental} />
-          <LocationMap location={rental?.location} />
+          <TitleAndDescription rentalData={rentalData} />
         </>
       ),
     },
     {
       key: "2",
       label: "Hình ảnh",
-      children: <ImageSlider images={rental?.image || []} />,
+      children: <ImageSlider images={rentalData?.image || []} />,
     },
     {
       key: "3",
@@ -45,39 +57,20 @@ export default function RentalLocationDetail() {
     {
       key: "5",
       label: "Cài đặt",
-      children: <SettingRentalLocation item={rental}/>,
+      children: <SettingRentalLocation item={rental} />,
     },
   ];
 
   return (
     <div
       style={{
-        padding: "20px 20px",
+        padding: "0px 20px",
         background: "#fff",
         borderRadius: 20,
         minHeight: "100vh",
         margin: "20px 10%",
       }}
     >
-      <Flex gap={10} align="center">
-        <h1 style={{ fontSize: 28, margin: 0 }}>{rental?.name || "Rental Location Detail"}</h1>
-        <Tag
-          style={{
-            background: rental?.status === "active" ? "green" : "red",
-            color: "#fff",
-            borderRadius: 20,
-            fontSize: 12,
-            fontWeight: 700,
-            padding: "2px 10px",
-          }}
-        >
-          {rental?.status === "active" ? "Hoạt động" : "Không hoạt động"}
-        </Tag>
-      </Flex>
-      <Flex align="center" gap={5} style={{ marginTop: 10 }}>
-        <FaLocationDot />
-        <p style={{ margin: 0 }}>{rental?.address || "Unknown location"}</p>
-      </Flex>
       <Tabs defaultActiveKey="1" items={items} />
     </div>
   );

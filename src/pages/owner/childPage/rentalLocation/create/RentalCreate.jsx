@@ -11,12 +11,13 @@ export default function RentalCreate() {
     data: ownerDetailData,
     isLoading: ownerDetailIsLoading,
     isError: ownerDetailIsError,
+    refetch,
   } = useGetOwnerDetailByUserIdQuery(id);
   const ownerId = ownerDetailData?.id;
 
   return (
     <div style={{ padding: "20px" }}>
-      <RentalForm ownerId={ownerId} />
+      <RentalForm refetch={refetch} ownerId={ownerId} />
     </div>
   );
 }

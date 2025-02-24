@@ -1,9 +1,9 @@
-import { Tag, Button } from "antd";
+import { Tag, Button, Pagination } from "antd";
 import { Flex } from "antd";
 import { IoLocationOutline } from "react-icons/io5";
-import { StarFilled } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
 import { IoIosAdd } from "react-icons/io";
+import { useState, useMemo } from "react";
 
 const RENTALLOCATION_STATUS = {
   PENDING: 1,
@@ -40,25 +40,19 @@ const DEFAULT_IMAGE =
 
 export default function RentalLocationList({ locations }) {
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(1);
+  const pageSize = 5;
+
+  // Tính toán danh sách địa điểm hiển thị
+  const paginatedLocations = useMemo(() => {
+    const startIndex = (currentPage - 1) * pageSize;
+    return locations.slice(startIndex, startIndex + pageSize);
+  }, [locations, currentPage]);
 
   return (
-    <div style={{ flex: 8, padding: "20px" }}>
-      <Flex
-        justify="space-between"
-        align="center"
-        style={{ marginBottom: "20px" }}
-      >
-        <h2 style={{ margin: 0 }}>Danh sách địa điểm</h2>
-        <Button
-          type="primary"
-          onClick={() => navigate("/rental-location/create")}
-          icon={<IoIosAdd />}
-        >
-          Thêm địa điểm mới
-        </Button>
-      </Flex>
+    <div style={{ flex: 8, padding: "0 20px 20px" }}>
       <div>
-        {locations.map((item, index) => (
+        {paginatedLocations.map((item, index) => (
           <div
             key={index}
             style={{
@@ -90,7 +84,7 @@ export default function RentalLocationList({ locations }) {
                   margin: "auto",
                 }}
               />
-              <Flex vertical style={{ flex: 1, minWidth: "250px" ,gap: 6}}>
+              <Flex vertical style={{ flex: 1, minWidth: "250px", gap: 6 }}>
                 <Flex align="center" gap={10} wrap="wrap">
                   <p style={{ fontSize: 20, fontWeight: 600, margin: 0 }}>
                     {item.name}
@@ -114,8 +108,6 @@ export default function RentalLocationList({ locations }) {
                   <p style={{ margin: 0, color: "#555" }}>{item.address}</p>
                 </Flex>
                 <Flex gap={10} align="center">
-                  {/* <StarFilled style={{ color: "#ffc907" }} /> */}
-                  {/* <p style={{ margin: 0, color: "#555" }}>4.8 (500 đánh giá)</p> */}
                   <Tag
                     style={{
                       borderRadius: 20,
@@ -143,6 +135,16 @@ export default function RentalLocationList({ locations }) {
           </div>
         ))}
       </div>
+
+      {/* Pagination */}
+      <Flex justify="center" style={{ marginTop: 20 }}>
+        <Pagination
+          current={currentPage}
+          pageSize={pageSize}
+          total={locations.length}
+          onChange={(page) => setCurrentPage(page)}
+        />
+      </Flex>
     </div>
   );
 }

@@ -2,7 +2,7 @@ import { useParams } from "react-router-dom";
 import AccountInfo from "./Components/AccountInfo/AccountInfo";
 import AccountStatus from "./Components/AccountStatus/AccountStatus";
 import CompanyInfo from "./Components/CompanyInfo/CompanyInfo";
-import { Skeleton } from "antd";
+import { Skeleton, Row, Col } from "antd";
 import { useGetOwnerDetailByUserIdQuery } from "../../../../redux/services/ownerApi";
 
 export default function Information() {
@@ -10,6 +10,7 @@ export default function Information() {
   const { data: ownerDetail, isLoading: ownerLoading } =
     useGetOwnerDetailByUserIdQuery(id);
   const userData = ownerDetail?.userId;
+
   if (ownerLoading) {
     return (
       <div
@@ -20,6 +21,7 @@ export default function Information() {
       </div>
     );
   }
+
   const userInfo = {
     isApproved: ownerDetail?.isApproved,
     note: ownerDetail?.note,
@@ -31,19 +33,15 @@ export default function Information() {
       "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrT_BjEyf_LEpcvb225JX2qFCJcLz5-0RXLg&s",
     isActive: userData?.isActive,
     messageIsActive: userData?.isActive
-      ? "Tài khoản đang hoạt thành công "
+      ? "Tài khoản đang hoạt thành công"
       : "Tài khoản đang bị khóa",
     isVerifiedEmail: userData?.isVerifiedEmail,
-    // isVerifiedPhone: userData?.isVerifiedPhone,
-    isVerify:
-      // userData?.isVerifiedEmail && userData?.isVerifiedPhone,
-      userData?.isVerifiedEmail,
-    messageIsVerify:
-      // userData?.isVerifiedEmail && userData?.isVerifiedPhone
-      userData?.isVerifiedEmail
-        ? "Đã xác thực "
-        : "Số điện thoại/Email chưa xác thực",
+    isVerify: userData?.isVerifiedEmail,
+    messageIsVerify: userData?.isVerifiedEmail
+      ? "Đã xác thực"
+      : "Số điện thoại/Email chưa xác thực",
   };
+
   const companyInfo = {
     businessLicensesFile:
       ownerDetail?.businessInformationId.businessLicensesFile,
@@ -56,15 +54,10 @@ export default function Information() {
   };
 
   return (
-    <div className="contentContainer">
-      <div
-        className="infoHorizontal"
-        style={{
-          display: "flex",
-          justifyContent: "space-around",
-        }}
-      >
-        <div className="infoVertical" style={{ width: "45%" }}>
+    <div style={{ padding: "0px 20px" }}>
+      <Row gutter={[16, 16]}>
+        {/* Cột trái: Thông tin tài khoản và trạng thái */}
+        <Col xs={24} md={12}>
           <AccountInfo initialData={userInfo} />
           <AccountStatus
             isAccountActive={userInfo.isActive}
@@ -75,11 +68,12 @@ export default function Information() {
             note={userInfo.note}
             userInfo={userInfo}
           />
-        </div>
-        <div className="companySection" style={{ width: "45%" }}>
+        </Col>
+        {/* Cột phải: Thông tin công ty */}
+        <Col xs={24} md={12}>
           <CompanyInfo companyInfo={companyInfo} />
-        </div>
-      </div>
+        </Col>
+      </Row>
     </div>
   );
 }

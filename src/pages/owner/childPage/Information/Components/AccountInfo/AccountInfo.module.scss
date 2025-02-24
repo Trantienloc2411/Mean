@@ -1,6 +1,13 @@
-.contentCard{
-    padding: 10px;
-    Card {
-        width: 35%;
+.gridContainer {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 100px auto;
+  }
+  
+  /* Khi màn hình nhỏ hơn 768px, chuyển sang 1 cột */
+  @media (max-width: 768px) {
+    .gridContainer {
+      grid-template-columns: 1fr;
     }
-}
+  }
+  

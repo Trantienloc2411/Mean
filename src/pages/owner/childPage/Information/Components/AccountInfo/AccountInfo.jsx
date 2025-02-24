@@ -1,174 +1,73 @@
-// import React, { useState } from 'react';
-// import { Card, Avatar, Typography, Space, Input, Button, Form } from 'antd';
-// import { EditOutlined, SaveOutlined, CloseOutlined } from '@ant-design/icons';
-// import styles from '../AccountInfo/AccountInfo.module.scss';
-// const { Text } = Typography;
-
-// const ProfileCard = ({ initialData }) => {
-//   const [isEditing, setIsEditing] = useState(false);
-//   const [form] = Form.useForm();
-
-//   // Set default values to prevent undefined errors
-//   const defaultData = {
-//     fullName: 'N/a',
-//     email: 'N/a',
-//     phone: 'N/a',
-//     avatar: '',
-//     ...initialData // This will override defaults with provided data
-//   };
-
-//   const toggleEdit = () => {
-//     if (isEditing) {
-//       setIsEditing(false);
-//     } else {
-//       form.setFieldsValue(defaultData);
-//       setIsEditing(true);
-//     }
-//   };
-
-//   const onFinish = (values) => {
-//     console.log('Updated values:', values);
-//     setIsEditing(false);
-//   };
-
-//   const ViewMode = ({ data }) => (
-//     <Space direction="vertical" size="small" style={{ width: '100%' }}>
-//       {['fullName', 'email', 'phone'].map((field) => (
-//         <div key={field}>
-//           <Text type="secondary">{field.charAt(0).toUpperCase() + field.slice(1)}</Text>
-//           <div style={{
-//             background: '#f5f5f5',
-//             padding: '8px 12px',
-//             borderRadius: 6
-//           }}>
-//             {data[field]}
-//           </div>
-//         </div>
-//       ))}
-//     </Space>
-//   );
-
-//   const EditMode = () => (
-//     <Form
-//       form={form}
-//       layout="vertical"
-//       onFinish={onFinish}
-//       initialValues={defaultData}
-//     >
-//       {['fullName', 'email', 'phone'].map((field) => (
-//         <Form.Item
-//           key={field}
-//           name={field}
-//           label={field.charAt(0).toUpperCase() + field.slice(1)}
-//           rules={[{ required: true, message: `Please input your ${field}!` }]}
-//         >
-//           <Input />
-//         </Form.Item>
-//       ))}
-
-//       <Form.Item>
-//         <Space>
-//           <Button type="primary" htmlType="submit">
-//             <SaveOutlined /> Save
-//           </Button>
-//           <Button onClick={() => setIsEditing(false)}>
-//             <CloseOutlined /> Cancel
-//           </Button>
-//         </Space>
-//       </Form.Item>
-//     </Form>
-//   );
-
-//   return (
-
-//     <>
-//     <div className="contentCard" style={{margin : 20}}>
-//     <Card
-//       style={{
-//         borderRadius: 8,
-//         width: '100%',
-//         boxShadow: '0 1px 3px rgba(0,0,0,0.12)'
-//       }}
-//       extra={
-//         <EditOutlined
-//           onClick={toggleEdit}
-//           style={{ cursor: 'pointer' }}
-//         />
-//       }
-//       title="Thông tin tài khoản"
-//     >
-//       <Space direction="vertical" size="large" style={{ width: '100%',  display: 'grid',gridTemplateColumns:"100px auto",   }}>
-//         <div style={{ textAlign: 'center'}}>
-//           <Avatar
-//             size={80}
-//             src={defaultData.avatar}
-//           />
-//         </div>
-
-//         {isEditing ? <EditMode /> : <ViewMode data={defaultData} />}
-//       </Space>
-//     </Card>
-
-//     </div>
-//     </>
-
-//   );
-// };
-
-// // Usage example:
-// export default ProfileCard;
-
 import React from "react";
 import { Card, Avatar, Typography, Space } from "antd";
-import styles from "../AccountInfo/AccountInfo.module.scss";
+import styles from "./AccountInfo.module.scss";
+
 const { Text } = Typography;
 
 const ProfileCard = ({ initialData }) => {
-  // Set default values to prevent undefined errors
+  // Đặt giá trị mặc định cho các trường nếu không có dữ liệu truyền vào
   const defaultData = {
     fullName: "N/a",
     email: "N/a",
     phone: "N/a",
     avatar: "",
-    ...initialData, // This will override defaults with provided data
+    ...initialData, // Ghi đè dữ liệu mặc định nếu có dữ liệu từ props
+  };
+
+  /**
+   * Hàm render một trường thông tin
+   * @param {string} label - Tên của trường thông tin (ví dụ: "Full Name")
+   * @param {string} value - Giá trị tương ứng
+   */
+  const renderField = (label, value) => {
+    return (
+      <div key={label} style={{ width: "100%" }}>
+        <Text type="secondary" style={{ display: "block", marginBottom: 4 }}>
+          {label}
+        </Text>
+        <div
+          style={{
+            background: "#f5f5f5",
+            padding: "8px 12px",
+            borderRadius: 6,
+            overflow: "hidden",
+            textOverflow: "ellipsis",
+            width: "100%",
+            wordBreak: "break-word", // Cho phép xuống dòng nếu nội dung quá dài
+            overflowWrap: "break-word", // Tương tự
+          }}
+        >
+          {value}
+        </div>
+      </div>
+    );
   };
 
   return (
     <div className="contentCard" style={{ margin: 20 }}>
       <Card
+        title="Thông tin tài khoản"
         style={{
           borderRadius: 8,
           width: "100%",
           boxShadow: "0 1px 3px rgba(0,0,0,0.12)",
         }}
-        title="Thông tin tài khoản"
       >
         <Space
           direction="vertical"
           size="large"
-          style={{ width: "100%", display: "grid",gridTemplateColumns:"100px auto",  }}
+          className={styles.gridContainer}
         >
+          {/* Phần hiển thị Avatar */}
           <div style={{ textAlign: "center" }}>
             <Avatar size={80} src={defaultData.avatar} />
           </div>
 
+          {/* Phần hiển thị các trường thông tin */}
           <Space direction="vertical" size="small" style={{ width: "100%" }}>
-            {["fullName", "email", "phone"].map((field) => (
-              <div key={field}>
-                <Text type="secondary">
-                  {field.charAt(0).toUpperCase() + field.slice(1)}
-                </Text>
-                <div
-                  style={{
-                    background: "#f5f5f5",
-                    padding: "8px 12px",
-                    borderRadius: 6,
-                  }}
-                >
-                  {defaultData[field]}
-                </div>
-              </div>
-            ))}
+            {renderField("Full Name", defaultData.fullName)}
+            {renderField("Email", defaultData.email)}
+            {renderField("Phone", defaultData.phone)}
           </Space>
         </Space>
       </Card>
