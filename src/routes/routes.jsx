@@ -73,7 +73,7 @@ const SettingOwner = lazy(() =>
   import("../pages/owner/childPage/Setting/Setting.jsx")
 );
 
-// const Customer = lazy(() => import("../pages/customer/Customer"));
+const Customer = lazy(() => import("../pages/customer/Customer"));
 const PolicyApp = lazy(() => import("../pages/policyApp/PolicyApp"));
 const RentalLocation = lazy(() =>
   import("../pages/rentalLocation/RentalLocation")
