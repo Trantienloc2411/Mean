@@ -3,7 +3,19 @@ import dayjs from 'dayjs';
 
 const formatDateForAPI = (dateString) => {
   if (!dateString) return null;
-  return dayjs(dateString, "DD-MM-YYYY HH:mm:ss").toISOString();
+  
+  try {
+    if (dateString.includes('T') && dateString.includes('Z')) {
+      return dateString;
+    }
+    if (dayjs.isDayjs(dateString)) {
+      return dateString.toISOString();
+    }
+    return dayjs(dateString).toISOString();
+  } catch (error) {
+    console.error('Error formatting date:', dateString, error);
+    return dateString;
+  }
 };
 
 const transformPolicyData = (data) => {
@@ -25,8 +37,6 @@ export const policySystemApi = apiSlice.injectEndpoints({
         if (Array.isArray(response)) {
           return response.map(policy => ({
             ...policy,
-            // startDate: dayjs(policy.startDate).format('DD-MM-YYYY HH:mm:ss'),
-            // endDate: dayjs(policy.endDate).format('DD-MM-YYYY HH:mm:ss')
           }));
         }
         return response;
@@ -38,18 +48,20 @@ export const policySystemApi = apiSlice.injectEndpoints({
       query: (id) => `/policy-system/${id}`,
       transformResponse: (response) => ({
         ...response,
-        // startDate: dayjs(response.startDate).format('DD-MM-YYYY HH:mm:ss'),
-        // endDate: dayjs(response.endDate).format('DD-MM-YYYY HH:mm:ss')
       }),
       providesTags: ["PolicySystem"],
     }),
 
     createPolicySystem: builder.mutation({
-      query: (policySystem) => ({
-        url: "/policy-system/create-policy-system",
-        method: "POST",
-        body: transformPolicyData(policySystem),
-      }),
+      query: (policySystem) => {
+        const transformedData = transformPolicyData(policySystem);
+        console.log('Sending to API:', transformedData);
+        return {
+          url: "/policy-system/create-policy-system",
+          method: "POST",
+          body: transformedData,
+        };
+      },
       invalidatesTags: ["PolicySystem"],
     }),
 
