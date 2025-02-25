@@ -1,19 +1,25 @@
 import { Modal, Descriptions, Tag } from 'antd';
 import styles from './DetailRoomTypeModal.module.scss';
-import { useGetAmenityByIdQuery } from '../../../../../../../../redux/services/serviceApi';
 
 const DetailRoomTypeModal = ({ isOpen, onCancel, roomType, service }) => {
   if (!roomType) return null;
 
   const formatDateTime = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleString('vi-VN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+    if (typeof dateString === 'string' && dateString.includes('/')) {
+      return dateString;
+    }
+    try {
+      const date = new Date(dateString);
+      return date.toLocaleString('vi-VN', {
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit',
+        hour: '2-digit',
+        minute: '2-digit'
+      });
+    } catch (error) {
+      return 'Invalid date';
+    }
   };
 
   return (
