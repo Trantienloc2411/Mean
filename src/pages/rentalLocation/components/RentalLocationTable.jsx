@@ -2,7 +2,6 @@ import { useState } from "react";
 import { MoreOutlined } from "@ant-design/icons";
 
 import { Dropdown, Menu, Table } from "antd";
-import styles from "./Table.module.scss";
 import { useNavigate } from "react-router-dom";
 import ModalViewDetailRental from "./ModalViewDetailRental";
 
@@ -47,16 +46,16 @@ export default function RentalLocationTable({ data, loading }) {
     setIsDetailModalVisible(true);
   };
 
-  const handleChangeStatus = (record) => {
-    console.log(
-      `${
-        record.status === RENTALLOCATION_STATUS.ACTIVE
-          ? "Ngưng hoạt động"
-          : "Kích hoạt lại"
-      } địa điểm:`,
-      record.name
-    );
-  };
+  // const handleChangeStatus = (record) => {
+  //   console.log(
+  //     `${
+  //       record.status === RENTALLOCATION_STATUS.ACTIVE
+  //         ? "Ngưng hoạt động"
+  //         : "Kích hoạt lại"
+  //     } địa điểm:`,
+  //     record.name
+  //   );
+  // };
 
   const columns = [
     {
@@ -111,11 +110,11 @@ export default function RentalLocationTable({ data, loading }) {
               >
                 Xem chi tiết
               </Menu.Item>
-              <Menu.Item key="3" onClick={() => handleChangeStatus(record)}>
+              {/* <Menu.Item key="3" onClick={() => handleChangeStatus(record)}>
                 {record.status === RENTALLOCATION_STATUS.ACTIVE
                   ? "Ngưng hoạt động"
                   : "Hoạt động lại"}
-              </Menu.Item>
+              </Menu.Item> */}
             </Menu>
           }
           trigger={["click"]}

@@ -57,7 +57,7 @@ export default function RentalLocationDetail() {
     {
       key: "5",
       label: "Cài đặt",
-      children: <SettingRentalLocation item={rental} />,
+      children: <SettingRentalLocation rentalData={rentalData} />,
     },
   ];
 

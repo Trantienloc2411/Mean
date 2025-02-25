@@ -3,9 +3,25 @@ import SettingInformation from "./SettingInformation";
 import SettingStatus from "./SettingStatus";
 import DocumentManagement from "./DocumentManagement";
 
-const { TabPane } = Tabs;
+export default function SettingRentalLocation({ rentalData }) {
+  const items = [
+    {
+      key: "1",
+      label: "Thông tin địa điểm",
+      children: <SettingInformation rentalData={rentalData} />,
+    },
+    {
+      key: "2",
+      label: "Trạng thái",
+      children: <SettingStatus />,
+    },
+    {
+      key: "3",
+      label: "Danh sách giấy tờ",
+      children: <DocumentManagement />,
+    },
+  ];
 
-export default function SettingRentalLocation({item}) {
   return (
     <div style={{ display: "flex", height: "100vh" }}>
       <Tabs
@@ -13,20 +29,8 @@ export default function SettingRentalLocation({item}) {
         style={{
           width: "100%",
         }}
-      >
-        {/* Tab Thông Tin Địa Điểm */}
-        <TabPane tab="Thông tin địa điểm" key="1">
-          <SettingInformation item={item}/>
-        </TabPane>
-
-        {/* Tab Trạng Thái Địa Điểm */}
-        <TabPane tab="Trạng thái" key="2">
-          <SettingStatus />
-        </TabPane>
-        <TabPane tab="Danh sách giấy tờ" key="3">
-          <DocumentManagement />
-        </TabPane>
-      </Tabs>
+        items={items}
+      />
     </div>
   );
 }

@@ -61,7 +61,7 @@ export default function TitleAndDescription({ rentalData }) {
           {STATUS_LABELS[rentalData.status]?.label || "Không xác định"}
         </Tag>
       </Flex>
-      <Flex align="center" gap={5} style={{  }}>
+      <Flex align="center" gap={5} style={{}}>
         <FaLocationDot />
         <p style={{ margin: 0 }}>{rentalData?.address || "Unknown location"}</p>
       </Flex>
@@ -107,12 +107,16 @@ export default function TitleAndDescription({ rentalData }) {
       </div>
 
       <Row gutter={16} style={{ marginTop: 20 }}>
-        <Title level={3} style={{ margin: 0, fontSize: "23px",marginBottom: 10 }}>
-          Địa chỉ:</Title>
+        <Title
+          level={3}
+          style={{ margin: 0, fontSize: "23px", marginBottom: 10 }}
+        >
+          Địa chỉ:
+        </Title>
         <Col span={24}>
           <LocationMap
-            // latitude={rentalData?.latitude}
-            latitude={rentalData?.attitude}
+            latitude={rentalData?.latitude}
+            // latitude={rentalData?.attitude}
             longitude={rentalData?.longitude}
           />
         </Col>

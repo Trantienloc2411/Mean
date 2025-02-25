@@ -41,7 +41,7 @@ export default function RentalForm({ ownerId, refetch }) {
       ownerId,
       name: values.rentalName,
       status: 1,
-      image: imageUrls, 
+      image: imageUrls,
       description: values.description,
       landUsesRightsFile: pdfFile ? pdfFile.name : "",
       address: values.address,
