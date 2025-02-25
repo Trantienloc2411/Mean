@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Input, Button, DatePicker, Dropdown, Table } from 'antd';
+import { Input, Button, DatePicker, Dropdown, Table, Spin } from 'antd';
 import { FilterOutlined, PlusOutlined, MoreOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -10,7 +10,12 @@ import DeletePolicyModal from './components/DeletePolicyModal/DeletePolicyModal.
 import AddPolicyModal from './components/AddPolicyModal/AddPolicyModal.jsx';
 import UpdatePolicyModal from './components/UpdatePolicyModal/UpdatePolicyModal.jsx';
 import DetailPolicyModal from './components/DetailPolicyModal/DetailPolicyModal.jsx';
-import { policyData } from './data/fakeData.js';
+import {
+  useGetAllPolicySystemsQuery,
+  useCreatePolicySystemMutation,
+  useUpdatePolicySystemMutation,
+  useDeletePolicySystemMutation,
+} from '../../redux/services/policySystemApi.js';
 
 export default function PolicyApp() {
   dayjs.extend(isBetween);
@@ -20,20 +25,29 @@ export default function PolicyApp() {
     dateRange: [],
   });
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredData, setFilteredData] = useState(policyData);
+  const [filteredData, setFilteredData] = useState([]);
   const [selectedPolicy, setSelectedPolicy] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
+  const { data: policyData, isLoading } = useGetAllPolicySystemsQuery(undefined, {
+    onSuccess: (data) => {
+      console.log('Received policy data:', data);
+    }
+  });
+  const [createPolicy] = useCreatePolicySystemMutation();
+  const [updatePolicy] = useUpdatePolicySystemMutation();
+  const [deletePolicy] = useDeletePolicySystemMutation();
+
   const filterGroups = [
     {
       name: "unit",
       title: "Đơn vị",
       options: [
-        { key: '1', label: "Phần trăm", value: "Percent" },
-        { key: '2', label: "VND", value: "VND" },
+        { key: '1', label: "Phần trăm", value: "percent" },
+        { key: '2', label: "VND", value: "vnd" },
       ],
     },
     {
@@ -42,16 +56,12 @@ export default function PolicyApp() {
       options: [
         {
           label: <span className={`${styles.status} ${styles.active}`}>Đang hoạt động</span>,
-          value: 'Active',
+          value: true,
         },
         {
-          label: <span className={`${styles.status} ${styles.expired}`}>Hết hạn</span>,
-          value: 'Expired',
-        },
-        {
-          label: <span className={`${styles.status} ${styles.paused}`}>Tạm dừng</span>,
-          value: 'Paused',
-        },
+          label: <span className={`${styles.status} ${styles.expired}`}>Không hoạt động</span>,
+          value: false,
+        }
       ]
     }
   ];
@@ -84,60 +94,69 @@ export default function PolicyApp() {
     }
   ];
 
-  const handleDeleteConfirm = () => {
-    setFilteredData(prevData => prevData.filter(item => item.No !== selectedPolicy?.No));
-    setIsDeleteModalOpen(false);
-    setSelectedPolicy(null);
-  };
-
-  const handleAddPolicy = (values) => {
+  const handleDeleteConfirm = async () => {
     try {
-      console.log("StartTime:", values.startTime, "EndTime:", values.endTime);
-      console.log("Filtered Data Before:", filteredData);
-  
-      const newPolicy = {
-        ...values,
-        No: filteredData.length + 1,
-        Name: values.name,
-        Description: values.description,
-        Value: values.value,
-        Unit: values.unit === 'percent' ? 'Percent' : 'VND',
-        CreatedDate: dayjs().format('HH:mm DD/MM/YYYY'),
-        StartTime: dayjs(values.startDate).format('HH:mm DD/MM/YYYY'),
-        EndTime: dayjs(values.endDate).format('HH:mm DD/MM/YYYY'),
-        Status: values.isActive ? 'Active' : 'Paused',
-        IsActive: values.isActive || false
-      };
-  
-      console.log("New Policy:", newPolicy);
-  
-      setFilteredData(prevData => [...prevData, newPolicy]);
-      setIsAddModalOpen(false);
-      console.log("Modal đã đóng");
-  
+      await deletePolicy(selectedPolicy.id).unwrap();
+      setIsDeleteModalOpen(false);
+      setSelectedPolicy(null);
     } catch (error) {
-      console.error("Lỗi khi thêm chính sách:", error);
+      console.error("Error deleting policy:", error);
     }
   };
-  
-  
-  const handleUpdatePolicy = (values) => {
-    setFilteredData(prevData =>
-      prevData.map(item =>
-        item.No === selectedPolicy.No
-          ? {
-            ...item,
-            ...values,
-            StartTime: values.StartTime,
-            EndTime: values.EndTime,
-          }
-          : item
-      )
-    );
-    setIsUpdateModalOpen(false);
-    setSelectedPolicy(null);
+
+  const handleAddPolicy = async (values) => {
+    try {
+      const newPolicy = {
+        policySystemCategoryId: values.policySystemCategoryId,
+        policySystemBookingId: values.policySystemBookingId || "",
+        name: values.name,
+        description: values.description || "",
+        value: values.value || "",
+        unit: values.unit || "",
+        startDate: values.startDate ? dayjs(values.startDate).format('DD-MM-YYYY HH:mm:ss') : null,
+        endDate: values.endDate ? dayjs(values.endDate).format('DD-MM-YYYY HH:mm:ss') : null,
+        isActive: true
+      };
+
+      console.log("Creating policy with dates:", {
+        startDate: newPolicy.startDate,
+        endDate: newPolicy.endDate
+      });
+
+      await createPolicy(newPolicy).unwrap();
+      setIsAddModalOpen(false);
+      message.success('Tạo chính sách thành công');
+    } catch (error) {
+      console.error("Error adding policy:", error);
+      message.error('Có lỗi xảy ra khi tạo chính sách');
+    }
   };
 
+  const handleUpdatePolicy = async (values) => {
+    try {
+      const updatedPolicy = {
+        id: selectedPolicy.id,
+        staffId: values.staffId,
+        policySystemCategoryId: values.policySystemCategoryId,
+        policySystemBookingId: values.policySystemBookingId || "",
+        name: values.name,
+        description: values.description || "",
+        value: values.value || "",
+        unit: values.unit || "",
+        startDate: dayjs(values.startDate).format('DD-MM-YYYY HH:mm:ss'),
+        endDate: dayjs(values.endDate).format('DD-MM-YYYY HH:mm:ss'),
+        isActive: values.isActive === 'active'
+      };
+
+      await updatePolicy(updatedPolicy).unwrap();
+      setIsUpdateModalOpen(false);
+      setSelectedPolicy(null);
+      message.success('Cập nhật chính sách thành công');
+    } catch (error) {
+      console.error('Error in handleUpdatePolicy:', error);
+      message.error('Có lỗi xảy ra khi cập nhật chính sách');
+    }
+  };
   const handleFilterChange = (filterName, newValues) => {
     setSelectedValues(prev => ({
       ...prev,
@@ -157,68 +176,66 @@ export default function PolicyApp() {
   }, 500);
 
   useEffect(() => {
+    if (!policyData) return;
+
     let filtered = [...policyData];
 
     if (searchTerm) {
       filtered = filtered.filter((item) =>
-        item.Name.toLowerCase().includes(searchTerm.toLowerCase())
+        item.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
     if (selectedValues.status?.length > 0) {
       filtered = filtered.filter((item) =>
-        selectedValues.status.includes(item.Status)
+        selectedValues.status.includes(item.isActive)
       );
     }
 
     if (selectedValues.unit?.length > 0) {
       filtered = filtered.filter((item) =>
-        selectedValues.unit.includes(item.Unit)
+        selectedValues.unit.includes(item.unit)
       );
     }
 
     if (selectedValues.dateRange?.length === 2) {
       const [start, end] = selectedValues.dateRange;
       filtered = filtered.filter((item) => {
-        const itemStart = dayjs(item.StartTime, "HH:mm DD/MM/YYYY");
-        const itemEnd = dayjs(item.EndTime, "HH:mm DD/MM/YYYY");
+        const itemStart = dayjs(item.startDate, "DD/MM/YYYY HH:mm:ss");
+        const itemEnd = dayjs(item.endDate, "DD/MM/YYYY HH:mm:ss");
         return itemStart.isAfter(dayjs(start)) && itemEnd.isBefore(dayjs(end));
       });
     }
 
     setFilteredData(filtered);
-  }, [searchTerm, selectedValues]);
+  }, [searchTerm, selectedValues, policyData]);
 
   const columns = [
-    { title: "No.", dataIndex: "No", key: "No" },
-    { title: "Tên chính sách", dataIndex: "Name", key: "Name" },
-    { title: "Đơn vị", dataIndex: "Unit", key: "Unit" },
-    { title: "Giá trị", dataIndex: "Value", key: "Value" },
-    { title: "Ngày bắt đầu", dataIndex: "StartTime", key: "StartTime" },
-    { title: "Ngày kết thúc", dataIndex: "EndTime", key: "EndTime" },
+    { title: "No.", dataIndex: "id", key: "id" },
+    { title: "Tên chính sách", dataIndex: "name", key: "name" },
+    { title: "Đơn vị", dataIndex: "unit", key: "unit" },
+    { title: "Giá trị", dataIndex: "value", key: "value" },
+    {
+      title: "Ngày bắt đầu",
+      dataIndex: "startDate",
+      key: "startDate",
+      render: (date) => dayjs(date, "DD-MM-YYYY HH:mm:ss").format("DD-MM-YYYY HH:mm:ss")
+    },
+    {
+      title: "Ngày kết thúc",
+      dataIndex: "endDate",
+      key: "endDate",
+      render: (date) => dayjs(date, "DD-MM-YYYY HH:mm:ss").format("DD-MM-YYYY HH:mm:ss")
+    },
     {
       title: "Trạng thái",
-      dataIndex: "Status",
-      key: "Status",
-      render: (status) => {
-        let className = '';
-        switch (status) {
-          case 'Active':
-            className = styles.active;
-            break;
-          case 'Paused':
-            className = styles.paused;
-            break;
-          case 'Expired':
-            className = styles.expired;
-            break;
-          default:
-            break;
-        }
-        return <span className={`${styles.status} ${className}`}>
-          {status === 'Active' ? 'Đang hoạt động' : status === 'Paused' ? 'Tạm dừng' : 'Hết hạn'}
-        </span>;
-      },
+      dataIndex: "isActive",
+      key: "isActive",
+      render: (isActive) => (
+        <span className={`${styles.status} ${isActive ? styles.active : styles.expired}`}>
+          {isActive ? 'Đang hoạt động' : 'Không hoạt động'}
+        </span>
+      ),
     },
     {
       title: "",
@@ -279,41 +296,47 @@ export default function PolicyApp() {
           </Button>
         </div>
 
-        <Table
-          columns={columns}
-          dataSource={filteredData}
-          pagination={{
-            total: filteredData.length,
-            pageSize: 7,
-            showSizeChanger: false,
-            className: styles.customPagination,
-            itemRender: (page, type, originalElement) => {
-              const totalPages = Math.ceil(filteredData.length / 7);
-              if (type === "prev") {
-                return (
-                  <button
-                    className={styles.paginationButton}
-                    disabled={page === 0}
-                  >
-                    « Trước
-                  </button>
-                );
-              }
-              if (type === "next") {
-                return (
-                  <button
-                    className={styles.paginationButton}
-                    disabled={page >= totalPages}
-                  >
-                    Tiếp »
-                  </button>
-                );
-              }
-              return originalElement;
-            },
-          }}
-          className={styles.reportTable}
-        />
+        {isLoading ? (
+          <div className={styles.loadingContainer}>
+            <Spin size="large" />
+          </div>
+        ) : (
+          <Table
+            columns={columns}
+            dataSource={filteredData}
+            pagination={{
+              total: filteredData.length,
+              pageSize: 7,
+              showSizeChanger: false,
+              className: styles.customPagination,
+              itemRender: (page, type, originalElement) => {
+                const totalPages = Math.ceil(filteredData.length / 7);
+                if (type === "prev") {
+                  return (
+                    <button
+                      className={styles.paginationButton}
+                      disabled={page === 0}
+                    >
+                      « Trước
+                    </button>
+                  );
+                }
+                if (type === "next") {
+                  return (
+                    <button
+                      className={styles.paginationButton}
+                      disabled={page >= totalPages}
+                    >
+                      Tiếp »
+                    </button>
+                  );
+                }
+                return originalElement;
+              },
+            }}
+            className={styles.reportTable}
+          />
+        )}
 
         <AddPolicyModal
           isOpen={isAddModalOpen}
@@ -347,7 +370,7 @@ export default function PolicyApp() {
             setSelectedPolicy(null);
           }}
           onConfirm={handleDeleteConfirm}
-          policyName={selectedPolicy?.Name}
+          policyName={selectedPolicy?.name}
         />
       </div>
     </div>

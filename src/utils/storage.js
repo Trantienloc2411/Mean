@@ -10,7 +10,18 @@ export const saveRole = (role) => {
   localStorage.setItem("user_role", JSON.stringify(role));
 };
 
-export const getToken = () => localStorage.getItem("access_token");
+export const getToken = () => {
+  try {
+    const token = localStorage.getItem('access_token');
+    if (!token) {
+      return null;
+    }
+    return token;
+  } catch (error) {
+    console.error('Error getting token:', error);
+    return null;
+  }
+};
 export const getUserId = () => localStorage.getItem("user_id");
 export const getRole = () => {
   const role = localStorage.getItem("user_role");
