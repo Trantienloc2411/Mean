@@ -1,44 +1,54 @@
 import React, { useState } from "react";
-import { Input, Button, Form, Upload, message } from "antd";
+import { Input, Button, Form, message } from "antd";
 import {
   EditOutlined,
   SaveOutlined,
   CloseOutlined,
-  UploadOutlined,
+  EnvironmentOutlined,
 } from "@ant-design/icons";
 
-export default function SettingInformation({item}) {
+export default function SettingInformation({ rentalData }) {
   const [isEditing, setIsEditing] = useState(false); // Chế độ chỉnh sửa
   const [form] = Form.useForm();
 
   // Dữ liệu ban đầu
   const [data, setData] = useState({
-    name: "Địa điểm ABC",
-    description: "Mô tả địa điểm ABC",
-    address: "123 Đường XYZ, Thành phố HCM",
-    position: "10.8231, 106.6297", // Lat, Lng
+    name: rentalData?.name || "",
+    description: rentalData?.description || "",
+    address: rentalData?.address || "",
+    longitude: rentalData?.longitude || "", // Kinh độ
+    latitude: rentalData?.latitude || "", // Vĩ độ
   });
 
   const handleEdit = () => {
-    setIsEditing(true); // Chuyển sang chế độ chỉnh sửa
-    form.setFieldsValue(data); // Đổ dữ liệu vào form
+    setIsEditing(true);
+    form.setFieldsValue(data);
   };
 
   const handleCancel = () => {
-    setIsEditing(false); // Quay lại chế độ xem
+    setIsEditing(false);
   };
 
   const handleUpdate = () => {
     form
       .validateFields()
       .then((values) => {
-        setData(values); // Cập nhật dữ liệu
+        setData(values);
         message.success("Cập nhật thông tin thành công!");
-        setIsEditing(false); // Quay lại chế độ xem
+        setIsEditing(false);
       })
       .catch((info) => {
         console.error("Validate Failed:", info);
       });
+  };
+
+  const handleViewOnMap = () => {
+    if (data.latitude && data.longitude) {
+      const mapUrl = `https://www.google.com/maps?q=${data.latitude},${data.longitude}`;
+      window.open(mapUrl, "_blank");
+    } else {
+      message.warning("Không có tọa độ hợp lệ để xem trên Google Maps.");
+    }
   };
 
   return (
@@ -52,7 +62,6 @@ export default function SettingInformation({item}) {
           initialValues={data}
           style={{ marginTop: "16px" }}
         >
-          {/* Tên địa điểm */}
           <Form.Item
             label="Tên địa điểm"
             name="name"
@@ -61,7 +70,6 @@ export default function SettingInformation({item}) {
             <Input placeholder="Nhập tên địa điểm" />
           </Form.Item>
 
-          {/* Mô tả */}
           <Form.Item
             label="Mô tả"
             name="description"
@@ -70,7 +78,6 @@ export default function SettingInformation({item}) {
             <Input.TextArea placeholder="Nhập mô tả địa điểm" rows={4} />
           </Form.Item>
 
-          {/* Địa chỉ */}
           <Form.Item
             label="Địa chỉ"
             name="address"
@@ -79,22 +86,14 @@ export default function SettingInformation({item}) {
             <Input placeholder="Nhập địa chỉ địa điểm" />
           </Form.Item>
 
-          {/* Vị trí Google Map */}
-          <Form.Item label="Vị trí Google Map" name="position">
-            <Input placeholder="Nhập tọa độ (Lat, Lng)" />
+          <Form.Item label="Vĩ độ (Latitude)" name="latitude">
+            <Input placeholder="Nhập vĩ độ" />
           </Form.Item>
 
-          {/* Tải tệp quyền dùng đất */}
-          <Form.Item label="Tệp quyền dùng đất">
-            <Upload
-              beforeUpload={() => false}
-              accept=".pdf,.doc,.docx,.png,.jpg"
-            >
-              <Button icon={<UploadOutlined />}>Chọn tệp</Button>
-            </Upload>
+          <Form.Item label="Kinh độ (Longitude)" name="longitude">
+            <Input placeholder="Nhập kinh độ" />
           </Form.Item>
 
-          {/* Nút hành động */}
           <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
             <Button
               type="primary"
@@ -121,16 +120,24 @@ export default function SettingInformation({item}) {
             <strong>Địa chỉ:</strong> {data.address}
           </p>
           <p>
-            <strong>Vị trí Google Map:</strong> {data.position}
+            <strong>Vĩ độ (Latitude):</strong> {data.latitude}
           </p>
-          <Button
-            type="default"
-            icon={<EditOutlined />}
-            onClick={handleEdit}
-            style={{ marginTop: "16px" }}
-          >
-            Chỉnh sửa
-          </Button>
+          <p>
+            <strong>Kinh độ (Longitude):</strong> {data.longitude}
+          </p>
+
+          <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
+            <Button type="default" icon={<EditOutlined />} onClick={handleEdit}>
+              Chỉnh sửa
+            </Button>
+            <Button
+              type="primary"
+              icon={<EnvironmentOutlined />}
+              onClick={handleViewOnMap}
+            >
+              Xem trên Google Maps
+            </Button>
+          </div>
         </div>
       )}
     </div>

@@ -10,14 +10,17 @@ export const rentalApi = apiSlice.injectEndpoints({
               ...result.map(({ id }) => ({ type: "RentalList", id })),
               { type: "RentalList", id: "LIST" },
             ]
-          : [{ type: "RentalList", id: "LIST" }],
+          : [{ type: "RentalLocation", id: "LIST" }],
     }),
     getRentalLocationById: builder.query({
       query: (id) => `rental-location/${id}`,
+      providesTags: ["RentalLocation"],
+
     }),
     getRentalLocationByOwnerId: builder.query({
       query: (ownerId) =>
         `rental-location/all-rental-location?ownerId=${ownerId}`,
+      providesTags: ["RentalLocation"], 
     }),
     createRentalLocation: builder.mutation({
       query: (newRental) => ({
@@ -25,9 +28,9 @@ export const rentalApi = apiSlice.injectEndpoints({
         method: "POST",
         body: newRental,
       }),
-      invalidatesTags: [{ type: "RentalList", id: "LIST" }],
+      invalidatesTags: ["RentalLocation"], 
     }),
-  }),
+    }),
 });
 
 export const {

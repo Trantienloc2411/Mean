@@ -23,13 +23,13 @@ export default function Setting() {
 
   const [userInfo, setUserInfo] = useState(null);
   const [businessInfo, setBusinessInfo] = useState(null);
-console.log(ownerDetail);
+  console.log(ownerDetail);
 
   useEffect(() => {
     if (ownerDetail) {
       const userData = ownerDetail?.userId;
       setUserInfo({
-        ownerId:ownerDetail?.id,
+        ownerId: ownerDetail?.id,
         userId: userData?.id,
         isApproved: ownerDetail?.isApproved,
         note: ownerDetail?.note,

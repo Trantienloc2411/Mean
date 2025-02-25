@@ -8,4 +8,9 @@ export default defineConfig({
     port: 3000,
     open: true, // Tự động mở trình duyệt
   },
+  resolve: {
+    alias: {
+      leaflet: "leaflet/dist/leaflet.js",
+    },
+  },
 });
