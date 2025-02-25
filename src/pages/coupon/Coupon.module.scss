@@ -15,3 +15,17 @@
         }
     }
 }
+.status{
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    display: inline-block;
+    &.active{
+        background-color: #E8F1FD;
+        color: #448DF2;
+    }
+    &.inactive{
+        background-color: #FEECEB;
+        color: #F36960;
+    }
+}

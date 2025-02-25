@@ -7,7 +7,7 @@ import {
   UploadOutlined,
 } from "@ant-design/icons";
 
-export default function SettingInformation() {
+export default function SettingInformation({item}) {
   const [isEditing, setIsEditing] = useState(false); // Chế độ chỉnh sửa
   const [form] = Form.useForm();
 

@@ -11,16 +11,18 @@ import { useDispatch } from "react-redux";
 import { useNavigate } from "react-router-dom";
 import { removeToken } from "../../../utils/storage";
 import { setCredentials, setLogout } from "../../../redux/slices/authSlice";
-import { useLogoutMutation } from "../../../redux/services/authApi";
+// import { useLogoutQuery } from "../../../redux/services/authApi";
 
-export default function Avatar() {
+export default function Avatar({ userData }) {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const [logout] = useLogoutMutation();
+  // const { logout } = useLogoutQuery();
+  const defaultAvatar =
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaj0ucKVpTNbey2YUj2f0V_MDQ1G6jBiwt2w&s";
 
   const handleLogout = async () => {
     // try {
-    // await logout().unwrap();
+    //   await logout().unwrap();
     dispatch(setLogout()); // Reset auth state
     removeToken();
     navigate("/login");
@@ -32,24 +34,24 @@ export default function Avatar() {
   };
 
   const items = [
-    {
-      key: "1",
-      label: "Hồ sơ",
-      icon: <UserOutlined />,
-    },
-    {
-      key: "2",
-      label: "Ví Mean",
-      icon: <WalletOutlined />,
-    },
+    // {
+    //   key: "1",
+    //   label: "Hồ sơ",
+    //   icon: <UserOutlined />,
+    // },
+    // {
+    //   key: "2",
+    //   label: "Ví Mean",
+    //   icon: <WalletOutlined />,
+    // },
     {
       key: "3",
       label: "Cài đặt",
       icon: <SettingOutlined />,
     },
-    {
-      type: "divider",
-    },
+    // {
+    // type: "divider",
+    // },
     {
       key: "4",
       label: "Đăng xuất",
@@ -76,10 +78,16 @@ export default function Avatar() {
       >
         <div
           style={{
-            width: 35,
-            height: 35,
+            width: 50,
+            height: 50,
             borderRadius: "50%",
             overflow: "hidden",
+            border: "2px solid #ddd",
+            boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            backgroundColor: "#f5f5f5",
           }}
         >
           <Image
@@ -89,10 +97,29 @@ export default function Avatar() {
               objectFit: "cover",
             }}
             preview={false}
-            src="https://s3-alpha-sig.figma.com/img/4920/fcde/8447f632360829a3d6cf6bd47b299bab?Expires=1737331200&Key-Pair-Id=APKAQ4GOSFWCVNEHN3O4&Signature=YRDul0LX5qH0qTJ~PYdbbybEnteiXecE7RrpyaJYW3rUifKmkLp4N2Z7LAVMSNvoNY5KXcmwhIqm5UWzcxWGg1waRqqC2uFYrx0jg4WoplYgOuHs9zytpNR7vXQvL-bjCmjuvVzERd36~7DsRQEsIosfV4kIoJkeosNYeCrHNIiikZCN8OKKWofulOhhq5o5klATU0sg-mX409oyDa3WtMkK2Xa7TLmSldHfhx60rkgQ143JPs5EFMTxYkG1kOrrtbQFh6MWQuqiYceftCcpNAo2bTYdrAni5P7IhcA-eSbopVix6NSUahpqvXlGnm7koWuaK3mkWk41Kpt-X53LNQ__"
+            src={userData?.getUser?.avatarUrl?.[0] || defaultAvatar}
+            onError={(e) => {
+              e.target.onerror = null;
+              e.target.src = defaultAvatar;
+            }}
+            alt="User Avatar"
           />
         </div>
-        <span style={{ color: "#333" }}>Nguyễn Lê Vỹ Kha</span>
+
+        <span
+          style={{
+            textAlign: "end",
+            minWidth: 100,
+            maxWidth: 150,
+            color: "#333",
+            overflow: "hidden",
+            whiteSpace: "nowrap",
+            textOverflow: "ellipsis",
+            flexShrink: 1, // Cho phép thu nhỏ nếu cần
+          }}
+        >
+          {userData?.getUser.fullName}
+        </span>
         <DownOutlined style={{ fontSize: "12px", color: "#666" }} />
       </div>
     </Dropdown>

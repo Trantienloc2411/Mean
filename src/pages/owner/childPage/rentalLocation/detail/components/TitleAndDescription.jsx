@@ -3,12 +3,16 @@ import { Row, Col, Typography } from "antd"; // Sử dụng Row và Col cho layo
 const { Title, Text } = Typography;
 
 export default function TitleAndDescription({ item }) {
+  const defaultAvatar =
+    "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSaj0ucKVpTNbey2YUj2f0V_MDQ1G6jBiwt2w&s";
+  console.log(item);
+
   return (
     <Row
-      gutter={[16, 16]} // Khoảng cách giữa các cột
+      gutter={[16, 16]}
       style={{
         marginBottom: "20px",
-        alignItems: "start", // Căn giữa theo chiều dọc
+        alignItems: "start",
       }}
     >
       {/* Cột Mô tả */}
@@ -18,8 +22,7 @@ export default function TitleAndDescription({ item }) {
             Mô tả
           </Title>
           <Text style={{ fontSize: "16px", color: "#555" }}>
-            Explore this amazing rental location with stunning views and
-            excellent amenities.
+            {item?.description || "Không có mô tả"}
           </Text>
         </div>
       </Col>
@@ -28,7 +31,10 @@ export default function TitleAndDescription({ item }) {
       <Col xs={24} sm={24} md={12} lg={12}>
         <div style={{ textAlign: "center" }}>
           <img
-            src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbfdF0qrauC2c8iiw4_Ue4eQjmt_Gtsm0UhQ&s"
+            src={
+              item?.image?.[0] ??
+              "https://intero.vn/wp-content/uploads/No_Image_Available_thum_488.jpg"
+            }
             alt="Rental Location"
             style={{
               width: "100%",

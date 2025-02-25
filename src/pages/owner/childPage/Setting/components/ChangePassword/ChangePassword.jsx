@@ -1,83 +1,118 @@
-import React from "react";
-import { Form, Menu, Input, Button } from "antd";
-import {
-  UserOutlined,
-  LockOutlined,
-  BankOutlined,
-  WalletOutlined,
-} from "@ant-design/icons";
+import React, { useState } from "react";
+import { Form, Input, Button, message } from "antd";
 import styles from "../ChangePassword/ChangePassword.module.scss";
-export default function ChangePassword(props) {
-  const { onChangePassword } = props;
+import { useUpdatePasswordMutation } from "../../../../../../redux/services/authApi";
 
+export default function ChangePassword() {
   const [form] = Form.useForm();
+  const [updatePassword, { isLoading }] = useUpdatePasswordMutation();
 
-  const handleSave = () => {
-    form
-      .validateFields()
-      .then((values) => {
-        onChangePassword(values);
-        message.success("Password updated successfully!");
+  const [currentPassword, setCurrentPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+
+  const handleSave = async () => {
+    try {
+      const values = await form.validateFields();
+      const { currentPassword, newPassword, confirmNewPassword } = values;
+
+      if (!currentPassword || !newPassword || !confirmNewPassword) {
+        message.error("Vui lòng điền đầy đủ thông tin!");
+        return;
+      }
+
+      if (newPassword.length < 6) {
+        message.error("Mật khẩu mới phải có ít nhất 6 ký tự!");
+        return;
+      }
+
+      if (newPassword !== confirmNewPassword) {
+        message.error("Mật khẩu xác nhận không khớp!");
+        return;
+      }
+
+      // Gọi API cập nhật mật khẩu
+      const response = await updatePassword({
+        currentPassword,
+        newPassword,
+      }).unwrap();
+      console.log(response);
+
+      if (response.success) {
+        message.success("Cập nhật mật khẩu thành công!");
         form.resetFields();
-      })
-      .catch((info) => {
-        message.error("Failed to update password. Please check the form.");
-      });
+      } else {
+        message.error(response.data.message || "Cập nhật mật khẩu thất bại!");
+      }
+    } catch (error) {
+      console.log(error);
+      
+      message.error(error.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+    }
   };
+
   return (
     <div
       className={styles.content}
-      style={{
-        backgroundColor: "white",
-        padding: 10,
-      }}
+      style={{ backgroundColor: "white", padding: 10 }}
     >
-      <h2>Đổi mật khẩu</h2>
+      <h2 style={{ fontSize: 24 }}>Đổi mật khẩu</h2>
       <Form layout="vertical" form={form} className={styles.passwordForm}>
         <Form.Item
-          label="Current Password"
+          label="Mật khẩu hiện tại"
           name="currentPassword"
           rules={[
-            { required: true, message: "Please input your current password!" },
+            { required: true, message: "Vui lòng nhập mật khẩu hiện tại!" },
           ]}
         >
-          <Input.Password />
+          <Input.Password
+            value={currentPassword}
+            onChange={(e) => setCurrentPassword(e.target.value)}
+          />
         </Form.Item>
+
         <Form.Item
-          label="New Password"
+          label="Mật khẩu mới"
           name="newPassword"
-          rules={[
-            { required: true, message: "Please input your new password!" },
-          ]}
+          rules={[{ required: true, message: "Vui lòng nhập mật khẩu mới!" }]}
         >
-          <Input.Password />
+          <Input.Password
+            value={newPassword}
+            onChange={(e) => setNewPassword(e.target.value)}
+          />
         </Form.Item>
+
         <Form.Item
-          label="Confirm New Password"
+          label="Xác nhận mật khẩu mới"
           name="confirmNewPassword"
           dependencies={["newPassword"]}
           rules={[
-            { required: true, message: "Please confirm your new password!" },
+            { required: true, message: "Vui lòng xác nhận mật khẩu mới!" },
             ({ getFieldValue }) => ({
               validator(_, value) {
                 if (!value || getFieldValue("newPassword") === value) {
                   return Promise.resolve();
                 }
                 return Promise.reject(
-                  new Error("The two passwords do not match!")
+                  new Error("Mật khẩu xác nhận không khớp!")
                 );
               },
             }),
           ]}
         >
-          <Input.Password />
+          <Input.Password
+            value={confirmNewPassword}
+            onChange={(e) => setConfirmNewPassword(e.target.value)}
+          />
         </Form.Item>
+
         <Button
           type="primary"
           onClick={handleSave}
+          loading={isLoading}
           className={styles.saveButton}
         >
-          Save
+          {isLoading ? "Đang cập nhật..." : "Lưu"}
         </Button>
       </Form>
     </div>

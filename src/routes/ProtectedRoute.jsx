@@ -2,8 +2,8 @@ import { Navigate, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 
 export const NotAuthRoute = ({ children }) => {
-  const { isAuthenticated, role } = useSelector((state) => state.auth);
-  // const location = useLocation();
+  const { isAuthenticated, role, userId } = useSelector((state) => state.auth);
+  const location = useLocation();
   // console.log("Auth Check:", {
   //   isAuthenticated,
   //   role,
@@ -11,8 +11,19 @@ export const NotAuthRoute = ({ children }) => {
   // });
 
   if (isAuthenticated) {
-    if (role == "Staff") {
-      return <Navigate to="/admin/dashboard" replace />;
+    if (role === "Staff") {
+      return (
+        <Navigate to="/admin/dashboard" state={{ from: location }} replace />
+      );
+    }
+    if (role === "Owner") {
+      return (
+        <Navigate
+          to={`/owner/${userId}/dashboard`}
+          state={{ from: location }}
+          replace
+        />
+      );
     }
   }
 
@@ -20,7 +31,7 @@ export const NotAuthRoute = ({ children }) => {
 };
 export const ProtectedRoute = ({ children }) => {
   const { isAuthenticated, role } = useSelector((state) => state.auth);
-  // const location = useLocation();
+  const location = useLocation();
 
   // console.log("Auth Check:", {
   //   isAuthenticated,
@@ -37,7 +48,7 @@ export const ProtectedRoute = ({ children }) => {
 
 export const AdminRoute = ({ children }) => {
   const { isAuthenticated, role } = useSelector((state) => state.auth);
-  // const location = useLocation();
+  const location = useLocation();
 
   // console.log("Admin Check:", {
   //   isAuthenticated,
@@ -45,7 +56,7 @@ export const AdminRoute = ({ children }) => {
   //   path: location.pathname,
   // });
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated || !role) {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
@@ -58,8 +69,8 @@ export const AdminRoute = ({ children }) => {
 
 export const OwnerRoute = ({ children }) => {
   const { isAuthenticated, role } = useSelector((state) => state.auth);
-  
-  // const location = useLocation();
+
+  const location = useLocation();
 
   // console.log("Owner Check:", {
   //   isAuthenticated,

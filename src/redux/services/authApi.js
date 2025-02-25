@@ -7,6 +7,54 @@ export const authApi = apiSlice.injectEndpoints({
         url: "/user/login",
         method: "POST",
         body: credentials,
+        credentials: "include",
+      }),
+    }),
+    forgetPasswordToken: builder.mutation({
+      query: (credentials) => ({
+        url: "/user/forgot-password-token",
+        method: "POST",
+        body: credentials,
+        // credentials: "include",
+      }),
+    }),
+    sendOtpEmail: builder.mutation({
+      query: (credentials) => ({
+        url: "/user/send-otp",
+        method: "POST",
+        body: credentials,
+        // credentials: "include",
+      }),
+    }),
+    verifyEmail: builder.mutation({
+      query: (credentials) => ({
+        url: "/user/verify-email",
+        method: "POST",
+        body: credentials,
+        // credentials: "include",
+      }),
+    }),
+    resetPasswordToken: builder.mutation({
+      query: (credentials) => ({
+        url: "/user/reset-password/{token}",
+        method: "PUT",
+        body: credentials,
+        // credentials: "include",
+      }),
+    }),
+    updatePassword: builder.mutation({
+      query: (credentials) => ({
+        url: "/user/password",
+        method: "PUT",
+        body: credentials,
+        // credentials: "include",
+      }),
+    }),
+    refreshToken: builder.query({
+      query: () => ({
+        url: "/user/refresh",
+        method: "GET",
+        credentials: "include",
       }),
     }),
 
@@ -20,10 +68,10 @@ export const authApi = apiSlice.injectEndpoints({
       providesTags: ["Role"],
     }),
 
-    logout: builder.mutation({
+    logout: builder.query({
       query: () => ({
-        url: "/user/logout", 
-        method: "POST",
+        url: "/user/logout",
+        method: "GET",
       }),
     }),
   }),
@@ -31,7 +79,14 @@ export const authApi = apiSlice.injectEndpoints({
 
 export const {
   useLoginMutation,
-  useLogoutMutation,
+  useLogoutQuery,
   useLazyGetUserQuery,
+  useGetUserQuery,
   useLazyGetRoleByIdQuery,
+  useLazyRefreshTokenQuery,
+  useForgetPasswordTokenMutation,
+  useResetPasswordTokenMutation,
+  useSendOtpEmailMutation,
+  useVerifyEmailMutation,
+  useUpdatePasswordMutation,
 } = authApi;

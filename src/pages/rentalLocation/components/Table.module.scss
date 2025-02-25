@@ -1,0 +1,31 @@
+.status {
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    display: inline-block;
+    &.active {
+        background: #E7F8F0;
+        color: #41C588;
+    }
+    &.pending {
+        background: #FEF4E6;
+        color: #F9A63A;
+    }
+    &.suspended {
+        background: #FEECEB;
+        color: #F36960;
+    }
+    &.underreview {
+        background: #E8F1FD;
+        color: #448DF2;
+    }
+    &.inactive {
+        background: #e2e3e5;
+        color: #6c757d;
+    }
+    &.completed {
+        background: #e2e3e5;
+        color: #343a40;
+    }
+}
+

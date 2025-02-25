@@ -3,10 +3,16 @@ import { useState, useEffect, useRef } from "react";
 import Avatar from "./Avatar";
 import NotificationIcon from "./NotificationIcon";
 import NotificationPanel from "./NotificationPanel";
+import { useSelector } from "react-redux";
+import { useGetUserQuery } from "../../../redux/services/authApi";
 
 export default function HeaderAdmin() {
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [time, setTime] = useState(new Date());
+  const userId = useSelector((state) => state.auth.userId);
+
+  const { data: userData, isLoading } = useGetUserQuery(userId);
+  // console.log(userData);
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -96,7 +102,7 @@ export default function HeaderAdmin() {
           display: "flex",
           position: "relative",
           height: "60px",
-          backgroundColor: "#fff",
+          // backgroundColor: "#fff",
         }}
       >
         {/* <SearchField /> Search Field Component */}
@@ -116,14 +122,14 @@ export default function HeaderAdmin() {
           </div>
           {/* Notification Icon */}
           <NotificationIcon
-            ref={iconRef} // Reference for icon
+            // ref={iconRef} // Reference for icon
             count={notifications.length}
             onClick={(e) => {
               e.stopPropagation(); // Ngừng propagate event lên trên
               setIsNotificationOpen((prev) => !prev); // Toggle notification panel
             }}
           />
-          <Avatar /> {/* Avatar Component */}
+          <Avatar userData={userData} /> {/* Avatar Component */}
         </div>
       </div>
 

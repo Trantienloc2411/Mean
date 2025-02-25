@@ -1,4 +1,4 @@
-import { Outlet, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, useNavigate, useLocation, useParams } from "react-router-dom";
 import {
   BarChartOutlined,
   CalendarOutlined,
@@ -10,23 +10,50 @@ import { Layout, Menu } from "antd";
 import Logo from "../assets/images/logo.png";
 import { BsBuildings } from "react-icons/bs";
 import HeaderSimple from "../components/layouts/header/HeaderSimple";
-import useAppInit from "../hooks/useAppInit";
+import { MdOutlinePolicy } from "react-icons/md";
 
 const { Header, Content } = Layout;
 
-// Danh sách menu items với đường dẫn
-const menuItems = [
-  { key: "/owner/dashboard", icon: <HomeOutlined />, label: "Tổng quan" },
-  { key: "/owner/information", icon: <UserOutlined />, label: "Thông tin" },
-  { key: "/owner/rental-location", icon: <BsBuildings />, label: "Địa điểm" },
-  { key: "/owner/booking", icon: <CalendarOutlined />, label: "Đặt phòng" },
-  { key: "/owner/type-room", icon: <TagOutlined />, label: "Loại phòng" },
-  { key: "/owner/policy", icon: <BarChartOutlined />, label: "Chính sách" },
-  { key: "/owner/setting", icon: <BarChartOutlined />, label: "Cài đặt" },
-];
-
 const OwnerLayout = () => {
   // useAppInit();
+  const { id } = useParams(); // Lấy ID từ URL
+  const menuItems = [
+    {
+      key: `/owner/${id}/dashboard`,
+      icon: <HomeOutlined />,
+      label: "Tổng quan",
+    },
+    {
+      key: `/owner/${id}/information`,
+      icon: <UserOutlined />,
+      label: "Thông tin",
+    },
+    {
+      key: `/owner/${id}/rental-location`,
+      icon: <BsBuildings />,
+      label: "Địa điểm",
+    },
+    {
+      key: `/owner/${id}/booking`,
+      icon: <CalendarOutlined />,
+      label: "Đặt phòng",
+    },
+    {
+      key: `/owner/${id}/type-room`,
+      icon: <TagOutlined />,
+      label: "Loại phòng",
+    },
+    {
+      key: `/owner/${id}/policy`,
+      icon: <MdOutlinePolicy />,
+      label: "Chính sách",
+    },
+    {
+      key: `/owner/${id}/setting`,
+      icon: <BarChartOutlined />,
+      label: "Cài đặt",
+    },
+  ];
   const navigate = useNavigate(); // Để điều hướng khi người dùng click Menu
   const location = useLocation(); // Để lấy path hiện tại
 

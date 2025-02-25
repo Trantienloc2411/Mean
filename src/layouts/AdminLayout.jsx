@@ -16,7 +16,6 @@ import { Layout, Menu } from "antd";
 import Logo from "../assets/images/logo.png";
 import { BsBuildings } from "react-icons/bs";
 import HeaderAdmin from "../components/layouts/header/HeaderAdmin";
-import useAppInit from "../hooks/useAppInit";
 const { Header, Content, Sider } = Layout;
 
 // Danh sách menu items với đường dẫn
@@ -37,7 +36,6 @@ const menuItems = [
 ];
 
 const AdminLayout = () => {
-  // useAppInit();
   const navigate = useNavigate(); // Để điều hướng khi người dùng click Menu
   const location = useLocation(); // Để lấy path hiện tại
   const [collapsed, setCollapsed] = useState(false); // Trạng thái thu nhỏ/mở rộng của sidebar
@@ -80,26 +78,31 @@ const AdminLayout = () => {
             transition: "all 0.3s",
           }}
         >
-          <img
-            src={Logo} // Đường dẫn tới logo của bạn
-            alt="Mean Logo"
-            style={{
-              height: "40px",
-              width: "40px",
-            }}
-          />
-          {!collapsed && (
-            <span
+          <div
+            style={{ cursor: "pointer" }}
+            onClick={() => navigate("/admin/dashboard")} // Điều hướng khi click
+          >
+            <img
+              src={Logo} // Đường dẫn tới logo của bạn
+              alt="Mean Logo"
               style={{
-                marginLeft: "8px",
-                fontSize: "26px",
-                fontWeight: "500",
-                color: "#2F7BEB",
+                height: "40px",
+                width: "40px",
               }}
-            >
-              Mean
-            </span>
-          )}
+            />
+            {!collapsed && (
+              <span
+                style={{
+                  marginLeft: "8px",
+                  fontSize: "26px",
+                  fontWeight: "500",
+                  color: "#2F7BEB",
+                }}
+              >
+                Mean
+              </span>
+            )}
+          </div>
         </div>
 
         <Menu
@@ -125,6 +128,7 @@ const AdminLayout = () => {
             width: `calc(100% - ${collapsed ? "80px" : "200px"})`,
             padding: "0 20px",
             backgroundColor: "#fff",
+            boxShadow: "0px 4px 5px 0px rgba(0, 0, 0, 0.1)",
           }}
         >
           <HeaderAdmin />
