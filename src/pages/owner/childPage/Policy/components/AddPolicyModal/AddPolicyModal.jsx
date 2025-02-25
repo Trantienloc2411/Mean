@@ -1,17 +1,27 @@
-import { Modal, Input, Form, DatePicker } from 'antd';
+import { useState } from 'react';
+import { Modal, Input, Form, DatePicker, message } from 'antd';
 import dayjs from 'dayjs';
 import styles from './AddPolicyModal.module.scss';
 
 const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
     const { TextArea } = Input;
     const [form] = Form.useForm();
+    const [loading, setLoading] = useState(false);
 
-    const handleSubmit = (values) => {
-        onConfirm({
-            ...values,
-            CreatedDate: dayjs().format('HH:mm DD/MM/YYYY'),
-            Status: 'Pending',
-        });
+    const handleSubmit = async (values) => {
+        try {
+            setLoading(true);
+            await onConfirm({
+                ...values,
+                CreatedDate: dayjs().format('HH:mm DD/MM/YYYY'),
+                Status: 'Pending',
+            });
+            form.resetFields();
+        } catch (error) {
+            console.error("Error adding policy:", error);
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
@@ -19,30 +29,37 @@ const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
             className={styles.addPolicyModal}
             title="Thêm Chính Sách Mới"
             open={isOpen}
-            onCancel={onCancel}
+            onCancel={() => {
+                form.resetFields();
+                onCancel();
+            }}
             onOk={() => form.submit()}
+            confirmLoading={loading}
+            okText="Thêm mới"
+            cancelText="Huỷ"
         >
             <Form
                 form={form}
                 onFinish={handleSubmit}
                 initialValues={{
                     ApplyDate: dayjs(),
-                    EndDate: dayjs(),
+                    EndDate: dayjs().add(30, 'day'),
                 }}
+                layout="vertical"
             >
                 <Form.Item
                     name="Name"
                     label="Tên chính sách"
                     rules={[{ required: true, message: 'Vui lòng nhập tên chính sách!' }]}
                 >
-                    <Input />
+                    <Input placeholder="Nhập tên chính sách" />
                 </Form.Item>
                 <Form.Item
                     name="Description"
                     label="Mô tả"
                     rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}
                 >
-                    <TextArea rows={4} placeholder="Nhập mô tả tiện ích" />
+                    <TextArea rows={4} placeholder="Nhập mô tả chính sách" />
                 </Form.Item>
                 <Form.Item
                     name="ApplyDate"
@@ -52,6 +69,8 @@ const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
                     <DatePicker
                         format="HH:mm DD/MM/YYYY"
                         showTime={{ format: 'HH:mm' }}
+                        placeholder="Chọn ngày giờ áp dụng"
+                        style={{ width: '100%' }}
                     />
                 </Form.Item>
                 <Form.Item
@@ -77,6 +96,8 @@ const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
                     <DatePicker
                         format="HH:mm DD/MM/YYYY"
                         showTime={{ format: 'HH:mm' }}
+                        placeholder="Chọn ngày giờ kết thúc"
+                        style={{ width: '100%' }}
                     />
                 </Form.Item>
             </Form>

@@ -17,6 +17,7 @@ export const rentalApi = apiSlice.injectEndpoints({
     getOwnerDetailByUserId: builder.query({
       query: (id) => `owner/detail-owner/${id}`,
     }),
+    
   }),
 });
 
