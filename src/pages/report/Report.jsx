@@ -1,14 +1,18 @@
 import styles from "./Report.module.scss";
 import { useState, useEffect } from "react";
-import { Input, Button, Table, Dropdown } from "antd";
+import { Input, Button, Table, Dropdown, message } from "antd";
 import { MoreOutlined, FilterOutlined } from "@ant-design/icons";
 import Filter from "./components/Filter/Filter";
 import ReportDetail from "./components/ReportDetail/ReportDetail";
 import ReplyReport from "./components/ReplyReport/ReplyReport";
-import { reportData } from "./data/fakeData";
 import debounce from "lodash/debounce";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import { 
+  useGetAllReportsQuery, 
+  useGetReportByIdQuery, 
+  useUpdateReportMutation 
+} from "../../redux/services/reportApi";
 
 dayjs.extend(customParseFormat);
 
@@ -18,24 +22,85 @@ export default function Report() {
     date: null,
   });
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredData, setFilteredData] = useState(reportData);
+  const [filteredData, setFilteredData] = useState([]);
+  const [allReports, setAllReports] = useState([]);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
+  const [selectedReportId, setSelectedReportId] = useState(null);
 
-  const items = [
-    {
-      key: "1",
-      label: "Chi tiết",
-    },
-    {
-      key: "2",
-      label: "Trả lời",
-    },
-  ];
+  const { 
+    data: reports, 
+    isLoading, 
+    error, 
+    refetch: refetchReports 
+  } = useGetAllReportsQuery();
+
+  const { 
+    data: reportDetail, 
+    isLoading: isDetailLoading 
+  } = useGetReportByIdQuery(selectedReportId, { 
+    skip: !selectedReportId 
+  });
+
+  const [updateReport, { isLoading: isUpdating }] = useUpdateReportMutation();
+
+  useEffect(() => {
+    if (reports) {
+      const transformedData = reports.map((report) => ({
+        id: report.id || report._id,
+        customerName: report.bookingId, 
+        locationName: "Location", 
+        content: report.content,
+        createdAt: report.createdAt,
+        status: report.isReviewed ? "Reviewed" : "Pending",
+        reason: report.reason,
+        images: report.images,
+        hasReply: !!report.contentReply,
+        originalData: report 
+      }));
+      setAllReports(transformedData);
+      setFilteredData(transformedData);
+    }
+  }, [reports]);
+
+  useEffect(() => {
+    if (reportDetail && selectedReport) {
+      const updatedReport = {
+        ...selectedReport,
+        content: reportDetail.content,
+        reason: reportDetail.reason,
+        status: reportDetail.isReviewed ? "Reviewed" : "Pending",
+        images: reportDetail.images,
+        hasReply: !!reportDetail.contentReply,
+        originalData: reportDetail
+      };
+      setSelectedReport(updatedReport);
+    }
+  }, [reportDetail]);
+
+  const getMenuItems = (record) => {
+    const items = [
+      {
+        key: "1",
+        label: "Chi tiết",
+      }
+    ];
+
+    if (!record.hasReply) {
+      items.push({
+        key: "2",
+        label: "Trả lời",
+      });
+    }
+    
+    return items;
+  };
 
   const handleMenuClick = (key, record) => {
     setSelectedReport(record);
+    setSelectedReportId(record.id);
+    
     if (key === "1") {
       setIsDetailModalOpen(true);
     } else if (key === "2") {
@@ -49,18 +114,19 @@ export default function Report() {
       dataIndex: "id",
       key: "id",
       width: 70,
+      render: (text, record, index) => index + 1, 
     },
     {
-      title: "Khách hàng",
+      title: "Booking ID",
       dataIndex: "customerName",
       key: "customerName",
-      width: 120,
+      width: 150,
     },
     {
-      title: "Tên địa điểm",
-      dataIndex: "locationName",
-      key: "locationName",
-      width: 150,
+      title: "Lý do",
+      dataIndex: "reason",
+      key: "reason",
+      width: 120,
     },
     {
       title: "Content",
@@ -97,7 +163,7 @@ export default function Report() {
       render: (_, record) => (
         <Dropdown
           menu={{
-            items,
+            items: getMenuItems(record),
             onClick: ({ key }) => handleMenuClick(key, record),
           }}
         >
@@ -119,14 +185,14 @@ export default function Report() {
   };
 
   useEffect(() => {
-    let filtered = [...reportData];
-
-    // Search filter
+    if (!allReports.length) return;
+    
+    let filtered = [...allReports];
     if (searchTerm) {
       filtered = filtered.filter(
         (item) =>
-          item.customerName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.locationName.toLowerCase().includes(searchTerm.toLowerCase())
+          (item.customerName && item.customerName.toLowerCase().includes(searchTerm.toLowerCase())) ||
+          (item.reason && item.reason.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
@@ -135,20 +201,39 @@ export default function Report() {
         selectedValues.status.includes(item.status)
       );
     }
+    
     if (selectedValues.date) {
       const selectedDate = dayjs(selectedValues.date).format("DD/MM/YYYY");
       filtered = filtered.filter((item) => {
-        const itemDate = item.createdAt.split(" ")[1];
+        if (!item.createdAt) return false;
+        const itemDate = item.createdAt.split(" ")[0];
         return itemDate === selectedDate;
       });
     }
 
     setFilteredData(filtered);
-  }, [searchTerm, selectedValues]);
+  }, [searchTerm, selectedValues, allReports]);
 
   const getActiveFiltersCount = () => {
     return selectedValues.status.length + (selectedValues.date ? 1 : 0);
   };
+
+  const handleReplySubmit = async (replyData) => {
+    try {
+      if (replyData) {
+        await updateReport(replyData);
+        message.success("Báo cáo đã được trả lời thành công");
+        refetchReports(); 
+        setIsReplyModalOpen(false);
+      }
+    } catch (err) {
+      message.error("Không thể trả lời báo cáo, vui lòng thử lại");
+      console.error("Error submitting reply:", err);
+    }
+  };
+
+  if (isLoading) return <div>Đang tải dữ liệu...</div>;
+  if (error) return <div>Đã xảy ra lỗi khi tải dữ liệu: {error.toString()}</div>;
 
   return (
     <div className={styles.container}>
@@ -157,7 +242,7 @@ export default function Report() {
       <div className={styles.toolBar}>
         <div className={styles.searchFilter}>
           <Input
-            placeholder="Tìm kiếm tên khách hàng"
+            placeholder="Tìm kiếm theo booking ID hoặc lý do"
             onChange={(e) => handleSearch(e.target.value)}
             style={{ width: 250 }}
           />
@@ -182,6 +267,8 @@ export default function Report() {
       <Table
         columns={columns}
         dataSource={filteredData}
+        rowKey="id"
+        loading={isLoading}
         pagination={{
           total: filteredData.length,
           pageSize: 7,
@@ -220,16 +307,15 @@ export default function Report() {
         isOpen={isDetailModalOpen}
         onClose={() => setIsDetailModalOpen(false)}
         report={selectedReport}
+        isLoading={isDetailLoading}
       />
 
       <ReplyReport
         isOpen={isReplyModalOpen}
         onClose={() => setIsReplyModalOpen(false)}
         report={selectedReport}
-        onSubmit={(reply) => {
-          console.log("Reply submitted:", reply);
-          setIsReplyModalOpen(false);
-        }}
+        onSubmit={handleReplySubmit}
+        isLoading={isUpdating}
       />
     </div>
   );
