@@ -2,35 +2,39 @@ import { apiSlice } from "./apiSlice";
 
 export const serviceApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
-        getAllServices: builder.query({
+        getAllAmenities: builder.query({
             query: () => "/service/all-services",
+            transformResponse: (response) => response.data,
             providesTags: ["Service"],
         }),
 
-        getServiceById: builder.query({
+        getAmenityById: builder.query({
             query: (id) => `/service/${id}`,
-            providesTags: ["Service"],
+            providesTags: (result, error, id) => [{ type: "Service", id }],
         }),
 
-        createService: builder.mutation({
-            query: (service) => ({
+        createAmenity: builder.mutation({
+            query: (amenity) => ({
                 url: "/service/create-service",
                 method: "POST",
-                body: service,
+                body: amenity,
             }),
             invalidatesTags: ["Service"],
         }),
 
-        updateService: builder.mutation({
+        updateAmenity: builder.mutation({
             query: ({ id, ...data }) => ({
                 url: `/service/${id}`,
                 method: "PUT",
                 body: data,
             }),
-            invalidatesTags: ["Service"],
+            invalidatesTags: (result, error, { id }) => [
+                { type: "Service", id },
+                "Service",
+            ],
         }),
 
-        deleteService: builder.mutation({
+        deleteAmenity: builder.mutation({
             query: (id) => ({
                 url: `/service/${id}`,
                 method: "DELETE",
@@ -41,9 +45,9 @@ export const serviceApi = apiSlice.injectEndpoints({
 });
 
 export const {
-    useGetAllServicesQuery,
-    useGetServiceByIdQuery,
-    useCreateServiceMutation,
-    useUpdateServiceMutation,
-    useDeleteServiceMutation,
+    useGetAllAmenitiesQuery,
+    useGetAmenityByIdQuery,
+    useCreateAmenityMutation,
+    useUpdateAmenityMutation,
+    useDeleteAmenityMutation,
 } = serviceApi;

@@ -24,6 +24,8 @@ const DetailAmenityModal = ({ isOpen, onCancel, amenity }) => {
       <Descriptions bordered column={1}>
         <Descriptions.Item label="Tên tiện ích">{amenity.name}</Descriptions.Item>
         <Descriptions.Item label="Mô tả">{amenity.description}</Descriptions.Item>
+        <Descriptions.Item label="Ngày tạo">{amenity.createdAt}</Descriptions.Item>
+        <Descriptions.Item label="Cập nhật lần cuối">{amenity.updatedAt}</Descriptions.Item>
         <Descriptions.Item label="Trạng thái">
           {getStatusDisplay(amenity.status)}
         </Descriptions.Item>
