@@ -3,6 +3,7 @@ import SettingInformation from "./SettingInformation";
 import SettingStatus from "./SettingStatus";
 import DocumentManagement from "./DocumentManagement";
 
+
 export default function SettingRentalLocation({ rentalData }) {
   const items = [
     {
@@ -10,13 +11,14 @@ export default function SettingRentalLocation({ rentalData }) {
       label: "Thông tin địa điểm",
       children: <SettingInformation rentalData={rentalData} />,
     },
+
     {
-      key: "2",
+      key: "3",
       label: "Trạng thái",
       children: <SettingStatus />,
     },
     {
-      key: "3",
+      key: "2",
       label: "Danh sách giấy tờ",
       children: <DocumentManagement />,
     },

@@ -1,6 +1,6 @@
 import { apiSlice } from "./apiSlice";
 
-export const rentalApi = apiSlice.injectEndpoints({
+export const ownerApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getOwnerById: builder.query({
       query: (id) => `owner/${id}`,
@@ -24,4 +24,4 @@ export const {
   useLazyGetOwnerByIdQuery,
   useGetOwnerDetailByUserIdQuery,
   useUpdateOwnerMutation,
-} = rentalApi;
+} = ownerApi;

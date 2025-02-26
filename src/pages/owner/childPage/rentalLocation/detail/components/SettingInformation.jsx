@@ -1,47 +1,54 @@
 import React, { useState } from "react";
-import { Input, Button, Form, message } from "antd";
 import {
-  EditOutlined,
-  SaveOutlined,
-  CloseOutlined,
-  EnvironmentOutlined,
-} from "@ant-design/icons";
+  Button,
+  message,
+  Tag,
+  Card,
+  Typography,
+  Row,
+  Col,
+  Divider,
+} from "antd";
+import { EditOutlined, EnvironmentOutlined } from "@ant-design/icons";
+import EditRentalLocationModal from "./EditRentalLocationModal";
+import { useUpdateRentalLocationMutation } from "../../../../../../redux/services/rentalApi";
+
+const { Title, Text } = Typography;
+
+const RENTALLOCATION_STATUS = {
+  PENDING: 1,
+  INACTIVE: 2,
+  ACTIVE: 3,
+  PAUSE: 4,
+};
+
+const STATUS_LABELS = {
+  [RENTALLOCATION_STATUS.PENDING]: {
+    label: "Chờ duyệt",
+    color: "#856404",
+    bgColor: "#FFF3CD",
+  },
+  [RENTALLOCATION_STATUS.INACTIVE]: {
+    label: "Không hoạt động",
+    color: "#721C24",
+    bgColor: "#F8D7DA",
+  },
+  [RENTALLOCATION_STATUS.ACTIVE]: {
+    label: "Hoạt động",
+    color: "#155724",
+    bgColor: "#D4EDDA",
+  },
+  [RENTALLOCATION_STATUS.PAUSE]: {
+    label: "Tạm dừng",
+    color: "#0C5460",
+    bgColor: "#D1ECF1",
+  },
+};
 
 export default function SettingInformation({ rentalData }) {
-  const [isEditing, setIsEditing] = useState(false); // Chế độ chỉnh sửa
-  const [form] = Form.useForm();
-
-  // Dữ liệu ban đầu
-  const [data, setData] = useState({
-    name: rentalData?.name || "",
-    description: rentalData?.description || "",
-    address: rentalData?.address || "",
-    longitude: rentalData?.longitude || "", // Kinh độ
-    latitude: rentalData?.latitude || "", // Vĩ độ
-  });
-
-  const handleEdit = () => {
-    setIsEditing(true);
-    form.setFieldsValue(data);
-  };
-
-  const handleCancel = () => {
-    setIsEditing(false);
-  };
-
-  const handleUpdate = () => {
-    form
-      .validateFields()
-      .then((values) => {
-        setData(values);
-        message.success("Cập nhật thông tin thành công!");
-        setIsEditing(false);
-      })
-      .catch((info) => {
-        console.error("Validate Failed:", info);
-      });
-  };
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [data, setData] = useState(rentalData);
+  const { updateRentalLocation } = useUpdateRentalLocationMutation();
   const handleViewOnMap = () => {
     if (data.latitude && data.longitude) {
       const mapUrl = `https://www.google.com/maps?q=${data.latitude},${data.longitude}`;
@@ -51,95 +58,83 @@ export default function SettingInformation({ rentalData }) {
     }
   };
 
+  const handleUpdate = (updatedData) => {
+    setData(updatedData);
+  };
+
   return (
-    <div>
-      <h3>Thông tin địa điểm</h3>
-      {isEditing ? (
-        // Chế độ chỉnh sửa
-        <Form
-          form={form}
-          layout="vertical"
-          initialValues={data}
-          style={{ marginTop: "16px" }}
+    <Card
+      style={{
+        borderRadius: 12,
+        boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.1)",
+        padding: 20,
+      }}
+    >
+      <Title level={3} style={{ textAlign: "center", marginBottom: 20 }}>
+        Thông tin địa điểm
+      </Title>
+      <Row gutter={[16, 16]}>
+        <Col span={12}>
+          <Text strong>Tên:</Text> <Text>{data.name}</Text>
+        </Col>
+        <Col span={12}>
+          <Text strong>Địa chỉ:</Text> <Text>{data.address}</Text>
+        </Col>
+        <Col span={24}>
+          <Text strong>Mô tả:</Text> <Text>{data.description}</Text>
+        </Col>
+        <Col span={12}>
+          <Text strong>Vĩ độ:</Text> <Text>{data.latitude}</Text>
+        </Col>
+        <Col span={12}>
+          <Text strong>Kinh độ:</Text> <Text>{data.longitude}</Text>
+        </Col>
+        <Col span={12}>
+          <Text strong>Giờ mở cửa:</Text> <Text>{data.openHour}</Text>
+        </Col>
+        <Col span={12}>
+          <Text strong>Giờ đóng cửa:</Text> <Text>{data.closeHour}</Text>
+        </Col>
+        <Col span={12}>
+          <Text strong>Qua đêm:</Text>{" "}
+          <Text>{data.isOverNight ? "Có" : "Không"}</Text>
+        </Col>
+        <Col span={12}>
+          <Text strong>Trạng thái:</Text>
+          <Tag
+            style={{
+              background: STATUS_LABELS[data.status]?.bgColor,
+              color: STATUS_LABELS[data.status]?.color,
+              marginLeft: 8,
+            }}
+          >
+            {STATUS_LABELS[data.status]?.label || "Không xác định"}
+          </Tag>
+        </Col>
+      </Row>
+      <Divider />
+      <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
+        <Button
+          type="default"
+          icon={<EditOutlined />}
+          onClick={() => setIsModalOpen(true)}
         >
-          <Form.Item
-            label="Tên địa điểm"
-            name="name"
-            rules={[{ required: true, message: "Vui lòng nhập tên địa điểm!" }]}
-          >
-            <Input placeholder="Nhập tên địa điểm" />
-          </Form.Item>
-
-          <Form.Item
-            label="Mô tả"
-            name="description"
-            rules={[{ required: true, message: "Vui lòng nhập mô tả!" }]}
-          >
-            <Input.TextArea placeholder="Nhập mô tả địa điểm" rows={4} />
-          </Form.Item>
-
-          <Form.Item
-            label="Địa chỉ"
-            name="address"
-            rules={[{ required: true, message: "Vui lòng nhập địa chỉ!" }]}
-          >
-            <Input placeholder="Nhập địa chỉ địa điểm" />
-          </Form.Item>
-
-          <Form.Item label="Vĩ độ (Latitude)" name="latitude">
-            <Input placeholder="Nhập vĩ độ" />
-          </Form.Item>
-
-          <Form.Item label="Kinh độ (Longitude)" name="longitude">
-            <Input placeholder="Nhập kinh độ" />
-          </Form.Item>
-
-          <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
-            <Button
-              type="primary"
-              icon={<SaveOutlined />}
-              onClick={handleUpdate}
-            >
-              Cập nhật
-            </Button>
-            <Button icon={<CloseOutlined />} onClick={handleCancel}>
-              Hủy
-            </Button>
-          </div>
-        </Form>
-      ) : (
-        // Chế độ xem
-        <div style={{ marginTop: "16px" }}>
-          <p>
-            <strong>Tên địa điểm:</strong> {data.name}
-          </p>
-          <p>
-            <strong>Mô tả:</strong> {data.description}
-          </p>
-          <p>
-            <strong>Địa chỉ:</strong> {data.address}
-          </p>
-          <p>
-            <strong>Vĩ độ (Latitude):</strong> {data.latitude}
-          </p>
-          <p>
-            <strong>Kinh độ (Longitude):</strong> {data.longitude}
-          </p>
-
-          <div style={{ display: "flex", gap: "8px", marginTop: "16px" }}>
-            <Button type="default" icon={<EditOutlined />} onClick={handleEdit}>
-              Chỉnh sửa
-            </Button>
-            <Button
-              type="primary"
-              icon={<EnvironmentOutlined />}
-              onClick={handleViewOnMap}
-            >
-              Xem trên Google Maps
-            </Button>
-          </div>
-        </div>
-      )}
-    </div>
+          Chỉnh sửa
+        </Button>
+        <Button
+          type="primary"
+          icon={<EnvironmentOutlined />}
+          onClick={handleViewOnMap}
+        >
+          Xem trên Google Maps
+        </Button>
+      </div>
+      <EditRentalLocationModal
+        visible={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        rentalData={data}
+        onUpdate={handleUpdate}
+      />
+    </Card>
   );
 }
