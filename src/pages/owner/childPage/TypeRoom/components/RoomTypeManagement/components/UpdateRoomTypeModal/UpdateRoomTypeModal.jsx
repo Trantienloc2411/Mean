@@ -1,6 +1,6 @@
 import { Modal, Form, Input, InputNumber, Select, Button } from 'antd';
 import { useEffect } from 'react';
-import { useGetAllServicesQuery } from '../../../../../../../../redux/services/serviceApi';
+import { useGetAllAmenitiesQuery } from '../../../../../../../../redux/services/serviceApi';
 import { useGetAllRentalLocationsQuery } from '../../../../../../../../redux/services/rentalLocationApi';
 import styles from './UpdateRoomTypeModal.module.scss';
 
@@ -9,7 +9,7 @@ const { Option } = Select;
 
 const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => {
   const [form] = Form.useForm();
-  const { data: services, isLoading, error } = useGetAllServicesQuery();
+  const { data: services, isLoading, error } = useGetAllAmenitiesQuery();
   const { data: rentalLocations, isLoading: isLoadingRentalLocations } = useGetAllRentalLocationsQuery();
 
   useEffect(() => {

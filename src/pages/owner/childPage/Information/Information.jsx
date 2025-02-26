@@ -44,13 +44,13 @@ export default function Information() {
 
   const companyInfo = {
     businessLicensesFile:
-      ownerDetail?.businessInformationId.businessLicensesFile,
+      ownerDetail?.businessInformationId?.businessLicensesFile,
     citizenIdentification:
-      ownerDetail?.businessInformationId.citizenIdentification,
-    companyAddress: ownerDetail?.businessInformationId.companyAddress,
-    companyName: ownerDetail?.businessInformationId.companyName,
-    representativeName: ownerDetail?.businessInformationId.representativeName,
-    taxCode: ownerDetail?.businessInformationId.taxID,
+      ownerDetail?.businessInformationId?.citizenIdentification,
+    companyAddress: ownerDetail?.businessInformationId?.companyAddress,
+    companyName: ownerDetail?.businessInformationId?.companyName,
+    representativeName: ownerDetail?.businessInformationId?.representativeName,
+    taxCode: ownerDetail?.businessInformationId?.taxID,
   };
 
   return (

@@ -15,8 +15,8 @@ import {
   useDeleteAccommodationTypeMutation,
 } from "../../../../../../redux/services/accommodationTypeApi";
 import {
-  useGetAllServicesQuery,
-  useGetServiceByIdQuery
+  useGetAllAmenitiesQuery,
+  useGetAmenityByIdQuery
 } from "../../../../../../redux/services/serviceApi";
 
 const RoomTypeManagement = () => {
@@ -35,7 +35,7 @@ const RoomTypeManagement = () => {
   const [serviceNames, setServiceNames] = useState({});
 
   const { data: roomTypesData, isLoading: isRoomTypesLoading } = useGetAllAccommodationTypesQuery();
-  const { data: servicesData, isLoading: isServicesLoading } = useGetAllServicesQuery();
+  const { data: servicesData, isLoading: isServicesLoading } = useGetAllAmenitiesQuery();
 
   const roomTypes = Array.isArray(roomTypesData?.data) ? roomTypesData.data : Array.isArray(roomTypesData) ? roomTypesData : [];
   const services = Array.isArray(servicesData?.data) ? servicesData.data : Array.isArray(servicesData) ? servicesData : [];

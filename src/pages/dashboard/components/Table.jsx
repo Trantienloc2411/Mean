@@ -59,6 +59,7 @@ export default function TableModify(props) {
             columns={tableColumn}
             dataSource={maxItem < 1 ? tableData : tableData.slice(0, maxItem)}
             pagination={isPagination}
+            
         />
     );
 }

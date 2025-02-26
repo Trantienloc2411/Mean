@@ -1,5 +1,5 @@
 import { Modal, Form, Input, InputNumber, Select, Button } from 'antd';
-import { useGetAllServicesQuery } from '../../../../../../../../redux/services/serviceApi';
+import { useGetAllAmenitiesQuery } from '../../../../../../../../redux/services/serviceApi';
 import { useGetAllRentalLocationsQuery } from '../../../../../../../../redux/services/rentalLocationApi';
 import styles from './AddRoomTypeModal.module.scss';
 
@@ -8,7 +8,7 @@ const { Option } = Select;
 
 const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
   const [form] = Form.useForm();
-  const { data: services, isLoading, error } = useGetAllServicesQuery();
+  const { data: services, isLoading, error } = useGetAllAmenitiesQuery();
   const { data: rentalLocations, isLoading: isLoadingRentalLocations } = useGetAllRentalLocationsQuery();
 
   const handleSubmit = () => {

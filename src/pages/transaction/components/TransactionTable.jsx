@@ -9,6 +9,7 @@ import {
 } from "../../../enums/transactionEnums";
 import TransactionDetailModal from "./TransactionDetailModal";
 import { useState } from "react";
+import styles from "./TransactionTable.module.scss";
 
 export default function TransactionTable({ data, loading }) {
   const [isDetailModalVisible, setDetailModalVisible] = useState(false);
@@ -52,9 +53,17 @@ export default function TransactionTable({ data, loading }) {
       align: "center",
       key: "status",
       render: (status) => {
-        const { label = "Không xác định", color = "gray" } =
-          TransactionStatusEnum[status.toUpperCase()] || {};
-        return <Tag color={color}>{label}</Tag>;
+        return (
+          <span className={`${styles.status} ${styles[status.toLowerCase()]}`}>
+            {status === "active" ? "Hoạt động" : 
+            status === "pending" ? "Chờ xác nhận" :
+            status === "inactive" ? "Hủy" :
+            status === "refund" ? "Hoàn tiền" :
+            status === "finalPayment" ? "Thanh toán cuối" :
+            "Không xác định"
+            }
+          </span>
+        );
       },
     },
     {
@@ -115,6 +124,37 @@ export default function TransactionTable({ data, loading }) {
         loading={loading}
         columns={columns}
         rowKey="id"
+        pagination={{
+          total: data.length,
+          pageSize: 7,
+          showSizeChanger: false,
+          className: styles.customPagination,
+          itemRender: (page, type, originalElement) => {
+            const totalPages = Math.ceil(data.length / 7);
+            if (type === "prev") {
+              return (
+                <button
+                  className={styles.paginationButton}
+                  disabled={page === 1} // First page starts at 1
+                >
+                  « Trước
+                </button>
+              );
+            }
+            if (type === "next") {
+              return (
+                <button
+                  className={styles.paginationButton}
+                  disabled={page === totalPages} // Disable when on the last page
+                >
+                  Tiếp »
+                </button>
+              );
+            }
+            return originalElement;
+          },
+        }}
+        className={styles.transactionTable}
       />
       <TransactionDetailModal
         visible={isDetailModalVisible}

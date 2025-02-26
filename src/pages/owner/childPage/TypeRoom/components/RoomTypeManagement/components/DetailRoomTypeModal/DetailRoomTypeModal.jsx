@@ -1,6 +1,6 @@
 import { Modal, Descriptions, Tag } from 'antd';
 import styles from './DetailRoomTypeModal.module.scss';
-import { useGetServiceByIdQuery } from '../../../../../../../../redux/services/serviceApi';
+import { useGetAmenityByIdQuery } from '../../../../../../../../redux/services/serviceApi';
 
 const DetailRoomTypeModal = ({ isOpen, onCancel, roomType, service }) => {
   if (!roomType) return null;
