@@ -3,15 +3,14 @@ import { couponData } from "./data/fakeData.js";
 import TableModify from "../dashboard/components/Table";
 import { MoreOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
 import { useState, useEffect } from "react";
-import { Dropdown, Input, Button, DatePicker, Tag } from "antd";
+import { Dropdown, Input, Button, DatePicker, Tag ,Table} from "antd";
 import debounce from "lodash/debounce";
-import dayjs from 'dayjs';
-import isBetween from 'dayjs/plugin/isBetween';
+import dayjs from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
 import Filter from "../../components/Filter/Filter.jsx";
 import DeleteCouponModal from "./components/DeleteCouponModal.jsx";
 import AddCouponModal from "./components/AddCoupon/AddCouponModal.jsx";
 const { RangePicker } = DatePicker;
-
 
 export default function Coupon() {
   dayjs.extend(isBetween);
@@ -32,46 +31,44 @@ export default function Coupon() {
       name: "discountType",
       title: "Hình thức giảm",
       options: [
-        { key: '1', label: "Phần trăm", value: "Percentage" },
-        { key: '2', label: "Cố định", value: "Fixed" },
+        { key: "1", label: "Phần trăm", value: "Percentage" },
+        { key: "2", label: "Cố định", value: "Fixed" },
       ],
     },
     {
-      name: 'status',
-      title: 'Trạng thái',
+      name: "status",
+      title: "Trạng thái",
       options: [
         {
           label: <Tag color="green">Đang hoạt động</Tag>,
-          value: 'Active'
+          value: "Active",
         },
         {
           label: <Tag color="red">Hết hạn</Tag>,
-          value: 'Inactive'
-        }
-      ]
+          value: "Inactive",
+        },
+      ],
     },
-
   ];
 
   const items = [
     {
-      key: '1',
-      label: 'Xem chi tiết',
+      key: "1",
+      label: "Xem chi tiết",
     },
     {
-      key: '2',
-      label: 'Chỉnh sửa'
+      key: "2",
+      label: "Chỉnh sửa",
     },
     {
-      key: '3',
-      label: 'Vô hiệu hoá',
-      danger: true
-    }
+      key: "3",
+      label: "Vô hiệu hoá",
+      danger: true,
+    },
   ];
 
-
   const handleAddCoupon = (values) => {
-    console.log('New Coupon Values:', values);
+    console.log("New Coupon Values:", values);
     // Add your logic to handle the new coupon data
     setIsAddModalOpen(false);
   };
@@ -81,7 +78,8 @@ export default function Coupon() {
   };
 
   const handleMenuClick = (key, record) => {
-    if (key === '3') { // Vô hiệu hoá option
+    if (key === "3") {
+      // Vô hiệu hoá option
       setSelectedCoupon(record);
       setIsDeleteModalOpen(true);
     }
@@ -107,7 +105,9 @@ export default function Coupon() {
     // Apply status filter
     if (filters.status.length > 0) {
       filtered = filtered.filter((item) =>
-        filters.status.some((status) => status.toLowerCase() === item.Status.toLowerCase())
+        filters.status.some(
+          (status) => status.toLowerCase() === item.Status.toLowerCase()
+        )
       );
     }
 
@@ -131,9 +131,6 @@ export default function Coupon() {
     setFilteredData(filtered);
   };
 
-
-
-
   const handleFilterChange = (filterName, newValues) => {
     const updatedValues = {
       ...selectedValues,
@@ -143,8 +140,6 @@ export default function Coupon() {
     setSelectedValues(updatedValues); // Update state
     applyFilters(updatedValues); // Use updated state
   };
-
-
 
   // Handle date range filter change
   const handleDateRangeChange = (dates, dateStrings) => {
@@ -177,8 +172,8 @@ export default function Coupon() {
 
     if (selectedValues.status?.length > 0) {
       filtered = filtered.filter((item) =>
-        selectedValues.status.some((status) =>
-          status.toLowerCase() === item["Status"].toLowerCase()
+        selectedValues.status.some(
+          (status) => status.toLowerCase() === item["Status"].toLowerCase()
         )
       );
     }
@@ -193,44 +188,50 @@ export default function Coupon() {
     if (selectedValues.dateRange?.length === 2) {
       const [start, end] = selectedValues.dateRange;
       // Parse selected dates and set time range
-      const startDate = dayjs(start).startOf('day');
-      const endDate = dayjs(end).endOf('day');
+      const startDate = dayjs(start).startOf("day");
+      const endDate = dayjs(end).endOf("day");
 
       filtered = filtered.filter((item) => {
         // Parse dates from your specific format "HH:mm:ss DD/MM/YYYY"
-        const [time, date] = item.StartTime.split(' ');
-        const [endTime, endDate] = item.EndTime.split(' ');
+        const [time, date] = item.StartTime.split(" ");
+        const [endTime, endDate] = item.EndTime.split(" ");
 
-        const itemStartTime = dayjs(date + ' ' + time, "DD/MM/YYYY HH:mm:ss");
-        const itemEndTime = dayjs(endDate + ' ' + endTime, "DD/MM/YYYY HH:mm:ss");
+        const itemStartTime = dayjs(date + " " + time, "DD/MM/YYYY HH:mm:ss");
+        const itemEndTime = dayjs(
+          endDate + " " + endTime,
+          "DD/MM/YYYY HH:mm:ss"
+        );
 
-        return itemStartTime.isSame(startDate) ||
+        return (
+          itemStartTime.isSame(startDate) ||
           itemEndTime.isSame(endDate) ||
           (itemStartTime.isAfter(startDate) && itemEndTime.isBefore(endDate)) ||
-          (itemStartTime.isBefore(startDate) && itemEndTime.isAfter(endDate));
+          (itemStartTime.isBefore(startDate) && itemEndTime.isAfter(endDate))
+        );
       });
     }
 
     setFilteredData(filtered);
   }, [searchTerm, selectedValues]);
 
-
-
-
   const tableColumn = [
     { title: "No.", dataIndex: "No", key: "No" },
     { title: "Tên mã", dataIndex: "Name", key: "Name" },
     { title: "Hình thức giảm", dataIndex: "DiscountType", key: "DiscountType" },
     { title: "Giá trị", dataIndex: "Value", key: "Value" },
-    { title: "Khuyến mãi tối đa", dataIndex: "MaxDiscount", key: "MaxDiscount" },
+    {
+      title: "Khuyến mãi tối đa",
+      dataIndex: "MaxDiscount",
+      key: "MaxDiscount",
+    },
     { title: "Ngày bắt đầu", dataIndex: "StartTime", key: "StartTime" },
     { title: "Ngày kết thúc", dataIndex: "EndTime", key: "EndTime" },
     {
       title: <span className="titleTable">Trạng thái</span>,
       dataIndex: "Status",
       key: "status",
-      align: 'center',
-      render: ( Status ) => {
+      align: "center",
+      render: (Status) => {
         return (
           <span className={`${styles.status} ${styles[Status.toLowerCase()]}`}>
             {Status === "Active" ? "Đang hoạt động" : "Hết hạn"}
@@ -241,15 +242,20 @@ export default function Coupon() {
     {
       title: "",
       key: "operation",
-      render: (_, record) => (  // Add record parameter here
-        <Dropdown menu={{
-          items,
-          onClick: ({ key }) => handleMenuClick(key, record)  // Now record is available
-        }}>
+      render: (
+        _,
+        record // Add record parameter here
+      ) => (
+        <Dropdown
+          menu={{
+            items,
+            onClick: ({ key }) => handleMenuClick(key, record), // Now record is available
+          }}
+        >
           <MoreOutlined />
         </Dropdown>
       ),
-    }
+    },
   ];
 
   return (
@@ -270,11 +276,13 @@ export default function Coupon() {
               trigger={["click"]}
               placement="bottomRight"
               dropdownRender={() => (
-                <div style={{
-                  background: 'white',
-                  borderRadius: '8px',
-                  boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-                }}>
+                <div
+                  style={{
+                    background: "white",
+                    borderRadius: "8px",
+                    boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
+                  }}
+                >
                   <Filter
                     filterGroups={filterGroups}
                     selectedValues={selectedValues}
@@ -298,18 +306,17 @@ export default function Coupon() {
               couponName={selectedCoupon?.Name}
             />
 
-
             <DatePicker.RangePicker
               style={{ width: "300px", margin: "16px 0", marginLeft: 10 }}
               onChange={handleDateRangeChange}
-              placeholder={['Ngày bắt đầu', 'Ngày kết thúc']}
+              placeholder={["Ngày bắt đầu", "Ngày kết thúc"]}
               format="DD/MM/YYYY"
               value={
                 selectedValues.dateRange?.length === 2
                   ? [
-                    dayjs(selectedValues.dateRange[0], "DD/MM/YYYY"),
-                    dayjs(selectedValues.dateRange[1], "DD/MM/YYYY")
-                  ]
+                      dayjs(selectedValues.dateRange[0], "DD/MM/YYYY"),
+                      dayjs(selectedValues.dateRange[1], "DD/MM/YYYY"),
+                    ]
                   : null
               }
             />
@@ -330,13 +337,46 @@ export default function Coupon() {
             onCancel={handleAddCancel}
             onConfirm={handleAddCoupon}
           />
-
-
         </div>
 
         {/* Table */}
-        <TableModify tableColumn={tableColumn} tableData={filteredData} />
 
+        <Table
+          columns={tableColumn}
+          dataSource={filteredData}
+          pagination={{
+            total: filteredData.length,
+            pageSize: 7,
+            showSizeChanger: false,
+            className: styles.customPagination,
+            itemRender: (page, type, originalElement) => {
+              const totalPages = Math.ceil(filteredData.length / 7);
+
+              if (type === "prev") {
+                return (
+                  <button
+                    className={styles.paginationButton}
+                    disabled={page === 0}
+                  >
+                    « Trước
+                  </button>
+                );
+              }
+              if (type === "next") {
+                return (
+                  <button
+                    className={styles.paginationButton}
+                    disabled={page >= totalPages}
+                  >
+                    Tiếp »
+                  </button>
+                );
+              }
+              return originalElement;
+            },
+          }}
+          className={styles.couponTable}
+        />
       </div>
     </div>
   );

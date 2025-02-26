@@ -4,7 +4,7 @@ import {
   CloseCircleOutlined,
   UserOutlined,
 } from "@ant-design/icons";
-
+import styles from "./AccountTable.module.scss";
 export default function UserDetailModal({ open, onClose, user }) {
   if (!user) return null;
 
@@ -39,30 +39,55 @@ export default function UserDetailModal({ open, onClose, user }) {
         <Descriptions.Item label="Ngày sinh">{user.doB}</Descriptions.Item>
         <Descriptions.Item label="Vai trò">{user.roleName}</Descriptions.Item>
         <Descriptions.Item label="Trạng thái">
-          <Tag color={user.isActive ? "green" : "red"}>
-            {user.isActive ? "Hoạt động" : "Bị khóa"}
-          </Tag>
+          <span className={`${styles.isActive} ${styles[user.isActive]}`}>
+            {user.isActive === "true" ? "Hoạt động" : "Bị khóa"}
+          </span>
         </Descriptions.Item>
         <Descriptions.Item label="Xác thực Email">
-          {user.isVerifiedEmail ? (
-            <Tag color="green">
-              <CheckCircleOutlined /> Đã xác thực
-            </Tag>
-          ) : (
-            <Tag color="red">
-              <CloseCircleOutlined /> Chưa xác thực
-            </Tag>
+          {user && (
+            <span
+              className={`${styles.isVerifiedEmail} ${
+                user.isVerifiedEmail === "true" || user.isVerifiedEmail === true
+                  ? styles[user.isVerifiedEmail]
+                  : styles[user.isVerifiedEmail]
+              }`}
+            >
+              {user.isVerifiedEmail === "true" ||
+              user.isVerifiedEmail === true ? (
+                <>
+                  <CheckCircleOutlined /> Đã xác thực
+                </>
+              ) : (
+                <>
+                  <CloseCircleOutlined /> Chưa xác thực
+                </>
+              )}
+            </span>
           )}
         </Descriptions.Item>
+
         <Descriptions.Item label="Xác thực SĐT">
-          {user.isVerifiedPhone ? (
-            <Tag color="green">
-              <CheckCircleOutlined /> Đã xác thực
-            </Tag>
-          ) : (
-            <Tag color="red">
-              <CloseCircleOutlined /> Chưa xác thực
-            </Tag>
+          
+
+          {user && (
+            <span
+              className={`${styles.isVerifiedPhone} ${
+                user.isVerifiedPhone === "true" || user.isVerifiedPhone === true
+                  ? styles[user.isVerifiedPhone]
+                  : styles[user.isVerifiedPhone]
+              }`}
+            >
+              {user.isVerifiedPhone === "true" ||
+              user.isVerifiedPhone === true ? (
+                <>
+                  <CheckCircleOutlined /> Đã xác thực
+                </>
+              ) : (
+                <>
+                  <CloseCircleOutlined /> Chưa xác thực
+                </>
+              )}
+            </span>
           )}
         </Descriptions.Item>
         <Descriptions.Item label="Ngày tạo">{user.createdAt}</Descriptions.Item>

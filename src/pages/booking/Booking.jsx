@@ -1,4 +1,4 @@
-import { Dropdown, Tag, Input, Checkbox, Button } from "antd";
+import { Dropdown, Tag, Input, Checkbox, Button, Table } from "antd";
 import TableModify from "../dashboard/components/Table";
 import Overview from "./components/Overview";
 import { BookingData } from "./data/fakeData";
@@ -292,11 +292,43 @@ export default function Booking() {
           </Dropdown>
         </div>
 
-        <TableModify
-          tableColumn={tableColumn}
-          tableData={filteredData}
-          isPagination={true}
-        />
+        <Table 
+        columns={tableColumn}
+        dataSource={filteredData}
+        pagination={{
+          total: filteredData.length,
+          pageSize: 7,
+          showSizeChanger: false,
+          className: styles.customPagination,
+          itemRender: (page, type, originalElement) => {
+            const totalPages = Math.ceil(filteredData.length / 7);
+
+            if (type === "prev") {
+              return (
+                <button
+                  className={styles.paginationButton}
+                  disabled={page === 0}
+                >
+                  « Trước
+                </button>
+              );
+            }
+            if (type === "next") {
+              return (
+                <button
+                  className={styles.paginationButton}
+                  disabled={page >= totalPages}
+                >
+                  Tiếp »
+                </button>
+              );
+            }
+            return originalElement;
+          },
+        }}
+        className={styles.bookingTable}
+      />
+
       </div>
     </div>
   );
