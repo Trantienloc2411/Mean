@@ -57,7 +57,7 @@ export default function Setting() {
           ownerDetail?.businessInformationId?.citizenIdentification,
         companyAddress: ownerDetail?.businessInformationId?.companyAddress,
         companyName: ownerDetail?.businessInformationId?.companyName,
-        id: ownerDetail?.businessInformationId?.id,
+        id: ownerDetail?.businessInformationId?.id || null,
         representativeName:
           ownerDetail?.businessInformationId?.representativeName,
         taxID: ownerDetail?.businessInformationId?.taxID,
