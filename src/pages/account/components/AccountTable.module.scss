@@ -1,79 +1,94 @@
-.contentContainer {
-    padding: 20px;
-    background-color: '#eceef0';
-}
-.contentContainer h1 {
-    font-weight: 600;
-    padding-bottom: 4px;
-}
-.contentContainer h2 {
-    padding-top: 10px;
-}
-.listBooking{
-    background-color: white;
-    padding: 20px;
-    border-radius: 20px;
-}
-.statusTag {
+.role {
     padding: 4px 12px;
     border-radius: 16px;
     font-size: 12px;
     display: inline-block;
-    &.inprogress {
+    &.owner {
         background: #E7F8F0;
         color: #41C588;
     }
-    &.confirmed {
-        background: #FEF4E6;
-        color: #F9A63A;
-    }
-    &.canceled {
+    &.staff {
         background: #FEECEB;
         color: #F36960;
     }
-    &.complete {
+    &.customer {
         background: #E8F1FD;
         color: #448DF2;
     }
-    &.inactive {
-        background: #e2e3e5;
-        color: #6c757d;
-    }
-    &.pending {
-        background: #e2e3e5;
-        color: #343a40;
-    }
 }
-
-.paymentTag {
+.isActive {
     padding: 4px 12px;
     border-radius: 16px;
     font-size: 12px;
     display: inline-block;
-    &.unpaid {
-        background: #fff7e6;
-        color: #fa8c16;
+    &.true {
+        background: #E7F8F0;
+        color: #41C588;
     }
-    &.fullypaid {
-        background: #f6ffed;
-        color: #52c41a;
+    &.false{
+        background: #FEECEB;
+        color: #F36960;
     }
-    &.depositreturned {
-        background: #fff1f0;
-        color: #f5222d;
+}
+.verifyContainer{
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    justify-content: center;
+}
+.isVerifiedEmail {
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    display: inline-block;
+    &.true {
+        background: #E7F8F0;
+        color: #41C588;
     }
-    &.deposited {
-        background: #e6f4ff;
-        color: #1677ff;
+    &.false{
+        background: #FEECEB;
+        color: #F36960;
     }
-    &.depositforfeited {
-        background: #fff1f0;
-        color: #f5222d;
-    }   
-    
+}
+.isVerifiedPhone {
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    display: inline-block;
+    &.true {
+        background: #E7F8F0;
+        color: #41C588;
+    }
+    &.false{
+        background: #FEECEB;
+        color: #F36960;
+    }
 }
 
-.bookingTable {
+.paginationButton {
+    display: inline-flex;
+    align-items: center;
+    height: 100%;
+    background: white;
+    border: 1px solid #d9d9d9;
+    border-radius: 6px;
+    padding: 4px 20px;
+    cursor: pointer;
+    transition: all 0.2s;
+  
+    &:hover {
+      border-color: #667085;
+      color: #667085;
+    }
+  
+    &:disabled {
+      background: #f5f5f5;
+      color: rgba(0, 0, 0, 0.25);
+      border-color: #d9d9d9;
+      cursor: not-allowed;
+    }
+  }
+  .accountTable {
     :global {
       .ant-pagination {
         display: flex;
@@ -157,27 +172,3 @@
       }
     }
   }
-  .paginationButton {
-    display: inline-flex;
-    align-items: center;
-    height: 100%;
-    background: white;
-    border: 1px solid #d9d9d9;
-    border-radius: 6px;
-    padding: 4px 20px;
-    cursor: pointer;
-    transition: all 0.2s;
-  
-    &:hover {
-      border-color: #667085;
-      color: #667085;
-    }
-  
-    &:disabled {
-      background: #f5f5f5;
-      color: rgba(0, 0, 0, 0.25);
-      border-color: #d9d9d9;
-      cursor: not-allowed;
-    }
-  }
-

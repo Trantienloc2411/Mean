@@ -179,7 +179,7 @@ export default function Report() {
         </div>
       </div>
 
-      <Table
+      <Table 
         columns={columns}
         dataSource={filteredData}
         pagination={{

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 import { MoreOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import styles from "../components/AccountTable.module.scss";
 import { Dropdown, Menu, Table, Tag, message } from "antd";
 import UserDetailModal from "./UserDetailModal"; // Component modal chi tiết
 import {
@@ -30,7 +31,10 @@ export default function AccountTable({ data, loading }) {
       title: "No.",
       dataIndex: "no",
       key: "no",
-      render: (_, __, index) => index + 1,
+      render: (_, __, index) => {
+        const { current, pageSize } = pagination;
+        return (current - 1) * pageSize + index + 1;
+      },
     },
     { title: "Tên", dataIndex: "fullName", key: "fullName" },
     { title: "Số điện thoại", dataIndex: "phone", key: "phone" },
@@ -39,31 +43,57 @@ export default function AccountTable({ data, loading }) {
       title: "Loại",
       dataIndex: "roleName",
       key: "roleName",
-      render: (role) => <Tag color={roleColors[role] || "gray"}>{role}</Tag>,
+      render: (role) => {
+        return (
+          <span className={`${styles.role} ${styles[role.toLowerCase()]}`}>
+            {role === "Staff"
+              ? "Nhân viên"
+              : role === "Owner"
+              ? "Chủ hộ"
+              : "Khách hàng"}
+          </span>
+        );
+      },
     },
     {
       title: "Trạng Thái",
       dataIndex: "isActive",
       align: "center",
       key: "isActive",
-      render: (isActive) =>
-        isActive ? (
-          <Tag color="green">Hoạt động</Tag>
-        ) : (
-          <Tag color="red">Không Hoạt động</Tag>
-        ),
+      render: (isActive) => {
+        console.log(isActive);
+        return (
+          <span className={`${styles.isActive} ${styles[isActive]}`}>
+            {isActive ? "Hoạt động" : "Ngừng hoạt động"}
+          </span>
+        );
+      },
     },
     {
       title: "Xác thực",
       dataIndex: "isVerified",
       align: "center",
       key: "approve",
-      render: (_, record) => (
-        <>
-          <Tag color={record.isVerifiedEmail ? "green" : "red"}>Email</Tag>
-          <Tag color={record.isVerifiedPhone ? "green" : "red"}>Phone</Tag>
-        </>
-      ),
+      render: (_, record) => {
+        return (
+          <div className={styles.verifyContainer}>
+            <span
+              className={`${styles.isVerifiedEmail} ${
+                styles[record.isVerifiedEmail]
+              }`}
+            >
+              {"Email"}
+            </span>
+            <span
+              className={`${styles.isVerifiedPhone} ${
+                styles[record.isVerifiedPhone]
+              }`}
+            >
+              {"Phone"}
+            </span>
+          </div>
+        );
+      },
     },
     {
       title: "Thao tác",
@@ -102,6 +132,13 @@ export default function AccountTable({ data, loading }) {
       ),
     },
   ];
+
+  // Add pagination state
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 7,
+    total: data.length,
+  });
 
   const handleViewModel = (user) => {
     setSelectedUser(user);
@@ -157,6 +194,39 @@ export default function AccountTable({ data, loading }) {
         loading={loading}
         columns={columns}
         rowKey="id"
+        pagination={{
+          ...pagination,
+          showSizeChanger: false,
+          className: styles.customPagination,
+          onChange: (page) => {
+            setPagination(prev => ({ ...prev, current: page }));
+          },
+          itemRender: (page, type, originalElement) => {
+            const totalPages = Math.ceil(data.length / 7);
+            if (type === "prev") {
+              return (
+                <button
+                  className={styles.paginationButton}
+                  disabled={page === 1} // First page starts at 1
+                >
+                  « Trước
+                </button>
+              );
+            }
+            if (type === "next") {
+              return (
+                <button
+                  className={styles.paginationButton}
+                  disabled={page === totalPages} // Disable when on the last page
+                >
+                  Tiếp »
+                </button>
+              );
+            }
+            return originalElement;
+          },
+        }}
+        className={styles.accountTable}
       />
       <UserDetailModal
         open={isDetailOpen}
