@@ -13,19 +13,28 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
   const { data: rentalLocations, isLoading: isLoadingRentalLocations } = useGetAllRentalLocationsQuery();
 
   useEffect(() => {
+    console.log('Services data:', services);
+    console.log('Services with status true:', services?.data?.filter(service => service.status === true));
+  }, [services]);
+
+
+  useEffect(() => {
     if (initialValues) {
       const location = rentalLocations?.data?.find(loc => loc.id === initialValues.rentalLocationId);
-      const service = services?.data?.find(srv => srv.id === initialValues.serviceId);
+      const service = services?.data?.find(srv =>
+        srv.id === initialValues.serviceId && srv.status === true
+      );
+
       form.setFieldsValue({
         ...initialValues,
         rentalLocationId: {
           value: initialValues.rentalLocationId,
           label: location?.name
         },
-        serviceId: {
+        serviceId: service ? {
           value: initialValues.serviceId,
-          label: service?.name
-        }
+          label: service.name
+        } : undefined
       });
     }
   }, [initialValues, form, services, rentalLocations]);
@@ -73,8 +82,8 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
           label="Địa điểm thuê"
           rules={[{ required: true, message: 'Vui lòng chọn địa điểm thuê' }]}
         >
-          <Select 
-            placeholder="Chọn địa điểm thuê" 
+          <Select
+            placeholder="Chọn địa điểm thuê"
             loading={isLoadingRentalLocations}
             labelInValue
           >
@@ -89,13 +98,15 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
           label="Dịch vụ"
           rules={[{ required: true, message: 'Vui lòng chọn dịch vụ' }]}
         >
-          <Select 
-            placeholder="Chọn dịch vụ" 
+          <Select
+            placeholder="Chọn dịch vụ"
             loading={isLoading}
             labelInValue
           >
-            {services?.data?.map(service => (
-              <Option key={service.id} value={service.id}>{service.name}</Option>
+            {services?.data?.filter(service => service.status)?.map(service => (
+              <Option key={service.id || service._id} value={service.id || service._id}>
+                {service.name}
+              </Option>
             ))}
           </Select>
         </Form.Item>
@@ -129,10 +140,10 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
             label="Giá cơ bản"
             rules={[{ required: true, message: 'Vui lòng nhập giá cơ bản' }]}
           >
-            <InputNumber 
-              min={0} 
-              step={100000} 
-              placeholder="200000" 
+            <InputNumber
+              min={0}
+              step={100000}
+              placeholder="200000"
               addonAfter="VNĐ"
               formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
               parser={value => value.replace(/\$\s?|(,*)/g, '')}
@@ -145,10 +156,10 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
           label="Giá phụ trội theo giờ"
           rules={[{ required: true, message: 'Vui lòng nhập giá phụ trội theo giờ' }]}
         >
-          <InputNumber 
-            min={0} 
-            step={10000} 
-            placeholder="20000" 
+          <InputNumber
+            min={0}
+            step={10000}
+            placeholder="20000"
             addonAfter="VNĐ"
             formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
             parser={value => value.replace(/\$\s?|(,*)/g, '')}

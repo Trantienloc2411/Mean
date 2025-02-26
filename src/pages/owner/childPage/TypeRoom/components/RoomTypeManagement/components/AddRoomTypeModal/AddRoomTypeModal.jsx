@@ -63,10 +63,11 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
           rules={[{ required: true, message: 'Vui lòng chọn dịch vụ' }]}
         >
           <Select placeholder="Chọn dịch vụ" loading={isLoading}>
-            {services?.data?.map(service => (
-              <Option key={service.id} value={service.id}>{service.name}</Option>
-            ))}
-
+            {services?.filter(service => service.status === true)
+              .map(service => (
+                <Option key={service._id} value={service._id}>{service.name}</Option>
+              ))
+            }
           </Select>
         </Form.Item>
 

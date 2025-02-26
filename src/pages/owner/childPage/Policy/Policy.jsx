@@ -30,7 +30,7 @@ export default function Policy() {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [ownerId, setOwnerId] = useState(null);
-  const userId = localStorage.getItem('userId');
+  const userId = localStorage.getItem('user_id');
 
   const {
     data: ownerData,
@@ -38,7 +38,7 @@ export default function Policy() {
   } = useGetOwnerDetailByUserIdQuery(userId, {
     skip: !userId
   });
-
+  
   useEffect(() => {
     if (ownerData && ownerData._id) {
       setOwnerId(ownerData._id);
