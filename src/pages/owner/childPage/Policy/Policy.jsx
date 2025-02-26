@@ -23,7 +23,7 @@ export default function Policy() {
   });
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState([]);
-  const [baseData, setBaseData] = useState([]); 
+  const [baseData, setBaseData] = useState([]);
   const [selectedPolicy, setSelectedPolicy] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -38,7 +38,7 @@ export default function Policy() {
   } = useGetOwnerDetailByUserIdQuery(userId, {
     skip: !userId
   });
-  
+
   useEffect(() => {
     if (ownerData && ownerData._id) {
       setOwnerId(ownerData._id);
@@ -91,15 +91,15 @@ export default function Policy() {
       options: [
         {
           label: <span className={`${styles.status} ${styles.approved}`}>Đã duyệt</span>,
-          value: 'Approved',
+          value: 2,
         },
         {
           label: <span className={`${styles.status} ${styles.pending}`}>Đang chờ</span>,
-          value: 'Pending',
+          value: 1, 
         },
         {
           label: <span className={`${styles.status} ${styles.rejected}`}>Bị từ chối</span>,
-          value: 'Rejected',
+          value: 3,
         },
       ],
     }
@@ -118,17 +118,17 @@ export default function Policy() {
   const getStatusFromDates = (startDate, endDate) => {
     try {
       const now = dayjs();
-      if (!startDate || !endDate) return 'Pending';
+      if (!startDate || !endDate) return 1; 
 
       const start = dayjs(startDate, "DD/MM/YYYY HH:mm:ss");
       const end = dayjs(endDate, "DD/MM/YYYY HH:mm:ss");
 
-      if (now.isBefore(start)) return 'Pending';
-      if (now.isAfter(end)) return 'Rejected';
-      return 'Approved';
+      if (now.isBefore(start)) return 1; 
+      if (now.isAfter(end)) return 3; 
+      return 2; 
     } catch (error) {
       console.error("Error determining status:", { startDate, endDate }, error);
-      return 'Pending';
+      return 1; 
     }
   };
 
@@ -142,6 +142,9 @@ export default function Policy() {
     try {
       const mappedData = data.data.map((item, index) => {
         console.log("Processing item:", item);
+        const itemStatus = item.status !== undefined ? item.status :
+          getStatusFromDates(item.startDate, item.endDate);
+
         const tableRow = {
           No: index + 1,
           Name: item.policyTitle || "Unnamed Policy",
@@ -149,7 +152,7 @@ export default function Policy() {
           CreatedDate: formatDate(item.createdAt),
           ApplyDate: formatDate(item.startDate),
           EndDate: formatDate(item.endDate),
-          Status: getStatusFromDates(item.startDate, item.endDate),
+          Status: itemStatus,
           id: item.id || item._id,
           _id: item._id || item.id,
           ownerId: item.ownerId || "",
@@ -163,11 +166,12 @@ export default function Policy() {
 
       console.log("Mapped data for table:", mappedData);
       setBaseData(mappedData);
-      setFilteredData(mappedData); 
+      setFilteredData(mappedData);
     } catch (error) {
       console.error("Error processing data:", error);
     }
   };
+
 
   const menuItems = [
     {
@@ -235,27 +239,30 @@ export default function Policy() {
         policyDescription: formattedValues.Description,
         startDate: formattedValues.ApplyDate ? formattedValues.ApplyDate.format('DD/MM/YYYY HH:mm:ss') : null,
         endDate: formattedValues.EndDate ? formattedValues.EndDate.format('DD/MM/YYYY HH:mm:ss') : null,
+        status: 1, 
         isDelete: false,
         createdAt: dayjs().format('DD/MM/YYYY HH:mm:ss'),
         updatedAt: dayjs().format('DD/MM/YYYY HH:mm:ss')
       };
-      
+
       console.log("Creating new policy with data:", newPolicy);
       try {
         await createPolicy({
           ...formattedValues,
-          ownerId: ownerId || "63b92f4e17d7b3c2a4e4f3d2"
+          ownerId: ownerId || "63b92f4e17d7b3c2a4e4f3d2",
+          status: 1
         }).unwrap();
         refetch();
       } catch (apiError) {
         console.warn("API error, falling back to UI update:", apiError);
-        const updatedData = processData({
+        const updatedBaseData = [...baseData.map(item => item._original), newPolicy];
+        processData({
           success: true,
-          data: [...baseData.map(item => item._original), newPolicy]
+          data: updatedBaseData
         });
-        console.log("Updated data after add:", updatedData);
+        console.log("Updated data after add:", updatedBaseData);
       }
-      
+
       message.success('Tạo chính sách mới thành công!');
     } catch (error) {
       console.error("Error creating policy:", error);
@@ -264,6 +271,7 @@ export default function Policy() {
       setIsAddModalOpen(false);
     }
   };
+
 
   const handleUpdatePolicy = async (values) => {
     try {
@@ -277,13 +285,42 @@ export default function Policy() {
         ...formattedValues,
         id: selectedPolicy._id,
         ownerId: selectedPolicy.ownerId || ownerId,
+        status: values.Status
       };
 
       console.log("Updating policy with data:", updatedPolicyData);
 
-      await updatePolicy(updatedPolicyData).unwrap();
-      message.success('Cập nhật chính sách thành công!');
-      refetch();
+      try {
+        await updatePolicy(updatedPolicyData).unwrap();
+        message.success('Cập nhật chính sách thành công!');
+        refetch();
+      } catch (apiError) {
+        console.warn("API error during update, falling back to UI update:", apiError);
+        const updatedBaseData = baseData.map(item => {
+          if (item._id === selectedPolicy._id) {
+            return {
+              ...item,
+              Name: formattedValues.Name,
+              Description: formattedValues.Description,
+              ApplyDate: formattedValues.ApplyDate ? formattedValues.ApplyDate.format('HH:mm DD/MM/YYYY') : item.ApplyDate,
+              EndDate: formattedValues.EndDate ? formattedValues.EndDate.format('HH:mm DD/MM/YYYY') : item.EndDate,
+              Status: formattedValues.Status, 
+              _original: {
+                ...item._original,
+                policyTitle: formattedValues.Name,
+                policyDescription: formattedValues.Description,
+                status: formattedValues.Status,
+                startDate: formattedValues.ApplyDate ? formattedValues.ApplyDate.format('DD/MM/YYYY HH:mm:ss') : item._original.startDate,
+                endDate: formattedValues.EndDate ? formattedValues.EndDate.format('DD/MM/YYYY HH:mm:ss') : item._original.endDate
+              }
+            };
+          }
+          return item;
+        });
+
+        setBaseData(updatedBaseData);
+        setFilteredData(updatedBaseData);
+      }
     } catch (error) {
       console.error("Error updating policy:", error);
       message.error('Cập nhật chính sách thất bại: ' + (error.data?.message || 'Đã xảy ra lỗi'));
@@ -349,20 +386,20 @@ export default function Policy() {
       render: (status) => {
         let className = '';
         switch (status) {
-          case 'Approved':
+          case 2: 
             className = styles.approved;
             break;
-          case 'Pending':
+          case 1: 
             className = styles.pending;
             break;
-          case 'Rejected':
+          case 3:
             className = styles.rejected;
             break;
           default:
             break;
         }
         return <span className={`${styles.status} ${className}`}>
-          {status === 'Approved' ? 'Đã duyệt' : status === 'Pending' ? 'Đang chờ' : 'Bị từ chối'}
+          {status === 2 ? 'Đã duyệt' : status === 1 ? 'Đang chờ' : 'Bị từ chối'}
         </span>;
       },
     },

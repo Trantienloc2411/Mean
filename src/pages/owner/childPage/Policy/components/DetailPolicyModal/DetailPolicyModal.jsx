@@ -1,29 +1,30 @@
-import { Modal, Descriptions, Badge } from 'antd';
+import { Modal, Descriptions } from 'antd';
 import styles from './DetailPolicyModal.module.scss';
 
 const DetailPolicyModal = ({ isOpen, policy, onCancel }) => {
-  const getStatusBadge = (status) => {
+  const getStatusClassName = (status) => {
     switch (status) {
-      case 'Approved':
-        return 'success';
-      case 'Pending':
-        return 'processing';
-      case 'Rejected':
-        return 'error';
+      case 2: 
+        return 'approved';
+      case 1: 
+        return 'pending';
+      case 3: 
+        return 'rejected';
       default:
-        return 'default';
+        return '';
     }
   };
+
   const getStatusText = (status) => {
     switch (status) {
-      case 'Approved':
+      case 2: 
         return 'Đã duyệt';
-      case 'Pending':
+      case 1:
         return 'Đang chờ';
-      case 'Rejected':
+      case 3: 
         return 'Bị từ chối';
       default:
-        return status;
+        return 'Không xác định';
     }
   };
 
@@ -38,19 +39,18 @@ const DetailPolicyModal = ({ isOpen, policy, onCancel }) => {
     >
       {policy && (
         <Descriptions bordered column={1} size="middle">
+          <Descriptions.Item label="ID Chính sách">{policy._id}</Descriptions.Item>
+          <Descriptions.Item label="ID Chủ sở hữu">{policy.ownerId}</Descriptions.Item>
           <Descriptions.Item label="Tên chính sách">{policy.Name}</Descriptions.Item>
           <Descriptions.Item label="Mô tả">{policy.Description}</Descriptions.Item>
           <Descriptions.Item label="Ngày tạo">{policy.CreatedDate}</Descriptions.Item>
           <Descriptions.Item label="Ngày áp dụng">{policy.ApplyDate}</Descriptions.Item>
           <Descriptions.Item label="Ngày kết thúc">{policy.EndDate}</Descriptions.Item>
           <Descriptions.Item label="Trạng thái">
-            <Badge 
-              status={getStatusBadge(policy.Status)} 
-              text={getStatusText(policy.Status)} 
-            />
+            <span className={`${styles.status} ${styles[getStatusClassName(policy.Status)]}`}>
+              {getStatusText(policy.Status)}
+            </span>
           </Descriptions.Item>
-          <Descriptions.Item label="ID Chính sách">{policy._id}</Descriptions.Item>
-          <Descriptions.Item label="ID Chủ sở hữu">{policy.ownerId}</Descriptions.Item>
         </Descriptions>
       )}
     </Modal>

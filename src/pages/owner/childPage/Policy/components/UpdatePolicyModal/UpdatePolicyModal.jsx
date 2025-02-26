@@ -127,9 +127,9 @@ const UpdatePolicyModal = ({ isOpen, onCancel, onConfirm, initialValues }) => {
                     rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
                 >
                     <Select placeholder="Chọn trạng thái">
-                        <Select.Option value="Pending">Đang chờ</Select.Option>
-                        <Select.Option value="Approved">Đã duyệt</Select.Option>
-                        <Select.Option value="Rejected">Từ chối</Select.Option>
+                        <Select.Option value={1}>Đang chờ</Select.Option>
+                        <Select.Option value={2}>Đã duyệt</Select.Option>
+                        <Select.Option value={3}>Từ chối</Select.Option>
                     </Select>
                 </Form.Item>
             </Form>

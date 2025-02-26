@@ -10,19 +10,19 @@ const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
 
     const handleSubmit = async (values) => {
         try {
-            setLoading(true);
-            await onConfirm({
-                ...values,
-                CreatedDate: dayjs().format('HH:mm DD/MM/YYYY'),
-                Status: 'Pending',
-            });
-            form.resetFields();
+          setLoading(true);
+          await onConfirm({
+            ...values,
+            CreatedDate: dayjs().format('HH:mm DD/MM/YYYY'),
+            Status: 1,
+          });
+          form.resetFields();
         } catch (error) {
-            console.error("Error adding policy:", error);
+          console.error("Error adding policy:", error);
         } finally {
-            setLoading(false);
+          setLoading(false);
         }
-    };
+      };
 
     return (
         <Modal
