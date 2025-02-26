@@ -52,17 +52,17 @@ export default function Setting() {
       });
       setBusinessInfo({
         businessLicensesFile:
-          ownerDetail?.businessInformationId.businessLicensesFile,
+          ownerDetail?.businessInformationId?.businessLicensesFile,
         citizenIdentification:
-          ownerDetail?.businessInformationId.citizenIdentification,
-        companyAddress: ownerDetail?.businessInformationId.companyAddress,
-        companyName: ownerDetail?.businessInformationId.companyName,
-        id: ownerDetail?.businessInformationId.id,
+          ownerDetail?.businessInformationId?.citizenIdentification,
+        companyAddress: ownerDetail?.businessInformationId?.companyAddress,
+        companyName: ownerDetail?.businessInformationId?.companyName,
+        id: ownerDetail?.businessInformationId?.id,
         representativeName:
-          ownerDetail?.businessInformationId.representativeName,
-        taxID: ownerDetail?.businessInformationId.taxID,
-        updatedAt: ownerDetail?.businessInformationId.updatedAt,
-        createdAt: ownerDetail?.businessInformationId.createdAt,
+          ownerDetail?.businessInformationId?.representativeName,
+        taxID: ownerDetail?.businessInformationId?.taxID,
+        updatedAt: ownerDetail?.businessInformationId?.updatedAt,
+        createdAt: ownerDetail?.businessInformationId?.createdAt,
       });
     }
   }, [ownerDetail]);

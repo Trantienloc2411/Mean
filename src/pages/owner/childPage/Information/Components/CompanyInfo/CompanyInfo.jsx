@@ -8,12 +8,12 @@ const CompanyInfo = ({ companyInfo }) => {
   // const [form] = Form.useForm();
 
   const defaultData = {
-    companyName: companyInfo?.companyName || "",
-    representativeName: companyInfo?.representativeName || "",
-    representativeId: companyInfo?.citizenIdentification || "",
-    companyAddress: companyInfo?.companyAddress || "",
-    taxCode: companyInfo?.taxCode || "",
-    file: companyInfo?.businessLicensesFile || "",
+    companyName: companyInfo?.companyName || "Chưa có thông tin",
+    representativeName: companyInfo?.representativeName || "Chưa có thông tin",
+    representativeId: companyInfo?.citizenIdentification || "Chưa có thông tin",
+    companyAddress: companyInfo?.companyAddress || "Chưa có thông tin",
+    taxCode: companyInfo?.taxCode || "Chưa có thông tin",
+    file: companyInfo?.businessLicensesFile || "Chưa có thông tin",
   };
 
   const fields = [

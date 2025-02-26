@@ -66,16 +66,6 @@ export default function Account() {
     }
   }, [users, searchValue, selectedFilters, roleMap]);
 
-  // const handleRefreshToken = async () => {
-  //   try {
-  //     const result = await refreshToken().unwrap();
-  //     console.log(result);
-  //     message.success("Refresh Thành Công!");
-  //   } catch {
-  //     message.error("Lỗi Refresh Token!");
-  //   }
-  // };
-
   const handleFilterChange = (key, values) => {
     setSelectedFilters((prev) => ({ ...prev, [key]: values }));
   };
@@ -99,13 +89,6 @@ export default function Account() {
       <OverviewAccount />
       <div style={{ marginTop: 20 }}>
         <h1 style={{ fontSize: 20 }}>Danh sách tài khoản</h1>
-        {/* <Button
-          type="primary"
-          onClick={handleRefreshToken}
-          loading={isFetching}
-        >
-          Refresh Token
-        </Button> */}
         <div style={{ background: "#fff", borderRadius: 20, padding: 20 }}>
           <div
             style={{

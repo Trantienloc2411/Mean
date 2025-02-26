@@ -1,79 +1,37 @@
-.contentContainer {
-    padding: 20px;
-    background-color: '#eceef0';
-}
-.contentContainer h1 {
-    font-weight: 600;
-    padding-bottom: 4px;
-}
-.contentContainer h2 {
-    padding-top: 10px;
-}
-.listBooking{
-    background-color: white;
-    padding: 20px;
-    border-radius: 20px;
-}
-.statusTag {
+.status {
     padding: 4px 12px;
     border-radius: 16px;
     font-size: 12px;
     display: inline-block;
-    &.inprogress {
-        background: #E7F8F0;
-        color: #41C588;
-    }
-    &.confirmed {
-        background: #FEF4E6;
-        color: #F9A63A;
-    }
-    &.canceled {
-        background: #FEECEB;
-        color: #F36960;
-    }
-    &.complete {
-        background: #E8F1FD;
-        color: #448DF2;
-    }
-    &.inactive {
-        background: #e2e3e5;
-        color: #6c757d;
-    }
-    &.pending {
-        background: #e2e3e5;
-        color: #343a40;
-    }
+    background-color: #f0f0f0;
+    color: #999;
+  &.active {    
+    background-color: #e6f7ff;
+    color: #1890ff;
+  }
+  &.pending {
+    background-color: #fffbe6;
+    color: #faad14;
+  }
+  &.inactive {
+    background-color: #f5f5f5;
+    color: #999;
+  }
+  &.refund {
+    background-color: #f0f0f0;  
+    color: #999;
+  }
+  &.finalPayment {
+    background-color: #f0f0f0;
+    color: #999;
+  } 
+  &.undefined {
+    background-color: #f0f0f0;
+    color: #999;
+  }
+  
 }
-
-.paymentTag {
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 12px;
-    display: inline-block;
-    &.unpaid {
-        background: #fff7e6;
-        color: #fa8c16;
-    }
-    &.fullypaid {
-        background: #f6ffed;
-        color: #52c41a;
-    }
-    &.depositreturned {
-        background: #fff1f0;
-        color: #f5222d;
-    }
-    &.deposited {
-        background: #e6f4ff;
-        color: #1677ff;
-    }
-    &.depositforfeited {
-        background: #fff1f0;
-        color: #f5222d;
-    }   
-    
-}
-
-.bookingTable {
+.transactionTable {
     :global {
       .ant-pagination {
         display: flex;
@@ -180,4 +138,3 @@
       cursor: not-allowed;
     }
   }
-
