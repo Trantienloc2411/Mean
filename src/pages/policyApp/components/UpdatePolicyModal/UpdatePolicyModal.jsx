@@ -45,7 +45,6 @@ const UpdatePolicyModal = ({ isOpen, onCancel, initialValues }) => {
     skip: !currentUser?.id
   });
 
-
   const {
     data: categoriesResponse,
     isLoading: isLoadingCategories
@@ -72,6 +71,30 @@ const UpdatePolicyModal = ({ isOpen, onCancel, initialValues }) => {
     return null;
   };
 
+  const extractCategoryId = (initialValue) => {
+    if (!initialValue) return null;
+        if (initialValue.policySystemCategoryId && initialValue.policySystemCategoryId._id) {
+      return initialValue.policySystemCategoryId._id;
+    }
+        if (initialValue.policySystemCategoryId) {
+      return initialValue.policySystemCategoryId;
+    }
+    
+    return null;
+  };
+
+  const extractBookingId = (initialValue) => {
+    if (!initialValue) return null;
+        if (initialValue.policySystemBookingId && initialValue.policySystemBookingId._id) {
+      return initialValue.policySystemBookingId._id;
+    }
+        if (initialValue.policySystemBookingId) {
+      return initialValue.policySystemBookingId;
+    }
+    
+    return null;
+  };
+
   useEffect(() => {
     if (
       isOpen &&
@@ -79,10 +102,13 @@ const UpdatePolicyModal = ({ isOpen, onCancel, initialValues }) => {
       categoriesResponse &&
       bookingsResponse
     ) {
+      const categoryId = extractCategoryId(initialValues);
+      const bookingId = extractBookingId(initialValues);
+      
       form.setFieldsValue({
         ...initialValues,
-        policySystemCategoryId: initialValues.policySystemCategoryId || null,
-        policySystemBookingId: initialValues.policySystemBookingId || null,
+        policySystemCategoryId: categoryId,
+        policySystemBookingId: bookingId,
         startDate: parseDateString(initialValues.startDate),
         endDate: parseDateString(initialValues.endDate),
         isActive: initialValues.isActive ? 'active' : 'inactive'
