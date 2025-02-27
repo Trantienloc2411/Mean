@@ -18,6 +18,7 @@ import {
   useGetAllAmenitiesQuery,
   useGetAmenityByIdQuery
 } from "../../../../../../redux/services/serviceApi";
+import { Tag } from "antd";
 
 const RoomTypeManagement = () => {
   const [selectedValues, setSelectedValues] = useState({
@@ -165,10 +166,17 @@ const RoomTypeManagement = () => {
 
   const handleAddRoomType = async (values) => {
     try {
-      await createAccommodationType(values).unwrap();
+      const formattedValues = { ...values };
+      if (formattedValues.serviceIds && formattedValues.serviceIds.length > 0) {
+        formattedValues.serviceId = formattedValues.serviceIds[0];
+      }
+      
+      console.log('Sending to API:', formattedValues);
+      await createAccommodationType(formattedValues).unwrap();
       message.success('Thêm loại phòng thành công');
       setIsAddModalOpen(false);
     } catch (error) {
+      console.error('Error details:', error);
       message.error('Thêm loại phòng thất bại');
     }
   };
@@ -240,6 +248,13 @@ const RoomTypeManagement = () => {
       minute: '2-digit'
     });
   };
+  const customTagStyle = {
+    borderRadius: '16px',
+    padding: '4px 12px',
+    fontSize: '12px',
+    background: '#e2e3e5',
+    color: '#343a40',
+  };
 
   const columns = [
     {
@@ -266,7 +281,7 @@ const RoomTypeManagement = () => {
       ellipsis: true,
       render: (description) => (
         <Tooltip placement="topLeft" title={description}>
-          {description}
+          {description || 'N/A'}
         </Tooltip>
       )
     },
@@ -276,6 +291,7 @@ const RoomTypeManagement = () => {
       key: "maxPeopleNumber",
       align: "center",
       width: 120,
+      render: (value) => value || 'N/A',
     },
     {
       title: "Giá cơ bản",
@@ -283,7 +299,7 @@ const RoomTypeManagement = () => {
       key: "basePrice",
       align: "center",
       width: 120,
-      render: (price) => `${price?.toLocaleString()}đ`,
+      render: (price) => price ? `${price.toLocaleString()}đ` : 'N/A',
     },
     {
       title: "Giá theo giờ",
@@ -291,7 +307,7 @@ const RoomTypeManagement = () => {
       key: "overtimeHourlyPrice",
       align: "center",
       width: 120,
-      render: (price) => `${price?.toLocaleString()}đ/giờ`,
+      render: (price) => price ? `${price.toLocaleString()}đ/giờ` : 'N/A',
     },
     {
       title: "Địa điểm",
@@ -300,19 +316,34 @@ const RoomTypeManagement = () => {
       align: "left",
       width: 120,
       ellipsis: true,
-      render: (id) => (
-        <Tooltip placement="topLeft" title={id}>
-          {id}
-        </Tooltip>
-      )
+      render: (location) => {
+        if (!location) return 'N/A';
+        const locationName = typeof location === 'object' ? location.name : location;
+        return (
+          <Tooltip placement="topLeft" title={locationName}>
+            {locationName}
+          </Tooltip>
+        );
+      }
     },
     {
       title: "Dịch vụ",
-      dataIndex: "serviceId",
-      key: "serviceId",
-      align: "left",
-      width: 150,
-      render: (serviceId) => serviceNames[serviceId] || 'Loading...'
+      dataIndex: "serviceIds",
+      key: "serviceIds",
+      align: "center",
+      width: 100,
+      render: (serviceIds, record) => {
+        if (serviceIds && Array.isArray(serviceIds) && serviceIds.length > 0) {
+          return (
+            <div style={customTagStyle}>{serviceIds.length} dịch vụ</div>
+          );
+        }
+        if (record.serviceId) {
+          return <div style={customTagStyle}>1 dịch vụ</div>;
+        }
+
+        return 'N/A';
+      }
     },
     {
       title: "",
@@ -423,7 +454,7 @@ const RoomTypeManagement = () => {
             setIsDeleteModalOpen(false);
             setSelectedRoomType(null);
           }}
-          onConfirm={handleDeleteConfirm} 
+          onConfirm={handleDeleteConfirm}
           roomTypeName={selectedRoomType?.name}
         />
 

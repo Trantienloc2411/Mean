@@ -9,6 +9,8 @@ import policySystemReducer from "./slices/policySystemSlice";
 import staffReducer from "./slices/staffSlice";
 import policySystemCategoryReducer from "./slices/policySystemCategorySlice";
 import reportReducer from "./slices/reportSlice";
+import policyOwnerReducer from "./slices/policyOwnerSlice";
+import FeedbackReducer from "./slices/feedbackSlice";
 
 export const store = configureStore({
   reducer: {
@@ -22,6 +24,8 @@ export const store = configureStore({
     staff: staffReducer,
     policySystemCategory: policySystemCategoryReducer,
     report: reportReducer,
+    policyOwner: policyOwnerReducer,
+    feedback: FeedbackReducer,
   },
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware().concat(apiSlice.middleware),

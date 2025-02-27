@@ -14,37 +14,65 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
 
   useEffect(() => {
     if (initialValues) {
-      const location = rentalLocations?.data?.find(loc => loc.id === initialValues.rentalLocationId);
-      const service = services?.data?.find(srv => srv.id === initialValues.serviceId);
-      form.setFieldsValue({
+      const formValues = {
         ...initialValues,
-        rentalLocationId: {
-          value: initialValues.rentalLocationId,
-          label: location?.name
-        },
-        serviceId: {
-          value: initialValues.serviceId,
-          label: service?.name
-        }
-      });
+      };
+
+      if (formValues.rentalLocationId && typeof formValues.rentalLocationId === 'object') {
+        formValues.rentalLocationId = formValues.rentalLocationId._id || formValues.rentalLocationId.id;
+      }
+
+      if (formValues.serviceIds && Array.isArray(formValues.serviceIds) && formValues.serviceIds.length > 0) {
+        formValues.serviceIds = formValues.serviceIds.map(service => 
+          typeof service === 'object' ? service._id || service.id : service
+        );
+      } else if (formValues.serviceId) {
+        formValues.serviceIds = [formValues.serviceId];
+      }
+
+      form.setFieldsValue(formValues);
     }
-  }, [initialValues, form, services, rentalLocations]);
+  }, [initialValues, form]);
 
   const handleSubmit = () => {
     form.validateFields()
       .then((values) => {
         const submittedValues = {
           ...values,
-          rentalLocationId: values.rentalLocationId?.value || values.rentalLocationId,
-          serviceId: values.serviceId?.value || values.serviceId
         };
+
         console.log("Dữ liệu được cập nhật:", submittedValues);
         onConfirm(submittedValues);
-        form.resetFields();
       })
       .catch((info) => {
         console.log('Validate Failed:', info);
       });
+  };
+
+  const getServicesOptions = () => {
+    if (!services) return [];
+    
+    const servicesList = Array.isArray(services.data) ? services.data : 
+                          Array.isArray(services) ? services : [];
+    
+    return servicesList
+      .filter(service => service.status === true)
+      .map(service => ({
+        label: service.name,
+        value: service._id || service.id
+      }));
+  };
+
+  const getLocationsOptions = () => {
+    if (!rentalLocations) return [];
+    
+    const locationsList = Array.isArray(rentalLocations.data) ? rentalLocations.data :
+                           Array.isArray(rentalLocations) ? rentalLocations : [];
+    
+    return locationsList.map(location => ({
+      label: location.name,
+      value: location._id || location.id
+    }));
   };
 
   return (
@@ -73,31 +101,24 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
           label="Địa điểm thuê"
           rules={[{ required: true, message: 'Vui lòng chọn địa điểm thuê' }]}
         >
-          <Select 
-            placeholder="Chọn địa điểm thuê" 
+          <Select
+            placeholder="Chọn địa điểm thuê"
             loading={isLoadingRentalLocations}
-            labelInValue
-          >
-            {rentalLocations?.data?.map(location => (
-              <Option key={location.id} value={location.id}>{location.name}</Option>
-            ))}
-          </Select>
+            options={getLocationsOptions()}
+          />
         </Form.Item>
 
         <Form.Item
-          name="serviceId"
+          name="serviceIds"
           label="Dịch vụ"
           rules={[{ required: true, message: 'Vui lòng chọn dịch vụ' }]}
         >
-          <Select 
-            placeholder="Chọn dịch vụ" 
+          <Select
+            placeholder="Chọn dịch vụ"
             loading={isLoading}
-            labelInValue
-          >
-            {services?.data?.map(service => (
-              <Option key={service.id} value={service.id}>{service.name}</Option>
-            ))}
-          </Select>
+            mode="multiple"
+            options={getServicesOptions()}
+          />
         </Form.Item>
 
         <Form.Item
@@ -129,10 +150,10 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
             label="Giá cơ bản"
             rules={[{ required: true, message: 'Vui lòng nhập giá cơ bản' }]}
           >
-            <InputNumber 
-              min={0} 
-              step={100000} 
-              placeholder="200000" 
+            <InputNumber
+              min={0}
+              step={100000}
+              placeholder="200000"
               addonAfter="VNĐ"
               formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
               parser={value => value.replace(/\$\s?|(,*)/g, '')}
@@ -145,10 +166,10 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
           label="Giá phụ trội theo giờ"
           rules={[{ required: true, message: 'Vui lòng nhập giá phụ trội theo giờ' }]}
         >
-          <InputNumber 
-            min={0} 
-            step={10000} 
-            placeholder="20000" 
+          <InputNumber
+            min={0}
+            step={10000}
+            placeholder="20000"
             addonAfter="VNĐ"
             formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
             parser={value => value.replace(/\$\s?|(,*)/g, '')}

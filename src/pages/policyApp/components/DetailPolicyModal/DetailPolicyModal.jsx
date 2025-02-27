@@ -102,10 +102,7 @@ const DetailPolicyModal = ({ isOpen, onCancel, policy }) => {
             {formatDate(displayData.updatedAt)}
           </Descriptions.Item>
           <Descriptions.Item label="Trạng thái">
-            <span style={{
-              color: displayData.isActive ? '#52c41a' : '#ff4d4f',
-              fontWeight: 'bold'
-            }}>
+            <span className={`${styles.status} ${displayData.isActive ? styles.active : styles.expired}`}>
               {displayData.isActive ? 'Đang hoạt động' : 'Không hoạt động'}
             </span>
           </Descriptions.Item>
