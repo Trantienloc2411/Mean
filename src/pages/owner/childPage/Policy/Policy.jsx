@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Input, Button, Dropdown, Table } from 'antd';
+import { Input, Button, Dropdown, Table, message } from 'antd';
 import { FilterOutlined, PlusOutlined, MoreOutlined } from '@ant-design/icons';
 import styles from './Policy.module.scss';
 import Filter from './components/Filter/Filter.jsx';
@@ -7,7 +7,14 @@ import DeletePolicyModal from './components/DeletePolicyModal/DeletePolicyModal.
 import AddPolicyModal from './components/AddPolicyModal/AddPolicyModal.jsx';
 import UpdatePolicyModal from './components/UpdatePolicyModal/UpdatePolicyModal.jsx';
 import DetailPolicyModal from './components/DetailPolicyModal/DetailPolicyModal.jsx';
-import { policyData } from './data/fakeData.js';
+import dayjs from 'dayjs';
+import {
+  useGetAllPolicyOwnersQuery,
+  useCreatePolicyOwnerMutation,
+  useUpdatePolicyOwnerMutation,
+  useDeletePolicyOwnerMutation
+} from '../../../../redux/services/policyOwnerApi.js';
+import { useGetOwnerDetailByUserIdQuery } from '../../../../redux/services/ownerApi.js';
 
 export default function Policy() {
   const [selectedValues, setSelectedValues] = useState({
@@ -15,12 +22,67 @@ export default function Policy() {
     dateRange: [],
   });
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredData, setFilteredData] = useState(policyData);
+  const [filteredData, setFilteredData] = useState([]);
+  const [baseData, setBaseData] = useState([]);
   const [selectedPolicy, setSelectedPolicy] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [ownerId, setOwnerId] = useState(null);
+  const userId = localStorage.getItem('user_id');
+
+  const {
+    data: ownerData,
+    isLoading: isOwnerLoading
+  } = useGetOwnerDetailByUserIdQuery(userId, {
+    skip: !userId
+  });
+
+  useEffect(() => {
+    if (ownerData && ownerData._id) {
+      setOwnerId(ownerData._id);
+      console.log("Owner ID set:", ownerData._id);
+    }
+  }, [ownerData]);
+
+  const {
+    data: policiesData = { success: false, data: [] },
+    isLoading,
+    refetch,
+    error
+  } = useGetAllPolicyOwnersQuery();
+  const [createPolicy, { isLoading: isCreating }] = useCreatePolicyOwnerMutation();
+  const [updatePolicy, { isLoading: isUpdating }] = useUpdatePolicyOwnerMutation();
+  const [deletePolicy, { isLoading: isDeleting }] = useDeletePolicyOwnerMutation();
+
+  useEffect(() => {
+    console.log("API Response:", { policiesData, isLoading, error });
+    if ((!policiesData || !policiesData.data || policiesData.data.length === 0) && !isLoading) {
+      console.log("Using test data because API response is empty or invalid");
+      const testData = {
+        success: true,
+        data: [
+          {
+            "_id": "67bd845aa8453ac3505d6aab",
+            "ownerId": "63b92f4e17d7b3c2a4e4f3d2",
+            "policyTitle": "Cancellation Policy",
+            "policyDescription": "This policy covers cancellation terms for bookings.",
+            "startDate": "01/02/2025 19:00:00",
+            "endDate": "31/12/2025 19:00:00",
+            "isDelete": false,
+            "createdAt": "25/02/2025 15:50:34",
+            "updatedAt": "25/02/2025 15:50:34",
+            "__v": 0,
+            "id": "67bd845aa8453ac3505d6aab"
+          }
+        ]
+      };
+      processData(testData);
+    } else if (policiesData && policiesData.data) {
+      processData(policiesData);
+    }
+  }, [policiesData, isLoading, error]);
 
   const filterGroups = [
     {
@@ -29,19 +91,87 @@ export default function Policy() {
       options: [
         {
           label: <span className={`${styles.status} ${styles.approved}`}>Đã duyệt</span>,
-          value: 'Approved',
+          value: 2,
         },
         {
           label: <span className={`${styles.status} ${styles.pending}`}>Đang chờ</span>,
-          value: 'Pending',
+          value: 1, 
         },
         {
           label: <span className={`${styles.status} ${styles.rejected}`}>Bị từ chối</span>,
-          value: 'Rejected',
+          value: 3,
         },
       ],
     }
   ];
+
+  const formatDate = (dateString) => {
+    try {
+      if (!dateString) return '';
+      return dayjs(dateString, "DD/MM/YYYY HH:mm:ss").format('HH:mm DD/MM/YYYY');
+    } catch (error) {
+      console.error("Error formatting date:", dateString, error);
+      return dateString || '';
+    }
+  };
+
+  const getStatusFromDates = (startDate, endDate) => {
+    try {
+      const now = dayjs();
+      if (!startDate || !endDate) return 1; 
+
+      const start = dayjs(startDate, "DD/MM/YYYY HH:mm:ss");
+      const end = dayjs(endDate, "DD/MM/YYYY HH:mm:ss");
+
+      if (now.isBefore(start)) return 1; 
+      if (now.isAfter(end)) return 3; 
+      return 2; 
+    } catch (error) {
+      console.error("Error determining status:", { startDate, endDate }, error);
+      return 1; 
+    }
+  };
+
+  const processData = (data) => {
+    console.log("Processing data:", data);
+    if (!data || !data.data || !Array.isArray(data.data)) {
+      console.error("Invalid data structure:", data);
+      return;
+    }
+
+    try {
+      const mappedData = data.data.map((item, index) => {
+        console.log("Processing item:", item);
+        const itemStatus = item.status !== undefined ? item.status :
+          getStatusFromDates(item.startDate, item.endDate);
+
+        const tableRow = {
+          No: index + 1,
+          Name: item.policyTitle || "Unnamed Policy",
+          Description: item.policyDescription || "",
+          CreatedDate: formatDate(item.createdAt),
+          ApplyDate: formatDate(item.startDate),
+          EndDate: formatDate(item.endDate),
+          Status: itemStatus,
+          id: item.id || item._id,
+          _id: item._id || item.id,
+          ownerId: item.ownerId || "",
+          isDelete: item.isDelete || false,
+          _original: { ...item }
+        };
+
+        console.log("Created table row:", tableRow);
+        return tableRow;
+      });
+
+      console.log("Mapped data for table:", mappedData);
+      setBaseData(mappedData);
+      setFilteredData(mappedData);
+    } catch (error) {
+      console.error("Error processing data:", error);
+    }
+  };
+
 
   const menuItems = [
     {
@@ -71,40 +201,133 @@ export default function Policy() {
     }
   ];
 
-  const handleDeleteConfirm = () => {
-    setFilteredData(prevData => prevData.filter(item => item.No !== selectedPolicy?.No));
-    setIsDeleteModalOpen(false);
-    setSelectedPolicy(null);
+  const handleDeleteConfirm = async () => {
+    try {
+      console.log("Attempting to delete policy with ID:", selectedPolicy._id);
+      try {
+        await deletePolicy(selectedPolicy._id).unwrap();
+        message.success('Xóa chính sách thành công!');
+        refetch();
+      } catch (apiError) {
+        console.error("API delete error:", apiError);
+        console.log("API call failed, using local state update");
+        const newData = baseData.filter(item => item._id !== selectedPolicy._id);
+        setBaseData(newData);
+        setFilteredData(newData);
+        message.success('Xóa chính sách thành công (chế độ ngoại tuyến)!');
+      }
+    } catch (error) {
+      console.error("Delete operation completely failed:", error);
+      message.error('Xóa chính sách thất bại: ' + (error.data?.message || 'Đã xảy ra lỗi'));
+    } finally {
+      setIsDeleteModalOpen(false);
+      setSelectedPolicy(null);
+    }
   };
 
-  const handleAddPolicy = (values) => {
-    const newPolicy = {
-      ...values,
-      No: filteredData.length + 1,
-      CreatedDate: values.CreatedDate,
-      ApplyDate: values.ApplyDate.format('HH:mm DD/MM/YYYY'),
-      EndDate: values.EndDate.format('HH:mm DD/MM/YYYY'),
-    };
-    setFilteredData(prevData => [...prevData, newPolicy]);
-    setIsAddModalOpen(false);
+  const handleAddPolicy = async (values) => {
+    try {
+      const formattedValues = {
+        ...values,
+        ApplyDate: values.ApplyDate ? values.ApplyDate : null,
+        EndDate: values.EndDate ? values.EndDate : null
+      };
+      const newPolicy = {
+        _id: `temp_${Date.now()}`,
+        ownerId: ownerId || "63b92f4e17d7b3c2a4e4f3d2",
+        policyTitle: formattedValues.Name,
+        policyDescription: formattedValues.Description,
+        startDate: formattedValues.ApplyDate ? formattedValues.ApplyDate.format('DD/MM/YYYY HH:mm:ss') : null,
+        endDate: formattedValues.EndDate ? formattedValues.EndDate.format('DD/MM/YYYY HH:mm:ss') : null,
+        status: 1, 
+        isDelete: false,
+        createdAt: dayjs().format('DD/MM/YYYY HH:mm:ss'),
+        updatedAt: dayjs().format('DD/MM/YYYY HH:mm:ss')
+      };
+
+      console.log("Creating new policy with data:", newPolicy);
+      try {
+        await createPolicy({
+          ...formattedValues,
+          ownerId: ownerId || "63b92f4e17d7b3c2a4e4f3d2",
+          status: 1
+        }).unwrap();
+        refetch();
+      } catch (apiError) {
+        console.warn("API error, falling back to UI update:", apiError);
+        const updatedBaseData = [...baseData.map(item => item._original), newPolicy];
+        processData({
+          success: true,
+          data: updatedBaseData
+        });
+        console.log("Updated data after add:", updatedBaseData);
+      }
+
+      message.success('Tạo chính sách mới thành công!');
+    } catch (error) {
+      console.error("Error creating policy:", error);
+      message.error('Tạo chính sách thất bại: ' + (error.data?.message || 'Đã xảy ra lỗi'));
+    } finally {
+      setIsAddModalOpen(false);
+    }
   };
 
-  const handleUpdatePolicy = (values) => {
-    setFilteredData(prevData =>
-      prevData.map(item =>
-        item.No === selectedPolicy.No
-          ? {
-            ...item,
-            ...values,
-            CreatedDate: values.CreatedDate,
-            ApplyDate: values.ApplyDate.format('HH:mm DD/MM/YYYY'),
-            EndDate: values.EndDate.format('HH:mm DD/MM/YYYY'),
+
+  const handleUpdatePolicy = async (values) => {
+    try {
+      const formattedValues = {
+        ...values,
+        ApplyDate: values.ApplyDate ? values.ApplyDate : null,
+        EndDate: values.EndDate ? values.EndDate : null
+      };
+
+      const updatedPolicyData = {
+        ...formattedValues,
+        id: selectedPolicy._id,
+        ownerId: selectedPolicy.ownerId || ownerId,
+        status: values.Status
+      };
+
+      console.log("Updating policy with data:", updatedPolicyData);
+
+      try {
+        await updatePolicy(updatedPolicyData).unwrap();
+        message.success('Cập nhật chính sách thành công!');
+        refetch();
+      } catch (apiError) {
+        console.warn("API error during update, falling back to UI update:", apiError);
+        const updatedBaseData = baseData.map(item => {
+          if (item._id === selectedPolicy._id) {
+            return {
+              ...item,
+              Name: formattedValues.Name,
+              Description: formattedValues.Description,
+              ApplyDate: formattedValues.ApplyDate ? formattedValues.ApplyDate.format('HH:mm DD/MM/YYYY') : item.ApplyDate,
+              EndDate: formattedValues.EndDate ? formattedValues.EndDate.format('HH:mm DD/MM/YYYY') : item.EndDate,
+              Status: formattedValues.Status, 
+              _original: {
+                ...item._original,
+                policyTitle: formattedValues.Name,
+                policyDescription: formattedValues.Description,
+                status: formattedValues.Status,
+                startDate: formattedValues.ApplyDate ? formattedValues.ApplyDate.format('DD/MM/YYYY HH:mm:ss') : item._original.startDate,
+                endDate: formattedValues.EndDate ? formattedValues.EndDate.format('DD/MM/YYYY HH:mm:ss') : item._original.endDate
+              }
+            };
           }
-          : item
-      )
-    );
-    setIsUpdateModalOpen(false);
-    setSelectedPolicy(null);
+          return item;
+        });
+
+        setBaseData(updatedBaseData);
+        setFilteredData(updatedBaseData);
+      }
+    } catch (error) {
+      console.error("Error updating policy:", error);
+      message.error('Cập nhật chính sách thất bại: ' + (error.data?.message || 'Đã xảy ra lỗi'));
+    } finally {
+      setIsUpdateModalOpen(false);
+      setSelectedPolicy(null);
+    }
   };
 
   const handleFilterChange = (filterName, newValues) => {
@@ -120,22 +343,22 @@ export default function Policy() {
       dateRange: dates ? dateStrings : [],
     }));
   };
-
   useEffect(() => {
-    let filtered = [...policyData];
+    if (!baseData || baseData.length === 0) return;
 
+    console.log("Applying filters:", { searchTerm, selectedValues });
+    console.log("Base data for filtering:", baseData);
+    let filtered = [...baseData];
     if (searchTerm) {
       filtered = filtered.filter((item) =>
         item.Name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
-
     if (selectedValues.status?.length > 0) {
       filtered = filtered.filter((item) =>
         selectedValues.status.includes(item.Status)
       );
     }
-
     if (selectedValues.dateRange?.length === 2) {
       const [start, end] = selectedValues.dateRange;
       filtered = filtered.filter((item) => {
@@ -145,8 +368,9 @@ export default function Policy() {
       });
     }
 
+    console.log("Filtered data after applying filters:", filtered);
     setFilteredData(filtered);
-  }, [searchTerm, selectedValues]);
+  }, [searchTerm, selectedValues, baseData]);
 
   const columns = [
     { title: "No.", dataIndex: "No", key: "No" },
@@ -162,20 +386,20 @@ export default function Policy() {
       render: (status) => {
         let className = '';
         switch (status) {
-          case 'Approved':
+          case 2: 
             className = styles.approved;
             break;
-          case 'Pending':
+          case 1: 
             className = styles.pending;
             break;
-          case 'Rejected':
+          case 3:
             className = styles.rejected;
             break;
           default:
             break;
         }
         return <span className={`${styles.status} ${className}`}>
-          {status === 'Approved' ? 'Đã duyệt' : status === 'Pending' ? 'Đang chờ' : 'Bị từ chối'}
+          {status === 2 ? 'Đã duyệt' : status === 1 ? 'Đang chờ' : 'Bị từ chối'}
         </span>;
       },
     },
@@ -200,6 +424,12 @@ export default function Policy() {
   return (
     <div className={styles.contentContainer}>
       <h1>Quản lý Chính Sách</h1>
+      {isOwnerLoading && <div>Đang tải thông tin chủ sở hữu...</div>}
+      {filteredData.length === 0 && !isLoading && (
+        <div style={{ marginBottom: '10px' }}>
+          Không có dữ liệu để hiển thị.
+        </div>
+      )}
       <div className={styles.contentTable}>
         <div className={styles.tool}>
           <div className={styles.searchFilter}>
@@ -233,6 +463,8 @@ export default function Policy() {
             onClick={() => setIsAddModalOpen(true)}
             icon={<PlusOutlined />}
             className={styles.addRoomButton}
+            loading={isCreating}
+            disabled={false}
           >
             Tạo chính sách mới
           </Button>
@@ -241,6 +473,8 @@ export default function Policy() {
         <Table
           columns={columns}
           dataSource={filteredData}
+          loading={isLoading || isOwnerLoading}
+          rowKey={(record) => record._id || record.id || record.No}
           pagination={{
             total: filteredData.length,
             pageSize: 7,

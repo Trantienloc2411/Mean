@@ -14,15 +14,47 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
   const handleSubmit = () => {
     form.validateFields()
       .then((values) => {
-        console.log("Dữ liệu được thêm:", values);
-        onConfirm(values);
+        const formattedValues = {
+          ...values,
+          serviceIds: values.serviceIds ? values.serviceIds : 
+                      values.serviceId ? [values.serviceId] : []
+        };
+        if (formattedValues.serviceIds && formattedValues.serviceId) {
+          delete formattedValues.serviceId;
+        }
+
+        console.log("Dữ liệu được thêm:", formattedValues);
+        onConfirm(formattedValues);
         form.resetFields();
       })
       .catch((info) => {
         console.log('Validate Failed:', info);
       });
   };
+  const getServicesOptions = () => {
+    if (!services) return [];
+    const servicesList = Array.isArray(services.data) ? services.data : 
+                          Array.isArray(services) ? services : [];
+    
+    return servicesList
+      .filter(service => service.status === true)
+      .map(service => ({
+        label: service.name,
+        value: service._id || service.id
+      }));
+  };
 
+  const getLocationsOptions = () => {
+    if (!rentalLocations) return [];
+    
+    const locationsList = Array.isArray(rentalLocations.data) ? rentalLocations.data :
+                           Array.isArray(rentalLocations) ? rentalLocations : [];
+    
+    return locationsList.map(location => ({
+      label: location.name,
+      value: location._id || location.id
+    }));
+  };
 
   return (
     <Modal
@@ -48,26 +80,26 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
         <Form.Item
           name="rentalLocationId"
           label="Địa điểm thuê"
-          rules={[{ required: true, message: 'Vui lòng chọn ID địa điểm thuê' }]}
+          rules={[{ required: true, message: 'Vui lòng chọn địa điểm thuê' }]}
         >
-          <Select placeholder="Chọn địa điểm thuê" loading={isLoadingRentalLocations}>
-            {rentalLocations?.data?.map(location => (
-              <Option key={location.id} value={location.id}>{location.name}</Option>
-            ))}
-          </Select>
+          <Select 
+            placeholder="Chọn địa điểm thuê" 
+            loading={isLoadingRentalLocations}
+            options={getLocationsOptions()}
+          />
         </Form.Item>
 
         <Form.Item
-          name="serviceId"
+          name="serviceIds"
           label="Dịch vụ"
           rules={[{ required: true, message: 'Vui lòng chọn dịch vụ' }]}
         >
-          <Select placeholder="Chọn dịch vụ" loading={isLoading}>
-            {services?.data?.map(service => (
-              <Option key={service.id} value={service.id}>{service.name}</Option>
-            ))}
-
-          </Select>
+          <Select 
+            placeholder="Chọn dịch vụ" 
+            loading={isLoading}
+            mode="multiple"
+            options={getServicesOptions()}
+          />
         </Form.Item>
 
         <Form.Item
@@ -99,7 +131,14 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
             label="Giá cơ bản"
             rules={[{ required: true, message: 'Vui lòng nhập giá cơ bản' }]}
           >
-            <InputNumber min={0} step={100000} placeholder="200000" addonAfter="VNĐ" />
+            <InputNumber 
+              min={0} 
+              step={100000} 
+              placeholder="200000" 
+              addonAfter="VNĐ" 
+              formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+              parser={value => value.replace(/\$\s?|(,*)/g, '')}
+            />
           </Form.Item>
         </div>
 
@@ -108,27 +147,15 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
           label="Giá phụ trội theo giờ"
           rules={[{ required: true, message: 'Vui lòng nhập giá phụ trội theo giờ' }]}
         >
-          <InputNumber min={0} step={10000} placeholder="20000" addonAfter="VNĐ" />
+          <InputNumber 
+            min={0} 
+            step={10000} 
+            placeholder="20000" 
+            addonAfter="VNĐ"
+            formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
+            parser={value => value.replace(/\$\s?|(,*)/g, '')}
+          />
         </Form.Item>
-
-        {/* <Form.Item
-          name="amenities"
-          label="Tiện ích đi kèm"
-          rules={[{ required: true, message: 'Vui lòng chọn ít nhất một tiện ích' }]}
-        >
-          <Select mode="multiple" placeholder="Chọn tiện ích" style={{ width: '100%' }}>
-            {amenitiesList.map(amenity => (
-              <Option key={amenity} value={amenity}>{amenity}</Option>
-            ))}
-          </Select>
-        </Form.Item>
-
-        <Form.Item
-          name="additionalFeatures"
-          label="Tính năng bổ sung"
-        >
-          <Select mode="tags" placeholder="Nhập tính năng bổ sung" style={{ width: '100%' }} />
-        </Form.Item> */}
       </Form>
     </Modal>
   );
