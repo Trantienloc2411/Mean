@@ -1,0 +1,329 @@
+import { Modal, Form, Input, DatePicker, Radio, Checkbox, Button, message } from 'antd';
+
+import dayjs from 'dayjs';
+import { useState, useEffect } from 'react';
+
+const UpdateCouponModal = ({ isOpen, onCancel, onConfirm, isLoading, initialData }) => {
+  const [form] = Form.useForm();
+  const [messageApi, contextHolder] = message.useMessage();
+
+  useEffect(() => {
+    if (initialData && isOpen) {
+      form.setFieldsValue({
+        ...initialData,
+        startDate: dayjs(initialData.startDate, "DD/MM/YYYY HH:mm:ss"),
+        endDate: dayjs(initialData.endDate, "DD/MM/YYYY HH:mm:ss"),
+      });
+    }
+  }, [initialData, isOpen, form]);
+
+  const disabledDate = (current) => {
+    return current && current < dayjs().startOf('day');
+  };
+
+  const disabledDateTime = (date) => {
+    if (date && date.isSame(dayjs(), 'day')) {
+      const currentHour = dayjs().hour();
+      const currentMinute = dayjs().minute();
+      const currentSecond = dayjs().second();
+
+      return {
+        disabledHours: () => Array.from({ length: currentHour }, (_, i) => i),
+        disabledMinutes: (selectedHour) => 
+          selectedHour === currentHour 
+            ? Array.from({ length: currentMinute }, (_, i) => i)
+            : [],
+        disabledSeconds: (selectedHour, selectedMinute) => 
+          selectedHour === currentHour && selectedMinute === currentMinute
+            ? Array.from({ length: currentSecond }, (_, i) => i)
+            : [],
+      };
+    }
+    return {};
+  };
+
+  const handleSubmit = () => {
+    form.validateFields()
+      .then((values) => {
+        const formattedValues = {
+          ...values,
+          startDate: values.startDate.format('DD/MM/YYYY HH:mm:ss'),
+          endDate: values.endDate.format('DD/MM/YYYY HH:mm:ss'),
+        };
+        onConfirm(formattedValues);
+      })
+      .catch((info) => {
+        console.log('Validate Failed:', info);
+        messageApi.error({
+          content: 'Vui lòng kiểm tra lại thông tin nhập vào',
+          className: 'custom-message',
+          style: {
+            marginTop: '20vh',
+          },
+        });
+      });
+  };
+
+  return (
+    <>
+      {contextHolder}
+      <Modal
+        title="Cập nhật mã giảm giá"
+        open={isOpen}
+        onCancel={() => {
+          form.resetFields();
+          onCancel();
+        }}
+        footer={[
+          <Button 
+            key="cancel" 
+            onClick={() => {
+              form.resetFields();
+              onCancel();
+            }}
+            disabled={isLoading}
+          >
+            Huỷ
+          </Button>,
+          <Button 
+            key="submit" 
+            type="primary"
+            onClick={handleSubmit}
+            loading={isLoading}
+          >
+            Cập nhật
+          </Button>
+        ]}
+        width={600}
+        destroyOnClose={true}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          name="updateCouponForm"
+          preserve={false}
+        >
+          <Form.Item
+            name="name"
+            label="Tên mã giảm giá"
+            rules={[{ required: true, message: 'Hãy nhập tên mã giảm giá' }]}
+          >
+            <Input placeholder={initialData?.name || "Deal 10% cho bạn mới"} />
+          </Form.Item>
+
+          <Form.Item
+            name="code"
+            label="Mã giảm giá (CODE)"
+            rules={[
+              { required: true, message: 'Hãy nhập mã giảm giá (CODE)' },
+              { max: 8, message: 'Mã giảm giá không được vượt quá 8 ký tự' },
+              { min: 1, message: 'Mã giảm giá phải có ít nhất 1 ký tự' },
+              {
+                pattern: /^[A-Z0-9]+$/,
+                message: 'Mã giảm giá chỉ được chứa chữ in hoa và số'
+              }
+            ]}
+            normalize={(value) => value ? value.toUpperCase() : value}
+          >
+            <Input 
+              placeholder={initialData?.code || "DEAL10P"}
+              maxLength={8}
+              showCount
+              onChange={(e) => {
+                const value = e.target.value;
+                e.target.value = value.replace(/[^A-Z0-9]/g, '');
+              }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="discountBasedOn"
+            label="Hình thức giảm giá"
+            rules={[{ required: true, message: 'Hãy chọn hình thức giảm giá' }]}
+          >
+            <Radio.Group>
+              <Radio value="Percentage">Phần trăm (%)</Radio>
+              <Radio value="Fixed">Số tiền cố định (VNĐ)</Radio>
+            </Radio.Group>
+          </Form.Item>
+
+          <Form.Item
+            name="amount"
+            label="Giá trị"
+            rules={[
+              { required: true, message: 'Hãy nhập giá trị giảm giá' },
+              {
+                validator: (_, value) => {
+                  if (!value) return Promise.resolve();
+                  
+                  const numberValue = Number(value);
+                  if (isNaN(numberValue)) {
+                    return Promise.reject('Giá trị phải là số');
+                  }
+                  
+                  if (numberValue <= 0) {
+                    return Promise.reject('Giá trị phải lớn hơn 0');
+                  }
+
+                  const discountType = form.getFieldValue('discountBasedOn');
+                  if (discountType === 'Percentage' && numberValue > 100) {
+                    return Promise.reject('Phần trăm giảm giá không được vượt quá 100%');
+                  }
+
+                  return Promise.resolve();
+                }
+              }
+            ]}
+          >
+            <Input 
+              type="number"
+              placeholder={initialData?.amount?.toString() || "Nhập giá trị giảm giá"}
+              min={0}
+              max={form.getFieldValue('discountBasedOn') === 'Percentage' ? 100 : undefined}
+              onChange={(e) => {
+                const value = e.target.value;
+                // Remove any non-numeric characters except decimal point
+                e.target.value = value.replace(/[^\d.]/g, '');
+              }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="maxDiscount"
+            label="Giảm giá tối đa (không bắt buộc)"
+            rules={[
+              {
+                validator: (_, value) => {
+                  if (!value) return Promise.resolve();
+                  
+                  const numberValue = Number(value);
+                  if (isNaN(numberValue)) {
+                    return Promise.reject('Giá trị phải là số');
+                  }
+                  
+                  if (numberValue <= 0) {
+                    return Promise.reject('Giá trị phải lớn hơn 0');
+                  }
+
+                  return Promise.resolve();
+                }
+              }
+            ]}
+          >
+            <Input 
+              type="number"
+              placeholder={initialData?.maxDiscount?.toString() || "Nhập giá trị giảm giá tối đa"}
+              min={0}
+              onChange={(e) => {
+                const value = e.target.value;
+                // Remove any non-numeric characters except decimal point
+                e.target.value = value.replace(/[^\d.]/g, '');
+              }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="startDate"
+            label="Thời gian bắt đầu"
+            rules={[{ required: true, message: 'Hãy chọn thời gian bắt đầu' }]}
+          >
+            <DatePicker
+              showTime={{
+                format: 'HH:mm:ss',
+              }}
+              style={{ width: '100%' }}
+              format="DD/MM/YYYY HH:mm:ss"
+              placeholder={
+                initialData?.startDate 
+                  ? dayjs(initialData.startDate).format('DD/MM/YYYY HH:mm:ss')
+                  : "dd/mm/yyyy hh:mm:ss"
+              }
+              disabledDate={disabledDate}
+              disabledTime={disabledDateTime}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="endDate"
+            label="Thời gian kết thúc"
+            rules={[
+              { required: true, message: 'Hãy chọn thời gian kết thúc' },
+              ({ getFieldValue }) => ({
+                validator(_, value) {
+                  if (!value || !getFieldValue('startDate')) {
+                    return Promise.resolve();
+                  }
+                  
+                  const startDate = getFieldValue('startDate');
+                  const endDate = dayjs(value);
+                  const startMoment = dayjs(startDate);
+                  
+                  if (endDate.isBefore(startMoment) || endDate.isSame(startMoment)) {
+                    return Promise.reject(new Error('Thời gian kết thúc phải sau thời gian bắt đầu'));
+                  }
+                  return Promise.resolve();
+                },
+              }),
+            ]}
+          >
+            <DatePicker
+              showTime={{
+                format: 'HH:mm:ss',
+              }}
+              style={{ width: '100%' }}
+              format="DD/MM/YYYY HH:mm:ss"
+              placeholder={
+                initialData?.endDate 
+                  ? dayjs(initialData.endDate).format('DD/MM/YYYY HH:mm:ss')
+                  : "dd/mm/yyyy hh:mm:ss"
+              }
+              disabledDate={(current) => {
+                const startDate = form.getFieldValue('startDate');
+                return (
+                  disabledDate(current) || 
+                  (startDate && current && current.isBefore(startDate, 'day'))
+                );
+              }}
+              disabledTime={(date) => {
+                const startDate = form.getFieldValue('startDate');
+                if (startDate && date && date.isSame(startDate, 'day')) {
+                  return {
+                    disabledHours: () => Array.from(
+                      { length: startDate.hour() }, 
+                      (_, i) => i
+                    ),
+                    disabledMinutes: (selectedHour) => 
+                      selectedHour === startDate.hour()
+                        ? Array.from(
+                            { length: startDate.minute() }, 
+                            (_, i) => i
+                          )
+                        : [],
+                    disabledSeconds: (selectedHour, selectedMinute) => 
+                      selectedHour === startDate.hour() && 
+                      selectedMinute === startDate.minute()
+                        ? Array.from(
+                            { length: startDate.second() }, 
+                            (_, i) => i
+                          )
+                        : [],
+                  };
+                }
+                return disabledDateTime(date);
+              }}
+            />
+          </Form.Item>
+
+          <Form.Item
+            name="isActive"
+            valuePropName="checked"
+          >
+            <Checkbox>Kích hoạt?</Checkbox>
+          </Form.Item>
+        </Form>
+      </Modal>
+    </>
+  );
+};
+
+export default UpdateCouponModal;

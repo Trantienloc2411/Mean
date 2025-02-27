@@ -1,34 +1,45 @@
 import styles from "../coupon/Coupon.module.scss";
-import { couponData } from "./data/fakeData.js";
-import TableModify from "../dashboard/components/Table";
 import { MoreOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
 import { useState, useEffect } from "react";
-import { Dropdown, Input, Button, DatePicker, Tag ,Table} from "antd";
+import { Dropdown, Input, Button, DatePicker, Tag, Table, message } from "antd";
 import debounce from "lodash/debounce";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import Filter from "../../components/Filter/Filter.jsx";
 import DeleteCouponModal from "./components/DeleteCouponModal.jsx";
 import AddCouponModal from "./components/AddCoupon/AddCouponModal.jsx";
+import {
+  useGetCouponsQuery,
+  useCreateCouponMutation,
+  useUpdateCouponMutation,
+  useDeleteCouponMutation,
+} from "../../redux/services/couponApi";
+import UpdateCouponModal from "./components/UpdateCoupon/UpdateCouponModal.jsx";
+import ViewCouponModal from "./components/ViewCoupon/ViewCouponModal.jsx";
 const { RangePicker } = DatePicker;
 
 export default function Coupon() {
   dayjs.extend(isBetween);
+  const { data: coupons, isLoading, refetch } = useGetCouponsQuery();
+  const [createCoupon, { isLoading: isCreating }] = useCreateCouponMutation();
+  const [updateCoupon, { isLoading: isUpdating }] = useUpdateCouponMutation();
   const [selectedValues, setSelectedValues] = useState({
     status: [],
     discountType: [],
     dateRange: [], // Store the date range
   });
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredData, setFilteredData] = useState(couponData);
+  const [filteredData, setFilteredData] = useState([]);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedCoupon, setSelectedCoupon] = useState(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
 
   // Filter configuration
   const filterGroups = [
     {
-      name: "discountType",
+      name: "discountBasedOn",
       title: "Hình thức giảm",
       options: [
         { key: "1", label: "Phần trăm", value: "Percentage" },
@@ -36,16 +47,16 @@ export default function Coupon() {
       ],
     },
     {
-      name: "status",
+      name: "isActive",
       title: "Trạng thái",
       options: [
         {
           label: <Tag color="green">Đang hoạt động</Tag>,
-          value: "Active",
+          value: true,
         },
         {
           label: <Tag color="red">Hết hạn</Tag>,
-          value: "Inactive",
+          value: false,
         },
       ],
     },
@@ -67,10 +78,52 @@ export default function Coupon() {
     },
   ];
 
-  const handleAddCoupon = (values) => {
-    console.log("New Coupon Values:", values);
-    // Add your logic to handle the new coupon data
-    setIsAddModalOpen(false);
+  const handleAddCoupon = async (values) => {
+    try {
+      await createCoupon(values).unwrap();
+      setIsAddModalOpen(false);
+      refetch(); // Refresh the coupons list
+    } catch (error) {
+      console.error("Failed to create coupon:", error);
+    }
+  };
+
+  const handleUpdateCoupon = async (values) => {
+    try {
+      const formattedValues = {
+        id: selectedCoupon.id, // Make sure to include the coupon ID
+        name: values.name,
+        code: values.code,
+        discountBasedOn: values.discountBasedOn,
+        amount: Number(values.amount),
+        maxDiscount: values.maxDiscount ? Number(values.maxDiscount) : null,
+        startDate: values.startDate,
+        endDate: values.endDate,
+        isActive: values.isActive
+      };
+
+      await updateCoupon(formattedValues).unwrap();
+      
+      message.success({
+        content: 'Cập nhật mã giảm giá thành công',
+        className: 'custom-message',
+        style: {
+          marginTop: '20vh',
+        },
+      });
+      
+      setIsUpdateModalOpen(false);
+      setSelectedCoupon(null);
+      refetch(); // Refresh the coupons list
+    } catch (error) {
+      message.error({
+        content: error.data?.message || 'Có lỗi xảy ra khi cập nhật mã giảm giá',
+        className: 'custom-message',
+        style: {
+          marginTop: '20vh',
+        },
+      });
+    }
   };
 
   const handleAddCancel = () => {
@@ -100,12 +153,12 @@ export default function Coupon() {
 
   // Handle filter changes
   const applyFilters = (filters) => {
-    let filtered = [...couponData];
+    let filtered = [...coupons];
 
     // Apply status filter
-    if (filters.status.length > 0) {
+    if (filters.isActive.length > 0) {
       filtered = filtered.filter((item) =>
-        filters.status.some(
+        filters.isActive.some(
           (status) => status.toLowerCase() === item.Status.toLowerCase()
         )
       );
@@ -162,79 +215,98 @@ export default function Coupon() {
 
   // Filter data based on selected filters and search term
   useEffect(() => {
-    let filtered = [...couponData];
+    if (!coupons) {
+      setFilteredData([]);
+      return;
+    }
+
+    let filtered = [...coupons];
 
     if (searchTerm) {
       filtered = filtered.filter((item) =>
-        item["Name"].toLowerCase().includes(searchTerm.toLowerCase())
+        item.name.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
-    if (selectedValues.status?.length > 0) {
+    if (selectedValues.isActive?.length > 0) {
       filtered = filtered.filter((item) =>
-        selectedValues.status.some(
-          (status) => status.toLowerCase() === item["Status"].toLowerCase()
-        )
+        selectedValues.isActive.includes(item.isActive)
       );
     }
 
-    if (selectedValues.discountType?.length > 0) {
+    if (selectedValues.discountBasedOn?.length > 0) {
       filtered = filtered.filter((item) =>
-        selectedValues.discountType.includes(item["DiscountType"])
+        selectedValues.discountBasedOn.includes(item.discountBasedOn)
       );
     }
 
-    // In your useEffect:
     if (selectedValues.dateRange?.length === 2) {
       const [start, end] = selectedValues.dateRange;
-      // Parse selected dates and set time range
-      const startDate = dayjs(start).startOf("day");
-      const endDate = dayjs(end).endOf("day");
 
       filtered = filtered.filter((item) => {
-        // Parse dates from your specific format "HH:mm:ss DD/MM/YYYY"
-        const [time, date] = item.StartTime.split(" ");
-        const [endTime, endDate] = item.EndTime.split(" ");
+        // Convert the selected range dates to dayjs objects
+        const rangeStart = dayjs(start, "DD/MM/YYYY");
+        const rangeEnd = dayjs(end, "DD/MM/YYYY").endOf("day");
 
-        const itemStartTime = dayjs(date + " " + time, "DD/MM/YYYY HH:mm:ss");
-        const itemEndTime = dayjs(
-          endDate + " " + endTime,
-          "DD/MM/YYYY HH:mm:ss"
-        );
+        // Convert the coupon dates to dayjs objects
+        const couponStart = dayjs(item.startDate, "DD/MM/YYYY HH:mm:ss");
+        const couponEnd = dayjs(item.endDate, "DD/MM/YYYY HH:mm:ss");
 
-        return (
-          itemStartTime.isSame(startDate) ||
-          itemEndTime.isSame(endDate) ||
-          (itemStartTime.isAfter(startDate) && itemEndTime.isBefore(endDate)) ||
-          (itemStartTime.isBefore(startDate) && itemEndTime.isAfter(endDate))
-        );
+        // Check if the coupon dates overlap with the selected range
+        const isOverlapping =
+          ((couponStart.isSame(rangeStart) ||
+            couponStart.isAfter(rangeStart)) &&
+            (couponStart.isSame(rangeEnd) || couponStart.isBefore(rangeEnd))) ||
+          ((couponEnd.isSame(rangeStart) || couponEnd.isAfter(rangeStart)) &&
+            (couponEnd.isSame(rangeEnd) || couponEnd.isBefore(rangeEnd)));
+
+        return isOverlapping;
       });
     }
 
     setFilteredData(filtered);
-  }, [searchTerm, selectedValues]);
+  }, [searchTerm, selectedValues, coupons]);
 
   const tableColumn = [
     { title: "No.", dataIndex: "No", key: "No" },
-    { title: "Tên mã", dataIndex: "Name", key: "Name" },
-    { title: "Hình thức giảm", dataIndex: "DiscountType", key: "DiscountType" },
-    { title: "Giá trị", dataIndex: "Value", key: "Value" },
+    { title: "Tên mã", dataIndex: "name", key: "name" },
+    {
+      title: "Hình thức giảm",
+      dataIndex: "discountBasedOn",
+      key: "discountBasedOn",
+      render: (type) => (type === "Percentage" ? "Phần trăm" : "Cố định"),
+    },
+    {
+      title: "Giá trị",
+      dataIndex: "amount",
+      key: "amount",
+      render: (value, record) => {
+        return record.discountBasedOn === "Percentage"
+          ? `${value}%`
+          : `${value.toLocaleString()}đ`;
+      },
+    },
     {
       title: "Khuyến mãi tối đa",
-      dataIndex: "MaxDiscount",
-      key: "MaxDiscount",
+      dataIndex: "maxDiscount",
+      key: "maxDiscount",
+      render: (value) => `${value.toLocaleString()}đ`,
     },
-    { title: "Ngày bắt đầu", dataIndex: "StartTime", key: "StartTime" },
-    { title: "Ngày kết thúc", dataIndex: "EndTime", key: "EndTime" },
+    { title: "Ngày bắt đầu", dataIndex: "startDate", key: "startDate" },
+    { title: "Ngày kết thúc", dataIndex: "endDate", key: "endDate" },
     {
       title: <span className="titleTable">Trạng thái</span>,
-      dataIndex: "Status",
-      key: "status",
+      dataIndex: "isActive",
+      key: "isActive",
       align: "center",
-      render: (Status) => {
+      render: (isActive) => {
         return (
-          <span className={`${styles.status} ${styles[Status.toLowerCase()]}`}>
-            {Status === "Active" ? "Đang hoạt động" : "Hết hạn"}
+          <span
+            className={`${styles.status} ${
+              styles[isActive ? "active" : "inactive"]
+            }`}
+          >
+            {isActive ? "Đang hoạt động" : "Hết hạn"}
           </span>
         );
       },
@@ -242,17 +314,41 @@ export default function Coupon() {
     {
       title: "",
       key: "operation",
-      render: (
-        _,
-        record // Add record parameter here
-      ) => (
+      width: '5%',
+      render: (_, record) => (
         <Dropdown
           menu={{
-            items,
-            onClick: ({ key }) => handleMenuClick(key, record), // Now record is available
+            items: [
+              {
+                key: "1",
+                label: "Xem chi tiết",
+                onClick: () => {
+                  setSelectedCoupon(record);
+                  setIsViewModalOpen(true);
+                }
+              },
+              {
+                key: "2",
+                label: "Chỉnh sửa",
+                onClick: () => {
+                  setSelectedCoupon(record);
+                  setIsUpdateModalOpen(true);
+                }
+              },
+              {
+                key: "3",
+                label: "Vô hiệu hoá",
+                danger: true,
+                onClick: () => {
+                  setSelectedCoupon(record);
+                  setIsDeleteModalOpen(true);
+                }
+              }
+            ]
           }}
+          trigger={['click']}
         >
-          <MoreOutlined />
+          <MoreOutlined style={{ cursor: 'pointer' }} />
         </Dropdown>
       ),
     },
@@ -336,6 +432,26 @@ export default function Coupon() {
             isOpen={isAddModalOpen}
             onCancel={handleAddCancel}
             onConfirm={handleAddCoupon}
+            isLoading={isCreating}
+          />
+          <UpdateCouponModal 
+            isOpen={isUpdateModalOpen}
+            onCancel={() => {
+              setIsUpdateModalOpen(false);
+              setSelectedCoupon(null);
+            }}
+            onConfirm={handleUpdateCoupon}
+            isLoading={isUpdating}
+            initialData={selectedCoupon}
+          />
+
+          <ViewCouponModal
+            isOpen={isViewModalOpen}
+            onCancel={() => {
+              setIsViewModalOpen(false);
+              setSelectedCoupon(null);
+            }}
+            couponData={selectedCoupon}
           />
         </div>
 
@@ -343,14 +459,15 @@ export default function Coupon() {
 
         <Table
           columns={tableColumn}
-          dataSource={filteredData}
+          dataSource={filteredData || []}
+          loading={isLoading}
           pagination={{
-            total: filteredData.length,
+            total: filteredData?.length || 0,
             pageSize: 7,
             showSizeChanger: false,
             className: styles.customPagination,
             itemRender: (page, type, originalElement) => {
-              const totalPages = Math.ceil(filteredData.length / 7);
+              const totalPages = Math.ceil((filteredData?.length || 0) / 7);
 
               if (type === "prev") {
                 return (
