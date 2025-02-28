@@ -31,6 +31,21 @@
   }
   
 }
+
+.typeTransaction {
+    padding: 4px 12px;
+    border-radius: 16px;
+    font-size: 12px;
+    display: inline-block;
+    &.paymentcomplete {
+      background-color: #e6f7ff;
+      color: #1890ff;
+    }
+    &.refund {
+      background-color: #fffbe6;
+      color: #faad14;
+    }
+}
 .transactionTable {
     :global {
       .ant-pagination {
