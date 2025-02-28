@@ -26,7 +26,7 @@ export default function Transaction() {
       endTime: "2025-01-14 12:00",
       price: "500,000 VND",
       status: "active",
-      typeTransaction: "Thanh toán cuối",
+      typeTransaction: "PaymentComplete",
     },
     {
       id: 2,
@@ -36,7 +36,7 @@ export default function Transaction() {
       endTime: "2025-01-13 13:00",
       price: "1,000,000 VND",
       status: "pending",
-      typeTransaction: "Hoàn tiền",
+      typeTransaction: "Refund",
     },
     {
       id: 3,
@@ -46,7 +46,7 @@ export default function Transaction() {
       endTime: "2025-01-12 11:00",
       price: "200,000 VND",
       status: "cancel",
-      typeTransaction: "Trả full",
+      typeTransaction: "PaymentComplete",
     },
     {
       id: 4,
@@ -56,7 +56,7 @@ export default function Transaction() {
       endTime: "2025-01-11 16:00",
       price: "750,000 VND",
       status: "active",
-      typeTransaction: "Tiền cọc",
+      typeTransaction: "Refund",
     },
   ];
 

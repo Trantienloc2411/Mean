@@ -55,13 +55,17 @@ export default function TransactionTable({ data, loading }) {
       render: (status) => {
         return (
           <span className={`${styles.status} ${styles[status.toLowerCase()]}`}>
-            {status === "active" ? "Hoạt động" : 
-            status === "pending" ? "Chờ xác nhận" :
-            status === "inactive" ? "Hủy" :
-            status === "refund" ? "Hoàn tiền" :
-            status === "finalPayment" ? "Thanh toán cuối" :
-            "Không xác định"
-            }
+            {status === "active"
+              ? "Hoạt động"
+              : status === "pending"
+              ? "Chờ xác nhận"
+              : status === "inactive"
+              ? "Hủy"
+              : status === "refund"
+              ? "Hoàn tiền"
+              : status === "finalPayment"
+              ? "Thanh toán cuối"
+              : "Không xác định"}
           </span>
         );
       },
@@ -72,9 +76,19 @@ export default function TransactionTable({ data, loading }) {
       align: "center",
       key: "typeTransaction",
       render: (typeTransaction) => {
-        const { label = "Không xác định", color = "gray" } =
-          TransactionTypeEnum[typeTransaction.toUpperCase()] || {};
-        return <Tag color={color}>{label}</Tag>;
+        return (
+          <span
+            className={`${styles.typeTransaction} ${
+              styles[typeTransaction.toLowerCase()]
+            }`}
+          >
+            {typeTransaction === "PaymentComplete"
+              ? "Thanh toán hoàn tất"
+              : typeTransaction === "Refund"
+              ? "Hoàn tiền"
+              : "Không xác định"}
+          </span>
+        );
       },
     },
     {
