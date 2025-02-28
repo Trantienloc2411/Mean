@@ -207,7 +207,7 @@ const AddCouponModal = ({ isOpen, onCancel, onConfirm, isLoading }) => {
           </Form.Item>
 
           <Form.Item
-            name="code"
+            name="couponCode"
             label="Mã giảm giá (CODE)"
             rules={[
               { required: true, message: 'Hãy nhập mã giảm giá (CODE)' },

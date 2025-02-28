@@ -6,7 +6,7 @@ import { useState, useEffect } from 'react';
 const UpdateCouponModal = ({ isOpen, onCancel, onConfirm, isLoading, initialData }) => {
   const [form] = Form.useForm();
   const [messageApi, contextHolder] = message.useMessage();
-
+  
   useEffect(() => {
     if (initialData && isOpen) {
       form.setFieldsValue({
@@ -108,11 +108,11 @@ const UpdateCouponModal = ({ isOpen, onCancel, onConfirm, isLoading, initialData
             label="Tên mã giảm giá"
             rules={[{ required: true, message: 'Hãy nhập tên mã giảm giá' }]}
           >
-            <Input placeholder={initialData?.name || "Deal 10% cho bạn mới"} />
+            <Input placeholder="Deal 10% cho bạn mới" />
           </Form.Item>
 
           <Form.Item
-            name="code"
+            name="couponCode"
             label="Mã giảm giá (CODE)"
             rules={[
               { required: true, message: 'Hãy nhập mã giảm giá (CODE)' },
@@ -126,7 +126,7 @@ const UpdateCouponModal = ({ isOpen, onCancel, onConfirm, isLoading, initialData
             normalize={(value) => value ? value.toUpperCase() : value}
           >
             <Input 
-              placeholder={initialData?.code || "DEAL10P"}
+              value={initialData?.couponCode || "DEAL10P"}
               maxLength={8}
               showCount
               onChange={(e) => {
@@ -141,7 +141,7 @@ const UpdateCouponModal = ({ isOpen, onCancel, onConfirm, isLoading, initialData
             label="Hình thức giảm giá"
             rules={[{ required: true, message: 'Hãy chọn hình thức giảm giá' }]}
           >
-            <Radio.Group>
+            <Radio.Group value={initialData?.discountBasedOn || "Percentage"}>
               <Radio value="Percentage">Phần trăm (%)</Radio>
               <Radio value="Fixed">Số tiền cố định (VNĐ)</Radio>
             </Radio.Group>
@@ -177,7 +177,7 @@ const UpdateCouponModal = ({ isOpen, onCancel, onConfirm, isLoading, initialData
           >
             <Input 
               type="number"
-              placeholder={initialData?.amount?.toString() || "Nhập giá trị giảm giá"}
+              value={initialData?.amount?.toString() || "Nhập giá trị giảm giá"}
               min={0}
               max={form.getFieldValue('discountBasedOn') === 'Percentage' ? 100 : undefined}
               onChange={(e) => {
@@ -212,7 +212,7 @@ const UpdateCouponModal = ({ isOpen, onCancel, onConfirm, isLoading, initialData
           >
             <Input 
               type="number"
-              placeholder={initialData?.maxDiscount?.toString() || "Nhập giá trị giảm giá tối đa"}
+              value={initialData?.maxDiscount?.toString() || "Nhập giá trị giảm giá tối đa"}
               min={0}
               onChange={(e) => {
                 const value = e.target.value;
@@ -233,7 +233,7 @@ const UpdateCouponModal = ({ isOpen, onCancel, onConfirm, isLoading, initialData
               }}
               style={{ width: '100%' }}
               format="DD/MM/YYYY HH:mm:ss"
-              placeholder={
+              value={
                 initialData?.startDate 
                   ? dayjs(initialData.startDate).format('DD/MM/YYYY HH:mm:ss')
                   : "dd/mm/yyyy hh:mm:ss"
@@ -272,7 +272,7 @@ const UpdateCouponModal = ({ isOpen, onCancel, onConfirm, isLoading, initialData
               }}
               style={{ width: '100%' }}
               format="DD/MM/YYYY HH:mm:ss"
-              placeholder={
+              value={
                 initialData?.endDate 
                   ? dayjs(initialData.endDate).format('DD/MM/YYYY HH:mm:ss')
                   : "dd/mm/yyyy hh:mm:ss"
@@ -317,6 +317,7 @@ const UpdateCouponModal = ({ isOpen, onCancel, onConfirm, isLoading, initialData
           <Form.Item
             name="isActive"
             valuePropName="checked"
+            initialValue={initialData?.isActive}
           >
             <Checkbox>Kích hoạt?</Checkbox>
           </Form.Item>

@@ -23,6 +23,7 @@ export default function Coupon() {
   const { data: coupons, isLoading, refetch } = useGetCouponsQuery();
   const [createCoupon, { isLoading: isCreating }] = useCreateCouponMutation();
   const [updateCoupon, { isLoading: isUpdating }] = useUpdateCouponMutation();
+  const [deleteCoupon, { isLoading: isDeleting }] = useDeleteCouponMutation();
   const [selectedValues, setSelectedValues] = useState({
     status: [],
     discountType: [],
@@ -35,6 +36,11 @@ export default function Coupon() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 7,
+    total: 0
+  });
 
   // Filter configuration
   const filterGroups = [
@@ -93,7 +99,7 @@ export default function Coupon() {
       const formattedValues = {
         id: selectedCoupon.id, // Make sure to include the coupon ID
         name: values.name,
-        code: values.code,
+        couponCode: values.couponCode,
         discountBasedOn: values.discountBasedOn,
         amount: Number(values.amount),
         maxDiscount: values.maxDiscount ? Number(values.maxDiscount) : null,
@@ -138,14 +144,23 @@ export default function Coupon() {
     }
   };
 
-  const handleDeleteConfirm = () => {
-    // Handle the deletion logic here
-
-    console.log(`Deleting coupon: ${selectedCoupon?.Name}`);
-    setIsDeleteModalOpen(false);
-    setSelectedCoupon(null);
+  const handleDeleteConfirm = async() => {
+    
+    try {
+      await deleteCoupon(selectedCoupon.id).unwrap(); 
+      setIsDeleteModalOpen(false);
+      setSelectedCoupon(null);
+      refetch(); // Refresh the coupons list
+    } catch (error) {
+      message.error({
+        content: error.data?.message || 'Có lỗi xảy ra khi xóa mã giảm giá',
+        className: 'custom-message',
+        style: {
+          marginTop: '20vh',
+        },
+      });
   };
-
+};
   const handleDeleteCancel = () => {
     setIsDeleteModalOpen(false);
     setSelectedCoupon(null);
@@ -268,8 +283,17 @@ export default function Coupon() {
   }, [searchTerm, selectedValues, coupons]);
 
   const tableColumn = [
-    { title: "No.", dataIndex: "No", key: "No" },
-    { title: "Tên mã", dataIndex: "name", key: "name" },
+    { 
+      title: "No.", 
+      dataIndex: "index", 
+      key: "index",
+      render: (_, __, index) => {
+        const { current, pageSize } = pagination;
+        return (current - 1) * pageSize + index + 1;
+      },
+      width: '5%'
+    },
+    { title: "Mã giảm giá", dataIndex: "couponCode", key: "couponCode" },
     {
       title: "Hình thức giảm",
       dataIndex: "discountBasedOn",
@@ -281,6 +305,7 @@ export default function Coupon() {
       dataIndex: "amount",
       key: "amount",
       render: (value, record) => {
+        if (!value && value !== 0) return '-';
         return record.discountBasedOn === "Percentage"
           ? `${value}%`
           : `${value.toLocaleString()}đ`;
@@ -290,7 +315,10 @@ export default function Coupon() {
       title: "Khuyến mãi tối đa",
       dataIndex: "maxDiscount",
       key: "maxDiscount",
-      render: (value) => `${value.toLocaleString()}đ`,
+      render: (value) => {
+        if (!value && value !== 0) return 'Không giới hạn';
+        return `${value.toLocaleString()}đ`;
+      },
     },
     { title: "Ngày bắt đầu", dataIndex: "startDate", key: "startDate" },
     { title: "Ngày kết thúc", dataIndex: "endDate", key: "endDate" },
@@ -462,10 +490,16 @@ export default function Coupon() {
           dataSource={filteredData || []}
           loading={isLoading}
           pagination={{
+            ...pagination,
             total: filteredData?.length || 0,
-            pageSize: 7,
             showSizeChanger: false,
             className: styles.customPagination,
+            onChange: (page) => {
+              setPagination(prev => ({
+                ...prev,
+                current: page
+              }));
+            },
             itemRender: (page, type, originalElement) => {
               const totalPages = Math.ceil((filteredData?.length || 0) / 7);
 

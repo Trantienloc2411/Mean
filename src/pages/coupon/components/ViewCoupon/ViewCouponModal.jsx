@@ -1,5 +1,6 @@
-import { Modal, Descriptions, Button, Tag } from 'antd';
-import dayjs from 'dayjs';
+import { Modal, Descriptions, Button, Tag } from "antd";
+import dayjs from "dayjs";
+import styles from "../../Coupon.module.scss";
 
 const ViewCouponModal = ({ isOpen, onCancel, couponData }) => {
   return (
@@ -8,13 +9,9 @@ const ViewCouponModal = ({ isOpen, onCancel, couponData }) => {
       open={isOpen}
       onCancel={onCancel}
       footer={[
-        <Button 
-          key="close" 
-          type="primary" 
-          onClick={onCancel}
-        >
+        <Button key="close" type="primary" onClick={onCancel}>
           Đóng
-        </Button>
+        </Button>,
       ]}
       width={600}
     >
@@ -22,49 +19,65 @@ const ViewCouponModal = ({ isOpen, onCancel, couponData }) => {
         <Descriptions.Item label="Tên mã giảm giá">
           {couponData?.name}
         </Descriptions.Item>
-        
+
         <Descriptions.Item label="Mã giảm giá">
-          {couponData?.code}
+          {couponData?.couponCode}
         </Descriptions.Item>
 
         <Descriptions.Item label="Loại giảm giá">
-          {couponData?.discountBasedOn === 'Percentage' ? 'Phần trăm (%)' : 'Số tiền cố định'}
+          {couponData?.discountBasedOn === "Percentage"
+            ? "Phần trăm (%)"
+            : "Số tiền cố định"}
         </Descriptions.Item>
 
         <Descriptions.Item label="Giá trị">
-          {couponData?.discountBasedOn === 'Percentage' 
-            ? `${couponData?.amount}%` 
+          {couponData?.discountBasedOn === "Percentage"
+            ? `${couponData?.amount}%`
             : `${couponData?.amount?.toLocaleString()}đ`}
         </Descriptions.Item>
 
         <Descriptions.Item label="Giảm giá tối đa">
-          {couponData?.maxDiscount ? `${couponData?.maxDiscount?.toLocaleString()}đ` : 'Không giới hạn'}
+          {couponData?.maxDiscount
+            ? `${couponData?.maxDiscount?.toLocaleString()}đ`
+            : "Không giới hạn"}
         </Descriptions.Item>
 
         <Descriptions.Item label="Thời gian bắt đầu">
-          {dayjs(couponData?.startDate, "DD/MM/YYYY HH:mm:ss").format("DD/MM/YYYY HH:mm:ss")}
+          {dayjs(couponData?.startDate, "DD/MM/YYYY HH:mm:ss").format(
+            "DD/MM/YYYY HH:mm:ss"
+          )}
         </Descriptions.Item>
 
         <Descriptions.Item label="Thời gian kết thúc">
-          {dayjs(couponData?.endDate, "DD/MM/YYYY HH:mm:ss").format("DD/MM/YYYY HH:mm:ss")}
+          {dayjs(couponData?.endDate, "DD/MM/YYYY HH:mm:ss").format(
+            "DD/MM/YYYY HH:mm:ss"
+          )}
         </Descriptions.Item>
 
         <Descriptions.Item label="Trạng thái">
-          <Tag color={couponData?.isActive ? 'green' : 'red'}>
-            {couponData?.isActive ? 'Đang hoạt động' : 'Không hoạt động'}
-          </Tag>
+          <span
+            className={`${styles.status} ${
+              styles[couponData?.isActive ? "active" : "inactive"]
+            }`}
+          >
+            {couponData?.isActive ? "Đang hoạt động" : "Hết hạn"}
+          </span>
         </Descriptions.Item>
 
         <Descriptions.Item label="Ngày tạo">
-          {dayjs(couponData?.createdAt, "DD/MM/YYYY HH:mm:ss").format("DD/MM/YYYY HH:mm:ss")}
+          {dayjs(couponData?.createdAt, "DD/MM/YYYY HH:mm:ss").format(
+            "DD/MM/YYYY HH:mm:ss"
+          )}
         </Descriptions.Item>
 
         <Descriptions.Item label="Cập nhật lần cuối">
-          {dayjs(couponData?.updatedAt, "DD/MM/YYYY HH:mm:ss").format("DD/MM/YYYY HH:mm:ss")}
+          {dayjs(couponData?.updatedAt, "DD/MM/YYYY HH:mm:ss").format(
+            "DD/MM/YYYY HH:mm:ss"
+          )}
         </Descriptions.Item>
       </Descriptions>
     </Modal>
   );
 };
 
-export default ViewCouponModal; 
+export default ViewCouponModal;

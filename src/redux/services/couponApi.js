@@ -16,11 +16,11 @@ export const couponApi = apiSlice.injectEndpoints({
         }),
         updateCoupon: builder.mutation({
             query: (coupon) => ({
-                url: `/coupon/update-coupon/${coupon.id}`,
+                url: `/coupon/${coupon.id}`,
                 method: "PUT",
                 body: {
                     name: coupon.name,
-                    code: coupon.code,
+                    couponCode: coupon.couponCode,
                     discountBasedOn: coupon.discountBasedOn,
                     amount: coupon.amount,
                     maxDiscount: coupon.maxDiscount,
@@ -32,8 +32,8 @@ export const couponApi = apiSlice.injectEndpoints({
         }),
         deleteCoupon: builder.mutation({
             query: (id) => ({
-                url: `/coupon/delete-coupon/${id}`,
-                method: "DELETE",
+                url: `/coupon/deactivate/${id}`,
+                method: "PUT",
             }),
         }),
     }),
