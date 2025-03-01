@@ -15,12 +15,11 @@ export const rentalApi = apiSlice.injectEndpoints({
     getRentalLocationById: builder.query({
       query: (id) => `rental-location/${id}`,
       providesTags: ["RentalLocation"],
-
     }),
     getRentalLocationByOwnerId: builder.query({
       query: (ownerId) =>
         `rental-location/all-rental-location?ownerId=${ownerId}`,
-      providesTags: ["RentalLocation"], 
+      providesTags: ["RentalLocation"],
     }),
     createRentalLocation: builder.mutation({
       query: (newRental) => ({
@@ -28,9 +27,16 @@ export const rentalApi = apiSlice.injectEndpoints({
         method: "POST",
         body: newRental,
       }),
-      invalidatesTags: ["RentalLocation"], 
+      invalidatesTags: ["RentalLocation"],
     }),
+    updateRentalLocation: builder.mutation({
+      query: ({ id, updatedData }) => ({
+        url: `/rental-locations/${id}`, // Đảm bảo endpoint đúng
+        method: "PUT", // Kiểm tra lại phương thức API yêu cầu
+        body: updatedData,
+      }),
     }),
+  }),
 });
 
 export const {
@@ -38,4 +44,5 @@ export const {
   useGetRentalLocationByIdQuery,
   useGetRentalLocationByOwnerIdQuery,
   useCreateRentalLocationMutation,
+  useUpdateRentalLocationMutation, // Hook update thêm vào
 } = rentalApi;

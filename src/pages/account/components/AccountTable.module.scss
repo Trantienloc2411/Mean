@@ -1,174 +1,189 @@
 .role {
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 12px;
-    display: inline-block;
-    &.owner {
-        background: #E7F8F0;
-        color: #41C588;
-    }
-    &.staff {
-        background: #FEECEB;
-        color: #F36960;
-    }
-    &.customer {
-        background: #E8F1FD;
-        color: #448DF2;
-    }
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  display: inline-block;
+  &.owner {
+    background: #e7f8f0;
+    color: #41c588;
+  }
+  &.staff {
+    background: #feeceb;
+    color: #f36960;
+  }
+  &.customer {
+    background: #e8f1fd;
+    color: #448df2;
+  }
 }
 .isActive {
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 12px;
-    display: inline-block;
-    &.true {
-        background: #E7F8F0;
-        color: #41C588;
-    }
-    &.false{
-        background: #FEECEB;
-        color: #F36960;
-    }
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  display: inline-block;
+  &.true {
+    background: #e7f8f0;
+    color: #41c588;
+  }
+  &.false {
+    background: #feeceb;
+    color: #f36960;
+  }
 }
-.verifyContainer{
-    display: flex;
-    gap: 10px;
-    align-items: center;
-    justify-content: center;
+.verifyContainer {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  justify-content: center;
 }
 .isVerifiedEmail {
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 12px;
-    display: inline-block;
-    &.true {
-        background: #E7F8F0;
-        color: #41C588;
-    }
-    &.false{
-        background: #FEECEB;
-        color: #F36960;
-    }
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  display: inline-block;
+  &.true {
+    background: #e7f8f0;
+    color: #41c588;
+  }
+  &.false {
+    background: #feeceb;
+    color: #f36960;
+  }
 }
 .isVerifiedPhone {
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 12px;
-    display: inline-block;
-    &.true {
-        background: #E7F8F0;
-        color: #41C588;
-    }
-    &.false{
-        background: #FEECEB;
-        color: #F36960;
-    }
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  display: inline-block;
+  &.true {
+    background: #e7f8f0;
+    color: #41c588;
+  }
+  &.false {
+    background: #feeceb;
+    color: #f36960;
+  }
 }
 
 .paginationButton {
-    display: inline-flex;
-    align-items: center;
-    height: 100%;
-    background: white;
-    border: 1px solid #d9d9d9;
-    border-radius: 6px;
-    padding: 4px 20px;
-    cursor: pointer;
-    transition: all 0.2s;
-  
-    &:hover {
-      border-color: #667085;
-      color: #667085;
-    }
-  
-    &:disabled {
-      background: #f5f5f5;
-      color: rgba(0, 0, 0, 0.25);
-      border-color: #d9d9d9;
-      cursor: not-allowed;
-    }
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  padding: 4px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #667085;
+    color: #667085;
   }
-  .accountTable {
-    :global {
-      .ant-pagination {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-  
-        .ant-pagination-prev,
-        .ant-pagination-next {
-          height: 32px;
-          margin: 0;
-  
-          .ant-pagination-item-link {
-            border: 1px solid #d9d9d9;
-            border-radius: 6px;
-            padding: 4px 15px;
-            color: rgba(0, 0, 0, 0.88);
-            font-size: 14px;
-            background: white;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            transition: all 0.2s;
-  
-            &:hover {
-              border-color: #1677ff;
-              color: #1677ff;
-            }
+
+  &:disabled {
+    background: #f5f5f5;
+    color: rgba(0, 0, 0, 0.25);
+    border-color: #d9d9d9;
+    cursor: not-allowed;
+  }
+}
+.accountTable {
+  :global {
+    .ant-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+
+      .ant-pagination-prev,
+      .ant-pagination-next {
+        height: 32px;
+        margin: 0;
+
+        .ant-pagination-item-link {
+          border: 1px solid #d9d9d9;
+          border-radius: 6px;
+          padding: 4px 15px;
+          color: rgba(0, 0, 0, 0.88);
+          font-size: 14px;
+          background: white;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          transition: all 0.2s;
+
+          &:hover {
+            border-color: #1677ff;
+            color: #1677ff;
           }
-  
-          &.ant-pagination-disabled {
-            .ant-pagination-item-link {
+        }
+
+        &.ant-pagination-disabled {
+          .ant-pagination-item-link {
+            border-color: #d9d9d9;
+            color: rgba(0, 0, 0, 0.25);
+            cursor: not-allowed;
+            background: #f5f5f5;
+
+            &:hover {
               border-color: #d9d9d9;
               color: rgba(0, 0, 0, 0.25);
-              cursor: not-allowed;
-              background: #f5f5f5;
-  
-              &:hover {
-                border-color: #d9d9d9;
-                color: rgba(0, 0, 0, 0.25);
-              }
             }
           }
         }
-  
-        .ant-pagination-item {
-          min-width: 32px;
-          height: 32px;
-          line-height: 32px;
-          border: none;
-          margin: 0;
-          border-radius: 6px;
-  
+      }
+
+      .ant-pagination-item {
+        min-width: 32px;
+        height: 32px;
+        line-height: 32px;
+        border: none;
+        margin: 0;
+        border-radius: 6px;
+
+        a {
+          color: rgba(0, 0, 0, 0.88);
+          padding: 0 4px;
+          transition: all 0.2s;
+        }
+
+        &:hover {
+          background: transparent;
+
           a {
-            color: rgba(0, 0, 0, 0.88);
-            padding: 0 4px;
-            transition: all 0.2s;
+            color: #1677ff;
           }
-  
+        }
+
+        &-active {
+          background: #f7f9fc;
+
+          a {
+            color: #1677ff;
+            font-weight: 500;
+          }
+
           &:hover {
-            background: transparent;
-  
-            a {
-              color: #1677ff;
-            }
-          }
-  
-          &-active {
-            background: #F7F9FC;
-  
-            a {
-              color: #1677ff;
-              font-weight: 500;
-            }
-  
-            &:hover {
-              background: #e6f4ff;
-            }
+            background: #e6f4ff;
           }
         }
       }
     }
   }
+}
+
+.fullName {
+  display: flex;
+  align-items: center;
+  color: #333;
+  font-weight: 500;
+  cursor: pointer; 
+  transition: color 0.2s ease-in-out;
+  &:hover {
+    color: #007bff;
+  }
+  &:active {
+    color: #0056b3; 
+  }
+}

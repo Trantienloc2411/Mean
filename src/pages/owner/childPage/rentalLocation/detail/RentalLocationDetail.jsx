@@ -27,7 +27,7 @@ export default function RentalLocationDetail() {
     );
   if (error) return <p>Failed to load rental location.</p>;
   const rentalData = rental.data;
-  console.log(rentalData);
+  // console.log(rentalData);
 
   const items = [
     {

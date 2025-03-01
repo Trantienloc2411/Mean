@@ -1,5 +1,16 @@
-import { useState } from "react";
-import { Avatar, Button, Form, Input, Upload, message, DatePicker } from "antd";
+import { useState, useEffect } from "react";
+import {
+  Avatar,
+  Button,
+  Card,
+  Form,
+  Input,
+  Upload,
+  message,
+  DatePicker,
+  Row,
+  Col,
+} from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 import dayjs from "dayjs";
 import { useUpdateUserMutation } from "../../../../../../redux/services/userApi";
@@ -12,6 +23,11 @@ export default function AccountInformation({ userData, refetch }) {
   const [updateUser] = useUpdateUserMutation();
   const { id } = useParams();
   const [uploading, setUploading] = useState(false);
+
+  // Cập nhật formData khi userData thay đổi
+  useEffect(() => {
+    setFormData(userData);
+  }, [userData]);
 
   const handleSave = async () => {
     if (uploading) return;
@@ -36,7 +52,6 @@ export default function AccountInformation({ userData, refetch }) {
       };
 
       await updateUser({ id, updatedUser: updatedData }).unwrap();
-
       message.success("Cập nhật thông tin thành công!");
       setIsEditing(false);
       await refetch();
@@ -81,24 +96,13 @@ export default function AccountInformation({ userData, refetch }) {
   };
 
   return (
-    <div>
-      <h3 style={{ fontSize: 24 }}>Thông tin tài khoản</h3>
-      <div style={{ display: "grid", gridTemplateColumns: "20% auto" }}>
-        <div
-          style={{
-            textAlign: "center",
-            gap: "10px",
-            display: "flex",
-            flexDirection: "column",
-            justifyContent: "center",
-            alignItems: "center",
-          }}
-        >
+    <Card title="Thông tin tài khoản" style={{ marginBottom: 24 }}>
+      <Row gutter={24} align="middle">
+        <Col xs={24} sm={24} md={8} style={{ textAlign: "center" }}>
           <Avatar
-            style={{ width: "120px", height: "120px" }}
+            size={120}
             src={formData.avatar || "profile-placeholder.jpg"}
           />
-
           {isEditing && (
             <Upload
               showUploadList={false}
@@ -110,71 +114,76 @@ export default function AccountInformation({ userData, refetch }) {
                 return false;
               }}
             >
-              <Button icon={<UploadOutlined />} disabled={uploading}>
+              <Button
+                icon={<UploadOutlined />}
+                disabled={uploading}
+                style={{ marginTop: 16 }}
+              >
                 {uploading ? "Đang tải..." : "Đổi ảnh đại diện"}
               </Button>
             </Upload>
           )}
-        </div>
-
-        <Form layout="vertical">
-          <Form.Item label="Họ và tên">
-            <Input
-              value={formData.fullName}
-              onChange={(e) =>
-                setFormData({ ...formData, fullName: e.target.value })
-              }
-              disabled={!isEditing || uploading}
-            />
-          </Form.Item>
-
-          <Form.Item label="Email">
-            <Input value={formData.email} disabled={true} />
-          </Form.Item>
-
-          <Form.Item label="Số điện thoại">
-            <Input
-              value={formData.phone}
-              onChange={(e) =>
-                setFormData({ ...formData, phone: e.target.value })
-              }
-              disabled={!isEditing || uploading}
-            />
-          </Form.Item>
-
-          <Form.Item label="Ngày sinh">
-            <DatePicker
-              value={formData.doB ? dayjs(formData.doB, "DD/MM/YYYY") : null}
-              onChange={(date, dateString) =>
-                setFormData({ ...formData, doB: dateString })
-              }
-              format="DD/MM/YYYY"
-              disabled={!isEditing || uploading}
-            />
-          </Form.Item>
-
-          {isEditing ? (
-            <div
-              style={{ display: "flex", justifyContent: "end", gap: "20px" }}
-            >
-              <Button type="primary" onClick={handleSave} disabled={uploading}>
-                {uploading ? "Đang tải..." : "Lưu"}
-              </Button>
-              <Button type="default" onClick={handleCancel}>
-                Thoát
-              </Button>
-            </div>
-          ) : (
-            <div
-              style={{ display: "flex", justifyContent: "end", gap: "20px" }}
-            >
-              <Button type="default" onClick={() => setIsEditing(true)}>
-                Chỉnh sửa
-              </Button>
-            </div>
-          )}
-        </Form>
-      </div>
-    </div>
+        </Col>
+        <Col xs={24} sm={24} md={16}>
+          <Form layout="vertical">
+            <Form.Item label="Họ và tên">
+              <Input
+                value={formData.fullName}
+                onChange={(e) =>
+                  setFormData({ ...formData, fullName: e.target.value })
+                }
+                disabled={!isEditing || uploading}
+              />
+            </Form.Item>
+            <Form.Item label="Email">
+              <Input value={formData.email} disabled />
+            </Form.Item>
+            <Form.Item label="Số điện thoại">
+              <Input
+                value={formData.phone}
+                onChange={(e) =>
+                  setFormData({ ...formData, phone: e.target.value })
+                }
+                disabled={!isEditing || uploading}
+              />
+            </Form.Item>
+            <Form.Item label="Ngày sinh">
+              <DatePicker
+                value={formData.doB ? dayjs(formData.doB, "DD/MM/YYYY") : null}
+                onChange={(date, dateString) =>
+                  setFormData({ ...formData, doB: dateString })
+                }
+                format="DD/MM/YYYY"
+                disabled={!isEditing || uploading}
+              />
+            </Form.Item>
+            <Form.Item>
+              {isEditing ? (
+                <div
+                  style={{
+                    display: "flex",
+                    justifyContent: "flex-end",
+                    gap: "16px",
+                  }}
+                >
+                  <Button
+                    type="primary"
+                    onClick={handleSave}
+                    disabled={uploading}
+                  >
+                    {uploading ? "Đang tải..." : "Lưu"}
+                  </Button>
+                  <Button onClick={handleCancel}>Thoát</Button>
+                </div>
+              ) : (
+                <div style={{ display: "flex", justifyContent: "flex-end" }}>
+                  <Button onClick={() => setIsEditing(true)}>Chỉnh sửa</Button>
+                </div>
+              )}
+            </Form.Item>
+          </Form>
+        </Col>
+      </Row>
+    </Card>
   );
 }

@@ -1,11 +1,22 @@
 import { Menu } from "antd";
 import styles from "../Navbar/NavBar.module.scss";
-import { UserOutlined, LockOutlined, BankOutlined, WalletOutlined } from '@ant-design/icons';
-export default function NavBar(props) {
+import { BankOutlined, WalletOutlined } from "@ant-design/icons";
 
-    const {activeKey,
-        onSelect
-    } = props;
+export default function NavBar(props) {
+  const { activeKey, onSelect } = props;
+
+  const menuItems = [
+    {
+      key: "bankAccount",
+      icon: <BankOutlined />,
+      label: "Tài khoản ngân hàng",
+    },
+    {
+      key: "meanWallet",
+      icon: <WalletOutlined />,
+      label: "Ví Mean",
+    },
+  ];
 
   return (
     <div className={styles.sidebar}>
@@ -15,14 +26,8 @@ export default function NavBar(props) {
         selectedKeys={[activeKey]}
         onClick={(e) => onSelect(e.key)}
         className={styles.menu}
-      >
-        <Menu.Item key="bankAccount" icon={<BankOutlined />}>
-          Tài khoản ngân hàng
-        </Menu.Item>
-        <Menu.Item key="meanWallet" icon={<WalletOutlined />}>
-          Ví Mean
-        </Menu.Item>
-      </Menu>
+        items={menuItems}
+      />
     </div>
   );
 }
