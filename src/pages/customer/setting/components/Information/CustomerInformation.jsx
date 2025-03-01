@@ -5,7 +5,7 @@ export default function CustomerInformation({ customerDetail }) {
   if (!customerDetail) return null;
 
   const { _id, isDelete, createdAt, updatedAt, userId } = customerDetail;
-  const { fullName, email, phone, doB, avatarUrl, isVerifiedEmail } =
+  const { fullName, email, phone, doB, avatarUrl, isVerifiedEmail, isActive } =
     userId || {};
 
   return (
@@ -23,7 +23,7 @@ export default function CustomerInformation({ customerDetail }) {
       </div>
 
       <Descriptions bordered column={1}>
-        <Descriptions.Item label="ID khách hàng">{_id}</Descriptions.Item>
+        {/* <Descriptions.Item label="ID khách hàng">{_id}</Descriptions.Item> */}
         <Descriptions.Item label="Số điện thoại">
           {phone || "Chưa cập nhật"}
         </Descriptions.Item>
@@ -38,8 +38,9 @@ export default function CustomerInformation({ customerDetail }) {
           )}
         </Descriptions.Item>
         <Descriptions.Item label="Trạng thái">
-          {isDelete ? "Đã xóa" : "Hoạt động"}
+          {isDelete ? "Đã xóa" : isActive ? "Hoạt động" : "Đã Khóa "}
         </Descriptions.Item>
+
         <Descriptions.Item label="Tạo lúc">{createdAt}</Descriptions.Item>
         <Descriptions.Item label="Cập nhật lúc">{updatedAt}</Descriptions.Item>
       </Descriptions>

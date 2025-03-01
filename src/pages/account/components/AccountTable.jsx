@@ -1,99 +1,122 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-
-import { MoreOutlined, ExclamationCircleOutlined } from "@ant-design/icons";
+import { MoreOutlined } from "@ant-design/icons";
+import { Dropdown, Menu, Table, message } from "antd";
 import styles from "../components/AccountTable.module.scss";
-import { Dropdown, Menu, Table, Tag, message } from "antd";
-import UserDetailModal from "./UserDetailModal"; // Component modal chi tiết
+import UserDetailModal from "./UserDetailModal";
 import {
   useActiveUserMutation,
   useBlockUserMutation,
-  // useDeleteUserMutation,
 } from "../../../redux/services/userApi";
 
 export default function AccountTable({ data, loading }) {
+  const navigate = useNavigate();
   const [selectedUser, setSelectedUser] = useState(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
   const [activeUser] = useActiveUserMutation();
   const [blockUser] = useBlockUserMutation();
-  // const [deleteUser] = useDeleteUserMutation();
-  const navigate = useNavigate();
-
-  const roleColors = {
-    Staff: "blue",
-    Owner: "gold",
-    Customer: "green",
-    Unknown: "gray",
-  };
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 7,
+    total: data.length,
+  });
 
   const columns = [
     {
       title: "No.",
-      dataIndex: "no",
       key: "no",
-      render: (_, __, index) => {
-        const { current, pageSize } = pagination;
-        return (current - 1) * pageSize + index + 1;
-      },
+      render: (_, __, index) =>
+        (pagination.current - 1) * pagination.pageSize + index + 1,
     },
-    { title: "Tên", dataIndex: "fullName", key: "fullName" },
+    {
+      title: "Tên",
+      dataIndex: "fullName",
+      key: "fullName",
+      width: 150,
+      ellipsis: true,
+      sorter: (a, b) => a.fullName.localeCompare(b.fullName),
+      render: (text, record) => (
+        <span
+          className={styles.fullName}
+          // style={{ color: "blue", cursor: "pointer" }} // Thêm màu & con trỏ click
+          onClick={(e) => {
+            e.stopPropagation(); // Chặn sự kiện click lan truyền
+            handleViewModel(record);
+          }}
+        >
+          {text}
+        </span>
+      ),
+    },
     { title: "Số điện thoại", dataIndex: "phone", key: "phone" },
     { title: "Email", dataIndex: "email", key: "email" },
     {
       title: "Loại",
       dataIndex: "roleName",
+      align: "center",
       key: "roleName",
-      render: (role) => {
-        return (
-          <span className={`${styles.role} ${styles[role.toLowerCase()]}`}>
-            {role === "Staff"
-              ? "Nhân viên"
-              : role === "Owner"
-              ? "Chủ hộ"
-              : "Khách hàng"}
-          </span>
-        );
-      },
+      render: (role) => (
+        <span className={`${styles.role} ${styles[role.toLowerCase()]}`}>
+          {role === "Staff"
+            ? "Nhân viên"
+            : role === "Owner"
+            ? "Chủ hộ"
+            : "Khách hàng"}
+        </span>
+      ),
     },
     {
       title: "Trạng Thái",
       dataIndex: "isActive",
       align: "center",
       key: "isActive",
-      render: (isActive) => {
-        console.log(isActive);
-        return (
-          <span className={`${styles.isActive} ${styles[isActive]}`}>
-            {isActive ? "Hoạt động" : "Ngừng hoạt động"}
-          </span>
-        );
-      },
+      render: (isActive) => (
+        <span className={`${styles.isActive} ${styles[isActive]}`}>
+          {isActive ? "Hoạt động" : "Ngừng hoạt động"}
+        </span>
+      ),
     },
     {
       title: "Xác thực",
       dataIndex: "isVerified",
       align: "center",
-      key: "approve",
-      render: (_, record) => {
-        return (
-          <div className={styles.verifyContainer}>
-            <span
-              className={`${styles.isVerifiedEmail} ${
-                styles[record.isVerifiedEmail]
-              }`}
-            >
-              {"Email"}
-            </span>
-            <span
-              className={`${styles.isVerifiedPhone} ${
-                styles[record.isVerifiedPhone]
-              }`}
-            >
-              {"Phone"}
-            </span>
-          </div>
-        );
-      },
+
+      key: "isVerified",
+      render: (_, record) => (
+        <div className={styles.verifyContainer}>
+          <span
+            className={`${styles.isVerifiedEmail} ${
+              styles[record.isVerifiedEmail]
+            }`}
+          >
+            Email
+          </span>
+          <span
+            className={`${styles.isVerifiedPhone} ${
+              styles[record.isVerifiedPhone]
+            }`}
+          >
+            Phone
+          </span>
+        </div>
+      ),
+    },
+    {
+      title: "Ngày tạo",
+      dataIndex: "createdAt",
+      align: "center",
+      key: "createdAt",
+      sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+      render: (createdAt) => new Date(createdAt).toLocaleDateString("vi-VN"),
+    },
+    {
+      title: "Ngày cập nhật",
+      dataIndex: "updatedAt",
+      align: "center",
+      key: "updatedAt",
+      sorter: (a, b) => new Date(a.updatedAt) - new Date(b.updatedAt),
+      render: (updatedAt) =>
+        updatedAt ? new Date(updatedAt).toLocaleDateString("vi-VN") : "N/A",
     },
     {
       title: "Thao tác",
@@ -102,30 +125,23 @@ export default function AccountTable({ data, loading }) {
       render: (_, record) => (
         <Dropdown
           overlay={
-            <Menu>
-              <Menu.Item key="1" onClick={() => handleViewModel(record)}>
-                Xem
+            <Menu onClick={(e) => e.domEvent.stopPropagation()}>
+              <Menu.Item key="1" onClick={() => handleViewDetails(record)}>
+                Xem Chi Tiết
               </Menu.Item>
-              {record.roleName == "Staff" ? null : (
-                <Menu.Item key="2" onClick={() => handleViewDetails(record)}>
-                  Xem Chi Tiết
-                </Menu.Item>
-              )}
               {record.isActive ? (
-                <Menu.Item key="3" onClick={() => handleBlockUser(record)}>
+                <Menu.Item key="2" onClick={() => handleBlockUser(record)}>
                   Khóa tài khoản
                 </Menu.Item>
               ) : (
-                <Menu.Item key="4" onClick={() => handleActiveUser(record)}>
+                <Menu.Item key="3" onClick={() => handleActiveUser(record)}>
                   Cho phép hoạt động
                 </Menu.Item>
               )}
-              {/* <Menu.Item key="5" onClick={() => handleDelete(record)}>
-                Xóa
-              </Menu.Item> */}
             </Menu>
           }
           trigger={["click"]}
+          className="action-menu" // Thêm class này để kiểm tra trong onRow
         >
           <MoreOutlined />
         </Dropdown>
@@ -133,58 +149,35 @@ export default function AccountTable({ data, loading }) {
     },
   ];
 
-  // Add pagination state
-  const [pagination, setPagination] = useState({
-    current: 1,
-    pageSize: 7,
-    total: data.length,
-  });
-
-  const handleViewModel = (user) => {
-    setSelectedUser(user);
-    setIsDetailOpen(true);
-  };
   const handleViewDetails = (user) => {
-    if (user.roleName == "Customer") {
-      navigate(`/customer/${user._id}`);
-    } else if (user.roleName == "Owner") {
-      navigate(`/owner/${user._id}/dashboard`);
-    }
+    navigate(
+      user.roleName === "Customer"
+        ? `/customer/${user._id}`
+        : `/owner/${user._id}/dashboard`
+    );
   };
+
   const handleActiveUser = async (user) => {
     try {
       await activeUser(user._id).unwrap();
-      message.success("Cho phép thành công thành công!");
+      message.success("Cho phép hoạt động thành công!");
     } catch {
       message.error("Lỗi khi cập nhật trạng thái!");
     }
   };
+
   const handleBlockUser = async (user) => {
     try {
       await blockUser(user._id).unwrap();
-      message.success("Khóa thành công!");
+      message.success("Khóa tài khoản thành công!");
     } catch {
       message.error("Lỗi khi cập nhật trạng thái!");
     }
   };
-  // const handleDelete = (user) => {
-  //   Modal.confirm({
-  //     title: "Xác nhận xóa tài khoản?",
-  //     icon: <ExclamationCircleOutlined />,
-  //     content: `Bạn có chắc chắn muốn xóa tài khoản của ${user.fullName}?`,
-  //     okText: "Xóa",
-  //     okType: "danger",
-  //     cancelText: "Hủy",
-  //     onOk: async () => {
-  //       try {
-  //         await deleteUser(user.id).unwrap();
-  //         message.success("Xóa tài khoản thành công!");
-  //       } catch {
-  //         message.error("Lỗi khi xóa tài khoản!");
-  //       }
-  //     },
-  //   });
-  // };
+  const handleViewModel = (user) => {
+    setSelectedUser(user); // Lưu user được chọn
+    setIsDetailOpen(true); // Mở modal
+  };
 
   return (
     <div style={{ marginTop: 10 }}>
@@ -193,41 +186,16 @@ export default function AccountTable({ data, loading }) {
         dataSource={data}
         loading={loading}
         columns={columns}
-        rowKey="id"
+        rowKey="_id"
         pagination={{
           ...pagination,
           showSizeChanger: false,
-          className: styles.customPagination,
-          onChange: (page) => {
-            setPagination(prev => ({ ...prev, current: page }));
-          },
-          itemRender: (page, type, originalElement) => {
-            const totalPages = Math.ceil(data.length / 7);
-            if (type === "prev") {
-              return (
-                <button
-                  className={styles.paginationButton}
-                  disabled={page === 1} // First page starts at 1
-                >
-                  « Trước
-                </button>
-              );
-            }
-            if (type === "next") {
-              return (
-                <button
-                  className={styles.paginationButton}
-                  disabled={page === totalPages} // Disable when on the last page
-                >
-                  Tiếp »
-                </button>
-              );
-            }
-            return originalElement;
-          },
+          onChange: (page) =>
+            setPagination((prev) => ({ ...prev, current: page })),
         }}
         className={styles.accountTable}
       />
+
       <UserDetailModal
         open={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
