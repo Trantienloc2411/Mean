@@ -8,6 +8,7 @@ import {
   useActiveUserMutation,
   useBlockUserMutation,
 } from "../../../redux/services/userApi";
+import { FaEye } from "react-icons/fa";
 
 export default function AccountTable({ data, loading }) {
   const navigate = useNavigate();
@@ -35,18 +36,6 @@ export default function AccountTable({ data, loading }) {
       width: 150,
       ellipsis: true,
       sorter: (a, b) => a.fullName.localeCompare(b.fullName),
-      render: (text, record) => (
-        <span
-          className={styles.fullName}
-          // style={{ color: "blue", cursor: "pointer" }} // Thêm màu & con trỏ click
-          onClick={(e) => {
-            e.stopPropagation(); // Chặn sự kiện click lan truyền
-            handleViewModel(record);
-          }}
-        >
-          {text}
-        </span>
-      ),
     },
     { title: "Số điện thoại", dataIndex: "phone", key: "phone" },
     { title: "Email", dataIndex: "email", key: "email" },
@@ -119,16 +108,36 @@ export default function AccountTable({ data, loading }) {
         updatedAt ? new Date(updatedAt).toLocaleDateString("vi-VN") : "N/A",
     },
     {
-      title: "Thao tác",
+      key: "view",
+      align: "center",
+      render: (_, record) => (
+        <span
+          className={styles.iconViewDetail}
+          onClick={(e) => {
+            handleViewModel(record);
+          }}
+        >
+          <FaEye />
+        </span>
+      ),
+    },
+    {
+      // title: "Thao tác",
       key: "action",
       align: "center",
       render: (_, record) => (
         <Dropdown
           overlay={
             <Menu onClick={(e) => e.domEvent.stopPropagation()}>
-              <Menu.Item key="1" onClick={() => handleViewDetails(record)}>
+              {["Customer", "Owner"].includes(record.roleName) && (
+                <Menu.Item key="1" onClick={() => handleViewModel(record)}>
+                  Xem Chi Tiết
+                </Menu.Item>
+              )}
+
+              {/* <Menu.Item key="1" onClick={() => handleViewDetails(record)}>
                 Xem Chi Tiết
-              </Menu.Item>
+              </Menu.Item> */}
               {record.isActive ? (
                 <Menu.Item key="2" onClick={() => handleBlockUser(record)}>
                   Khóa tài khoản
