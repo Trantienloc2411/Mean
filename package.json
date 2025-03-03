@@ -20,6 +20,7 @@
     "cloudinary-react": "^1.8.1",
     "dayjs": "^1.11.13",
     "days": "^1.1.1",
+    "firebase": "^11.4.0",
     "google-fonts": "^1.0.0",
     "leaflet": "^1.9.4",
     "lodash": "^4.17.21",

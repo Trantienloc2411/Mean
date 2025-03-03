@@ -5,6 +5,7 @@ import AdminLayout from "../layouts/AdminLayout";
 import OwnerLayout from "../layouts/OwnerLayout";
 import Signup from "../pages/auth/signup/SignUp";
 import VerifyCode from "../pages/auth/verifyCode/VerifyCode";
+import VerifyPhone from "../pages/auth/verifyPhone/VerifyPhone.jsx";
 import ForgotPassword from "../pages/auth/forgotPassword/ForgotPassword";
 import SetNewPassword from "../pages/auth/setNewPassword/SetNewPassword";
 import SimpleLayout from "../layouts/SimpleLayout.jsx";
@@ -128,6 +129,10 @@ export const routes = [
       {
         path: "/verifycode",
         element: <VerifyCode />,
+      },
+      {
+        path: "/verifyPhone",
+        element: <VerifyPhone />,
       },
       {
         path: "/forgot-password",

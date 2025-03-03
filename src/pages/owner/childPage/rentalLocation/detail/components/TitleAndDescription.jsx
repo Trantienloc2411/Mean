@@ -116,7 +116,6 @@ export default function TitleAndDescription({ rentalData }) {
         <Col span={24}>
           <LocationMap
             latitude={rentalData?.latitude}
-            // latitude={rentalData?.attitude}
             longitude={rentalData?.longitude}
           />
         </Col>

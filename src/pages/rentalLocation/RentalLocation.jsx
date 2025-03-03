@@ -47,7 +47,6 @@ export default function RentalLocation() {
     setFilteredLocations(allLocations);
     setSearchValue("");
   };
-  console.log(filteredLocations);
 
   return (
     <div style={{ padding: 20 }}>

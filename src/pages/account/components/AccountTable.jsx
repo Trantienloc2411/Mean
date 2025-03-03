@@ -90,14 +90,14 @@ export default function AccountTable({ data, loading }) {
         </div>
       ),
     },
-    {
-      title: "Ngày tạo",
-      dataIndex: "createdAt",
-      align: "center",
-      key: "createdAt",
-      sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
-      render: (createdAt) => new Date(createdAt).toLocaleDateString("vi-VN"),
-    },
+    // {
+    //   title: "Ngày tạo",
+    //   dataIndex: "createdAt",
+    //   align: "center",
+    //   key: "createdAt",
+    //   sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+    //   render: (createdAt) => new Date(createdAt).toLocaleDateString("vi-VN"),
+    // },
     {
       title: "Ngày cập nhật",
       dataIndex: "updatedAt",
@@ -130,7 +130,7 @@ export default function AccountTable({ data, loading }) {
           overlay={
             <Menu onClick={(e) => e.domEvent.stopPropagation()}>
               {["Customer", "Owner"].includes(record.roleName) && (
-                <Menu.Item key="1" onClick={() => handleViewModel(record)}>
+                <Menu.Item key="1" onClick={() => handleViewDetails(record)}>
                   Xem Chi Tiết
                 </Menu.Item>
               )}

@@ -1,21 +1,24 @@
 import { useState } from "react";
 import { MoreOutlined } from "@ant-design/icons";
 
-import { Dropdown, Menu, Table } from "antd";
+import { Dropdown, Table } from "antd";
 import { useNavigate } from "react-router-dom";
 import ModalViewDetailRental from "./ModalViewDetailRental";
 import styles from "./RentalLocationTable.module.scss";
+import { FaEye } from "react-icons/fa";
 export default function RentalLocationTable({ data, loading }) {
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [selectedRental, setSelectedRental] = useState(null);
   const navigate = useNavigate();
-  console.log(data);
+  // console.log(data);
 
   const RENTALLOCATION_STATUS = {
     PENDING: 1,
     INACTIVE: 2,
     ACTIVE: 3,
     PAUSE: 4,
+    DELETED: 5,
+    NEEDS_UPDATE: 6,
   };
 
   const STATUS_LABELS = {
@@ -38,6 +41,16 @@ export default function RentalLocationTable({ data, loading }) {
       label: "Tạm dừng",
       bgColor: "#FEF4E6",
       color: "#F9A63A",
+    },
+    [RENTALLOCATION_STATUS.DELETED]: {
+      label: "Đã xóa",
+      bgColor: "#F8D7DA",
+      color: "#721C24",
+    },
+    [RENTALLOCATION_STATUS.NEEDS_UPDATE]: {
+      label: "Cần cập nhật",
+      bgColor: "#FFF3CD",
+      color: "#856404",
     },
   };
 
@@ -62,14 +75,38 @@ export default function RentalLocationTable({ data, loading }) {
         return (current - 1) * pageSize + index + 1;
       },
     },
-    { title: "Tên địa điểm", dataIndex: "name", key: "name" },
+    {
+      title: "Tên địa điểm",
+      dataIndex: "name",
+      key: "name",
+      width: 200,
+      ellipsis: true,
+    },
     {
       title: "Người đại diện",
-      key: "no",
-
+      key: "ownerName",
       render: (_, record) => record?.ownerId?.userId?.fullName || "N/A",
     },
-    { title: "Địa chỉ", dataIndex: "address", key: "address" },
+    {
+      title: "Địa chỉ",
+      dataIndex: "address",
+      key: "address",
+      width: 100,
+      ellipsis: true,
+    },
+
+    {
+      title: "Thời gian hoạt động",
+      align: "center",
+      key: "time",
+      render: (_, record) => {
+        const openHour = record?.openHour ?? "Chưa cập nhật";
+        const closeHour = record?.closeHour ?? "Chưa cập nhật";
+        const isOverNight = record?.isOverNight ?? false;
+        return `${openHour} - ${closeHour} ${isOverNight ? "(Qua đêm)" : ""}`;
+      },
+    },
+
     {
       title: "Trạng thái",
       dataIndex: "status",
@@ -84,7 +121,7 @@ export default function RentalLocationTable({ data, loading }) {
               color: statusInfo.color,
               padding: "4px 12px",
               borderRadius: "16px",
-              fontSize: "12px"
+              fontSize: "12px",
             }}
           >
             {statusInfo.label || "Không xác định"}
@@ -93,32 +130,36 @@ export default function RentalLocationTable({ data, loading }) {
       },
     },
     {
-      title: "Hành động",
+      key: "view",
+      align: "center",
+      render: (_, record) => (
+        <span
+          className={styles.iconViewDetail}
+          onClick={(e) => {
+            handleViewDetails(record);
+          }}
+        >
+          <FaEye />
+        </span>
+      ),
+    },
+    {
       key: "action",
       align: "center",
       render: (_, record) => (
         <Dropdown
-          overlay={
-            <Menu>
-              <Menu.Item key="1" onClick={() => handleViewDetails(record)}>
-                Xem
-              </Menu.Item>
-              <Menu.Item
-                key="2"
-                onClick={() => navigate(`/rental-location/${record.id}`)}
-              >
-                Xem chi tiết
-              </Menu.Item>
-              {/* <Menu.Item key="3" onClick={() => handleChangeStatus(record)}>
-                {record.status === RENTALLOCATION_STATUS.ACTIVE
-                  ? "Ngưng hoạt động"
-                  : "Hoạt động lại"}
-              </Menu.Item> */}
-            </Menu>
-          }
+          menu={{
+            items: [
+              {
+                key: "1",
+                label: "Xem chi tiết",
+                onClick: () => navigate(`/rental-location/${record.id}`),
+              },
+            ],
+          }}
           trigger={["click"]}
         >
-          <MoreOutlined />
+          <MoreOutlined style={{ cursor: "pointer", fontSize: "16px" }} />
         </Dropdown>
       ),
     },
@@ -137,7 +178,7 @@ export default function RentalLocationTable({ data, loading }) {
           showSizeChanger: false,
           className: styles.customPagination,
           onChange: (page) => {
-            setPagination(prev => ({ ...prev, current: page }));
+            setPagination((prev) => ({ ...prev, current: page }));
           },
           itemRender: (page, type, originalElement) => {
             const totalPages = Math.ceil(data.length / 7);

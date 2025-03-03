@@ -1,6 +1,10 @@
 import { Modal, Descriptions, Tag } from "antd";
+import { FaEye } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-
+import styles from "./RentalLocationTable.module.scss";
+import { Typography } from "antd";
+import { FaMapLocationDot } from "react-icons/fa6";
+const { Text } = Typography;
 const RENTALLOCATION_STATUS = {
   PENDING: 1,
   INACTIVE: 2,
@@ -32,6 +36,8 @@ const STATUS_LABELS = {
 };
 
 export default function ModalViewDetailRental({ visible, onClose, data }) {
+  console.log(data);
+
   const navigate = useNavigate();
   if (!data) return null;
   const statusInfo = STATUS_LABELS[data.status] || {
@@ -39,7 +45,23 @@ export default function ModalViewDetailRental({ visible, onClose, data }) {
     bgColor: "#E0E0E0",
     color: "#000000",
   };
-
+  const handleViewOwner = () => {
+    navigate(`/owner/${data?.ownerId?.userId?.id}/dashboard`);
+  };
+  const handleViewMap = () => {
+    if (data.latitude && data.longitude) {
+      window.open(
+        `https://www.google.com/maps?q=${data.latitude},${data.longitude}`,
+        "_blank"
+      );
+    } else {
+      const address = encodeURIComponent(data.address);
+      window.open(
+        `https://www.google.com/maps/search/?api=1&query=${address}`,
+        "_blank"
+      );
+    }
+  };
   return (
     <Modal
       title={`Chi tiết - ${data.name}`}
@@ -51,16 +73,27 @@ export default function ModalViewDetailRental({ visible, onClose, data }) {
       <Descriptions bordered column={1} size="middle">
         <Descriptions.Item label="Tên địa điểm">{data.name}</Descriptions.Item>
         <Descriptions.Item label="Người đại diện">
-          <div
-            onClick={() =>
-              navigate(`/owner/${data?.ownerId?.userId?.id}/dashboard`)
-            }
-            style={{ cursor: "pointer" }}
-          >
-            {data?.ownerId?.userId?.fullName || "Chưa cập nhật"}
+          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <Text>{data?.ownerId?.userId?.fullName || "Chưa cập nhật"}</Text>
+            <span
+              className={styles.iconViewDetail}
+              onClick={() => handleViewOwner()}
+            >
+              <FaEye />
+            </span>
           </div>
         </Descriptions.Item>
-        <Descriptions.Item label="Địa chỉ">{data.address}</Descriptions.Item>
+        <Descriptions.Item label="Địa chỉ">
+          <div>
+            {data.address}
+            <span
+              className={styles.iconViewDetail}
+              onClick={() => handleViewMap()}
+            >
+              <FaMapLocationDot />
+            </span>
+          </div>
+        </Descriptions.Item>
         {/* <Descriptions.Item label="Số phòng">
           {data.roomCount || "Không có thông tin"}
         </Descriptions.Item> */}
@@ -79,6 +112,12 @@ export default function ModalViewDetailRental({ visible, onClose, data }) {
         </Descriptions.Item>
         <Descriptions.Item label="Mô tả">
           {data.description || "Không có mô tả"}
+        </Descriptions.Item>
+        <Descriptions.Item label="Ngày tạo">
+          {data.createdAt || "Không có mô tả"}
+        </Descriptions.Item>
+        <Descriptions.Item label="Thời gian cập nhật">
+          {data.updatedAt || "Không có mô tả"}
         </Descriptions.Item>
       </Descriptions>
     </Modal>
