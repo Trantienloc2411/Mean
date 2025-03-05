@@ -1,0 +1,308 @@
+.clock-realtime {
+    height: 40px;
+    width: 100%;
+    display: flex;
+    align-items: right;
+    justify-content: right;
+    background-color: white; 
+   
+
+}
+.contentContainer {
+  background-color: #f6f8fa;
+  padding: 40px;
+  border-radius: 16px;
+  margin: 16px;
+
+  h1 {
+    font-size: 24px;
+    font-weight: 600;
+    color: #1a1f36;
+    margin-bottom: 20px;
+    margin-top: 0;
+  }
+}
+.clock-realtime .clockContent {
+    text-align: right;
+    padding-right: 2%;
+    padding-top: 12px ;
+}
+.card-list{
+    display: flex;
+    flex-direction: row;
+    justify-content:space-between;
+}
+
+.cardContainer {
+    display: flex;
+    flex-direction: column;
+    padding: 10px;
+    width: 25%;
+  }
+  
+  .cardRow {
+    display: flex; // Ensures content and icon are in the same row
+    justify-content: space-between; // Pushes content and icon to opposite sides
+  }
+  
+  .cardContent {
+    display: flex;
+    flex-direction: column; // Ensures text and number stack vertically
+  }
+  
+  .cardContent p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .cardContent h2 {
+    margin: 0;
+    font-weight: bold;
+    padding-right: 20px;
+  }
+  
+  .icon-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    width: 50px; // Adjust to your desired size
+    height: 50px; // Adjust to your desired size
+    //background-color: #e5e4ff; // Light blue background color
+    border-radius: 40%; 
+    margin-left: 20px;// Makes it circular
+  }
+  
+  .icon-wrapper .anticon {
+    font-size: 24px; // Adjust size as needed
+    //color: #5c7cfa; // Icon color
+  }
+  .listGroupContainer {
+    display: flex;
+    gap: 32px;
+    margin-top: 24px;
+  }
+  
+  .listLovePlaceContainer,
+  .listReviewCustomerContainer {
+    flex: 1;
+    background: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  }
+  
+  .sectionTitle {
+    font-size: 20px;
+    font-weight: 600;
+    color: #1a1f36;
+    margin: 16px 0;
+  }
+  
+  .chartContainer {
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    margin: 20px 0 32px;
+    
+    &:hover {
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: box-shadow 0.3s ease;
+    }
+  }
+  
+  .titleTable {
+    font-weight: 500;
+    color: #4a5568;
+  }
+  
+  .tableContainer {
+    :global {
+      .ant-table {
+        background: transparent;
+      }
+      
+      .ant-table-thead > tr > th {
+        background: #f8fafc;
+        &::before {
+          display: none;
+        }
+      }
+      
+      .ant-table-tbody > tr:hover > td {
+        background: #f1f5f9;
+      }
+    }
+  }
+  
+.chartCard {
+  height: 100%;
+  
+  :global {
+    .ant-card-head {
+      min-height: 48px;
+      padding: 0 16px;
+      
+      .ant-card-head-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1a1f36;
+        padding: 12px 0;
+      }
+    }
+    
+    .ant-card-body {
+      padding: 0;
+      margin: 20px;
+    }
+  }
+}
+
+.tableCard {
+  height: 100%;
+  
+  :global {
+    .ant-card-head {
+      min-height: 48px;
+      padding: 0 16px;
+      
+      .ant-card-head-title {
+        font-size: 16px;
+        font-weight: 600;
+        color: #1a1f36;
+        padding: 12px 0;
+      }
+    }
+    
+    .ant-card-body {
+      padding: 12px 16px;
+    }
+  }
+}
+
+.chartDescription {
+  color: #64748b;
+  font-size: 13px;
+  margin: 8px 16px;
+}
+
+// Update existing chartContainer styles
+.chartContainer {
+  background: white;
+  padding: 24px;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  margin: 20px 0 32px;
+  
+  &:hover {
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    transition: box-shadow 0.3s ease;
+  }
+}
+
+// Add responsive adjustments
+@media (max-width: 1200px) {
+  .chartCard {
+    :global {
+      .ant-card-body {
+        padding: 0 16px 16px;
+      }
+    }
+  }
+}
+
+@media (max-width: 768px) {
+  .contentContainer {
+    padding: 16px;
+    margin: 16px;
+  }
+}
+
+// Remove any extra margins from the last row
+.listGroupContainer:last-child {
+  margin-bottom: 0;
+}
+
+// Adjust table styles
+.tableContainer {
+  :global {
+    .ant-table-thead > tr > th {
+      padding: 12px 16px;
+    }
+    
+    .ant-table-tbody > tr > td {
+      padding: 8px 16px;
+    }
+  }
+}
+
+.chartList {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.chartItem {
+  width: 100%;
+  min-width: 0;
+  
+  &:last-child {
+    .chartWrapper {
+      width: 50%;
+      margin: 0 auto;
+    }
+    
+    .legendList {
+      width: 50%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 8px;
+      margin-top: 16px;
+    }
+  }
+}
+
+.chartDescription {
+  color: #64748b;
+  font-size: 12px;
+  margin: 6px 12px;
+  line-height: 1.4;
+}
+
+.chartWrapper {
+  padding: 8px;
+  
+  :global {
+    .recharts-wrapper {
+      font-size: 12px;
+    }
+    
+    .recharts-tooltip-wrapper {
+      font-size: 12px;
+    }
+  }
+}
+
+// Add responsive breakpoints
+@media (max-width: 1400px) {
+  .chartList {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 768px) {
+  .chartList {
+    grid-template-columns: 1fr;
+  }
+  
+  .chartItem:last-child {
+    .chartWrapper {
+      width: 70%;
+    }
+  }
+}
+  

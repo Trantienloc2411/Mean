@@ -16,7 +16,7 @@ const DeleteCouponModal = ({ isOpen, onCancel, onConfirm, couponName }) => {
       ]}
     >
       <p>
-        Bạn đang sắp thực hiện việc xoá mã giảm giá tên "{couponName}". Và hành động này sẽ không thể quay lại.
+        Bạn đang sắp thực hiện việc xoá mã giảm giá tên <span style={{ fontWeight: 'bold' }}>"{couponName}"</span>. Và hành động này sẽ không thể quay lại.
       </p>
     </Modal>
   );
