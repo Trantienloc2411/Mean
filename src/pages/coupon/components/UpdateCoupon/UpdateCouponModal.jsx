@@ -9,8 +9,14 @@ const UpdateCouponModal = ({ isOpen, onCancel, onConfirm, isLoading, initialData
   
   useEffect(() => {
     if (initialData && isOpen) {
+      form.resetFields();
       form.setFieldsValue({
-        ...initialData,
+        name: initialData.name,
+        couponCode: initialData.couponCode,
+        discountBasedOn: initialData.discountBasedOn,
+        amount: initialData.amount,
+        maxDiscount: initialData.maxDiscount,
+        isActive: initialData.isActive,
         startDate: dayjs(initialData.startDate, "DD/MM/YYYY HH:mm:ss"),
         endDate: dayjs(initialData.endDate, "DD/MM/YYYY HH:mm:ss"),
       });
@@ -101,14 +107,17 @@ const UpdateCouponModal = ({ isOpen, onCancel, onConfirm, isLoading, initialData
           form={form}
           layout="vertical"
           name="updateCouponForm"
-          preserve={false}
+          initialValues={{
+            isActive: true,
+            discountBasedOn: 'Percentage'
+          }}
         >
           <Form.Item
             name="name"
             label="Tên mã giảm giá"
             rules={[{ required: true, message: 'Hãy nhập tên mã giảm giá' }]}
           >
-            <Input placeholder="Deal 10% cho bạn mới" />
+            <Input placeholder="Săn hè đón sale ngay" />
           </Form.Item>
 
           <Form.Item
@@ -126,7 +135,7 @@ const UpdateCouponModal = ({ isOpen, onCancel, onConfirm, isLoading, initialData
             normalize={(value) => value ? value.toUpperCase() : value}
           >
             <Input 
-              value={initialData?.couponCode || "DEAL10P"}
+              placeholder="DEAL10P"
               maxLength={8}
               showCount
               onChange={(e) => {
@@ -141,7 +150,7 @@ const UpdateCouponModal = ({ isOpen, onCancel, onConfirm, isLoading, initialData
             label="Hình thức giảm giá"
             rules={[{ required: true, message: 'Hãy chọn hình thức giảm giá' }]}
           >
-            <Radio.Group value={initialData?.discountBasedOn || "Percentage"}>
+            <Radio.Group>
               <Radio value="Percentage">Phần trăm (%)</Radio>
               <Radio value="Fixed">Số tiền cố định (VNĐ)</Radio>
             </Radio.Group>
@@ -177,12 +186,11 @@ const UpdateCouponModal = ({ isOpen, onCancel, onConfirm, isLoading, initialData
           >
             <Input 
               type="number"
-              value={initialData?.amount?.toString() || "Nhập giá trị giảm giá"}
+              placeholder="Nhập giá trị giảm giá"
               min={0}
               max={form.getFieldValue('discountBasedOn') === 'Percentage' ? 100 : undefined}
               onChange={(e) => {
                 const value = e.target.value;
-                // Remove any non-numeric characters except decimal point
                 e.target.value = value.replace(/[^\d.]/g, '');
               }}
             />
@@ -212,11 +220,10 @@ const UpdateCouponModal = ({ isOpen, onCancel, onConfirm, isLoading, initialData
           >
             <Input 
               type="number"
-              value={initialData?.maxDiscount?.toString() || "Nhập giá trị giảm giá tối đa"}
+              placeholder="Nhập giá trị giảm giá tối đa"
               min={0}
               onChange={(e) => {
                 const value = e.target.value;
-                // Remove any non-numeric characters except decimal point
                 e.target.value = value.replace(/[^\d.]/g, '');
               }}
             />
@@ -233,11 +240,6 @@ const UpdateCouponModal = ({ isOpen, onCancel, onConfirm, isLoading, initialData
               }}
               style={{ width: '100%' }}
               format="DD/MM/YYYY HH:mm:ss"
-              value={
-                initialData?.startDate 
-                  ? dayjs(initialData.startDate).format('DD/MM/YYYY HH:mm:ss')
-                  : "dd/mm/yyyy hh:mm:ss"
-              }
               disabledDate={disabledDate}
               disabledTime={disabledDateTime}
             />

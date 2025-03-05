@@ -1,9 +1,10 @@
 import { useState, useEffect, useMemo } from "react";
-import { Button, Input, message } from "antd";
+import { Button, Input, message, Card } from "antd";
 import OverviewAccount from "./components/OverviewAccount";
 import { SearchOutlined } from "@ant-design/icons";
 import AccountTable from "./components/AccountTable";
 import FilterAccount from "./components/FilterAccount";
+import styles from "./Account.module.scss";
 import {
   useGetRolesQuery,
   useGetUsersQuery,
@@ -35,6 +36,26 @@ export default function Account() {
       }, {}) || {}
     );
   }, [roles]);
+
+  const countUser = (users) => {
+    if (!users) return { totalUser: 0, countCustomer: 0, countStaff: 0 };
+    
+    let totalUser = users.length;
+    let countCustomer = 0;
+    let countStaff = 0;
+
+    users.forEach((user) => {
+      if (user.roleID === "67927feaa0a58ce4f7e8e83a") {
+        countStaff++;
+      } else {
+        countCustomer++;
+      }
+    });
+
+    return { totalUser, countCustomer, countStaff };
+  };
+
+
 
   useEffect(() => {
     if (users) {
@@ -84,30 +105,30 @@ export default function Account() {
   }
 
   return (
-    <div style={{ padding: "10px 20px" }}>
-      <h1 style={{ fontSize: 32 }}>Quản lý tài khoản</h1>
-      <OverviewAccount />
-      <div style={{ marginTop: 20 }}>
-        <h1 style={{ fontSize: 20 }}>Danh sách tài khoản</h1>
-        <div style={{ background: "#fff", borderRadius: 20, padding: 20 }}>
-          <div
-            style={{
-              display: "flex",
-              justifyContent: "space-between",
-              alignItems: "center",
-            }}
-          >
-            <div style={{ display: "flex", gap: 20, flexGrow: 1 }}>
+    <div className={styles.contentContainer}>
+      <h2 className={styles.sectionTitle}>Quản lý tài khoản</h2>
+      
+      {/* Overview Section */}
+      <div className={styles.overviewSection}>
+        <OverviewAccount totalUser={countUser(users).totalUser} countCustomer={countUser(users).countCustomer} countStaff={countUser(users).countStaff} />
+      </div>
+
+      {/* Account List Section */}
+      <div className={styles.accountSection}>
+        <h2 className={styles.sectionTitle}>Danh sách tài khoản</h2>
+        <Card className={styles.accountCard} bordered={false}>
+          <div className={styles.toolbarContainer}>
+            <div className={styles.searchFilterGroup}>
               <Input
                 prefix={<SearchOutlined />}
                 placeholder="Tìm kiếm bằng số điện thoại"
-                style={{ width: 300 }}
+                className={styles.searchInput}
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
               />
               <FilterAccount
                 users={users}
-                roles={roles?.map((role) => role.roleName) || []} // Truyền roleName vào filter
+                roles={roles?.map((role) => role.roleName) || []}
                 filters={selectedFilters}
                 onFilterChange={handleFilterChange}
                 onReset={resetFilters}
@@ -117,16 +138,20 @@ export default function Account() {
             <Button
               icon={<IoCreate />}
               type="primary"
-              style={{ background: "#2f7beb" }}
+              className={styles.createButton}
               onClick={() => setOpenCreateUser(true)}
+
             >
               Tạo tài khoản
             </Button>
           </div>
 
-          <AccountTable loading={isLoading} data={filteredUsers} />
-        </div>
+          <div className={styles.tableContainer}>
+            <AccountTable loading={isLoading} data={filteredUsers} />
+          </div>
+        </Card>
       </div>
+
       <CreateAccountForm
         open={openCreateUser}
         onClose={() => setOpenCreateUser(false)}

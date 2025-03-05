@@ -1,44 +1,54 @@
-import { Dropdown, Tag, Input, Checkbox, Button, Table } from "antd";
+import { Dropdown, Tag, Input, Checkbox, Button, Table, Card } from "antd";
 import TableModify from "../dashboard/components/Table";
 import Overview from "./components/Overview";
-import { BookingData } from "./data/fakeData";
-import { FilterOutlined, MoreOutlined } from "@ant-design/icons";
+import { FilterOutlined, MoreOutlined, SearchOutlined } from "@ant-design/icons";
 import { useState, useEffect } from "react";
 import debounce from "lodash/debounce";
 import Filter from "../../components/Filter/Filter";
 import styles from "./Booking.module.scss";
+import { useGetBookingsQuery } from "../../redux/services/bookingApi";
+import moment from "moment";
 
 export default function Booking() {
+  const { data: bookings, error, isLoading } = useGetBookingsQuery();
   const [searchTerm, setSearchTerm] = useState("");
-  const [filteredData, setFilteredData] = useState(BookingData);
+  const [filteredData, setFilteredData] = useState([]);
   const [selectedValues, setSelectedValues] = useState({
     status: [],
     payment: [],
   });
 
+  // Add pagination state
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 7,
+    total: 0
+  });
+
+  // Define filterGroups
   const filterGroups = [
     {
       name: "status",
       title: "Trạng thái",
       options: [
         {
-          label: <Tag color="blue">Confirmed</Tag>,
+          label: <Tag color="blue">Đã xác nhận</Tag>,
           value: "Confirmed",
         },
         {
-          label: <Tag color="orange">Pending</Tag>,
+          label: <Tag color="orange">Chờ xác nhận</Tag>,
           value: "Pending",
         },
         {
-          label: <Tag color="green">Complete</Tag>,
+          label: <Tag color="green">Hoàn tất</Tag>,
           value: "Complete",
         },
         {
-          label: <Tag color="red">Canceled</Tag>,
+          label: <Tag color="red">Đã huỷ</Tag>,
           value: "Canceled",
         },
         {
-          label: <Tag color="purple">In Progress</Tag>,
+          label: <Tag color="purple">Đang sử dụng</Tag>,
           value: "In Progress",
         },
       ],
@@ -48,64 +58,97 @@ export default function Booking() {
       title: "Thanh toán",
       options: [
         {
-          label: <Tag color="blue">Deposited</Tag>,
+          label: <Tag color="blue">Đã đặt cọc</Tag>,
           value: "Deposited",
         },
         {
-          label: <Tag color="green">Fully Paid</Tag>,
+          label: <Tag color="green">Thanh toán hoàn tất</Tag>,
           value: "Fully Paid",
         },
         {
-          label: <Tag color="orange">Unpaid</Tag>,
+          label: <Tag color="orange">Chưa thanh toán</Tag>,
           value: "Unpaid",
         },
         {
-          label: <Tag color="red">Deposit Returned</Tag>,
+          label: <Tag color="red">Trả cọc</Tag>,
           value: "Deposit Returned",
         },
         {
-          label: <Tag color="purple">Deposit Forfeited</Tag>,
+          label: <Tag color="purple">Mất cọc</Tag>,
           value: "Deposit Forfeited",
         },
       ],
     },
   ];
+
+  // Update useEffect to handle data initialization
+  useEffect(() => {
+    if (bookings && Array.isArray(bookings)) {
+      const formattedBookings = bookings.map((booking) => ({
+        ...booking,
+        key: booking._id, // Use _id as the key
+      }));
+      setFilteredData(formattedBookings);
+      setPagination(prev => ({
+        ...prev,
+        total: formattedBookings.length
+      }));
+    }
+  }, [bookings]);
+
+  // Update search function
+  const debouncedSearch = debounce((value) => {
+    if (!bookings) return;
+    
+    const filtered = bookings.filter((booking) =>
+      booking.customerId.toLowerCase().includes(value.toLowerCase())
+    );
+    setFilteredData(filtered);
+  }, 1000);
+
+  // Update filter function to match the filter values
   const applyFilters = (filters) => {
-    let filtered = [...BookingData];
+    if (!bookings) return;
+    
+    let filtered = [...bookings];
 
     if (filters.status.length > 0) {
-      filtered = filtered.filter((item) =>
-        filters.status.includes(item.Status)
-      );
+      filtered = filtered.filter((booking) => {
+        let status = "";
+        if (booking.isCancel) status = "Canceled";
+        else if (booking.completedDate) status = "Complete";
+        else if (booking.confirmDate) status = "Confirmed";
+        else if (booking.checkInHour && !booking.checkOutHour) status = "In Progress";
+        else status = "Pending";
+
+        return filters.status.includes(status);
+      });
     }
 
     if (filters.payment.length > 0) {
-      filtered = filtered.filter((item) =>
-        filters.payment.includes(item.Payment)
-      );
+      filtered = filtered.filter((booking) => {
+        let paymentStatus = "";
+        if (booking.isFullPay) paymentStatus = "Fully Paid";
+        else if (booking.isPayOnlyDeposit) paymentStatus = "Deposited";
+        else if (booking.isCancel && booking.isPayOnlyDeposit) paymentStatus = "Deposit Returned";
+        else if (booking.isCancel && !booking.isPayOnlyDeposit) paymentStatus = "Deposit Forfeited";
+        else paymentStatus = "Unpaid";
+
+        return filters.payment.includes(paymentStatus);
+      });
     }
 
     setFilteredData(filtered);
   };
 
   const handleFilterChange = (filterName, newValues) => {
-    setSelectedValues((prev) => ({
-      ...prev,
-      [filterName]: newValues,
-    }));
-
-    applyFilters({
+    const updatedValues = {
       ...selectedValues,
       [filterName]: newValues,
-    });
+    };
+    setSelectedValues(updatedValues);
+    applyFilters(updatedValues);
   };
-
-  const debouncedSearch = debounce((value) => {
-    const filtered = BookingData.filter((item) =>
-      item["Customer Name"].toLowerCase().includes(value.toLowerCase())
-    );
-    setFilteredData(filtered);
-  }, 1000);
 
   // Handle search input change
   const handleSearch = (e) => {
@@ -120,6 +163,7 @@ export default function Booking() {
       debouncedSearch.cancel();
     };
   }, []);
+
   const items = [
     {
       key: "1",
@@ -127,208 +171,219 @@ export default function Booking() {
     },
   ];
 
+  // Update table columns to match the actual data structure
   const tableColumn = [
     {
-      title: <span className="titleTable">No</span>,
-      dataIndex: "No",
-      key: "No",
+      title: <span className={styles.titleTable}>STT</span>,
+      key: 'index',
+      render: (text, record, index) => index + 1,
+      width: 70,
     },
     {
-      title: <span className="titleTable">Tên Khách Hàng</span>,
-      dataIndex: "Customer Name",
-      key: "customerName",
+      title: <span className={styles.titleTable}>Mã đặt phòng</span>,
+      dataIndex: "_id",
+      key: "_id",
+      width: 150,
     },
     {
-      title: <span className="titleTable">Tên Địa Điểm</span>,
-      dataIndex: "Location",
-      key: "Location",
+      title: <span className={styles.titleTable}>Mã khách hàng</span>,
+      dataIndex: "customerId",
+      key: "customerId",
+      width: 150,
     },
     {
-      title: <span className="titleTable">Thời gian đặt</span>,
-      dataIndex: "Booking Time",
-      key: "bookingTime",
-      sorter: (a, b) => {
-        // Convert "Booking Time" strings to Date objects for comparison
-        const dateA = new Date(a["Booking Time"]);
-        const dateB = new Date(b["Booking Time"]);
-        return dateA - dateB; // Compare timestamps
-      },
+      title: <span className={styles.titleTable}>Thời gian đặt</span>,
+      dataIndex: "createdAt",
+      key: "createdAt",
+      width: 150,
     },
     {
-      title: <span className="titleTable">Thời gian sử dụng</span>,
-      dataIndex: "Usage Time",
-      key: "usageTime",
-      sorter: (a, b) => {
-        // Convert "Booking Time" strings to Date objects for comparison
-        const dateA = new Date(a["Usage Time"]);
-        const dateB = new Date(b["Usage Time"]);
-        return dateA - dateB; // Compare timestamps
-      },
+      title: <span className={styles.titleTable}>Thời gian check-in</span>,
+      dataIndex: "checkInHour",
+      key: "checkInHour",
+      width: 150,
     },
     {
-      title: <span className="titleTable">Tổng hoá đơn</span>,
-      dataIndex: "Total Amount",
-      key: "totalAmount",
-      sorter: (a, b) => a["Total Amount"] - b["Total Amount"],
-      render: (value) => {
-        return `${parseInt(value, 10).toLocaleString("en-US")} vnđ`;
-      },
+      title: <span className={styles.titleTable}>Số giờ thuê</span>,
+      dataIndex: "durationBookingHour",
+      key: "durationBookingHour",
+      width: 100,
+      render: (hours) => `${hours} giờ`,
     },
     {
-      title: <span className="titleTable">Trạng thái</span>,
-      dataIndex: "Status",
+      title: <span className={styles.titleTable}>Tổng tiền</span>,
+      dataIndex: "totalPrice",
+      key: "totalPrice",
+      width: 150,
+      render: (value) => `${parseInt(value).toLocaleString('vi-VN')} VNĐ`,
+    },
+    {
+      title: <span className={styles.titleTable}>Trạng thái</span>,
       key: "status",
+      width: 130,
       align: "center",
-      render: (Status) => {
-        if (!Status) return null; // Kiểm tra nếu Status không có giá trị
+      render: (record) => {
+        let status = "";
+        let statusClass = "";
 
-        const statusClass = Status.replace(/\s/g, "").toLowerCase(); // Xử lý class name
-        const validClass = styles[statusClass] ? styles[statusClass] : ""; // Kiểm tra class hợp lệ
+        if (record.isCancel) {
+          status = "Đã huỷ";
+          statusClass = "canceled";
+        } else if (record.completedDate) {
+          status = "Hoàn tất";
+          statusClass = "complete";
+        } else if (record.confirmDate) {
+          status = "Đã xác nhận";
+          statusClass = "confirmed";
+        } else if (record.checkInHour && !record.checkOutHour) {
+          status = "Đang sử dụng";
+          statusClass = "inprogress";
+        } else {
+          status = "Chờ xác nhận";
+          statusClass = "pending";
+        }
 
         return (
-          <span className={`${styles.statusTag} ${validClass}`}>
-            {Status === "In Progress"
-              ? "Đang sử dụng"
-              : Status === "Confirmed"
-              ? "Đã xác nhận"
-              : Status === "Canceled"
-              ? "Đã huỷ"
-              : Status === "Pending"
-              ? "Đợi xét duyệt"
-              : Status === "Inactive"
-              ? "Không hoạt động"
-              : Status === "Complete"
-              ? "Hoàn tất"
-              : Status}
+          <span className={`${styles.statusTag} ${styles[statusClass]}`}>
+            {status}
           </span>
         );
       },
     },
     {
-      title: <span className="titleTable">Thanh toán</span>,
-      dataIndex: "Payment",
+      title: <span className={styles.titleTable}>Thanh toán</span>,
       key: "payment",
-      
+      width: 150,
       align: "center",
-      render: (Payment) => {
-        // Define paymen-to-color mapping
-        const paymentClass = Payment
-          .toLowerCase()
-          .replace(/\s/g, "")
-          .replace(/[^\w-]/g, ""); // Xử lý class name
-        const validClass = styles[paymentClass] ? styles[paymentClass] : styles["unpaid"]; // Kiểm tra class hợp lệ
+      render: (record) => {
+        let paymentStatus = "";
+        let paymentClass = "";
+
+        if (record.isFullPay) {
+          paymentStatus = "Thanh toán hoàn tất";
+          paymentClass = "fullypaid";
+        } else if (record.isPayOnlyDeposit) {
+          paymentStatus = "Đã đặt cọc";
+          paymentClass = "deposited";
+        } else if (record.isCancel && record.isPayOnlyDeposit) {
+          paymentStatus = "Trả cọc";
+          paymentClass = "depositreturned";
+        } else if (record.isCancel && !record.isPayOnlyDeposit) {
+          paymentStatus = "Mất cọc";
+          paymentClass = "depositforfeited";
+        } else {
+          paymentStatus = "Chưa thanh toán";
+          paymentClass = "unpaid";
+        }
+
         return (
-          <span className={`${styles.paymentTag} ${validClass}`}>
-            {Payment === "Deposit Forfeited"
-              ? "Mất cọc"
-              : Payment === "Fully Paid"
-              ? "Thanh toán hoàn tất "
-              : Payment === "Deposited"
-              ? "Đã đặt cọc"
-              : Payment === "Deposit Returned"
-              ? "Trả cọc"
-              : Payment === "Unpaid"
-              ? "Chưa thanh toán"
-              : Payment}
+          <span className={`${styles.paymentTag} ${styles[paymentClass]}`}>
+            {paymentStatus}
           </span>
         );
       },
     },
-
     {
-      title: <span className="titleTable">Action</span>,
+      title: <span className={styles.titleTable}>Thao tác</span>,
       key: "operation",
+      width: 100,
       render: () => (
-        <Dropdown
-          menu={{
-            items,
-          }}
-        >
+        <Dropdown menu={{ items }}>
           <MoreOutlined />
         </Dropdown>
       ),
     },
   ];
+
+  if (error) {
+    return <div>Error loading data</div>;
+  }
+
   return (
     <div className={styles.contentContainer}>
-      <h1>Quản lí đặt phòng</h1>
-      <Overview />
-      <h2>Danh sách đặt phòng:</h2>
+      <h1 className={styles.sectionTitle}>Quản lý đặt phòng</h1>
+      
+      <div className={styles.overviewSection}>
+        <Overview />
+      </div>
 
-      <div className={styles.listBooking}>
-        <div
-          style={{
-            marginBottom: "16px",
-            display: "flex",
-            flexDirection: "row",
-          }}
-        >
-          <Input
-            placeholder="Tìm kiếm tên khách hàng"
-            value={searchTerm}
-            onChange={handleSearch}
-            style={{ width: "250px" }}
-          />
-
-          <Dropdown
-            overlay={
-              <Filter
-                filterGroups={filterGroups}
-                selectedValues={selectedValues}
-                onFilterChange={handleFilterChange}
+      <div className={styles.bookingSection}>
+        <h2 className={styles.sectionTitle}>Danh sách đặt phòng</h2>
+        <Card className={styles.bookingCard} bordered={false}>
+          <div className={styles.toolbarContainer}>
+            <div className={styles.searchFilterGroup}>
+              <Input
+                prefix={<SearchOutlined />}
+                placeholder="Tìm kiếm theo mã khách hàng"
+                className={styles.searchInput}
+                value={searchTerm}
+                onChange={handleSearch}
               />
-            }
-            trigger={["click"]}
-            placement="bottomRight"
-            overlayStyle={{
-              padding: "8px",
-            }}
-          >
-            <Button icon={<FilterOutlined />}>
-              Lọc
-              {Object.values(selectedValues).flat().length > 0 &&
-                ` (${Object.values(selectedValues).flat().length})`}
-            </Button>
-          </Dropdown>
-        </div>
-
-        <Table 
-        columns={tableColumn}
-        dataSource={filteredData}
-        pagination={{
-          total: filteredData.length,
-          pageSize: 7,
-          showSizeChanger: false,
-          className: styles.customPagination,
-          itemRender: (page, type, originalElement) => {
-            const totalPages = Math.ceil(filteredData.length / 7);
-
-            if (type === "prev") {
-              return (
-                <button
-                  className={styles.paginationButton}
-                  disabled={page === 0}
+              <Dropdown
+                overlay={
+                  <Filter
+                    filterGroups={filterGroups}
+                    selectedValues={selectedValues}
+                    onFilterChange={handleFilterChange}
+                  />
+                }
+                trigger={["click"]}
+                placement="bottomRight"
+              >
+                <Button 
+                  icon={<FilterOutlined />}
+                  className={styles.filterButton}
                 >
-                  « Trước
-                </button>
-              );
-            }
-            if (type === "next") {
-              return (
-                <button
-                  className={styles.paginationButton}
-                  disabled={page >= totalPages}
-                >
-                  Tiếp »
-                </button>
-              );
-            }
-            return originalElement;
-          },
-        }}
-        className={styles.bookingTable}
-      />
+                  Lọc
+                  {Object.values(selectedValues).flat().length > 0 &&
+                    ` (${Object.values(selectedValues).flat().length})`}
+                </Button>
+              </Dropdown>
+            </div>
+          </div>
 
+          <div className={styles.tableContainer}>
+            <Table 
+              columns={tableColumn}
+              dataSource={filteredData}
+              loading={isLoading}
+              pagination={{
+                ...pagination,
+                showSizeChanger: false,
+                className: styles.customPagination,
+                onChange: (page) => {
+                  setPagination(prev => ({ ...prev, current: page }));
+                },
+                itemRender: (page, type, originalElement) => {
+                  const totalPages = Math.ceil(filteredData.length / pagination.pageSize);
+                  if (type === "prev") {
+                    return (
+                      <button
+                        className={styles.paginationButton}
+                        disabled={page === 1} // First page starts at 1
+                      >
+                        « Trước
+                      </button>
+                    );
+                  }
+                  if (type === "next") {
+                    return (
+                      <button
+                        className={styles.paginationButton}
+                        disabled={page === totalPages} // Disable when on the last page
+                      >
+                        Tiếp »
+                      </button>
+                    );
+                  }
+                  return originalElement;
+                },
+              }}
+              className={styles.bookingTable}
+              scroll={{ x: 1300 }} // Add horizontal scroll for better mobile view
+            />
+          </div>
+        </Card>
       </div>
     </div>
   );
