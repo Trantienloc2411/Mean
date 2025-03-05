@@ -16,7 +16,7 @@ export default function OverviewTransaction() {
         value="50"
         iconName={<GrTransaction />}
         width={"15%"}
-        height={100}
+        height={120}
       />
       <CardDashboard
         backgroundColorIcon="#fff3cd"
@@ -25,7 +25,7 @@ export default function OverviewTransaction() {
         value="50"
         iconName={<BiMoneyWithdraw />}
         width={"15%"}
-        height={100}
+        height={120}
       />
       <CardDashboard
         backgroundColorIcon="#e8f5e9"
@@ -34,7 +34,7 @@ export default function OverviewTransaction() {
         value="50"
         iconName={<FaMoneyBill />}
         width={"15%"}
-        height={100}
+        height={120}
       />
       <CardDashboard
         backgroundColorIcon="#e3f2fd"
@@ -43,7 +43,7 @@ export default function OverviewTransaction() {
         value="50"
         iconName={<GiPayMoney />}
         width={"15%"}
-        height={100}
+        height={120}
       />
       <CardDashboard
         backgroundColorIcon="#ffebee"
@@ -52,7 +52,7 @@ export default function OverviewTransaction() {
         value="50"
         iconName={<MdCancel />}
         width={"15%"}
-        height={100}
+        height={120}
       />
     </Flex>
   );
