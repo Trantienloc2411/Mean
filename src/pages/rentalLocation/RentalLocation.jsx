@@ -32,6 +32,31 @@ export default function RentalLocation() {
     applyFilters(searchValue, { ...filters, [key]: values });
   };
 
+  const countStatus = (data) => {
+    const statusCounts = {
+      total: data.length,
+      active: 0, // 3
+      inactive: 0, // 2
+      pending: 0, // 1
+      pause: 0, // 4
+      needUpdate: 0, // 5
+    };
+    data.forEach((location) => {
+      if (location.status === 3) {
+        statusCounts.active++;
+      } else if (location.status === 2) {
+        statusCounts.inactive++;
+      } else if (location.status === 1) {
+        statusCounts.pending++;
+      } else if (location.status === 4) {
+        statusCounts.pause++;
+      } else if (location.status === 5) {
+        statusCounts.needUpdate++;
+      }
+    });
+    return statusCounts;
+  };
+
   const applyFilters = (search, filterValues) => {
     const filtered = allLocations.filter((location) => {
       const matchesSearch = location.name
@@ -57,7 +82,7 @@ export default function RentalLocation() {
       <h1 className={styles.sectionTitle}>Quản lý địa điểm</h1>
 
       <div className={styles.overviewSection}>
-        <OverviewLocation />
+        <OverviewLocation data={countStatus(filteredLocations)} />
       </div>
 
       <div className={styles.locationSection}>

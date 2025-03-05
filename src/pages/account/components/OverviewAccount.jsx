@@ -6,7 +6,7 @@ export default function OverviewAccount({totalUser, countCustomer, countStaff}) 
     <Flex gap={30} justify="space-between">
       <CardDashboard
         title="Tổng "
-        value={totalUser} 
+        value={totalUser > 1000 ? `${(totalUser / 1000).toFixed(1)}K` : totalUser} 
         iconName={<FaUserFriends />}
         backgroundColorIcon="#d0cfff"
         colorIcon="#8280FF"
@@ -15,7 +15,7 @@ export default function OverviewAccount({totalUser, countCustomer, countStaff}) 
       />
       <CardDashboard
         title="Khách hàng "
-        value={countCustomer}
+        value={countCustomer > 1000 ? `${(countCustomer / 1000).toFixed(1)}K` : countCustomer}
         iconName={<FaUserFriends />}
         backgroundColorIcon="#d0cfff"
         colorIcon="#8280FF"
@@ -24,7 +24,7 @@ export default function OverviewAccount({totalUser, countCustomer, countStaff}) 
         />
       <CardDashboard
         title="Quản lý"
-        value={countStaff}
+        value={countStaff > 1000 ? `${(countStaff / 1000).toFixed(1)}K` : countStaff}
         iconName={<FaUserFriends />}
         backgroundColorIcon="#d0cfff"
         colorIcon="#8280FF"

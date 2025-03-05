@@ -221,9 +221,11 @@ export default function Dashboard() {
       <div className={styles.contentContainer}>
         <h1 className={styles.sectionTitle}>Tổng quan</h1>
         <Overview
-          totalUser={countUser(userData)}
-          totalTransaction={countBooking(bookingData)}
-          totalRevenue={countRevenue(bookingData) + " VNĐ"}
+          totalUser={
+              countUser(userData) >  1000 ? `${(countUser(userData) / 1000).toFixed(1)}K` : countUser(userData)
+          }
+          totalTransaction={countBooking(bookingData) >  1000 ? `${(countBooking(bookingData) / 1000).toFixed(1)}K` : countBooking(bookingData)}
+          totalRevenue={countRevenue(bookingData) >  1000 ? `${(countRevenue(bookingData) / 1000).toFixed(1)}K` : countRevenue(bookingData)         + " VNĐ"}
           countViewer="10"
         />
         
