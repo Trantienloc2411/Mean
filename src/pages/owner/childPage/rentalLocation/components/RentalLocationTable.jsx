@@ -6,12 +6,10 @@ import { useNavigate } from "react-router-dom";
 import ModalViewDetailRental from "./ModalViewDetailRental";
 import styles from "./RentalLocationTable.module.scss";
 import { FaEye } from "react-icons/fa";
-import _ from "lodash";
 export default function RentalLocationTable({ data, loading }) {
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [selectedRental, setSelectedRental] = useState(null);
   const navigate = useNavigate();
-  // console.log(data);
 
   const RENTALLOCATION_STATUS = {
     PENDING: 1,
@@ -144,7 +142,7 @@ export default function RentalLocationTable({ data, loading }) {
       render: (_, record) => (
         <span
           className={styles.iconViewDetail}
-          onClick={(e) => {
+          onClick={() => {
             handleViewDetails(record);
           }}
         >

@@ -1,65 +1,47 @@
 import { useState, useEffect } from "react";
-import FilterSection from "./components/FilterSection";
-import RentalLocationList from "./components/RentalLocationList";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetRentalLocationByOwnerIdQuery } from "../../../../redux/services/rentalApi";
 import { useGetOwnerDetailByUserIdQuery } from "../../../../redux/services/ownerApi";
-import { Button, Spin } from "antd";
+import { Button, Spin, Input, Flex } from "antd";
 import { LoadingOutlined } from "@ant-design/icons";
-import { Image } from "antd";
 import { IoIosAdd } from "react-icons/io";
 import { Typography } from "antd";
-import { Flex } from "antd";
+import RentalLocationTable from "./components/RentalLocationTable";
+import FilterRentalLocation from "./components/FilterRentalLocation";
+
 const { Title } = Typography;
+
 export default function RentalLocation() {
   const { id } = useParams();
+  const navigate = useNavigate();
 
-  // Lấy thông tin chủ sở hữu
-  const {
-    data: ownerDetailData,
-    isLoading: ownerDetailIsLoading,
-    isError: ownerDetailIsError,
-  } = useGetOwnerDetailByUserIdQuery(id);
-
+  const { data: ownerDetailData, isLoading: ownerDetailIsLoading } =
+    useGetOwnerDetailByUserIdQuery(id);
   const ownerId = ownerDetailData?.id;
 
-  // Lấy danh sách địa điểm cho thuê theo ownerId
-  const {
-    data: rentalData,
-    isLoading: rentalIsLoading,
-    isError: rentalIsError,
-  } = useGetRentalLocationByOwnerIdQuery(ownerId, { skip: !ownerId });
+  const { data: rentalData, isLoading: rentalIsLoading } =
+    useGetRentalLocationByOwnerIdQuery(ownerId, { skip: !ownerId });
 
   const [searchValue, setSearchValue] = useState("");
   const [filters, setFilters] = useState({ statuses: [] });
-  const [rentalLocations, setRentalLocations] = useState([]);
   const [filteredLocations, setFilteredLocations] = useState([]);
-  const navigate = useNavigate();
 
-  // Cập nhật dữ liệu khi rentalData thay đổi
   useEffect(() => {
     if (rentalData?.data) {
-      setRentalLocations(rentalData.data);
-      setFilteredLocations(rentalData.data);
+      applyFilters(searchValue, filters, rentalData.data);
     }
-  }, [rentalData]);
+  }, [rentalData, searchValue, filters]);
 
-  const handleSearch = (value) => {
-    setSearchValue(value);
-    applyFilters(value, filters);
+  const handleSearch = (e) => {
+    setSearchValue(e.target.value);
   };
 
-  const handleFilterChange = (status) => {
-    const updatedStatuses = filters.statuses.includes(status)
-      ? filters.statuses.filter((s) => s !== status)
-      : [...filters.statuses, status];
-
-    setFilters({ statuses: updatedStatuses });
-    applyFilters(searchValue, { statuses: updatedStatuses });
+  const handleFilterChange = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const applyFilters = (search, filterValues) => {
-    const filtered = rentalLocations.filter((location) => {
+  const applyFilters = (search, filterValues, data) => {
+    const filtered = data.filter((location) => {
       const matchesSearch = location.name
         .toLowerCase()
         .includes(search.toLowerCase());
@@ -76,11 +58,9 @@ export default function RentalLocation() {
       <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} />
     );
 
-  if (ownerDetailIsError || rentalIsError) return <p>Lỗi khi tải dữ liệu.</p>;
-
   return (
     <div style={{ padding: "10px 20px" }}>
-      <Flex justify="space-between">
+      <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
         <Title level={2}>Địa điểm cho thuê</Title>
         <Button
           type="primary"
@@ -90,37 +70,44 @@ export default function RentalLocation() {
           Thêm địa điểm mới
         </Button>
       </Flex>
-      <div style={{ display: "flex", gap: "20px", padding: "0 20px 20px" }}>
-        <FilterSection
-          searchValue={searchValue}
-          filters={filters}
-          onSearch={handleSearch}
-          onFilterChange={handleFilterChange}
-        />
 
-        {/* Kiểm tra nếu không có địa điểm nào */}
-        {filteredLocations.length > 0 ? (
-          <RentalLocationList locations={filteredLocations} />
-        ) : (
-          <div
-            style={{
-              flex: 8,
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              fontSize: "18px",
-              fontWeight: "500",
-              color: "#888",
-              background: "#fff",
-              padding: "40px",
-              borderRadius: "8px",
-              boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-            }}
-          >
-            Không có địa điểm nào phù hợp.
-          </div>
-        )}
-      </div>
+      <Flex gap={16} style={{ marginBottom: 16 }}>
+        <Input
+          placeholder="Tìm kiếm địa điểm..."
+          value={searchValue}
+          onChange={handleSearch}
+          style={{ width: 300 }}
+        />
+        <FilterRentalLocation
+          filters={filters}
+          onFilterChange={handleFilterChange}
+          onReset={() => setFilters({ statuses: [] })}
+          onApplyFilters={() =>
+            applyFilters(searchValue, filters, rentalData?.data || [])
+          }
+        />
+      </Flex>
+
+      {filteredLocations.length > 0 ? (
+        <RentalLocationTable
+          data={filteredLocations}
+          loading={rentalIsLoading}
+        />
+      ) : (
+        <div
+          style={{
+            textAlign: "center",
+            padding: "40px",
+            fontSize: "18px",
+            color: "#888",
+            background: "#fff",
+            borderRadius: "8px",
+            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+          }}
+        >
+          Không có địa điểm nào phù hợp.
+        </div>
+      )}
     </div>
   );
 }

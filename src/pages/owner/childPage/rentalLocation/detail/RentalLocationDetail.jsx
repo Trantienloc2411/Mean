@@ -1,6 +1,6 @@
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useGetRentalLocationByIdQuery } from "../../../../../redux/services/rentalApi";
-import { Tabs, Flex, Tag, Spin } from "antd";
+import { Tabs, Flex, Tag, Spin, Button } from "antd";
 import { FaLocationDot } from "react-icons/fa6";
 import TitleAndDescription from "./components/TitleAndDescription";
 import LocationMap from "./components/LocationMap";
@@ -8,9 +8,12 @@ import ImageSlider from "./components/ImageSlider";
 import RecentReviews from "./components/RecentReviews";
 import RoomList from "./components/RoomList";
 import SettingRentalLocation from "./components/SettingRentalLocation";
+import { LeftOutlined } from "@ant-design/icons";
 
 export default function RentalLocationDetail() {
   const { id } = useParams(); // Get ID from URL
+  const navigate = useNavigate();
+
   const { data: rental, isLoading, error } = useGetRentalLocationByIdQuery(id);
   if (isLoading)
     return (
@@ -71,6 +74,13 @@ export default function RentalLocationDetail() {
         margin: "20px 10%",
       }}
     >
+      <Button
+        type="link"
+        onClick={() => navigate(-1)}
+        style={{ marginBottom: 16, display: "flex", alignItems: "center" }}
+      >
+        <LeftOutlined /> Quay lại
+      </Button>
       <Tabs defaultActiveKey="1" items={items} />
     </div>
   );

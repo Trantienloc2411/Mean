@@ -91,31 +91,37 @@ export default function RentalForm({ ownerId, refetch }) {
     const districtName = districts.find(
       (d) => d.code === values.district
     )?.name;
+    const wardName = wards.find((w) => w.code === values.ward)?.name;
 
-    // Đảm bảo không bị null/undefined
-    if (!provinceName || !districtName) {
+    console.log(provinceName, districtName, wardName);
+
+    // Kiểm tra xem tất cả thông tin địa chỉ đã đầy đủ chưa
+    if (!provinceName || !districtName || !wardName) {
       message.error("Lỗi khi lấy thông tin địa chỉ, vui lòng thử lại.");
       return;
     }
 
-    const fullAddress = `${values.address}, ${values.ward}, ${districtName}, ${provinceName}`;
-
+    // Kiểm tra hình ảnh đã tải lên chưa
     if (fileList.length === 0) {
       message.error("Vui lòng tải lên ít nhất một hình ảnh.");
       return;
     }
     const imageUrls = fileList.map((file) => file.url);
 
+    // Chuẩn bị dữ liệu gửi lên API
     const formattedData = {
       ownerId,
       name: values.rentalName,
-      status: 1,
-      image: imageUrls,
       description: values.description,
-      landUsesRightsFile: pdfFile ? pdfFile.name : "",
-      address: fullAddress, // ✅ Địa chỉ đầy đủ với tên tỉnh/thành, quận/huyện
-      longitude: values.longitude,
-      latitude: values.latitude,
+      // landUsesRightsFile: pdfFile ? pdfFile.name : null,
+      landUsesRightsFile: null,
+      image: imageUrls,
+      address: values.address,
+      ward: wardName,
+      district: districtName,
+      city: provinceName,
+      longitude: parseFloat(values.longitude),
+      latitude: parseFloat(values.latitude),
       openHour: values.openHour.format("HH:mm"),
       closeHour: values.closeHour.format("HH:mm"),
       isOverNight,
@@ -130,7 +136,8 @@ export default function RentalForm({ ownerId, refetch }) {
       refetch();
       navigate(`/rental-location/${response._id}`);
     } catch (error) {
-      message.error("Tạo địa điểm cho thuê thất bại!");
+      console.error("Lỗi khi tạo địa điểm:", error);
+      message.error("Tạo địa điểm cho thuê thất bại! Vui lòng thử lại.");
     }
   };
 
@@ -165,7 +172,7 @@ export default function RentalForm({ ownerId, refetch }) {
               label="Mô tả"
               rules={[{ required: true }]}
             >
-              <TextArea rows={4} placeholder="Nhập mô tả" maxLength={255} />
+              <TextArea rows={4} placeholder="Nhập mô tả" />
             </Form.Item>
 
             <Form.Item
@@ -210,7 +217,7 @@ export default function RentalForm({ ownerId, refetch }) {
             >
               <Select placeholder="Chọn phường/xã" disabled={!selectedDistrict}>
                 {wards.map((w) => (
-                  <Option key={w.code} value={w.name}>
+                  <Option key={w.code} value={w.code}>
                     {w.name}
                   </Option>
                 ))}
