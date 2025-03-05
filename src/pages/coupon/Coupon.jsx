@@ -113,9 +113,7 @@ export default function Coupon() {
       message.success({
         content: 'Cập nhật mã giảm giá thành công',
         className: 'custom-message',
-        style: {
-          marginTop: '20vh',
-        },
+
       });
       
       setIsUpdateModalOpen(false);
@@ -427,7 +425,7 @@ export default function Coupon() {
               isOpen={isDeleteModalOpen}
               onCancel={handleDeleteCancel}
               onConfirm={handleDeleteConfirm}
-              couponName={selectedCoupon?.Name}
+              couponName={selectedCoupon?.name}
             />
 
             <DatePicker.RangePicker
@@ -450,6 +448,7 @@ export default function Coupon() {
             color="default"
             variant="outlined"
             type="primary"
+            className={styles.createButton}
             onClick={() => setIsAddModalOpen(true)}
             icon={<PlusOutlined />}
           >

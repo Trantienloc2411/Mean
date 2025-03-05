@@ -5,7 +5,7 @@ import { Flex } from "antd";
 import TransactionTable from "./components/TransactionTable";
 import FilterModal from "./components/FilterModal";
 import OverviewTransaction from "./components/OverviewTransaction";
-
+import styles from "./Transaction.module.scss";
 export default function Transaction() {
   const [searchValue, setSearchValue] = useState(""); // Tìm kiếm theo mã giao dịch hoặc mã đặt phòng
   const [filters, setFilters] = useState({
@@ -100,19 +100,19 @@ export default function Transaction() {
   };
 
   return (
-    <div style={{ padding: "10px 20px" }}>
-      <h1 style={{ fontSize: 32 }}>Quản lý giao dịch</h1>
-      <div>
+    <div className={styles.contentContainer}>
+      <h1 className={styles.sectionTitle}>Quản lý giao dịch</h1>
+      <div className={styles.overviewSection}>
         <OverviewTransaction />
       </div>
-      <div style={{ marginTop: 10 }}>
-        <h1 style={{ fontSize: 20 }}>Lịch sử giao dịch</h1>
-        <div style={{ padding: "20px", background: "#fff", borderRadius: 20 }}>
+      <div className={styles.transactionSection}>
+        <h1 className={styles.sectionTitle}>Lịch sử giao dịch</h1>
+        <div className={styles.contentTable}>
           <Flex gap={30}>
             <Input
               prefix={<SearchOutlined />}
               placeholder="Tìm kiếm bằng mã giao dịch hoặc mã đặt phòng"
-              style={{ width: 300, marginBottom: 20 }}
+              className={styles.searchInput}
               value={searchValue}
               onChange={(e) => setSearchValue(e.target.value)}
             />

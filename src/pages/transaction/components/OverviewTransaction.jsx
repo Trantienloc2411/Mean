@@ -8,13 +8,15 @@ import { GrTransaction } from "react-icons/gr";
 
 export default function OverviewTransaction() {
   return (
-    <Flex gap={30} justify="left" wrap>
+    <Flex gap={30} justify="space-between" wrap>
       <CardDashboard
         backgroundColorIcon="#e0f7fa"
         colorIcon="#00acc1"
         title="Tổng giao dịch"
         value="50"
         iconName={<GrTransaction />}
+        width={"15%"}
+        height={120}
       />
       <CardDashboard
         backgroundColorIcon="#fff3cd"
@@ -22,6 +24,8 @@ export default function OverviewTransaction() {
         title="Tổng cọc"
         value="50"
         iconName={<BiMoneyWithdraw />}
+        width={"15%"}
+        height={120}
       />
       <CardDashboard
         backgroundColorIcon="#e8f5e9"
@@ -29,6 +33,8 @@ export default function OverviewTransaction() {
         title="Tổng trả hoàn toàn"
         value="50"
         iconName={<FaMoneyBill />}
+        width={"15%"}
+        height={120}
       />
       <CardDashboard
         backgroundColorIcon="#e3f2fd"
@@ -36,6 +42,8 @@ export default function OverviewTransaction() {
         title="Tổng hoàn tiền"
         value="50"
         iconName={<GiPayMoney />}
+        width={"15%"}
+        height={120}
       />
       <CardDashboard
         backgroundColorIcon="#ffebee"
@@ -43,6 +51,8 @@ export default function OverviewTransaction() {
         title="Tổng Hủy"
         value="50"
         iconName={<MdCancel />}
+        width={"15%"}
+        height={120}
       />
     </Flex>
   );
