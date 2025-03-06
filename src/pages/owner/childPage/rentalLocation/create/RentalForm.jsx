@@ -572,7 +572,7 @@ export default function RentalForm({ ownerId, refetch }) {
           <ImageUpload fileList={fileList} setFileList={setFileList} />
         </Form.Item>
 
-        {fileList.length > 0 && (
+        {/* {fileList.length > 0 && (
           <div style={{ marginTop: "20px" }}>
             <h4>Hình ảnh đã tải lên ({fileList.length})</h4>
             <Row gutter={[16, 16]}>
@@ -590,7 +590,7 @@ export default function RentalForm({ ownerId, refetch }) {
               ))}
             </Row>
           </div>
-        )}
+        )} */}
       </Card>
     </Form>
   );
