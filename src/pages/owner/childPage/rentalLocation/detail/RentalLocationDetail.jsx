@@ -63,6 +63,24 @@ export default function RentalLocationDetail() {
       children: <SettingRentalLocation rentalData={rentalData} />,
     },
   ];
+  // <Button
+  //   type="link"
+  //   onClick={() => navigate(-1)}
+  //   style={{ marginBottom: 16, display: "flex", alignItems: "center" }}
+  // >
+  //   <LeftOutlined /> Trở về
+  // </Button>;
+  function ButtonBack() {
+    return (
+      <Button
+        type="link"
+        onClick={() => navigate(-1)}
+        // style={{ display: "flex", alignItems: "center" }}
+      >
+        <LeftOutlined /> Trở về
+      </Button>
+    );
+  }
 
   return (
     <div
@@ -74,14 +92,13 @@ export default function RentalLocationDetail() {
         margin: "20px 10%",
       }}
     >
-      <Button
-        type="link"
-        onClick={() => navigate(-1)}
-        style={{ marginBottom: 16, display: "flex", alignItems: "center" }}
-      >
-        <LeftOutlined /> Quay lại
-      </Button>
-      <Tabs defaultActiveKey="1" items={items} />
+      <Tabs
+        defaultActiveKey="1"
+        items={items}
+        tabBarExtraContent={{
+          right: <ButtonBack />,
+        }}
+      />
     </div>
   );
 }

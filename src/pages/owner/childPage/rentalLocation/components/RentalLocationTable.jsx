@@ -82,15 +82,8 @@ export default function RentalLocationTable({ data, loading }) {
       ellipsis: true,
     },
     {
-      title: "Người đại diện",
-      key: "ownerName",
-      render: (_, record) => record?.ownerId?.userId?.fullName || "N/A",
-    },
-    {
       title: "Địa chỉ",
-      // dataIndex: "address",
       key: "address",
-      width: 100,
       ellipsis: true,
       render: (_, record) =>
         record?.address +

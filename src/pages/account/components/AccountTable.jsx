@@ -61,7 +61,7 @@ export default function AccountTable({ data, loading }) {
       key: "isActive",
       render: (isActive) => (
         <span className={`${styles.isActive} ${styles[isActive]}`}>
-          {isActive ? "Hoạt động" : "Ngừng hoạt động"}
+          {isActive ? "Hoạt động" : "Đang Khóa"}
         </span>
       ),
     },

@@ -15,8 +15,6 @@ export default function RentalLocation() {
   const [searchValue, setSearchValue] = useState("");
   const [filteredLocations, setFilteredLocations] = useState([]);
 
-  
-
   const [filters, setFilters] = useState({ statuses: [] });
   useEffect(() => {
     setFilteredLocations(allLocations);

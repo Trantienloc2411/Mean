@@ -61,10 +61,15 @@ export default function TitleAndDescription({ rentalData }) {
           {STATUS_LABELS[rentalData.status]?.label || "Không xác định"}
         </Tag>
       </Flex>
-      <Flex align="center" gap={5} style={{}}>
+      <Flex align="center" gap={5}>
         <FaLocationDot />
-        <p style={{ margin: 0 }}>{rentalData?.address || "Unknown location"}</p>
+        <p style={{ margin: 0 }}>
+          {rentalData
+            ? `${rentalData.address}, ${rentalData.ward}, ${rentalData.district}, ${rentalData.city}`
+            : "Unknown location"}
+        </p>
       </Flex>
+
       <Flex gap={5} style={{ marginTop: 5 }}>
         <FieldTimeOutlined />
         {rentalData?.openHour || "Không có giờ mở cửa"}

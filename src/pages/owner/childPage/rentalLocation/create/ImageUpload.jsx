@@ -6,7 +6,7 @@ import { supabase } from "../../../../../redux/services/supabase";
 const { Dragger } = Upload;
 
 export default function ImageUpload({ fileList, setFileList }) {
-  const [uploading, setUploading] = useState(false); // Trạng thái loading
+  const [uploading, setUploading] = useState(false);
 
   const uploadProps = {
     name: "file",
@@ -27,10 +27,10 @@ export default function ImageUpload({ fileList, setFileList }) {
       return true;
     },
     customRequest: async ({ file, onSuccess, onError }) => {
-      setUploading(true); // Bắt đầu loading
+      setUploading(true);
       const fileName = `${Date.now()}-${file.name}`;
 
-      // Tải ảnh lên Supabase Storage
+      // Upload file lên Supabase
       const { data, error } = await supabase.storage
         .from("image")
         .upload(fileName, file, {
@@ -38,43 +38,53 @@ export default function ImageUpload({ fileList, setFileList }) {
           upsert: false,
         });
 
-      if (error) {
+      if (error || !data) {
         message.error("Tải ảnh lên thất bại!");
-        onError(error);
+        onError(error || new Error("Lỗi tải lên"));
         setUploading(false);
         return;
       }
 
-      // Lấy public URL từ Supabase
-      const { data: publicUrl } = supabase.storage
+      // Lấy public URL
+      const { data: urlData } = supabase.storage
         .from("image")
         .getPublicUrl(data.path);
 
-      if (publicUrl) {
+      if (urlData?.publicUrl) {
         setFileList((prev) => [
           ...prev,
-          { uid: file.uid, url: publicUrl.publicUrl, name: file.name },
+          { uid: file.uid, url: urlData.publicUrl, name: fileName },
         ]);
         message.success("Tải ảnh lên thành công!");
         onSuccess("ok");
       } else {
         message.error("Không lấy được URL ảnh!");
-        onError("Lỗi lấy URL");
+        onError(new Error("Không lấy được URL ảnh!"));
       }
-      setUploading(false); // Kết thúc loading
+      setUploading(false);
     },
     onRemove: async (file) => {
-      const fileName = file.url.split("/").pop(); // Lấy tên file từ URL
-      await supabase.storage.from("image").remove([fileName]);
+      setUploading(true);
+      try {
+        const fileName = file.name; // Dùng tên file đã lưu trong state
+        const { error } = await supabase.storage
+          .from("image")
+          .remove([fileName]);
 
-      setFileList((prev) => prev.filter((item) => item.uid !== file.uid));
-      message.success("Đã xóa ảnh!");
+        if (error) throw error;
+
+        setFileList((prev) => prev.filter((item) => item.uid !== file.uid));
+        message.success("Đã xóa ảnh!");
+      } catch (error) {
+        message.error("Lỗi khi xóa ảnh!");
+      }
+      setUploading(false);
     },
     fileList,
   };
 
   return (
-    <Spin spinning={uploading} tip="Đang tải ảnh lên...">
+    <Spin spinning={uploading} tip="Đang xử lý...">
       <Dragger {...uploadProps}>
         <p className="ant-upload-drag-icon">
           <InboxOutlined />
