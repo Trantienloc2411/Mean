@@ -1,70 +1,3 @@
-.role {
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 12px;
-  display: inline-block;
-  &.owner {
-    background: #e7f8f0;
-    color: #41c588;
-  }
-  &.staff {
-    background: #feeceb;
-    color: #f36960;
-  }
-  &.customer {
-    background: #e8f1fd;
-    color: #448df2;
-  }
-}
-.isActive {
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 12px;
-  display: inline-block;
-  &.true {
-    background: #e7f8f0;
-    color: #41c588;
-  }
-  &.false {
-    background: #feeceb;
-    color: #f36960;
-  }
-}
-.verifyContainer {
-  display: flex;
-  gap: 10px;
-  align-items: center;
-  justify-content: center;
-}
-.isVerifiedEmail {
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 12px;
-  display: inline-block;
-  &.true {
-    background: #e7f8f0;
-    color: #41c588;
-  }
-  &.false {
-    background: #feeceb;
-    color: #f36960;
-  }
-}
-.isVerifiedPhone {
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 12px;
-  display: inline-block;
-  &.true {
-    background: #e7f8f0;
-    color: #41c588;
-  }
-  &.false {
-    background: #feeceb;
-    color: #f36960;
-  }
-}
-
 .paginationButton {
   display: inline-flex;
   align-items: center;
@@ -88,7 +21,7 @@
     cursor: not-allowed;
   }
 }
-.accountTable {
+.rentalLocationTable {
   :global {
     .ant-pagination {
       display: flex;
@@ -174,16 +107,28 @@
 }
 
 .iconViewDetail {
-  display: flex;
-  align-items: center;
   color: #333;
-  font-weight: 500;
   cursor: pointer;
-  transition: color 0.2s ease-in-out;
+  transition: all 0.2s;
+
   &:hover {
-    color: #007bff;
+    color: #0052cc;
   }
   &:active {
-    color: #0056b3;
+    color: #0052cc;
   }
+}
+
+.addressDetail {
+  width: 400px; /* hoặc bất kỳ giá trị nào bạn muốn */
+  // overflow: auto; /* thêm nếu muốn hiển thị scroll khi nội dung dài */
+}
+.descriptionText {
+  width: 400px;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 4.5em; /* Khoảng 3 dòng, tùy theo font-size */
 }

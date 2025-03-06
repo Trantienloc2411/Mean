@@ -134,7 +134,7 @@ const Login = () => {
               <label>Email hoặc số điện thoại</label>
               <input
                 type="email"
-                placeholder="john.doe@gmail.com"
+                placeholder="Email"
                 className={styles.formInput}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
@@ -145,7 +145,7 @@ const Login = () => {
               <div className={styles.passwordInputWrapper}>
                 <input
                   type={showPassword ? "text" : "password"}
-                  placeholder="••••••••••••"
+                  placeholder="Password"
                   className={styles.formInput}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}

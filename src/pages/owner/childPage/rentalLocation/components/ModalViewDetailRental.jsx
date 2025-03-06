@@ -45,9 +45,9 @@ export default function ModalViewDetailRental({ visible, onClose, data }) {
     bgColor: "#E0E0E0",
     color: "#000000",
   };
-  const handleViewOwner = () => {
-    navigate(`/owner/${data?.ownerId?.userId?.id}/dashboard`);
-  };
+  // const handleViewOwner = () => {
+  //   navigate(`/owner/${data?.ownerId?.userId?.id}/dashboard`);
+  // };
   const handleViewMap = () => {
     if (data.latitude && data.longitude) {
       window.open(
@@ -72,7 +72,7 @@ export default function ModalViewDetailRental({ visible, onClose, data }) {
     >
       <Descriptions bordered column={1} size="middle">
         <Descriptions.Item label="Tên địa điểm">{data.name}</Descriptions.Item>
-        <Descriptions.Item label="Người đại diện">
+        {/* <Descriptions.Item label="Người đại diện">
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
             <Text>{data?.ownerId?.userId?.fullName || "Chưa cập nhật"}</Text>
             <span
@@ -82,10 +82,12 @@ export default function ModalViewDetailRental({ visible, onClose, data }) {
               <FaEye />
             </span>
           </div>
-        </Descriptions.Item>
+        </Descriptions.Item> */}
         <Descriptions.Item label="Địa chỉ">
-          <div>
-            {data.address}
+          <div style={{ display: "flex ", gap: 10, alignItems: "center" }}>
+            <Text className={styles.addressDetail}>
+              {data?.address} {data?.ward} {data?.district} {data?.city}
+            </Text>
             <span
               className={styles.iconViewDetail}
               onClick={() => handleViewMap()}
@@ -111,7 +113,9 @@ export default function ModalViewDetailRental({ visible, onClose, data }) {
           {`${data.openHour} - ${data.closeHour}`}
         </Descriptions.Item>
         <Descriptions.Item label="Mô tả">
-          {data.description || "Không có mô tả"}
+          <span className={styles.descriptionText}>
+            {data.description || "Không có mô tả"}
+          </span>
         </Descriptions.Item>
         <Descriptions.Item label="Ngày tạo">
           {data.createdAt || "Không có mô tả"}
