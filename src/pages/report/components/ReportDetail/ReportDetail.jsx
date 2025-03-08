@@ -6,7 +6,9 @@ export default function ReportDetail({ isOpen, onClose, report, isLoading }) {
   const [staffName, setStaffName] = useState(null);
 
   useEffect(() => {
-    if (report?.originalData?.replyBy?.userId?.fullName) {
+    if (report?.replyBy?.userId?.fullName) {
+      setStaffName(report.replyBy.userId.fullName);
+    } else if (report?.originalData?.replyBy?.userId?.fullName) {
       setStaffName(report.originalData.replyBy.userId.fullName);
     }
   }, [report]);
@@ -77,17 +79,17 @@ export default function ReportDetail({ isOpen, onClose, report, isLoading }) {
             </div>
           )}
 
-          {report.originalData?.contentReply && (
+          {(report.contentReply || report.originalData?.contentReply) && (
             <>
               <Divider style={{ margin: '16px 0' }} />
               <div className={styles.replySection}>
                 <div className={styles.replyHeader}>
                   <label>Phản hồi:</label>
                   <span className={styles.replyInfo}>
-                    Bởi: {staffName || 'Admin'} | {report.originalData.updatedAt || report.updatedAt}
+                    Bởi: {staffName || 'Admin'} | {report.updatedAt || report.originalData?.updatedAt}
                   </span>
                 </div>
-                <p className={styles.replyContent}>{report.originalData.contentReply}</p>
+                <p className={styles.replyContent}>{report.contentReply || report.originalData?.contentReply}</p>
               </div>
             </>
           )}
