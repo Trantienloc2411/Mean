@@ -12,7 +12,6 @@ const { Title, Text } = Typography;
 export default function TitleAndDescription({ rentalData }) {
   const DEFAULT_IMAGE =
     "https://aqgqtxnbmgeknaojqagx.supabase.co/storage/v1/object/public/Sep-booking//No_Image_Available.jpg";
-  console.log(rentalData);
   const RENTALLOCATION_STATUS = {
     PENDING: 1,
     INACTIVE: 2,

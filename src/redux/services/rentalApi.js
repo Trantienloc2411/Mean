@@ -31,10 +31,11 @@ export const rentalApi = apiSlice.injectEndpoints({
     }),
     updateRentalLocation: builder.mutation({
       query: ({ id, updatedData }) => ({
-        url: `/rental-locations/${id}`, // Đảm bảo endpoint đúng
+        url: `rental-location/${id}`, // Đảm bảo endpoint đúng
         method: "PUT", // Kiểm tra lại phương thức API yêu cầu
         body: updatedData,
       }),
+      invalidatesTags: ["RentalLocation"],
     }),
   }),
 });
