@@ -7,7 +7,7 @@ import LocationMap from "./components/LocationMap";
 import ImageSlider from "./components/ImageSlider";
 import RecentReviews from "./components/RecentReviews";
 import RoomList from "./components/RoomList";
-import SettingRentalLocation from "./components/SettingRentalLocation";
+import SettingRentalLocation from "./settingRentalLocation/SettingRentalLocation";
 import { LeftOutlined } from "@ant-design/icons";
 
 export default function RentalLocationDetail() {
@@ -45,7 +45,9 @@ export default function RentalLocationDetail() {
     {
       key: "2",
       label: "Hình ảnh",
-      children: <ImageSlider images={rentalData?.image || []} />,
+      children: (
+        <ImageSlider rentalData={rentalData} images={rentalData?.image || []} />
+      ),
     },
     {
       key: "3",

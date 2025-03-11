@@ -1,18 +1,10 @@
-import React, { useState } from "react";
-import {
-  Button,
-  message,
-  Tag,
-  Card,
-  Typography,
-  Row,
-  Col,
-  Divider,
-} from "antd";
+import { useState } from "react";
+import { Button, message, Tag, Typography, Row, Col, Divider } from "antd";
 import { EditOutlined, EnvironmentOutlined } from "@ant-design/icons";
-import EditRentalLocationModal from "./EditRentalLocationModal";
-import { useUpdateRentalLocationMutation } from "../../../../../../redux/services/rentalApi";
-import { Flex } from "antd";
+import EditRentalLocationInformationModal from "./EditRentalLocationInformationModal";
+import EditAddressModal from "./EditAddressModal";
+import { Card } from "antd";
+import LocationMap from "../components/LocationMap";
 
 const { Title, Text } = Typography;
 
@@ -59,9 +51,10 @@ const STATUS_LABELS = {
 };
 
 export default function SettingInformation({ rentalData }) {
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
+  const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [data, setData] = useState(rentalData);
-  const { updateRentalLocation } = useUpdateRentalLocationMutation();
+
   const handleViewOnMap = () => {
     if (data.latitude && data.longitude) {
       const mapUrl = `https://www.google.com/maps?q=${data.latitude},${data.longitude}`;
@@ -74,62 +67,31 @@ export default function SettingInformation({ rentalData }) {
   const handleUpdate = (updatedData) => {
     setData(updatedData);
   };
-  const statusInfo = STATUS_LABELS[data.status] || {};
 
   return (
-    <div
-      style={{
-        borderRadius: 12,
-        padding: 0,
-      }}
-    >
-      <Title level={3} style={{ textAlign: "center", marginBottom: 20 }}>
-        Thông tin địa điểm
-      </Title>
-      <Row gutter={[16, 16]}>
-        <Col span={24}>
-          <div style={{ display: "flex", gap: 20, alignItems: "center" }}>
-            <Text strong style={{ fontSize: 26 }}>
-              {data.name}
-            </Text>
-            <span
-              style={{
-                backgroundColor: statusInfo.bgColor,
-                color: statusInfo.color,
-                padding: "4px 12px",
-                borderRadius: "16px",
-                fontSize: "12px",
-              }}
-            >
-              {statusInfo.label || "Không xác định"}
-            </span>
-          </div>
-        </Col>
-        <Col span={24}>
-          <Text strong>Địa chỉ:</Text>{" "}
-          <Text>
-            {data.address}, {data.ward}, {data.district}, {data.city}
+    <div style={{ borderRadius: 12, padding: 0 }}>
+      <Card
+        title="Thông tin"
+        extra={<EditOutlined onClick={() => setIsInfoModalOpen(true)} />}
+      >
+        <div>
+          <Text strong style={{ fontSize: 22 }}>
+            {data.name}
           </Text>
-        </Col>
-        <Col span={24}>
-          <Text strong>Thời gian hoạt động:</Text>{" "}
+        </div>
+        <div>
+          <Text strong>Thời gian hoạt động:</Text>
+
           <Text>
             {data.openHour} - {data.closeHour}
           </Text>
-        </Col>
-
-        <Col span={12}>
+        </div>
+        <div>
           <Text strong>Hoạt động qua đêm: </Text>
-          <Text>{data.isOverNight ? "Có" : "Không"}</Text>
-        </Col>
 
-        <Col span={24}>
-          <Text strong>Vị trí bản đồ:</Text>{" "}
-          <Text>
-            {data.latitude},{data.longitude}
-          </Text>
-        </Col>
-        <Col span={24}>
+          <Text>{data.isOverNight ? "Có" : "Không"}</Text>
+        </div>
+        <div>
           <Text strong>Trạng thái:</Text>
           <Tag
             style={{
@@ -140,19 +102,52 @@ export default function SettingInformation({ rentalData }) {
           >
             {STATUS_LABELS[data.status]?.label || "Không xác định"}
           </Tag>
+        </div>
+        <div>
+          <Text strong>Mô tả:</Text> <Text>{data.description}</Text>
+        </div>
+      </Card>
+      <br />
+      <Card
+        title="Địa chỉ"
+        extra={<EditOutlined onClick={() => setIsMapModalOpen(true)} />}
+      >
+        <Col span={24}>
+          <Text strong>Địa chỉ:</Text>{" "}
+          <Text>
+            {data.address}, {data.ward}, {data.district}, {data.city}
+          </Text>
         </Col>
         <Col span={24}>
-          <Text strong>Mô tả:</Text> <Text>{data.description}</Text>
+          <Text strong>Vị trí bản đồ:</Text>{" "}
+          <Text>
+            {data.latitude},{data.longitude}
+          </Text>
         </Col>
-      </Row>
+        <LocationMap latitude={data?.latitude} longitude={data?.longitude} />
+      </Card>
       <Divider />
-      <div style={{ display: "flex", justifyContent: "center", gap: "12px" }}>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "center",
+          gap: "12px",
+          flexWrap: "wrap",
+        }}
+      >
         <Button
           type="default"
           icon={<EditOutlined />}
-          onClick={() => setIsModalOpen(true)}
+          onClick={() => setIsInfoModalOpen(true)}
         >
-          Chỉnh sửa
+          Chỉnh sửa thông tin
+        </Button>
+        <Button
+          type="default"
+          icon={<EditOutlined />}
+          onClick={() => setIsMapModalOpen(true)}
+        >
+          Chỉnh sửa vị trí
         </Button>
         <Button
           type="primary"
@@ -162,10 +157,16 @@ export default function SettingInformation({ rentalData }) {
           Xem trên Google Maps
         </Button>
       </div>
-      <EditRentalLocationModal
-        visible={isModalOpen}
-        onClose={() => setIsModalOpen(false)}
+      <EditRentalLocationInformationModal
+        visible={isInfoModalOpen}
+        onClose={() => setIsInfoModalOpen(false)}
         rentalData={data}
+        onUpdate={handleUpdate}
+      />
+      <EditAddressModal
+        visible={isMapModalOpen}
+        onClose={() => setIsMapModalOpen(false)}
+        addressData={data}
         onUpdate={handleUpdate}
       />
     </div>
