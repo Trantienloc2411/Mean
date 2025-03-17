@@ -1,9 +1,6 @@
 export default function LocationMap({ latitude, longitude }) {
   const apiKey = import.meta.env.VITE_APP_GOOGLE_MAPS_API_KEY;
 
-  // Kiểm tra API Key
-  console.log("Google Maps API Key:", apiKey);
-
   // Kiểm tra giá trị latitude & longitude
   if (
     latitude == null ||
@@ -18,9 +15,6 @@ export default function LocationMap({ latitude, longitude }) {
   }
 
   const mapUrl = `https://www.google.com/maps/embed/v1/place?key=${apiKey}&q=${latitude},${longitude}`;
-
-  // Kiểm tra URL Maps
-  console.log("Map URL:", mapUrl);
 
   return (
     <div>

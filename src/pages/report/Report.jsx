@@ -1,7 +1,7 @@
 import styles from "./Report.module.scss";
 import { useState, useEffect } from "react";
 import { Input, Button, Table, Dropdown, message } from "antd";
-import { MoreOutlined, FilterOutlined } from "@ant-design/icons";
+import { MoreOutlined, FilterOutlined, SearchOutlined } from "@ant-design/icons";
 import Filter from "./components/Filter/Filter";
 import ReportDetail from "./components/ReportDetail/ReportDetail";
 import ReplyReport from "./components/ReplyReport/ReplyReport";
@@ -53,7 +53,7 @@ export default function Report() {
         bookingInfo: report.bookingId,
         content: report.content,
         createdAt: report.createdAt,
-        status: report.isReviewed ? "Reviewed" : "Pending",
+        isReviewed: report.isReviewed,
         reason: report.reason,
         images: report.images,
         hasReply: !!report.contentReply,
@@ -73,7 +73,7 @@ export default function Report() {
         ...selectedReport,
         content: reportDetail.content,
         reason: reportDetail.reason,
-        status: reportDetail.isReviewed ? "Reviewed" : "Pending",
+        isReviewed: reportDetail.isReviewed,
         images: reportDetail.images,
         hasReply: !!reportDetail.contentReply,
         contentReply: reportDetail.contentReply,
@@ -153,14 +153,16 @@ export default function Report() {
     },
     {
       title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
+      dataIndex: "isReviewed",
+      key: "isReviewed",
       width: 120,
-      render: (status) => (
-        <span className={`${styles.status} ${styles[status.toLowerCase()]}`}>
-          {status === "Reviewed" ? "Đã xem" : "Chưa xem"}
-        </span>
-      ),
+      render: (isReviewed) => {
+        return (
+          <span className={`${styles.status} ${isReviewed ? styles.replied : styles.pending}`}>
+            {isReviewed ? "Đã xem" : "Chưa xem"}
+          </span>
+        );
+      },
     },
     {
       title: "",
@@ -242,15 +244,16 @@ export default function Report() {
   if (error) return <div>Đã xảy ra lỗi khi tải dữ liệu: {error.toString()}</div>;
 
   return (
-    <div className={styles.container}>
-      <h1>Báo cáo</h1>
+    <div className={styles.contentContainer}>
+      <h1 className={styles.sectionTitle}>Báo cáo</h1>
 
       <div className={styles.toolBar}>
         <div className={styles.searchFilter}>
           <Input
+            prefix={<SearchOutlined />}
             placeholder="Tìm kiếm theo booking ID hoặc lý do"
             onChange={(e) => handleSearch(e.target.value)}
-            style={{ width: 250 }}
+            style={{ width: 250, marginBottom: 20, marginRight: 20 }}
           />
 
           <Dropdown

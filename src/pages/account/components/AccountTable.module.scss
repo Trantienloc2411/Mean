@@ -173,17 +173,17 @@
   }
 }
 
-.fullName {
+.iconViewDetail {
   display: flex;
   align-items: center;
   color: #333;
   font-weight: 500;
-  cursor: pointer; 
+  cursor: pointer;
   transition: color 0.2s ease-in-out;
   &:hover {
     color: #007bff;
   }
   &:active {
-    color: #0056b3; 
+    color: #0056b3;
   }
 }

@@ -1,14 +1,173 @@
+// Container styles
+.contentContainer {
+  background-color: #f6f8fa;
+  padding: 40px;
+  border-radius: 16px;
+  margin: 16px;
+}
+
+// Section titles
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1f36;
+  margin-bottom: 20px;
+  margin-top: 0;
+}
+
+// Overview section
+.overviewSection {
+  margin-bottom: 24px;
+}
+
+// Account section
+.accountSection {
+  margin-top: 24px;
+}
+
+.accountCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  
+  :global {
+    .ant-card-body {
+      padding: 24px;
+    }
+  }
+}
+
+// Toolbar container
+.toolbarContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.searchFilterGroup {
+  display: flex;
+  gap: 16px;
+  flex-grow: 1;
+}
+
+.searchInput {
+  width: 300px;
+  border-radius: 8px;
+  
+  :global {
+    .ant-input {
+      &:focus, &:hover {
+        border-color: #6366f1;
+      }
+    }
+  }
+}
+
+// Create button
+.createButton {
+  background-color: #fff;
+  color: #667085;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 10px 16px;
+  font-weight: 500;
+  border: 1px solid #667085;
+
+  &:hover {
+      background-color: #e4e6ea !important;
+      border-color: #525c70 !important;
+      color: black !important;
+  }
+}
+
+// Table container
+.tableContainer {
+  :global {
+    .ant-table {
+      background: transparent;
+    }
+    
+    .ant-table-thead > tr > th {
+      background: #f8fafc;
+      font-weight: 600;
+      color: #1a1f36;
+      
+      &::before {
+        display: none;
+      }
+    }
+    
+    .ant-table-tbody > tr:hover > td {
+      background: #f1f5f9;
+    }
+    
+    .ant-table-tbody > tr > td {
+      border-bottom: 1px solid #f1f5f9;
+    }
+  }
+}
+
+// Icon background styles
 .iconBg {
-  padding: 10px;
+  padding: 12px;
   text-align: center;
-  border-radius: 20px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
+
+// Card styles for overview
 .cardTitle {
-  color: #838383;
+  color: #64748b;
   font-weight: 400;
-  font-size: 20;
+  font-size: 14px;
+  margin-bottom: 8px;
 }
+
 .cardNumber {
   font-weight: 600;
   font-size: 24px;
+  color: #1a1f36;
+  margin: 0;
+}
+
+// Responsive styles
+@media (max-width: 1200px) {
+  .contentContainer {
+    padding: 20px;
+    margin: 16px;
+  }
+  
+  .searchFilterGroup {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .searchInput {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .contentContainer {
+    padding: 16px;
+    margin: 12px;
+  }
+  
+  .toolbarContainer {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .createButton {
+    width: 100%;
+  }
+  
+  .sectionTitle {
+    font-size: 18px;
+  }
 }

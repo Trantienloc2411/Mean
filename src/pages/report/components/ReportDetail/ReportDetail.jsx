@@ -33,8 +33,8 @@ export default function ReportDetail({ isOpen, onClose, report, isLoading }) {
           <div className={styles.header}>
             <div className={styles.mainInfo}>
               <h3>Booking ID: {report.customerName}</h3>
-              <span className={`${styles.status} ${styles[report.status.toLowerCase()]}`}>
-                {report.status === 'Reviewed' ? 'Đã xem' : 'Chưa xem'}
+              <span className={`${styles.status} ${styles[report.isReviewed ? 'replied' : 'pending']}`}>
+                {report.isReviewed ? 'Đã xem' : 'Chưa xem'}
               </span>
             </div>
             <span className={styles.date}>{report.createdAt}</span>

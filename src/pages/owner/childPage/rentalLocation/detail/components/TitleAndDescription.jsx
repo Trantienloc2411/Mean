@@ -12,7 +12,6 @@ const { Title, Text } = Typography;
 export default function TitleAndDescription({ rentalData }) {
   const DEFAULT_IMAGE =
     "https://aqgqtxnbmgeknaojqagx.supabase.co/storage/v1/object/public/Sep-booking//No_Image_Available.jpg";
-  console.log(rentalData);
   const RENTALLOCATION_STATUS = {
     PENDING: 1,
     INACTIVE: 2,
@@ -61,10 +60,15 @@ export default function TitleAndDescription({ rentalData }) {
           {STATUS_LABELS[rentalData.status]?.label || "Không xác định"}
         </Tag>
       </Flex>
-      <Flex align="center" gap={5} style={{}}>
+      <Flex align="center" gap={5}>
         <FaLocationDot />
-        <p style={{ margin: 0 }}>{rentalData?.address || "Unknown location"}</p>
+        <p style={{ margin: 0 }}>
+          {rentalData
+            ? `${rentalData.address}, ${rentalData.ward}, ${rentalData.district}, ${rentalData.city}`
+            : "Unknown location"}
+        </p>
       </Flex>
+
       <Flex gap={5} style={{ marginTop: 5 }}>
         <FieldTimeOutlined />
         {rentalData?.openHour || "Không có giờ mở cửa"}
@@ -116,7 +120,6 @@ export default function TitleAndDescription({ rentalData }) {
         <Col span={24}>
           <LocationMap
             latitude={rentalData?.latitude}
-            // latitude={rentalData?.attitude}
             longitude={rentalData?.longitude}
           />
         </Col>

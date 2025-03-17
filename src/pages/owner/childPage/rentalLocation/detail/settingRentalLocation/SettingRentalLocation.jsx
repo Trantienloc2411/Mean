@@ -1,8 +1,7 @@
 import { Tabs } from "antd";
 import SettingInformation from "./SettingInformation";
 import SettingStatus from "./SettingStatus";
-import DocumentManagement from "./DocumentManagement";
-
+import DocumentManagement from "../components/DocumentManagement";
 
 export default function SettingRentalLocation({ rentalData }) {
   const items = [
@@ -25,7 +24,7 @@ export default function SettingRentalLocation({ rentalData }) {
   ];
 
   return (
-    <div style={{ display: "flex", height: "100vh" }}>
+    <div style={{ display: "flex", paddingBottom: 30 }}>
       <Tabs
         tabPosition="left"
         style={{

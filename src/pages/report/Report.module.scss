@@ -1,41 +1,64 @@
-.container {
-  padding: 24px;
-  background: #fff;
+.contentContainer {
+  padding: 40px;
+  background-color: #F9FAFB;
+  min-height: 100vh;
+  margin: 16px; 
+  border-radius: 16px;
+
 
   h1 {
-    margin-bottom: 24px;
     font-size: 24px;
     font-weight: 600;
+    margin-bottom: 8px;
   }
-}
 
-.toolBar {
-  margin-bottom: 24px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
+  h2 {
+    font-size: 18px;
+    font-weight: 500;
+    color: #667085;
+    margin-bottom: 24px;
+  }
 
-.searchFilter {
-  display: flex;
-  gap: 12px;
-  align-items: center;
+  .contentTable {
+    background-color: white;
+    padding: 20px;
+    border-radius: 20px;
+    box-shadow: 0px 1px 3px rgba(16, 24, 40, 0.1), 0px 1px 2px rgba(16, 24, 40, 0.06);
+
+    .tool {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+
+      .searchFilter {
+        display: flex;
+        gap: 10px;
+        align-items: center;
+      }
+    }
+  }
 }
 
 .status {
   padding: 4px 12px;
   border-radius: 16px;
-  font-size: 14px;
+  font-size: 12px;
   display: inline-block;
 
-  &.reviewed {
-    background: #e6f4ff;
-    color: #1677ff;
+  &.replied {
+    background-color: #D1FAE5;
+    color: #059669;
   }
 
   &.pending {
-    background: #fff7e6;
-    color: #fa8c16;
+    background-color: #FEF3C7;
+    color: #D97706;
+  }
+
+  &.rejected {
+    background-color: #FEECEB;
+    color: #F36960;
   }
 }
 
@@ -130,7 +153,6 @@
     }
   }
 }
-
 
 .paginationButton {
   display: inline-flex;

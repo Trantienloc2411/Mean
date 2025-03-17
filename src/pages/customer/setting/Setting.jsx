@@ -64,7 +64,12 @@ export default function Setting() {
     {
       key: "information",
       label: "Thông tin tài khoản",
-      children: <CustomerInformation customerDetail={customerDetail} />,
+      children: (
+        <CustomerInformation
+          refetch={refetch}
+          customerDetail={customerDetail}
+        />
+      ),
     },
     {
       key: "bankAccount",

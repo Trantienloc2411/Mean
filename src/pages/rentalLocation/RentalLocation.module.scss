@@ -1,0 +1,126 @@
+// Container styles
+.contentContainer {
+  padding: 40px;
+  margin: 16px; 
+  background-color: #F9FAFB;
+  min-height: 100vh;
+  border-radius: 16px;
+}
+
+// Section titles
+.sectionTitle {
+  font-size: 24px;
+  font-weight: 600;
+  color: #1a1f36;
+  margin-bottom: 20px;
+  margin-top: 0;
+}
+
+// Overview section
+.overviewSection {
+  margin-bottom: 24px;
+}
+
+// Location section
+.locationSection {
+  margin-top: 24px;
+}
+
+.locationCard {
+  background: white;
+  border-radius: 12px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  
+  :global {
+    .ant-card-body {
+      padding: 24px;
+    }
+  }
+}
+
+// Toolbar container
+.toolbarContainer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.searchFilterGroup {
+  display: flex;
+  gap: 16px;
+  flex-grow: 1;
+}
+
+.searchInput {
+  width: 300px;
+  border-radius: 8px;
+  
+  :global {
+    .ant-input {
+      &:focus, &:hover {
+        border-color: #6366f1;
+      }
+    }
+  }
+}
+
+// Table container
+.tableContainer {
+  :global {
+    .ant-table {
+      background: transparent;
+    }
+    
+    .ant-table-thead > tr > th {
+      background: #f8fafc;
+      font-weight: 600;
+      color: #1a1f36;
+      
+      &::before {
+        display: none;
+      }
+    }
+    
+    .ant-table-tbody > tr:hover > td {
+      background: #f1f5f9;
+    }
+    
+    .ant-table-tbody > tr > td {
+      border-bottom: 1px solid #f1f5f9;
+    }
+  }
+}
+
+// Responsive styles
+@media (max-width: 1200px) {
+  .contentContainer {
+    padding: 20px;
+    margin: 16px;
+  }
+  
+  .searchFilterGroup {
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .searchInput {
+    width: 100%;
+  }
+}
+
+@media (max-width: 768px) {
+  .contentContainer {
+    padding: 16px;
+    margin: 12px;
+  }
+  
+  .toolbarContainer {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .sectionTitle {
+    font-size: 18px;
+  }
+} 

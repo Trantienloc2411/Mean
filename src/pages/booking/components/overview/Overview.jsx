@@ -17,13 +17,15 @@ export default function Overview(props) {
   } = props;
 
   return (
-    <Flex wrap justify="start" gap={40}>
+    <Flex wrap justify="space-between" >
       <CardDashboard
         title={"Tổng"}
         value={"100"}
         iconName={<TeamOutlined />}
         backgroundColorIcon={"#e5e4ff"}
         colorIcon={"#8280FF"}
+        width={"17%"}
+        height={120}
       ></CardDashboard>
 
       <CardDashboard
@@ -34,6 +36,8 @@ export default function Overview(props) {
         }
         backgroundColorIcon={"#D3D0CEFF"}
         colorIcon={"#8F8D8CFF"}
+        width={"17%"}
+        height={120}
       ></CardDashboard>
       <CardDashboard
         title={"Đã xác nhận"}
@@ -41,6 +45,8 @@ export default function Overview(props) {
         iconName={<FileDoneOutlined style={{ color: "#4ad991" }} />}
         backgroundColorIcon={"#d9f7e8"}
         colorIcon={"#4ad991"}
+        width={"17%"}
+        height={120}
       ></CardDashboard>
 
       <CardDashboard
@@ -49,6 +55,8 @@ export default function Overview(props) {
         iconName={<CheckOutlined style={{ color: "#6CCAF0FF" }} />}
         backgroundColorIcon={"#A3F7F7FF"}
         colorIcon={"#6CCAF0FF"}
+        width={"17%"}
+        height={120}
       ></CardDashboard>
 
       <CardDashboard
@@ -57,6 +65,8 @@ export default function Overview(props) {
         iconName={<StopOutlined style={{ color: "#ff9066" }} />}
         backgroundColorIcon={"#ffded1"}
         colorIcon={"#ff9066"}
+        width={"17%"}
+        height={120}
       ></CardDashboard>
     </Flex>
   );

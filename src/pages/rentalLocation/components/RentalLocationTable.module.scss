@@ -90,7 +90,7 @@
         }
 
         &-active {
-          background: #F7F9FC;
+          background: #f7f9fc;
 
           a {
             color: #1677ff;
@@ -103,5 +103,18 @@
         }
       }
     }
+  }
+}
+
+.iconViewDetail {
+  color: #333;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    color: #0052cc;
+  }
+  &:active {
+    color: #0052cc;
   }
 }

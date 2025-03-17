@@ -8,40 +8,48 @@ const CardDashboard = ({
   iconName,
   backgroundColorIcon = "#d0cfff",
   colorIcon = "#8280FF",
-  height = 100,
-  width = 250,
+  height,
+  width,
 }) => {
   const containerStyles = {
-    height: `${height}px`,
-    minWidth: `${width}px`,
-    padding: "20px",
-    borderRadius: "8px",
-    boxShadow: "0 4px 6px rgba(0, 0, 0, 0.1)",
+    height: height,
+    minWidth: width,
+    padding: "24px",
+    borderRadius: "12px",
+    boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
     backgroundColor: "#fff",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
+    transition: "transform 0.2s ease, box-shadow 0.2s ease",
+    cursor: "pointer",
+    "&:hover": {
+      transform: "translateY(-2px)",
+      boxShadow: "0 4px 6px rgba(0, 0, 0, 0.12)",
+    }
   };
 
   const titleStyles = {
     margin: 0,
     fontSize: "14px",
-    color: "#666",
+    color: "#64748b",
+    marginBottom: "8px",
   };
 
   const numberStyles = {
     margin: 0,
-    fontWeight: "bold",
-    fontSize: "24px",
+    fontWeight: "600",
+    fontSize: "28px",
+    color: "#1a1f36",
   };
 
   const iconBgStyles = {
     background: backgroundColorIcon,
     alignItems: "center",
     justifyContent: "center",
-    borderRadius: "20px",
-    padding: "10px",
-    marginLeft: "10px",
+    borderRadius: "12px",
+    padding: "12px",
+    marginLeft: "16px",
   };
 
   const iconStyles = {
