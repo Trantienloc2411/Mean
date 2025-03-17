@@ -6,6 +6,20 @@ const { Title, Text } = Typography;
 const { Panel } = Collapse;
 
 const DetailPolicyModal = ({ isOpen, policy, onCancel }) => {
+  if (!policy) {
+    return (
+      <Modal
+        title="Chi tiết Chính sách"
+        open={isOpen}
+        onCancel={onCancel}
+        footer={null}
+        className={styles.detailPolicyModal}
+      >
+        <p>Không có thông tin chính sách để hiển thị.</p>
+      </Modal>
+    );
+  }
+
   const policyData = policy?._original || policy;
 
   const getStatusClassName = (status) => {
@@ -45,7 +59,10 @@ const DetailPolicyModal = ({ isOpen, policy, onCancel }) => {
   };
 
   const values = policyData?.values || [];
-  const ownerInfo = policyData?.ownerId.userId || {};
+  const ownerInfo = policyData?.ownerId && typeof policyData.ownerId === 'object' && policyData.ownerId.userId
+    ? policyData.ownerId.userId
+    : null;
+
   const hasOwnerDetails = ownerInfo && typeof ownerInfo === 'object';
 
   const valuesColumns = [
@@ -88,7 +105,7 @@ const DetailPolicyModal = ({ isOpen, policy, onCancel }) => {
             labelStyle={{ fontWeight: 'bold', width: '200px' }}
           >
             <Descriptions.Item label="ID">
-              {policyData._id}
+              {policyData._id || 'Không có'}
             </Descriptions.Item>
             <Descriptions.Item label="Tên chính sách">
               {policyData.policyTitle || policy?.Name || 'Không có'}
@@ -132,18 +149,20 @@ const DetailPolicyModal = ({ isOpen, policy, onCancel }) => {
             </Collapse>
           )}
 
-          <Collapse defaultActiveKey={['1']}>
-            <Panel header={`Giá trị chính sách (${values.length})`} key="1">
-              <Table
-                dataSource={values}
-                columns={valuesColumns}
-                rowKey="_id"
-                pagination={values.length > 5 ? { pageSize: 5 } : false}
-                size="small"
-                scroll={{ x: 'max-content' }}
-              />
-            </Panel>
-          </Collapse>
+          {values.length > 0 && (
+            <Collapse defaultActiveKey={['1']}>
+              <Panel header={`Giá trị chính sách (${values.length})`} key="1">
+                <Table
+                  dataSource={values}
+                  columns={valuesColumns}
+                  rowKey="_id"
+                  pagination={values.length > 5 ? { pageSize: 5 } : false}
+                  size="small"
+                  scroll={{ x: 'max-content' }}
+                />
+              </Panel>
+            </Collapse>
+          )}
         </Space>
       )}
     </Modal>

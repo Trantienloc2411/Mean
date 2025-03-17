@@ -138,13 +138,13 @@ export default function Policy() {
       console.error("Invalid data structure:", data);
       return;
     }
-
+  
     try {
       const mappedData = data.data.map((item, index) => {
         console.log("Processing item:", item);
         const itemStatus = item.status !== undefined ? item.status :
           getStatusFromDates(item.startDate, item.endDate);
-
+  
         const tableRow = {
           No: index + 1,
           Name: item.policyTitle || "Unnamed Policy",
@@ -157,13 +157,14 @@ export default function Policy() {
           _id: item._id || item.id,
           ownerId: item.ownerId || "",
           isDelete: item.isDelete || false,
+          values: item.values || [], // Add this line to include values
           _original: { ...item }
         };
-
+  
         console.log("Created table row:", tableRow);
         return tableRow;
       });
-
+  
       console.log("Mapped data for table:", mappedData);
       setBaseData(mappedData);
       setFilteredData(mappedData);
@@ -186,6 +187,8 @@ export default function Policy() {
       key: '2',
       label: 'Chỉnh sửa',
       onClick: (record) => {
+        console.log("Selected policy for update:", record);
+        console.log("Original policy data:", record._original);
         setSelectedPolicy(record);
         setIsUpdateModalOpen(true);
       },
