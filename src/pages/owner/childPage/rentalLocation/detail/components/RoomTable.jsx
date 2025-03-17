@@ -1,128 +1,98 @@
-import { Tag, Dropdown, Menu, Button } from "antd";
-import { EllipsisOutlined } from "@ant-design/icons";
-import {
-  RoomApprovalStatusEnum,
-  RoomConditionEnum,
-} from "../../../../../../enums/roomEnum";
-import { Typography } from "antd";
-import { useNavigate } from "react-router-dom";
+import React from "react";
+import { Tag, Dropdown, Menu, Button, Tooltip } from "antd";
+import { EllipsisOutlined, TagsOutlined } from "@ant-design/icons";
 
-export default function RoomTable() {
-  const navigate = useNavigate();
+// Enum
+const STATUS_MAP = {
+  1: { label: "Sẵn sàng", color: "green" },
+  2: { label: "Đã đặt", color: "blue" },
+  3: { label: "Đang dọn dẹp", color: "orange" },
+  4: { label: "Đang chuẩn bị", color: "purple" },
+  5: { label: "Bảo trì", color: "red" },
+  6: { label: "Đóng", color: "gray" }
+};
 
+export default function RoomTableColumns({ onDetailClick, onEditClick }) {
   const handleMenuClick = (key, record) => {
     if (key === "detail") {
-      navigate(`/accomodation/${record.key}`);
+      onDetailClick?.(record);
     } else if (key === "edit") {
-      navigate(`/accomodation/edit/${record.key}`);
+      onEditClick?.(record);
     }
   };
 
+  const actionMenu = (record) => (
+    <Menu onClick={({ key }) => handleMenuClick(key, record)}>
+      <Menu.Item key="detail">Xem chi tiết</Menu.Item>
+      <Menu.Item key="edit">Sửa</Menu.Item>
+    </Menu>
+  );
+
   return [
-    {
-      title: "No.",
-      dataIndex: "no",
-      key: "no",
-    },
     {
       title: "Tên phòng",
       dataIndex: "name",
       key: "name",
+      render: (name, record) => record.accommodationTypeId?.name || name
     },
     {
       title: "Loại phòng",
-      dataIndex: "type",
+      dataIndex: ["accommodationTypeId", "name"],
       key: "type",
     },
     {
       title: "Số người tối đa",
-      dataIndex: "maxPeople",
+      dataIndex: ["accommodationTypeId", "maxPeopleNumber"],
       key: "maxPeople",
     },
     {
-      title: "Tiện ích đi kèm",
-      dataIndex: "amenities",
-      key: "amenities",
-      render: (amenities) => (
-        <Dropdown
-          overlay={
-            <Menu>
-              {amenities.map((amenity, index) => (
-                <Menu.Item key={index}>{amenity}</Menu.Item>
-              ))}
-            </Menu>
-          }
-          trigger={["hover"]}
-        >
-          <Typography>{amenities.length} tiện ích</Typography>
-        </Dropdown>
-      ),
-    },
-    {
-      title: "Giá phòng ban đầu",
-      dataIndex: "initialPrice",
+      title: "Giá ban đầu",
+      dataIndex: ["accommodationTypeId", "basePrice"],
       key: "initialPrice",
+      render: (price) => `${price?.toLocaleString() || 0} VND`,
     },
     {
       title: "Giá theo giờ",
-      dataIndex: "hourlyPrice",
+      dataIndex: ["accommodationTypeId", "overtimeHourlyPrice"],
       key: "hourlyPrice",
+      render: (price) => `${price?.toLocaleString() || 0} VND/giờ`,
     },
     {
-      title: "Tình trạng",
-      dataIndex: "condition",
-      align: "center",
-      key: "condition",
-      render: (condition) => {
-        const config = RoomConditionEnum[condition];
+      title: "Số lượng dịch vụ",
+      dataIndex: ["accommodationTypeId", "serviceIds"],
+      key: "serviceCount",
+      render: (serviceIds) => {
+        const count = serviceIds?.length || 0;
         return (
-          <Tag
-            style={{
-              padding: "2px 10px",
-              borderRadius: 20,
-              color: config?.textColor,
-              backgroundColor: config?.backgroundColor,
-            }}
-          >
-            {config?.label}
-          </Tag>
+            <div style={{ 
+              display: 'flex', 
+              alignItems: 'flex-start', 
+              gap: '5px', 
+              justifyContent: 'flex-start' 
+            }}>
+              {count} tiện ích
+            </div>
         );
-      },
+      }
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
-      align: "center",
       key: "status",
       render: (status) => {
-        const config = RoomApprovalStatusEnum[status];
+        const statusInfo = STATUS_MAP[status] || { label: "Không xác định", color: "default" };
         return (
-          <Tag
-            style={{
-              padding: "2px 10px",
-              borderRadius: 20,
-              color: config?.textColor,
-              backgroundColor: config?.backgroundColor,
-            }}
-          >
-            {config?.label}
+          <Tag color={statusInfo.color}>
+            {statusInfo.label}
           </Tag>
         );
       },
     },
     {
-      title: "",
+      title: "Thao tác",
       key: "action",
       render: (_, record) => (
-        <Dropdown
-          overlay={
-            <Menu onClick={({ key }) => handleMenuClick(key, record)}>
-              <Menu.Item key="detail">Xem chi tiết</Menu.Item>
-              <Menu.Item key="edit">Sửa</Menu.Item>
-            </Menu>
-          }
-          trigger={["click"]}
-        >
+        <Dropdown overlay={() => actionMenu(record)} trigger={["click"]}>
           <Button icon={<EllipsisOutlined />} />
         </Dropdown>
       ),

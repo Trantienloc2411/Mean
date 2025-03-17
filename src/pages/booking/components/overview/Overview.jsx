@@ -5,7 +5,7 @@ import {
   CheckOutlined,
   TeamOutlined,
 } from "@ant-design/icons";
-import CardDashboard from "../../../components/Card/CardDashboard.jsx";
+import CardDashboard from "../../../../components/Card/CardDashboard.jsx";
 import { Flex } from "antd";
 export default function Overview(props) {
   const {
