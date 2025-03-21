@@ -1,6 +1,4 @@
 import { Modal, Descriptions, Tag } from "antd";
-import { FaEye } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
 import styles from "./RentalLocationTable.module.scss";
 import { Typography } from "antd";
 import { FaMapLocationDot } from "react-icons/fa6";
@@ -10,35 +8,46 @@ const RENTALLOCATION_STATUS = {
   INACTIVE: 2,
   ACTIVE: 3,
   PAUSE: 4,
+  DELETED: 5,
+  NEEDS_UPDATE: 6,
 };
 
 const STATUS_LABELS = {
   [RENTALLOCATION_STATUS.PENDING]: {
     label: "Chờ duyệt",
-    bgColor: "#FFF3CD",
-    color: "#856404",
+    bgColor: "#e2e3e5",
+    color: "#6c757d",
   },
   [RENTALLOCATION_STATUS.INACTIVE]: {
     label: "Không hoạt động",
-    bgColor: "#F8D7DA",
-    color: "#721C24",
+    bgColor: "#FEECEB",
+    color: "#F36960",
   },
   [RENTALLOCATION_STATUS.ACTIVE]: {
     label: "Hoạt động",
-    bgColor: "#D4EDDA",
-    color: "#155724",
+    bgColor: "#E7F8F0",
+    color: "#41C588",
   },
   [RENTALLOCATION_STATUS.PAUSE]: {
     label: "Tạm dừng",
-    bgColor: "#D1ECF1",
-    color: "#0C5460",
+    bgColor: "#FEF4E6",
+    color: "#F9A63A",
+  },
+  [RENTALLOCATION_STATUS.DELETED]: {
+    label: "Đã xóa",
+    bgColor: "#F8D7DA",
+    color: "#721C24",
+  },
+  [RENTALLOCATION_STATUS.NEEDS_UPDATE]: {
+    label: "Cần cập nhật",
+    bgColor: "#FFF3CD",
+    color: "#856404",
   },
 };
 
 export default function ModalViewDetailRental({ visible, onClose, data }) {
   console.log(data);
 
-  const navigate = useNavigate();
   if (!data) return null;
   const statusInfo = STATUS_LABELS[data.status] || {
     label: "Không xác định",

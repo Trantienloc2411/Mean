@@ -1,239 +1,428 @@
-import { useState, useCallback } from "react";
-import { Button, Input, Select, Table, Upload, Space } from "antd";
-import { FilterOutlined, SearchOutlined, PaperClipOutlined, InboxOutlined } from "@ant-design/icons";
-import debounce from "lodash/debounce";
+import {
+  Button,
+  Card,
+  Tag,
+  Space,
+  Modal,
+  Form,
+  Input,
+  Upload,
+  message,
+} from "antd";
+import { UploadOutlined } from "@ant-design/icons";
+import {
+  useCreateLandUsesRightMutation,
+  useGetLandUsesRightQuery,
+  useUpdateLandUsesRightMutation,
+} from "../../../../../../redux/services/landUsesApi";
+import { useState } from "react";
+import dayjs from "dayjs";
+import { supabase } from "../../../../../../redux/services/supabase";
+import { FaEdit, FaFile } from "react-icons/fa";
+import { Menu } from "antd";
+import { Dropdown } from "antd";
+import { getUserId } from "../../../../../../utils/storage";
+import { useEffect } from "react";
+export default function DocumentManagement({ rentalData }) {
+  const idRental = rentalData?.id;
+  const { data: fileData, isLoading } = useGetLandUsesRightQuery(idRental);
+  const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [isDenyModalOpen, setIsDenyModalOpen] = useState(false);
+  const { uploading, handleUploadFile } = useFileUpload(idRental);
+  const [form] = Form.useForm();
+  const [updateDocument] = useUpdateLandUsesRightMutation();
+  const [fileUrl, setFileUrl] = useState(null);
+  const userId = getUserId();
+  const idDocument = fileData?.id || null;
+  if (isLoading) return <p>Đang tải dữ liệu...</p>;
+  if (!fileData) return <RentalNone idRental={idRental} />;
 
-const { Option } = Select;
-const { Dragger } = Upload;
+  useEffect(() => {
+    if (isEditModalOpen) {
+      form.setFieldsValue({
+        documentName: fileData.documentName,
+        note: fileData.note,
+      });
+    }
+  }, [isEditModalOpen, fileData]);
 
-export default function DocumentManagement() {
-  const [searchText, setSearchText] = useState("");
-  const [filteredData, setFilteredData] = useState([]);
-  const [fileList, setFileList] = useState([]);
+  const handleMenuClick = ({ key }) => {
+    if (key === "approve") {
+      setIsApproveModalOpen(true);
+    } else if (key === "deny") {
+      setIsDenyModalOpen(true);
+    } else if (key === "edit") {
+      setIsEditModalOpen(true);
+    }
+  };
 
-  const styles = {
-    container: {
-      padding: "24px",
-    },
-    header: {
-      display: "flex",
-      justifyContent: "space-between",
-      marginBottom: "24px",
-    },
-    searchInput: {
-      width: "300px",
-    },
-    filters: {
-      display: "flex",
-      gap: "16px",
-      marginBottom: "24px",
-      flexWrap: "wrap",
-    },
-    filterSelect: {
-      width: "200px",
-      "@media (max-width: 768px)": {
-        width: "calc(50% - 8px)",
-      },
-      "@media (max-width: 480px)": {
-        width: "100%",
-      },
-    },
-    uploadArea: {
-      marginBottom: "24px",
-      background: "#fafafa",
-      border: "2px dashed #e8e8e8",
-      borderRadius: "8px",
-      padding: "32px",
-    },
-    uploadText: {
-      margin: "8px 0",
-      color: "#666",
-    },
-    uploadIcon: {
-      fontSize: "48px",
-      color: "#999",
-    },
-    statusComplete: {
-      background: "#e6f7f0",
-      color: "#52c41a",
-      padding: "4px 8px",
-      borderRadius: "4px",
-    },
-    table: {
-      background: "white",
-      borderRadius: "8px",
-    },
-  }
+  const handleBeforeUpload = async (file) => {
+    const fileUrl = await handleUploadFile(file);
+    if (fileUrl) {
+      setFileUrl(fileUrl); // Ghi đè file cũ
+    }
+    return false; // Ngăn chặn Upload tự động
+  };
+  const handleApprove = () => {
+    const formUpdate = {
+      staffId: userId,
+      documentStatus: true,
+      approvedDate: Date.now(),
+      refuseDate: null,
+      note: "Đã chấp nhận giấy tờ",
+    };
+    try {
+      updateDocument({ id: idDocument, updatedLandUsesRight: formUpdate });
+      setIsApproveModalOpen(false);
+    } catch (error) {
+      console.error("❌ Lỗi khi gửi API:", error);
+      message.error("Lỗi khi chấp nhận giấy tờ!");
+    }
+  };
 
-  // Sample data for the table
-  const data = [
-    {
-      key: "1",
-      documentName: "PR_Sales_4561234",
-      documentType: "Doc",
-      documentDate: "01.05.2020, 14:28",
-      staff: "Braun Henry",
-      status: "Complete",
-      region: "New Hampshire",
-    },
-    {
-      key: "2",
-      documentName: "PR_Sales_4572131",
-      documentType: "Doc",
-      documentDate: "01.05.2020, 14:32",
-      staff: "Salih Demirci",
-      status: "Complete",
-      region: "New Hampshire",
-    },
-    // Add more sample data as needed
-  ]
+  const handleDeny = (values) => {
+    const formUpdate = {
+      staffId: userId,
+      documentStatus: false,
+      approvedDate: null,
+      refuseDate: Date.now(),
+      note: values.note,
+    };
+    try {
+      updateDocument({ id: idDocument, updatedLandUsesRight: formUpdate });
+      setIsDenyModalOpen(false);
+      form.resetFields();
+    } catch (error) {
+      console.error("❌ Lỗi khi gửi API:", error);
+      message.error("Lỗi khi từ chối giấy tờ!");
+    }
+  };
+  const handleEdit = (values) => {
+    const formUpdate = {
+      staffId: userId,
+      documentName: values.documentName,
+      approvedDate: null,
+      documentStatus: false,
+      // refuseDate: null,
+      note: values.note,
+      documentFile: fileUrl || fileData.documentFile, // Giữ file cũ nếu không tải lên file mới
+    };
 
-  // Function to filter data based on search text
-  const filterData = (value) => {
-    const lowercasedValue = value.toLowerCase().trim()
-    const filtered = data.filter((item) =>
-      Object.keys(item).some((key) => item[key].toString().toLowerCase().includes(lowercasedValue)),
-    )
-    setFilteredData(filtered)
-  }
-
-  // Debounce the filterData function to avoid excessive filtering on every keystroke
-  const debouncedFilterData = useCallback(debounce(filterData, 300), [])
-
-  // Handle search input change
-  const handleSearch = (e) => {
-    const value = e.target.value
-    setSearchText(value)
-    debouncedFilterData(value)
-  }
-
-  const uploadProps = {
-    name: "file",
-    multiple: false,
-    fileList: fileList,
-    beforeUpload: (file) => {
-      const isValidType = [".pdf", ".doc", ".docx"].includes(file.name.slice(file.name.lastIndexOf(".")))
-      const isLt5M = file.size / 1024 / 1024 < 5
-
-      if (!isValidType) {
-        message.error("You can only upload PDF or Word documents!")
-      }
-      if (!isLt5M) {
-        message.error("File must be smaller than 5MB!")
-      }
-
-      return isValidType && isLt5M
-    },
-    onChange: (info) => {
-      const { status } = info.file
-      if (status === "done") {
-        message.success(`${info.file.name} file uploaded successfully.`)
-      } else if (status === "error") {
-        message.error(`${info.file.name} file upload failed.`)
-      }
-      setFileList(info.fileList.slice(-1))
-    },
-    onDrop(e) {
-      console.log("Dropped files", e.dataTransfer.files)
-    },
-  }
-
-  const columns = [
-    {
-      title: "Tên tài liệu",
-      dataIndex: "documentName",
-      key: "documentName",
-      sorter: (a, b) => a.documentName.localeCompare(b.documentName),
-    },
-    {
-      title: "Loại tài liệu",
-      dataIndex: "documentType",
-      key: "documentType",
-    },
-    {
-      title: "Document Date",
-      dataIndex: "documentDate",
-      key: "documentDate",
-      sorter: (a, b) => new Date(a.documentDate) - new Date(b.documentDate),
-    },
-    {
-      title: "Người thực hiện",
-      dataIndex: "staff",
-      key: "staff",
-    },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => <span style={styles.statusComplete}>{status}</span>,
-    },
-    {
-      title: "Hành động",
-      key: "operation",
-      render: () => (
-        <Space size="middle">
-          <Button type="text" icon={<SearchOutlined />} />
-          <Button type="text" icon={<FilterOutlined />} />
-          <Button type="text" icon={<PaperClipOutlined />} />
-        </Space>
-      ),
-    },
-  ]
+    try {
+      updateDocument({ id: idDocument, updatedLandUsesRight: formUpdate });
+      setIsEditModalOpen(false);
+      form.resetFields();
+    } catch (error) {
+      console.error("❌ Lỗi khi cập nhật giấy tờ:", error);
+      message.error("Lỗi khi cập nhật giấy tờ!");
+    }
+  };
+  const menu = (
+    <Menu onClick={handleMenuClick}>
+      <Menu.Item key="approve">Chấp nhận</Menu.Item>
+      <Menu.Item key="deny">Từ chối</Menu.Item>
+      <Menu.Item key="edit">Chỉnh sửa</Menu.Item>
+    </Menu>
+  );
 
   return (
-    <>
-      <div
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          justifyContent: "space-between",
-          alignItems: "center",
-        }}
+    <div className="document-management">
+      <Space direction="vertical" style={{ width: "100%" }} size="large">
+        <Card
+          title="Giấy tờ địa điểm"
+          extra={
+            <Dropdown
+              overlay={menu}
+              trigger={["click"]}
+              placement="bottomRight"
+            >
+              <div style={{ cursor: "pointer" }}>
+                <FaEdit />
+              </div>
+            </Dropdown>
+          }
+        >
+          <p>
+            <strong>Ngày tải lên: </strong>
+            {fileData.uploadDate
+              ? dayjs(fileData.uploadDate, "DD/MM/YYYY HH:mm:ss").format(
+                  "hh:mm:ss DD/MM/YYYY"
+                )
+              : "Chưa có"}
+          </p>
+          {fileData.approvedDate && (
+            <p>
+              <strong>Ngày chấp thuận: </strong>
+              {fileData.approvedDate
+                ? dayjs(fileData.approvedDate, "DD/MM/YYYY HH:mm:ss").format(
+                    "hh:mm:ss DD/MM/YYYY"
+                  )
+                : "Chưa có"}
+            </p>
+          )}
+          {fileData.refuseDate && (
+            <p>
+              <strong>Ngày từ chối: </strong>
+              {fileData.refuseDate
+                ? dayjs(fileData.refuseDate, "DD/MM/YYYY HH:mm:ss").format(
+                    "hh:mm:ss DD/MM/YYYY"
+                  )
+                : "Chưa có"}
+            </p>
+          )}
+
+          <p>
+            <strong style={{ marginRight: 10 }}>Trạng thái:</strong>
+            {fileData.documentStatus && fileData.approvedDate ? (
+              <Tag color="success">Đã duyệt</Tag>
+            ) : fileData.documentStatus === false && fileData.refuseDate ? (
+              <Tag color="error">Chưa chấp thuận</Tag>
+            ) : (
+              <Tag color="warning">Chờ duyệt</Tag>
+            )}
+          </p>
+          <p>
+            <strong>Tên giấy tờ: </strong>
+            {fileData.documentName || "Không có ghi chú"}
+          </p>
+          <p>
+            <strong>Ghi chú:</strong> {fileData.note || "Không có ghi chú"}
+          </p>
+          <div style={{ display: "flex", gap: "14px" }}>
+            <strong>File đính kèm:</strong>
+            {fileData.documentFile ? (
+              <a
+                href={fileData.documentFile}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{ color: "blue", fontSize: "16px" }}
+              >
+                <FaFile />
+                {fileData.documentName}
+              </a>
+            ) : (
+              "Chưa có file nào"
+            )}
+            (Ấn vào để xem)
+          </div>
+        </Card>
+      </Space>
+
+      <Modal
+        title="Xác nhận chấp nhận giấy tờ"
+        open={isApproveModalOpen}
+        onCancel={() => setIsApproveModalOpen(false)}
+        onOk={handleApprove}
+        okText="Xác nhận"
+        cancelText="Hủy"
       >
-        <h3>Quản lí tài liệu đất</h3>
-      </div>
+        <p>Bạn có chắc chắn muốn chấp nhận giấy tờ này không?</p>
+      </Modal>
 
-      <div style={styles.container}>
-        {/* Search and filters header */}
-        <div style={styles.header}>
-          <Input
-            placeholder="Tìm kiếm tên tài liệu..."
-            prefix={<SearchOutlined />}
-            style={styles.searchInput}
-            value={searchText}
-            onChange={handleSearch}
-          />
-        </div>
+      <Modal
+        title="Nhập lý do từ chối"
+        open={isDenyModalOpen}
+        onCancel={() => setIsDenyModalOpen(false)}
+        footer={null}
+      >
+        <Form form={form} onFinish={handleDeny} layout="vertical">
+          <Form.Item
+            name="note"
+            label="Lý do từ chối"
+            rules={[{ required: true, message: "Vui lòng nhập lý do từ chối" }]}
+          >
+            <Input.TextArea placeholder="Nhập lý do từ chối..." />
+          </Form.Item>
+          <Space style={{ display: "flex", justifyContent: "flex-end" }}>
+            <Button onClick={() => setIsDenyModalOpen(false)}>Hủy</Button>
+            <Button type="primary" htmlType="submit">
+              Gửi
+            </Button>
+          </Space>
+        </Form>
+      </Modal>
 
-        {/* Filter dropdowns */}
-        <div style={styles.filters}>
-          <Select defaultValue="Document Type" style={styles.filterSelect}>
-            <Option value="doc">Doc</Option>
-          </Select>
-          <Select defaultValue="Document Date" style={styles.filterSelect}>
-            <Option value="recent">Recent</Option>
-          </Select>
-          <Select defaultValue="Staff" style={styles.filterSelect}>
-            <Option value="all">All Staff</Option>
-          </Select>
-        </div>
-
-        {/* Document upload area */}
-        <Dragger {...uploadProps} style={styles.uploadArea}>
-          <p>   
-            <InboxOutlined style={styles.uploadIcon} />
-          </p>
-          <p style={styles.uploadText}>Thả tài liệu ở đây.  </p>
-          <p style={styles.uploadText}>
-            <a href="#">Nhấn để chọn tài liệu</a>
-          </p>
-          <p style={{ marginTop: "8px", fontStyle: "italic" }}>Chỉ nhận các tệp tin có dung lượng dưới 5 MB và đuôi tệp tin có định dạng (*.pdf, *.doc, *.docx ) </p>
-        </Dragger>
-
-        {/* Documents table */}
-        <Table columns={columns} dataSource={searchText ? filteredData : data} style={styles.table} />
-      </div>
-    </>
-  )
+      <Modal
+        title="Chỉnh sửa giấy tờ"
+        open={isEditModalOpen}
+        onCancel={() => setIsEditModalOpen(false)}
+        onOk={() => form.submit()}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          initialValues={{
+            documentName: fileData.documentName,
+            note: fileData.note,
+          }}
+          onFinish={handleEdit}
+        >
+          <Form.Item
+            name="documentName"
+            label="Tên giấy tờ"
+            rules={[{ required: true, message: "Vui lòng nhập tên giấy tờ" }]}
+          >
+            <Input />
+          </Form.Item>
+          <Form.Item name="note" label="Ghi chú">
+            <Input.TextArea />
+          </Form.Item>
+          <Form.Item name="documentFile" label="Thay đổi file">
+            <Upload beforeUpload={handleBeforeUpload} maxCount={1}>
+              <Button icon={<UploadOutlined />}>Chọn file</Button>
+            </Upload>
+            {fileUrl && (
+              <p>
+                <a href={fileUrl} target="_blank">
+                  {fileUrl}
+                </a>
+              </p>
+            )}
+          </Form.Item>
+        </Form>
+      </Modal>
+    </div>
+  );
 }
 
+function RentalNone({ idRental }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [form] = Form.useForm();
+  const [fileUrl, setFileUrl] = useState(null);
+  const [createDocument, { isLoading }] = useCreateLandUsesRightMutation();
+  const { uploading, handleUploadFile } = useFileUpload(idRental);
+
+  console.log("📍 ID Rental:", idRental);
+
+  const convertFormValues = (values) => ({
+    staffId: null,
+    rentalLocationId: idRental,
+    documentName: values.documentName,
+    documentType: "Certificate",
+    documentStatus: false,
+    documentFile: fileUrl, // Chỉ có một file duy nhất
+    uploadDate: dayjs().format("DD/MM/YYYY HH:mm:ss"),
+    approvedDate: null,
+    refuseDate: null,
+    note: values.note || "Đang chờ kiểm tra",
+    isDelete: false,
+  });
+
+  const handleSubmit = async (values) => {
+    try {
+      if (!fileUrl) {
+        message.error("Vui lòng tải lên một file PDF!");
+        return;
+      }
+      console.log("🚀 Dữ liệu gửi API:", convertFormValues(values));
+      await createDocument({ data: convertFormValues(values) }).unwrap();
+      message.success("Thêm giấy tờ thành công!");
+      setIsModalOpen(false);
+      form.resetFields();
+      setFileUrl(null);
+    } catch (error) {
+      console.error("❌ Lỗi khi gửi API:", error);
+      message.error("Lỗi khi thêm giấy tờ!");
+    }
+  };
+
+  const handleBeforeUpload = async (file) => {
+    const fileUrl = await handleUploadFile(file);
+    if (fileUrl) {
+      setFileUrl(fileUrl); // Ghi đè file cũ
+    }
+    return false; // Ngăn chặn Upload tự động
+  };
+
+  return (
+    <div style={{ textAlign: "center", padding: "20px" }}>
+      <p>Chưa có giấy tờ nào.</p>
+      <Button type="primary" onClick={() => setIsModalOpen(true)}>
+        Thêm giấy tờ
+      </Button>
+
+      <Modal
+        title="Thêm giấy tờ"
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        onOk={() => form.submit()}
+        confirmLoading={isLoading}
+      >
+        <Form
+          form={form}
+          layout="vertical"
+          onFinish={handleSubmit}
+          initialValues={{
+            documentName: "",
+            note: "",
+          }}
+        >
+          <Form.Item
+            name="documentName"
+            label="Tên giấy tờ"
+            rules={[{ required: true, message: "Vui lòng nhập tên giấy tờ" }]}
+          >
+            <Input placeholder="Nhập tên giấy tờ" />
+          </Form.Item>
+          <Form.Item
+            rules={[{ required: true, message: "Vui lòng tải lên file" }]}
+            name="documentFile"
+            label="Tải lên file"
+          >
+            <Upload beforeUpload={handleBeforeUpload} maxCount={1}>
+              <Button icon={<UploadOutlined />} loading={uploading}>
+                {uploading ? "Đang tải lên..." : "Chọn file"}
+              </Button>
+            </Upload>
+            {fileUrl && (
+              <p>
+                <a href={fileUrl} target="_blank" rel="noopener noreferrer">
+                  {fileUrl}
+                </a>
+              </p>
+            )}
+          </Form.Item>
+          <Form.Item name="note" label="Ghi chú">
+            <Input.TextArea placeholder="Nhập ghi chú" />
+          </Form.Item>
+        </Form>
+      </Modal>
+    </div>
+  );
+}
+
+const useFileUpload = (businessId) => {
+  const [uploading, setUploading] = useState(false);
+
+  const handleUploadFile = async (file) => {
+    if (file.type !== "application/pdf") {
+      message.error("Chỉ chấp nhận file PDF!");
+      return false;
+    }
+
+    setUploading(true);
+    const fileName = `business/${businessId || "new"}-${Date.now()}.pdf`;
+
+    try {
+      const { error } = await supabase.storage
+        .from("business")
+        .upload(fileName, file, {
+          cacheControl: "3600",
+          upsert: true,
+        });
+
+      if (error) throw error;
+
+      const { data } = supabase.storage.from("business").getPublicUrl(fileName);
+      return data.publicUrl;
+    } catch (error) {
+      message.error("Lỗi khi tải lên file!");
+      return false;
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  return { uploading, handleUploadFile };
+};
