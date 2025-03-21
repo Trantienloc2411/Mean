@@ -1,11 +1,11 @@
 import { Tabs } from "antd";
-import Overview from "./childPage/Overview/Overview.js";
-import Booking from "./childPage/Booking/Booking.js";
-import Information from "./childPage/Information/Information.js";
+import Overview from "./childPage/Overview/Overview.jsx";
+import Booking from "./childPage/Booking/Booking.jsx";
+import Information from "./childPage/Information/Information.jsx";
 import Place from "./childPage/accomodation/Accomodation.jsx";
 import Policy from "./childPage/Policy/Policy.jsx";
-import Setting from "./childPage/Setting/Setting.js";
-import TypeRoom from "./childPage/TypeRoom/TypeRoom.js";
+import Setting from "./childPage/Setting/Setting.jsx";
+import TypeRoom from "./childPage/TypeRoom/TypeRoom.jsx";
 
 export default function owner() {
   const items = [
