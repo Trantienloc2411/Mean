@@ -49,14 +49,17 @@ export default function Report() {
     if (reports) {
       const transformedData = reports.map((report) => ({
         id: report.id || report._id,
-        customerName: report.bookingId, 
-        locationName: "Location", 
+        customerName: report.bookingId?._id || "N/A", 
+        bookingInfo: report.bookingId,
         content: report.content,
         createdAt: report.createdAt,
         isReviewed: report.isReviewed,
         reason: report.reason,
         images: report.images,
         hasReply: !!report.contentReply,
+        contentReply: report.contentReply,
+        replyBy: report.replyBy,
+        updatedAt: report.updatedAt,
         originalData: report 
       }));
       setAllReports(transformedData);
@@ -73,6 +76,9 @@ export default function Report() {
         isReviewed: reportDetail.isReviewed,
         images: reportDetail.images,
         hasReply: !!reportDetail.contentReply,
+        contentReply: reportDetail.contentReply,
+        replyBy: reportDetail.replyBy,
+        updatedAt: reportDetail.updatedAt,
         originalData: reportDetail
       };
       setSelectedReport(updatedReport);
