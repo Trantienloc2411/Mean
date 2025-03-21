@@ -1,9 +1,31 @@
 import { useState, useMemo } from "react";
-import { Card, Avatar, Rate, Select, Space, Typography, Row, Col } from "antd";
+import {
+  Card,
+  Avatar,
+  Rate,
+  Select,
+  Space,
+  Typography,
+  Row,
+  Col,
+  Divider,
+  Button,
+} from "antd";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi";
 import utc from "dayjs/plugin/utc";
+import { useParams } from "react-router-dom";
+import {
+  useGetFeedbackByRentalIdQuery,
+  useUpdateFeedbackReplyMutation,
+} from "../../../../../../redux/services/feedbackApi";
+import { Flex } from "antd";
+import { Image } from "antd";
+import { Modal } from "antd";
+import { Input } from "antd";
+import { message } from "antd";
+import { StarFilled } from "@ant-design/icons";
 
 dayjs.extend(relativeTime);
 dayjs.locale("vi");
@@ -12,19 +34,46 @@ dayjs.extend(utc);
 const { Text, Title } = Typography;
 const { Option } = Select;
 
-const ReviewsComponent = ({ reviews = [] }) => {
+const ReviewsComponent = () => {
+  const { id } = useParams();
+  const { data: feedbackData = [] } = useGetFeedbackByRentalIdQuery(id);
+  const [updateFeedbackReply] = useUpdateFeedbackReplyMutation();
+
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [replyContent, setReplyContent] = useState("");
+  const [selectedReview, setSelectedReview] = useState(null);
+
+  const openReplyModal = (review) => {
+    setSelectedReview(review);
+    setReplyContent(review.contentReply || "");
+    setIsModalOpen(true);
+  };
+  const handleSendReply = async () => {
+    if (!selectedReview) return;
+
+    try {
+      await updateFeedbackReply({
+        feedbackId: selectedReview.id,
+        contentReply: replyContent,
+      }).unwrap();
+      message.success("Phản hồi đã được gửi!");
+      setIsModalOpen(false);
+    } catch (error) {
+      message.error("Gửi phản hồi thất bại!");
+    }
+  };
+
   const [sortBy, setSortBy] = useState("newest");
 
-  // Tính toán tổng số đánh giá và điểm trung bình
   const stats = useMemo(() => {
-    if (!reviews.length) return { average: 0, total: 0 };
+    if (!feedbackData.length) return { average: 0, total: 0 };
 
-    const total = reviews.length;
-    const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
-    const average = (sum / total).toFixed(1);
+    const total = feedbackData.length;
+    const sum = feedbackData.reduce((acc, review) => acc + review.rating, 0);
+    const average = parseFloat((sum / total).toFixed(1)); // Đảm bảo là số
 
     const distribution = Array(5).fill(0);
-    reviews.forEach((review) => {
+    feedbackData.forEach((review) => {
       distribution[review.rating - 1]++;
     });
 
@@ -33,19 +82,22 @@ const ReviewsComponent = ({ reviews = [] }) => {
       total,
       distribution: distribution.map((count) => ({
         count,
-        percentage: ((count / total) * 100).toFixed(1),
+        percentage: total > 0 ? ((count / total) * 100).toFixed(1) : "0",
       })),
     };
-  }, [reviews]);
+  }, [feedbackData]);
 
-  // Sắp xếp reviews
   const sortedReviews = useMemo(() => {
-    const sorted = [...reviews];
+    const sorted = [...feedbackData];
     switch (sortBy) {
       case "newest":
-        return sorted.sort((a, b) => new Date(b.date) - new Date(a.date));
+        return sorted.sort(
+          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+        );
       case "oldest":
-        return sorted.sort((a, b) => new Date(a.date) - new Date(b.date));
+        return sorted.sort(
+          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
+        );
       case "highest":
         return sorted.sort((b, a) => b.rating - a.rating);
       case "lowest":
@@ -53,53 +105,51 @@ const ReviewsComponent = ({ reviews = [] }) => {
       default:
         return sorted;
     }
-  }, [reviews, sortBy]);
-
-  if (!reviews.length) {
-    return <Card>Chưa có đánh giá nào</Card>;
-  }
+  }, [feedbackData, sortBy]);
 
   return (
-    <div style={{ maxWidth: 1200, margin: "0 auto", padding: "20px" }}>
-      {/* Phần thống kê */}
-      <Card style={{ marginBottom: 24 }}>
+    <div style={{ maxWidth: 800, margin: "0 auto", padding: "20px" }}>
+      <Card style={{ marginBottom: 24, borderRadius: 8 }}>
         <Row gutter={24} align="middle">
-          <Col xs={24} sm={8}>
-            <div style={{ textAlign: "center" }}>
-              <Title level={1} style={{ marginBottom: 0 }}>
-                {stats.average}
-              </Title>
-              <Rate disabled defaultValue={Number(stats.average)} allowHalf />
-              <Text type="secondary">{stats.total} đánh giá</Text>
-            </div>
+          <Col xs={24} sm={8} style={{ textAlign: "center" }}>
+            <Title level={1} style={{ marginBottom: 0 }}>
+              {stats.average} <StarFilled style={{ color: "#fadb14" }} />
+            </Title>
+            {/* <Rate disabled defaultValue={Number(stats.average)} allowHalf /> */}
+            <Text type="secondary">{stats.total} đánh giá</Text>
           </Col>
           <Col xs={24} sm={16}>
             <Space direction="vertical" style={{ width: "100%" }}>
-              {stats.distribution.reverse().map((stat, index) => {
+              {stats?.distribution?.reverse().map((stat, index) => {
                 const stars = 5 - index;
                 return (
-                  <Space key={stars} align="center" style={{ width: "100%" }}>
-                    <Text>{stars} sao</Text>
-                    <div
-                      style={{
-                        width: "60%",
-                        height: 8,
-                        background: "#f0f0f0",
-                        borderRadius: 4,
-                        margin: "0 8px",
-                      }}
-                    >
+                  <Row key={stars} align="middle">
+                    <Col span={4}>
+                      <Text>{stars} sao</Text>
+                    </Col>
+                    <Col span={16}>
                       <div
                         style={{
-                          width: `${stat.percentage}%`,
-                          height: "100%",
-                          background: "#1890ff",
+                          background: "#f0f0f0",
                           borderRadius: 4,
+                          height: 8,
+                          width: "100%",
                         }}
-                      />
-                    </div>
-                    <Text type="secondary">{stat.count}</Text>
-                  </Space>
+                      >
+                        <div
+                          style={{
+                            width: `${stat.percentage}%`,
+                            height: "100%",
+                            background: "#1890ff",
+                            borderRadius: 4,
+                          }}
+                        />
+                      </div>
+                    </Col>
+                    <Col span={4}>
+                      <Text type="secondary">{stat.count}</Text>
+                    </Col>
+                  </Row>
                 );
               })}
             </Space>
@@ -107,13 +157,12 @@ const ReviewsComponent = ({ reviews = [] }) => {
         </Row>
       </Card>
 
-      {/* Phần lọc */}
       <div style={{ marginBottom: 16, textAlign: "right" }}>
         <Space>
           <Text>Sắp xếp theo:</Text>
           <Select
             defaultValue="newest"
-            style={{ width: 180, textAlign: "left" }}
+            style={{ width: 180 }}
             onChange={setSortBy}
           >
             <Option value="newest">Mới nhất</Option>
@@ -124,43 +173,108 @@ const ReviewsComponent = ({ reviews = [] }) => {
         </Space>
       </div>
 
-      {/* Danh sách đánh giá */}
       <Space direction="vertical" style={{ width: "100%" }}>
-        {sortedReviews.map((review) => (
-          <Card key={review.id}>
-            <Space align="start" style={{ width: "100%" }}>
-              <Avatar
-                src={review.avatar}
-                size={64}
-                style={{
-                  backgroundColor: !review.avatar ? "#1890ff" : undefined,
-                }}
-              >
-                {!review.avatar && review.user[0].toUpperCase()}
-              </Avatar>
-              <div style={{ flex: 1 }}>
-                <Space align="baseline">
-                  <Text strong>{review.user}</Text>
-                  <Rate disabled defaultValue={review.rating} />
-                  <Text type="secondary">
-                    {dayjs(review.date).format("HH:mm DD/MM/YYYY ")}(
-                    {dayjs(review.date).fromNow()})
-                  </Text>
-                </Space>
+        {sortedReviews.length > 0 ? (
+          sortedReviews.map((review) => {
+            const customer = review.bookingId?.customerId;
+            const userName = customer?.userId
+              ? customer.userId.fullName
+              : "Người dùng ẩn danh";
+            const avatar = customer?.userId?.avatarUrl?.[0] || "";
+
+            return (
+              <Card key={review.id} style={{ borderRadius: 8 }}>
+                <Flex justify="space-between" align="center">
+                  <Flex justify="start" gap={10} align="center">
+                    <Avatar
+                      src={avatar}
+                      size={32}
+                      style={{
+                        backgroundColor: !avatar ? "#1890ff" : undefined,
+                      }}
+                    >
+                      {!avatar && userName[0].toUpperCase()}
+                    </Avatar>
+                    <Text strong>{userName}</Text>
+                  </Flex>
+                  <Flex align="end" vertical gap={10}>
+                    <Rate disabled defaultValue={review.rating} />
+                    <Text type="secondary">
+                      {dayjs(review.createdAt).format("HH:mm DD/MM/YYYY")}
+                    </Text>
+                  </Flex>
+                </Flex>
                 <Text
                   style={{
                     display: "block",
-                    margin: "8px 0",
+                    margin: "8px 20px",
                     whiteSpace: "pre-line",
                   }}
                 >
-                  {review.comment}
+                  {review.content}
                 </Text>
-              </div>
-            </Space>
-          </Card>
-        ))}
+                {review.images?.length > 0 && (
+                  <div style={{ marginTop: 8 }}>
+                    <Image.PreviewGroup>
+                      {review.images.map((imgSrc, index) => (
+                        <Image
+                          key={index}
+                          src={imgSrc}
+                          width={80}
+                          height={80}
+                          style={{
+                            objectFit: "cover",
+                            borderRadius: 8,
+                            marginRight: 8,
+                          }}
+                        />
+                      ))}
+                    </Image.PreviewGroup>
+                  </div>
+                )}
+
+                {review.contentReply ? (
+                  <>
+                    <Divider style={{ margin: "12px 0" }} />
+                    <Card
+                      size="small"
+                      style={{ background: "#f5f5f5", borderRadius: 8 }}
+                    >
+                      <Text strong>Chủ nhà phản hồi:</Text>
+                      <Text style={{ display: "block", marginTop: 4 }}>
+                        {review.contentReply}
+                      </Text>
+                    </Card>
+                  </>
+                ) : (
+                  <Flex justify="end">
+                    <Button onClick={() => openReplyModal(review)}>
+                      Phản hồi
+                    </Button>
+                  </Flex>
+                )}
+              </Card>
+            );
+          })
+        ) : (
+          <Card>Chưa có đánh giá nào</Card>
+        )}
       </Space>
+      <Modal
+        title="Phản hồi đánh giá"
+        open={isModalOpen}
+        onCancel={() => setIsModalOpen(false)}
+        onOk={handleSendReply}
+        okText="Gửi"
+        cancelText="Hủy"
+      >
+        <Input.TextArea
+          rows={4}
+          value={replyContent}
+          onChange={(e) => setReplyContent(e.target.value)}
+          placeholder="Nhập phản hồi của bạn..."
+        />
+      </Modal>
     </div>
   );
 };

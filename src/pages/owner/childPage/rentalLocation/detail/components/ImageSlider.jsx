@@ -31,7 +31,7 @@ const ImageSlider = ({ images = [], setImages, rentalData }) => {
         onClick={() => setModalOpen(true)}
         style={{ marginBottom: 16 }}
       >
-        Thêm ảnh
+        Chỉnh sửa
       </Button>
       <Image.PreviewGroup>
         <Row gutter={[16, 16]} justify="start">

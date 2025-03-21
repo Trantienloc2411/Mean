@@ -69,6 +69,7 @@ export default function AccountStatus({ userData, refetch }) {
       message.error("Từ chối thất bại!");
     }
   };
+  console.log(userData);
 
   return (
     <Card title="Trạng thái tài khoản" style={{ marginTop: 20 }}>
@@ -112,7 +113,7 @@ export default function AccountStatus({ userData, refetch }) {
         <Flex>
           <div>
             <strong style={{ marginRight: 10 }}>Xác thực:</strong>
-            {userData.isVerify ? (
+            {userData.isVerifiedEmail ? (
               <Tag color="blue">Đã xác thực</Tag>
             ) : (
               <Tag color="orange">Chưa xác thực</Tag>

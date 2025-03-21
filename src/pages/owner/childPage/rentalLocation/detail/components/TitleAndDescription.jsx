@@ -3,9 +3,7 @@ import { Flex } from "antd";
 import { Row, Col, Typography } from "antd"; // Sử dụng Row và Col cho layout
 import { FaLocationDot } from "react-icons/fa6";
 import LocationMap from "./LocationMap";
-import ImageGallery from "./ImageGallery";
 import { FieldTimeOutlined } from "@ant-design/icons";
-import { Grid } from "antd";
 
 const { Title, Text } = Typography;
 
@@ -17,28 +15,40 @@ export default function TitleAndDescription({ rentalData }) {
     INACTIVE: 2,
     ACTIVE: 3,
     PAUSE: 4,
+    DELETED: 5,
+    NEEDS_UPDATE: 6,
   };
 
   const STATUS_LABELS = {
     [RENTALLOCATION_STATUS.PENDING]: {
       label: "Chờ duyệt",
-      bgColor: "#FFF3CD",
-      color: "#856404",
+      bgColor: "#e2e3e5",
+      color: "#6c757d",
     },
     [RENTALLOCATION_STATUS.INACTIVE]: {
       label: "Không hoạt động",
-      bgColor: "#F8D7DA",
-      color: "#721C24",
+      bgColor: "#FEECEB",
+      color: "#F36960",
     },
     [RENTALLOCATION_STATUS.ACTIVE]: {
       label: "Hoạt động",
-      bgColor: "#D4EDDA",
-      color: "#155724",
+      bgColor: "#E7F8F0",
+      color: "#41C588",
     },
     [RENTALLOCATION_STATUS.PAUSE]: {
       label: "Tạm dừng",
-      bgColor: "#D1ECF1",
-      color: "#0C5460",
+      bgColor: "#FEF4E6",
+      color: "#F9A63A",
+    },
+    [RENTALLOCATION_STATUS.DELETED]: {
+      label: "Đã xóa",
+      bgColor: "#F8D7DA",
+      color: "#721C24",
+    },
+    [RENTALLOCATION_STATUS.NEEDS_UPDATE]: {
+      label: "Cần cập nhật",
+      bgColor: "#FFF3CD",
+      color: "#856404",
     },
   };
   return (

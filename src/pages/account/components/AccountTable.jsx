@@ -9,6 +9,7 @@ import {
   useBlockUserMutation,
 } from "../../../redux/services/userApi";
 import { FaEye } from "react-icons/fa";
+import dayjs from "dayjs";
 
 export default function AccountTable({ data, loading }) {
   const navigate = useNavigate();
@@ -100,12 +101,15 @@ export default function AccountTable({ data, loading }) {
     // },
     {
       title: "Ngày cập nhật",
-      dataIndex: "updatedAt",
+      // dataIndex: "updatedAt",
       align: "center",
-      key: "updatedAt",
-      sorter: (a, b) => new Date(a.updatedAt) - new Date(b.updatedAt),
-      render: (updatedAt) =>
-        updatedAt ? new Date(updatedAt).toLocaleDateString("vi-VN") : "N/A",
+      sorter: (a, b) =>
+        dayjs(a.updatedAt, "DD/MM/YYYY HH:mm:ss").toDate() -
+        dayjs(b.updatedAt, "DD/MM/YYYY HH:mm:ss").toDate(),
+      render: (_, record) =>
+        dayjs(record.updatedAt, "DD/MM/YYYY HH:mm:ss").format(
+          "hh:mm:ss DD/MM/YYYY"
+        ),
     },
     {
       key: "view",

@@ -4,6 +4,7 @@ export const ownerApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getOwnerById: builder.query({
       query: (id) => `owner/${id}`,
+      providesTags: (result, error, id) => [{ type: "Owner", id }],
     }),
 
     updateOwner: builder.mutation({
@@ -12,17 +13,19 @@ export const ownerApi = apiSlice.injectEndpoints({
         method: "PUT",
         body: updatedData,
       }),
+      invalidatesTags: (result, error, { id }) => [{ type: "Owner", id }],
     }),
 
     getOwnerDetailByUserId: builder.query({
       query: (id) => `owner/detail-owner/${id}`,
+      providesTags: (result, error, id) => [{ type: "OwnerDetail", id }],
     }),
-    
   }),
 });
 
 export const {
   useLazyGetOwnerByIdQuery,
-  useGetOwnerDetailByUserIdQuery,
+  useGetOwnerByIdQuery,
   useUpdateOwnerMutation,
+  useGetOwnerDetailByUserIdQuery,
 } = ownerApi;

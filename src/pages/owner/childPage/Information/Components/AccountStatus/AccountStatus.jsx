@@ -45,11 +45,11 @@ export default function StatusInfo({
       valueStyle: isAccountVerified ? colorTrue : colorFalse,
     },
     {
-      label: "Trạng thái Phê duyệt:",
+      label: "Trạng thái phê duyệt:",
       status: isApproved,
       value: isApproved ? "Phê duyệt" : "Chưa phê duyệt",
       tooltip: note,
-      valueStyle: isAccountVerified ? colorTrue : colorFalse,
+      valueStyle: isApproved ? colorTrue : colorFalse,
     },
   ];
 

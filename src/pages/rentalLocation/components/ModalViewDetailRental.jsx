@@ -70,7 +70,12 @@ export default function ModalViewDetailRental({ visible, onClose, data }) {
       footer={null}
       width={700}
     >
-      <Descriptions bordered column={1} size="middle">
+      <Descriptions
+        labelStyle={{ width: "30%" }}
+        bordered
+        column={1}
+        size="middle"
+      >
         <Descriptions.Item label="Tên địa điểm">{data.name}</Descriptions.Item>
         <Descriptions.Item label="Người đại diện">
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
@@ -85,10 +90,11 @@ export default function ModalViewDetailRental({ visible, onClose, data }) {
         </Descriptions.Item>
         <Descriptions.Item label="Địa chỉ">
           <div>
-            {data.address}
+            {data.address}, {data?.district}, {data?.ward}, {data?.city}
             <span
               className={styles.iconViewDetail}
               onClick={() => handleViewMap()}
+              style={{ marginLeft: "10px" }}
             >
               <FaMapLocationDot />
             </span>
