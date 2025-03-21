@@ -49,6 +49,9 @@ const Login = () => {
       console.log("Login response:", loginResult);
 
       if (loginResult?.accessToken) {
+        saveToken(loginResult.accessToken);
+        saveUserId(loginResult._id);
+
         const userData = await getUserById(loginResult._id).unwrap();
 
         console.log(userData);
