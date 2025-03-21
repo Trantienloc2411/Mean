@@ -90,9 +90,7 @@ export default function RentalLocationTable({ data, loading }) {
     },
     {
       title: "Địa chỉ",
-      // dataIndex: "address",
       key: "address",
-      width: 100,
       ellipsis: true,
       render: (_, record) =>
         record?.address +
@@ -102,6 +100,14 @@ export default function RentalLocationTable({ data, loading }) {
           record?.ward +
           " " +
           record?.city || "N/A",
+      onCell: () => ({
+        style: {
+          whiteSpace: "nowrap",
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          maxWidth: 300,
+        },
+      }),
     },
 
     {

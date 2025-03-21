@@ -1,0 +1,148 @@
+.document-management {
+  &__heading {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+
+    h3 {
+      font-size: 20px;
+      font-weight: 600;
+      margin: 0;
+    }
+  }
+
+  &__container {
+    padding: 24px;
+    background-color: #f5f5f5;
+    border-radius: 8px;
+  }
+
+  &__header {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 24px;
+  }
+
+  &__search-input {
+    width: 300px;
+
+    @media (max-width: 768px) {
+      width: 100%;
+    }
+  }
+
+  &__filters {
+    display: flex;
+    gap: 16px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  &__filter-select {
+    width: 200px;
+
+    @media (max-width: 768px) {
+      width: calc(50% - 8px);
+    }
+
+    @media (max-width: 480px) {
+      width: 100%;
+    }
+  }
+
+  &__upload-area {
+    margin-bottom: 24px;
+    background: #fafafa;
+    border: 2px dashed #e8e8e8;
+    border-radius: 8px;
+    padding: 32px;
+    transition: all 0.3s ease;
+
+    &:hover {
+      border-color: #1890ff;
+    }
+  }
+
+  &__upload-icon {
+    font-size: 48px;
+    color: #999;
+
+    .anticon {
+      font-size: 48px;
+    }
+  }
+
+  &__upload-text {
+    margin: 8px 0;
+    color: #666;
+  }
+
+  &__upload-link {
+    margin: 0;
+
+    button {
+      padding: 0;
+    }
+  }
+
+  &__upload-hint {
+    margin-top: 8px;
+    font-style: italic;
+    color: #999;
+    font-size: 12px;
+  }
+
+  &__table {
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+
+    .ant-table-thead > tr > th {
+      background-color: #f9f9f9;
+      font-weight: 600;
+    }
+  }
+
+  &__table-row {
+    transition: background-color 0.3s;
+
+    &:hover {
+      background-color: #f0f8ff !important;
+    }
+  }
+}
+
+.document-status {
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 12px;
+  font-weight: 500;
+
+  &--complete {
+    background: #e6f7f0;
+    color: #52c41a;
+  }
+
+  &--pending {
+    background: #fff7e6;
+    color: #fa8c16;
+  }
+
+  &--rejected {
+    background: #fff1f0;
+    color: #f5222d;
+  }
+}
+
+.action-buttons {
+  .ant-btn {
+    color: #595959;
+
+    &:hover {
+      color: #1890ff;
+      background-color: #f0f8ff;
+    }
+  }
+}

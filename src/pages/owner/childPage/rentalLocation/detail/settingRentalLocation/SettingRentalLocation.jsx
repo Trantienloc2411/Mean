@@ -1,6 +1,5 @@
 import { Tabs } from "antd";
 import SettingInformation from "./SettingInformation";
-import SettingStatus from "./SettingStatus";
 import DocumentManagement from "../components/DocumentManagement";
 
 export default function SettingRentalLocation({ rentalData }) {
@@ -10,16 +9,10 @@ export default function SettingRentalLocation({ rentalData }) {
       label: "Thông tin địa điểm",
       children: <SettingInformation rentalData={rentalData} />,
     },
-
-    {
-      key: "3",
-      label: "Trạng thái",
-      children: <SettingStatus />,
-    },
     {
       key: "2",
       label: "Danh sách giấy tờ",
-      children: <DocumentManagement />,
+      children: <DocumentManagement rentalData={rentalData} />,
     },
   ];
 

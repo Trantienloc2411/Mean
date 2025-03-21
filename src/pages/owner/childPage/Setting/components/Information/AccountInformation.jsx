@@ -96,7 +96,7 @@ export default function AccountInformation({ userData, refetch }) {
   };
 
   return (
-    <Card title="Thông tin tài khoản" style={{ marginBottom: 24 }}>
+    <Card title="Thông tin tài khoản" style={{ marginBottom: 24, padding: 0 }}>
       <Row gutter={24} align="middle">
         <Col xs={24} sm={24} md={8} style={{ textAlign: "center" }}>
           <Avatar

@@ -57,7 +57,7 @@ export default function RentalLocationDetail() {
     {
       key: "4",
       label: "Đánh giá",
-      children: <RecentReviews reviews={rental?.reviews || []} />,
+      children: <RecentReviews />,
     },
     {
       key: "5",
