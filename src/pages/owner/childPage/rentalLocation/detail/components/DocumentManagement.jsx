@@ -15,14 +15,14 @@ import {
   useGetLandUsesRightQuery,
   useUpdateLandUsesRightMutation,
 } from "../../../../../../redux/services/landUsesApi";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import dayjs from "dayjs";
 import { supabase } from "../../../../../../redux/services/supabase";
 import { FaEdit, FaFile } from "react-icons/fa";
 import { Menu } from "antd";
 import { Dropdown } from "antd";
 import { getUserId } from "../../../../../../utils/storage";
-import { useEffect } from "react";
+
 export default function DocumentManagement({ rentalData }) {
   const idRental = rentalData?.id;
   const { data: fileData, isLoading } = useGetLandUsesRightQuery(idRental);
@@ -38,14 +38,14 @@ export default function DocumentManagement({ rentalData }) {
   if (isLoading) return <p>Đang tải dữ liệu...</p>;
   if (!fileData) return <RentalNone idRental={idRental} />;
 
-  useEffect(() => {
-    if (isEditModalOpen) {
+  if (isEditModalOpen) {
+    useEffect(() => {
       form.setFieldsValue({
-        documentName: fileData.documentName,
-        note: fileData.note,
+        documentName: fileData?.documentName || "",
+        note: fileData?.note || "",
       });
-    }
-  }, [isEditModalOpen, fileData]);
+    }, [fileData]);
+  }
 
   const handleMenuClick = ({ key }) => {
     if (key === "approve") {
