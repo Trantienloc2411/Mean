@@ -1,5 +1,5 @@
 import { Layout, Tabs } from "antd";
-import styles from "../Setting/Setting.module.scss";
+import styles from "./Setting.module.scss";
 import BankAccount from "./components/BankAccount/BankAccount";
 import MeanWallet from "./components/Wallet/MeanWallet";
 import { useParams } from "react-router-dom";
