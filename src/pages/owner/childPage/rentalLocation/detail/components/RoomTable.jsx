@@ -4,7 +4,7 @@ import { EllipsisOutlined, TagsOutlined } from "@ant-design/icons";
 
 // Enum
 const STATUS_MAP = {
-  1: { label: "Sẵn sàng", color: "green" },
+  1: { label: "Có Sẵn", color: "green" },
   2: { label: "Đã đặt", color: "blue" },
   3: { label: "Đang dọn dẹp", color: "orange" },
   4: { label: "Đang chuẩn bị", color: "purple" },
@@ -30,7 +30,7 @@ export default function RoomTableColumns({ onDetailClick, onEditClick }) {
 
   return [
     {
-      title: "Tên phòng",
+      title: "Số phòng",
       dataIndex: "name",
       key: "name",
       render: (name, record) => record.accommodationTypeId?.name || name
