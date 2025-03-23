@@ -5,8 +5,8 @@ import Booking from "./childPage/Booking/Booking.js";
 import Information from "./childPage/Information/Information.js";
 import Place from "./childPage/accomodation/Accomodation.jsx";
 import Policy from "./childPage/Policy/Policy.jsx";
-import Setting from "./childPage/Setting/Setting.js";
-import TypeRoom from "./childPage/TypeRoom/TypeRoom.js";
+import Setting from "./childPage/Setting/Setting.jsx";
+import TypeRoom from "./childPage/TypeRoom/TypeRoom.jsx";
 
 export default function Owner() {
   const storedKey = localStorage.getItem('ownerActiveTab') || "1";

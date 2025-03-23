@@ -9,7 +9,8 @@ const STATUS_MAP = {
   3: { label: "Đang dọn dẹp", color: "orange" },
   4: { label: "Đang chuẩn bị", color: "purple" },
   5: { label: "Bảo trì", color: "red" },
-  6: { label: "Đóng", color: "gray" }
+  6: { label: "Đóng", color: "gray" },
+  7: { label: "Đang sử dụng", color: "cyan" }
 };
 
 export default function RoomTableColumns({ onDetailClick, onEditClick }) {

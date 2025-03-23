@@ -30,7 +30,8 @@ const ACCOMMODATION_STATUS = Object.freeze({
   CLEANING: 3,
   PREPARING: 4,
   MAINTENANCE: 5,
-  CLOSED: 6
+  CLOSED: 6,
+  INUSE: 7
 });
 
 function getStatusColor(status) {
@@ -41,9 +42,11 @@ function getStatusColor(status) {
     case ACCOMMODATION_STATUS.PREPARING: return 'gold';
     case ACCOMMODATION_STATUS.MAINTENANCE: return 'orange';
     case ACCOMMODATION_STATUS.CLOSED: return 'red';
+    case ACCOMMODATION_STATUS.INUSE: return 'cyan';
     default: return 'default';
   }
 }
+
 
 function getStatusLabel(status) {
   switch (status) {
@@ -53,6 +56,7 @@ function getStatusLabel(status) {
     case 'PREPARING': return 'Đang chuẩn bị';
     case 'MAINTENANCE': return 'Bảo trì';
     case 'CLOSED': return 'Đóng cửa';
+    case 'INUSE': return 'Đang sử dụng';
     default: return status;
   }
 }

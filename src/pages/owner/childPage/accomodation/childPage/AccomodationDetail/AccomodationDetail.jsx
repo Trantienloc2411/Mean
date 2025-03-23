@@ -53,6 +53,7 @@ export default function AccommodationDetail(props) {
       case 4: return { text: "Đang chuẩn bị", color: "#722ed1", bgColor: "#f9f0ff" };
       case 5: return { text: "Bảo trì", color: "#ff4d4f", bgColor: "#fff1f0" };
       case 6: return { text: "Đóng cửa", color: "#595959", bgColor: "#fafafa" };
+      case 7: return { text: "Đang sử dụng", color: "#13c2c2", bgColor: "#e6fffb" };
       default: return { text: "Không xác định", color: "#d9d9d9", bgColor: "#fafafa" };
     }
   };
