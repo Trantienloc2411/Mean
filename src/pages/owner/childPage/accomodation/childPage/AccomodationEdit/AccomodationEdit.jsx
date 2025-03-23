@@ -1,208 +1,254 @@
-import { useLocation, useNavigate } from "react-router-dom";
-import styles from "./AccomodationEdit.module.scss";
-import { Button, Input, InputNumber, Switch, Checkbox, Row, Col, Form, Select } from "antd";
-import { ArrowLeftOutlined, SaveOutlined } from "@ant-design/icons";
+import React, { useState, useEffect } from "react";
+import {
+  Button,
+  Form,
+  Select,
+  Modal,
+  message,
+  Typography,
+  Divider,
+  Space,
+  Spin,
+  Badge
+} from "antd";
+import { SaveOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
-import { Upload } from "antd";
-import { InboxOutlined } from "@ant-design/icons";
+import { useLocation } from "react-router-dom";
+import ImageUpload from "../../../rentalLocation/create/ImageUpload"; 
+import { 
+  useUpdateAccommodationMutation 
+} from "../../../../../../redux/services/accommodationApi"; 
+import { useGetAllAccommodationTypesQuery } from "../../../../../../redux/services/accommodationTypeApi"; 
+import styles from "./AccomodationEdit.module.scss";
 
-export default function AccommodationEdit() {
+const { Title, Text } = Typography;
+const { Option } = Select;
+
+const ACCOMMODATION_STATUS = Object.freeze({
+  AVAILABLE: 1,
+  BOOKED: 2,
+  CLEANING: 3,
+  PREPARING: 4,
+  MAINTENANCE: 5,
+  CLOSED: 6,
+  INUSE: 7
+});
+
+function getStatusColor(status) {
+  switch (status) {
+    case ACCOMMODATION_STATUS.AVAILABLE: return 'green';
+    case ACCOMMODATION_STATUS.BOOKED: return 'blue';
+    case ACCOMMODATION_STATUS.CLEANING: return 'cyan';
+    case ACCOMMODATION_STATUS.PREPARING: return 'gold';
+    case ACCOMMODATION_STATUS.MAINTENANCE: return 'orange';
+    case ACCOMMODATION_STATUS.CLOSED: return 'red';
+    case ACCOMMODATION_STATUS.INUSE: return 'cyan';
+    default: return 'default';
+  }
+}
+
+
+function getStatusLabel(status) {
+  switch (status) {
+    case 'AVAILABLE': return 'Có sẵn';
+    case 'BOOKED': return 'Đã đặt';
+    case 'CLEANING': return 'Đang dọn dẹp';
+    case 'PREPARING': return 'Đang chuẩn bị';
+    case 'MAINTENANCE': return 'Bảo trì';
+    case 'CLOSED': return 'Đóng cửa';
+    case 'INUSE': return 'Đang sử dụng';
+    default: return status;
+  }
+}
+
+export default function AccommodationEdit({ 
+  visible, 
+  onCancel, 
+  onSuccess, 
+  accommodationId, 
+  accommodationData,
+  isLoading: isLoadingAccommodation 
+}) {
+  const [form] = Form.useForm();
+  const [fileList, setFileList] = useState([]);
+  
   const location = useLocation();
-  const roomData = location.state.data;
-  const navigate = useNavigate();
+  const pathnameParts = location.pathname.split("/");
+  const rentalLocationId = pathnameParts[pathnameParts.indexOf("rental-location") + 1];
+  
+  const [updateAccommodation, { isLoading }] = useUpdateAccommodationMutation();
+  const { data: accommodationTypes } = useGetAllAccommodationTypesQuery();
 
-  const { Option } = Select;
-  const { Dragger } = Upload;
+  useEffect(() => {
+    if (visible && accommodationData) {
+      form.setFieldsValue({
+        accommodationTypeId: accommodationData.accommodationTypeId?._id,
+        description: accommodationData.description || "",
+        status: accommodationData.status
+      });
 
-  const props = {
-    name: "file",
-    multiple: true,
-    action: "/upload.do", // Replace with your upload endpoint
-    onChange(info) {
-      const { status } = info.file;
-      if (status !== "uploading") {
-        console.log(info.file, info.fileList);
+      setFileList([]);
+      
+      if (accommodationData.image && Array.isArray(accommodationData.image)) {
+        const newFileList = accommodationData.image
+          .filter(url => url && url.trim() !== "") // Filter out empty strings
+          .map((url, index) => ({
+            uid: `-${index + 1}`,
+            name: `image-${index + 1}.png`,
+            status: 'done',
+            url: url,
+          }));
+        
+        if (newFileList.length > 0) {
+          setFileList(newFileList);
+        }
       }
-      if (status === "done") {
-        console.log(`${info.file.name} file uploaded successfully.`);
-      } else if (status === "error") {
-        console.log(`${info.file.name} file upload failed.`);
-      }
-    },
+    }
+  }, [visible, accommodationData, form]);
+
+  const handleSaveAction = async (values) => {
+    try {
+      const imageUrls = fileList.map(file => file.url || "").filter(url => url);
+      
+      const updatedData = {
+        id: accommodationId,
+        rentalLocationId: rentalLocationId,
+        accommodationTypeId: values.accommodationTypeId,
+        description: values.description || "",
+        image: imageUrls.length > 0 ? imageUrls : [""], // Use all images or empty array with one empty string
+        status: values.status
+      };
+      
+      await updateAccommodation(updatedData).unwrap();
+      message.success({
+        content: "Cập nhật phòng thành công!",
+        style: { marginTop: '20px' },
+      });
+      onSuccess();
+    } catch (error) {
+      console.error("Error updating accommodation:", error);
+      message.error({
+        content: "Có lỗi xảy ra khi cập nhật phòng!",
+        style: { marginTop: '20px' },
+      });
+    }
   };
 
-  const handleSaveAction = (values) => {
-    // Here you can submit the form values to your backend
-    console.log("Form values: ", values);
-  };
-
-  const handleBackNavigate = () => {
-    navigate("../location/AccomodationDetail");
-  };
+  const statusOptions = Object.entries(ACCOMMODATION_STATUS).map(([label, value]) => ({
+    label: getStatusLabel(label),
+    value,
+    color: getStatusColor(value)
+  }));
 
   return (
-    <div className={styles.content}>
-      <div className={styles.btnReturn}>
-        <Button onClick={handleBackNavigate} icon={<ArrowLeftOutlined />}>
-          Trở về
-        </Button>
-      </div>
-      <h2>Chỉnh sửa thông tin phòng</h2>
-      <Form
-        onFinish={handleSaveAction}
-        initialValues={{
-          roomName: roomData.roomName,
-          roomType: "standard", // You may adjust the default value accordingly
-          description: roomData.description,
-          maxPeople: roomData.maxPeople,
-          price: roomData.price,
-          amenities: [], // Populate this based on roomData.amenities if available
-        }}
-      >
-        <div className={styles.component}>
-          <div className={styles.valueInput}>
-            <div className={styles.leftSide}>
-              <h3>Tên phòng</h3>
-              <Form.Item name="roomName" rules={[{ required: true, message: 'Please input room name!' }]}>
-                <Input placeholder="Tên phòng" />
-              </Form.Item>
-              <h3 style={{ marginTop: 20 }}>Loại phòng</h3>
-              <Form.Item name="roomType">
-                <Select
-                  defaultValue="Mô tả về khu vực cho thuê"
-                  className={styles.customSelect}
-                  dropdownClassName={styles.customDropdown}
-                >
-                  <Option value="standard">Standard</Option>
-                  <Option value="deluxe">Deluxe</Option>
-                  <Option value="suite">Suite</Option>
-                </Select>
-              </Form.Item>
-              <div className={styles.switchOption} style={{alignItems: "baseline", display: "flex"}}>
-                <h3 style={{ marginBottom: 0 }}>Trạng thái phòng</h3>
-                <Form.Item name="status" valuePropName="checked">
-                  <Switch
-                    checkedChildren="Hoạt động"
-                    unCheckedChildren="Tạm ngưng"
-                    defaultChecked
-                    className={styles.customSwitch}
-                  />
-                </Form.Item>
-              </div>
-            </div>
-            <div className={styles.rightSide}>
-              <h3>Mô tả</h3>
-              <Form.Item name="description">
-                <TextArea
-                  rows={4}
-                  placeholder="maxLength is 255"
-                  maxLength={255}
-                />
-              </Form.Item>
-              <div className={styles.maxPeopleDiv}>
-                <h3 style={{ marginTop: 20 }}>Số người tối đa ở: </h3>
-                <Form.Item name="maxPeople">
-                  <InputNumber
-                    size="medium"
-                    min={1}
-                    max={10}
-                    style={{ width: "100%" }}
-                  />
-                </Form.Item>
-              </div>
-              <div className={styles.price}>
-                <h3>Giá tiền: </h3>
-                <Form.Item name="price">
-                  <InputNumber
-                    formatter={(value) =>
-                      `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") + " ₫"
-                    }
-                    parser={(value) => value?.replace(/\₫\s?|(,*)/g, "").trim()}
-                    style={{ width: "100%" }}
-                  />
-                </Form.Item>
-              </div>
-            </div>
-          </div>
-
-          <div className={styles.amenities}>
-            <h3>Dịch vụ của phòng: </h3>
-            <div style={{ alignItems: "center" }}>
-              <Checkbox.Group style={{ width: "100%" }} name="amenities">
-                <Row gutter={[16, 16]}>
-                  <Col span={6}>
-                    <Checkbox value="Wifi">Wifi</Checkbox>
-                  </Col>
-                  <Col span={6}>
-                    <Checkbox value="AirCondition">Máy điều hoà</Checkbox>
-                  </Col>
-                  <Col span={6}>
-                    <Checkbox value="Kitchen">Bếp</Checkbox>
-                  </Col>
-                  <Col span={6}>
-                    <Checkbox value="TV">TiVi</Checkbox>
-                  </Col>
-                  <Col span={6}>
-                    <Checkbox value="WashingMachine">Máy giặt</Checkbox>
-                  </Col>
-                  <Col span={6}>
-                    <Checkbox value="FreeParking">Đỗ xe miễn phí</Checkbox>
-                  </Col>
-                  <Col span={6}>
-                    <Checkbox value="Pool">Hồ bơi</Checkbox>
-                  </Col>
-                  <Col span={6}>
-                    <Checkbox value="HotTub">Bồn tắm nóng</Checkbox>
-                  </Col>
-                  <Col span={6}>
-                    <Checkbox value="Gym">Gym</Checkbox>
-                  </Col>
-                  <Col span={6}>
-                    <Checkbox value="FreeParking">Miễn phí giữ xe</Checkbox>
-                  </Col>
-                </Row>
-              </Checkbox.Group>
-            </div>
-          </div>
-          <div className={styles.uploaderContainer}>
-            <h3>Accommodation Images</h3>
-            <Dragger {...props} className={styles.uploaderDragger}>
-              <p className={styles.uploadIcon}>
-                <InboxOutlined className="icon" />
-              </p>
-              <p className={styles.uploadText}>
-                Drag and drop images here, or click to select files
-              </p>
-              <p className={styles.uploadHint}>
-                Supported formats: JPG, PNG. Max size: 5MB
-              </p>
-            </Dragger>
-          </div>
+    <Modal
+      title={<Title level={4} className={styles.modalTitle}>Cập nhật thông tin phòng</Title>}
+      open={visible}
+      onCancel={onCancel}
+      width={800}
+      footer={null}
+      destroyOnClose
+      bodyStyle={{ padding: '20px' }}
+    >
+      <Divider className={styles.modalDivider} />
+      
+      {isLoadingAccommodation ? (
+        <div className={styles.loadingContainer}>
+          <Spin size="large" />
+          <Text>Đang tải thông tin phòng...</Text>
         </div>
-
-        <div
-          style={{
-            display: "flex",
-            justifyContent: "end",
-          }}
+      ) : (
+        <Form
+          form={form}
+          onFinish={handleSaveAction}
+          layout="vertical"
+          className={styles.formContainer}
         >
-          <Button
-            icon={<SaveOutlined />}
-            htmlType="submit"
-            size="large"
-            style={{
-              backgroundColor: "#177EE3",
-              color: "#fff",
-              marginTop: 20,
-              alignContent: "flex-end",
-              width: 150,
-              height: 40,
-            }}
-          >
-            Lưu lại
-          </Button>
-        </div>
-      </Form>
-    </div>
+          <div className={styles.formSection}>
+            <Form.Item 
+              name="accommodationTypeId"
+              label={<Text strong>Loại phòng</Text>}
+              rules={[{ required: true, message: "Vui lòng chọn loại phòng!" }]}
+            >
+              <Select 
+                placeholder="Chọn loại phòng"
+                size="large"
+                className={styles.selectLarge}
+              >
+                {accommodationTypes?.data?.map(type => (
+                  <Option key={type._id} value={type._id}>{type.name}</Option>
+                ))}
+              </Select>
+            </Form.Item>
+
+            <Form.Item 
+              name="description" 
+              label={<Text strong>Mô tả</Text>}
+            >
+              <TextArea
+                rows={4}
+                placeholder="Tối đa 255 ký tự"
+                maxLength={255}
+                showCount
+                className={styles.textArea}
+              />
+            </Form.Item>
+
+            <Form.Item 
+              name="status" 
+              label={<Text strong>Trạng thái</Text>}
+              rules={[{ required: true, message: "Vui lòng chọn trạng thái!" }]}
+            >
+              <Select 
+                placeholder="Chọn trạng thái"
+                size="large"
+                className={styles.selectLarge}
+                optionLabelProp="label"
+              >
+                {statusOptions.map(option => (
+                  <Option key={option.value} value={option.value} label={option.label}>
+                    <Space>
+                      <Badge color={option.color} className={styles.statusBadge} />
+                      {option.label}
+                    </Space>
+                  </Option>
+                ))}
+              </Select>
+            </Form.Item>
+          </div>
+          
+          <div className={styles.imageUploadSection}>
+            <Form.Item 
+              label={<Text strong>Hình ảnh phòng</Text>}
+            >
+              <ImageUpload fileList={fileList} setFileList={setFileList} />
+              <div className={styles.imageHint}>
+                <InfoCircleOutlined />
+                <Text type="secondary">Ảnh đầu tiên sẽ được sử dụng làm ảnh chính</Text>
+              </div>
+            </Form.Item>
+          </div>
+
+          <div className={styles.footerButtons}>
+            <Button 
+              onClick={onCancel} 
+              size="large"
+              className={styles.cancelButton}
+            >
+              Huỷ
+            </Button>
+            <Button
+              icon={<SaveOutlined />}
+              htmlType="submit"
+              loading={isLoading}
+              className={styles.saveButton}
+              size="large"
+            >
+              Lưu lại
+            </Button>
+          </div>
+        </Form>
+      )}
+    </Modal>
   );
 }

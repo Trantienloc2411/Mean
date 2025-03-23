@@ -1,143 +1,93 @@
-.content {
-    padding: 10px;
-    
-    .btnReturn {
-        max-width: 30px;
-        margin-bottom:20px;
-    }
+.formContainer {
+  padding: 12px 0;
+}
 
-    .btnSave{
-        
-    }
-    
-    .component{
-        display: flex;
-        justify-content: center;
-        flex-direction: column;
-        align-items: center;
-        .valueInput{
-            padding: 20px ;
-            display: flex;
-            justify-content: space-around;
-            align-items: start;
-            border-color: #e5e5e5;
-            border-radius: 10px;
-            border-style: solid;
-            width: 100%;
-            .leftSide{
-                min-width: 40%;
-                .customSelect {
-                    width: 100%;
-                    .ant-select-selector {
-                      background-color: #f8f8f8;
-                      border-radius: 8px !important;
-                      border: 1px solid #e5e5e5;
-                      padding: 10px !important;
-                      height: auto !important;
-                      display: flex;
-                      align-items: center;
-                      font-size: 14px;
-                      box-shadow: none;
-                  
-                      &:hover {
-                        border-color: #d9d9d9;
-                      }
-                    }
-                  
-                    .ant-select-arrow {
-                      color: #6e00ff; // Customize arrow color
-                    }
-                  }
-                  
-                  .customDropdown {
-                    .ant-select-item {
-                      font-size: 14px;
-                      padding: 8px 12px;
-                      &:hover {
-                        background-color: #f0f0f0 !important;
-                      }
-                    }
-                  }
-    
-                  .switchOption {
-                    padding-top: 20px;
-                    display: flex;
-                    justify-content: start;
-                    align-items: center;
-                    gap: 20px;
-    
-    
-                  }
-                 
-            }
-    
-            .rightSide{
-                min-width: 40%;
-                .maxPeopleDiv{
-                    margin-top: 20px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    gap: 20px
-                }
-                .price{
-                    margin-top: 20px;
-                    display: flex;
-                    justify-content: space-between;
-                    align-items: center;
-                    
-    
-                }
-            }
-        }
-    
-        .amenities{
-            margin-top: 20px;
-            max-width: 70%;
-            border-color: #e5e5e5;
-            border-radius: 10px;
-            border-style: solid;
-            padding: 20px;
-            
-        }
+.formSection {
+  margin-bottom: 24px;
+  background: #f9f9f9;
+  padding: 16px;
+  border-radius: 8px;
+}
 
-        /* Container for the uploader */
-        .uploaderContainer {
-            margin-top: 20px;
-            padding: 20px;
-            width: 80%;
-            border-color: #e5e5e5;
-            border-radius: 10px;
-            border-style: solid;
-            .uploaderDragger {
-                border-radius: 8px;
-                padding: 16px;
-            }
-            
-            /* Icon styling */
-            .uploadIcon {
-                .icon {
-                color: #8c8c8c;
-                font-size: 32px;
-                }
-            }
-            
-            /* Text customization */
-            .uploadText {
-                font-size: 16px;
-                color: #595959;
-            }
-            
-            .uploadHint {
-                font-size: 14px;
-                color: #8c8c8c;
-            }
-        }
-        
-        /* Dragger customization */
-        
-        
-    }
+.formLabel {
+  font-weight: 500;
+}
 
-    
+.imageUploadSection {
+  background: #f9f9f9;
+  padding: 16px;
+  border-radius: 8px;
+  margin-bottom: 24px;
+}
+
+.imageHint {
+  margin-top: 8px;
+  color: #888;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.footerButtons {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 24px;
+}
+
+.cancelButton {
+  border-radius: 6px;
+  height: 40px;
+  min-width: 100px;
+}
+
+.saveButton {
+  background-color: #177EE3;
+  color: #fff;
+  border-radius: 6px;
+  height: 40px;
+  min-width: 150px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border: none;
+
+  &:hover {
+    background-color: #0e6cc7;
+  }
+}
+
+.modalTitle {
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 40px;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.statusBadge {
+  margin-right: 8px;
+}
+
+.selectLarge {
+  width: 100%;
+}
+
+.modalBody {
+  padding: 20px;
+}
+
+.modalDivider {
+  margin: 12px 0 24px;
+}
+
+.textArea {
+  resize: none;
 }
