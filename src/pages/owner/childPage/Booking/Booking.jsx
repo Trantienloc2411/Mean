@@ -1,133 +1,144 @@
-import { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
 import styles from '../Booking/Booking.module.scss';
 import ListBooking from './Components/ListBooking/ListBooking';
 import ListPlace from './Components/ListPlace/ListPlace';
-import { 
-  useGetBookingsByOwnerIdQuery, 
+import {
+  useGetBookingsByOwnerIdQuery,
   useUpdateBookingMutation,
-  useGetBookingByIdQuery,
 } from '../../../../redux/services/bookingApi';
+import { useGetOwnerDetailByUserIdQuery } from '../../../../redux/services/ownerApi';
 
 const BOOKING_STATUS = Object.freeze({
-  CONFIRMED: 1,
-  NEEDCHECKIN: 2,
-  CHECKEDIN: 3,
-  NEEDCHECKOUT: 4,
-  CHECKEDOUT: 5,
-  CANCELLED: 6,
-  COMPLETED: 7,
+  CONFIRMED: 1,     
+  PENDING: 2,    
+  NEEDCHECKIN: 3,  
+  CHECKEDIN: 4,   
+  NEEDCHECKOUT: 5, 
+  CHECKEDOUT: 6,   
+  CANCELLED: 7,   
+  COMPLETED: 8,    
 });
 
 const PAYMENT_STATUS = Object.freeze({
-  BOOKING: 1,
-  PENDING: 2,
-  PAID: 3,
-  REFUND: 4,
-  FAILED: 5,
+  BOOKING: 1,   
+  PENDING: 2,      
+  PAID: 3,          
+  REFUND: 4,        
+  FAILED: 5,         
 });
 
 const getBookingStatusDisplay = (statusCode) => {
-  switch (statusCode) {
-    case BOOKING_STATUS.CONFIRMED:
-      return "Confirmed";
-    case BOOKING_STATUS.NEEDCHECKIN:
-      return "Pending Check-in";
-    case BOOKING_STATUS.CHECKEDIN:
-      return "Checked In";
-    case BOOKING_STATUS.NEEDCHECKOUT:
-      return "Pending Check-out";
-    case BOOKING_STATUS.CHECKEDOUT:
-      return "Checked Out";
-    case BOOKING_STATUS.CANCELLED:
-      return "Canceled";
-    case BOOKING_STATUS.COMPLETED:
-      return "Complete";
-    default:
-      return "Pending";
-  }
+  const statusMap = {
+    [BOOKING_STATUS.CONFIRMED]: "Confirmed",
+    [BOOKING_STATUS.PENDING]: "Pending",
+    [BOOKING_STATUS.NEEDCHECKIN]: "Need Check-in",
+    [BOOKING_STATUS.CHECKEDIN]: "Checked In",
+    [BOOKING_STATUS.NEEDCHECKOUT]: "Need Check-out",
+    [BOOKING_STATUS.CHECKEDOUT]: "Checked Out",
+    [BOOKING_STATUS.CANCELLED]: "Cancelled",
+    [BOOKING_STATUS.COMPLETED]: "Completed"
+  };
+  return statusMap[statusCode] || "Unknown Status";
 };
 
 const getPaymentStatusDisplay = (statusCode) => {
-  switch (statusCode) {
-    case PAYMENT_STATUS.BOOKING:
-      return "Booking";
-    case PAYMENT_STATUS.PENDING:
-      return "Pending";
-    case PAYMENT_STATUS.PAID:
-      return "Fully Paid";
-    case PAYMENT_STATUS.REFUND:
-      return "Refunded";
-    case PAYMENT_STATUS.FAILED:
-      return "Failed";
-    default:
-      return "Unpaid";
+  const statusMap = {
+    [PAYMENT_STATUS.BOOKING]: "Booking",
+    [PAYMENT_STATUS.PENDING]: "Pending",
+    [PAYMENT_STATUS.PAID]: "Fully Paid",
+    [PAYMENT_STATUS.REFUND]: "Refunded",
+    [PAYMENT_STATUS.FAILED]: "Failed",
+  };
+  return statusMap[statusCode] || "Unpaid";
+};
+
+const formatDate = (dateString) => {
+  try {
+    const [datePart, timePart] = dateString.split(' ');
+    const [day, month, year] = datePart.split('/');
+    const [hours, minutes, seconds] = timePart.split(':');
+    const date = new Date(year, month - 1, day, hours, minutes, seconds);
+    return date.toLocaleString();
+  } catch (error) {
+    console.error('Invalid date format:', dateString);
+    return 'Invalid Date';
   }
 };
 
 export default function Booking() {
-  const { ownerId: routeOwnerId } = useParams();
-  const [manualOwnerId, setManualOwnerId] = useState(null);
-  const [selectedBookingId, setSelectedBookingId] = useState(null);
-  const [updateBooking, { isLoading: isUpdating }] = useUpdateBookingMutation();
-  
-  useEffect(() => {
-    if (!routeOwnerId || routeOwnerId === 'undefined') {
-      const urlParts = window.location.pathname.split('/');
-      const ownerIdIndex = urlParts.indexOf('owner') + 1;
-      if (ownerIdIndex > 0 && ownerIdIndex < urlParts.length) {
-        setManualOwnerId(urlParts[ownerIdIndex]);
-      }
-    }
-  }, [routeOwnerId]);
-
-  const effectiveOwnerId = routeOwnerId && routeOwnerId !== 'undefined' ? routeOwnerId : manualOwnerId;
-  
-  const skipQuery = !effectiveOwnerId;
-  const { data: bookingsData, isLoading, error, refetch: refetchBookings } = useGetBookingsByOwnerIdQuery(effectiveOwnerId, {
-    skip: skipQuery
-  });
-  
-  const { data: selectedBookingData, isLoading: isLoadingBookingDetails } = useGetBookingByIdQuery(selectedBookingId, {
-    skip: !selectedBookingId
-  });
-  
-  const [selectedLocation, setSelectedLocation] = useState('all');
+  const [effectiveOwnerId, setEffectiveOwnerId] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [locations, setLocations] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState('all');
+
+  const [updateBooking, { isLoading: isUpdating }] = useUpdateBookingMutation();
+
+  const userId = localStorage.getItem('user_id');
+
+  const {
+    data: ownerDetailData,
+    isLoading: isLoadingOwnerDetail,
+    error: ownerDetailError
+  } = useGetOwnerDetailByUserIdQuery(
+    userId,
+    {
+      skip: !userId,
+      onSuccess: (data) => {
+        console.log('🔍 Owner Detail Query Success:', data);
+      },
+      onError: (error) => {
+        console.error('❌ Owner Detail Query Error:', error);
+      }
+    }
+  );
 
   useEffect(() => {
-    if (bookingsData && bookingsData.bookings) {
-      const formattedBookings = bookingsData.bookings.map((bookingObj) => {
-        const bookingKey = Object.keys(bookingObj)[0];
-        const booking = bookingObj[bookingKey];
-        
+    if (ownerDetailData) {
+      const ownerId = ownerDetailData.id || ownerDetailData._id;
+      console.log('🔑 Extracted Owner ID:', ownerId);
+      setEffectiveOwnerId(ownerId);
+    }
+  }, [ownerDetailData]);
+
+  const {
+    data: bookingsData,
+    isLoading,
+    error,
+    refetch: refetchBookings
+  } = useGetBookingsByOwnerIdQuery(
+    effectiveOwnerId,
+    {
+      skip: !effectiveOwnerId,
+      onSuccess: (data) => {
+        console.log('📋 Bookings Query Full Response:', data);
+      },
+      onError: (error) => {
+        console.error('❌ Bookings Query Error:', error);
+      }
+    }
+  );
+
+  useEffect(() => {
+    if (bookingsData && bookingsData.length > 0) {
+      const processedBookings = bookingsData.map(bookingWrapper => {
+        const booking = bookingWrapper.booking_1 || bookingWrapper;
         return {
-          No: booking._id ? booking._id.substring(booking._id.length - 5) : 'N/A',
-          "Customer Name": booking.customerId?.userId?.fullName || "Unknown",
-          Location: booking.accommodationId?.description || "Unknown",
-          "Booking Time": new Date(booking.createdAt).toLocaleString(),
-          "Usage Time": `${new Date(booking.checkInHour).toLocaleString()} ${booking.checkOutHour ? `- ${new Date(booking.checkOutHour).toLocaleString()}` : ''}`,
-          "Total Price": booking.totalPrice || booking.basePrice || 0,
-          Status: getBookingStatusDisplay(booking.status), 
-          Payment: getPaymentStatusDisplay(booking.paymentStatus),
-          _originalBooking: booking
+          _originalBooking: booking,
+          Status: getBookingStatusDisplay(booking.status),
+          Payment: getPaymentStatusDisplay(booking.paymentStatus)
         };
       });
-      
-      setBookings(formattedBookings);
-      
-      const locationsList = [];
-      bookingsData.bookings.forEach(bookingObj => {
-        const bookingKey = Object.keys(bookingObj)[0];
-        const booking = bookingObj[bookingKey];
-        
-        if (booking.accommodationId && !locationsList.some(loc => loc._id === booking.accommodationId._id)) {
-          locationsList.push(booking.accommodationId);
-        }
-      });
-      
-      setLocations(locationsList);
+
+      setBookings(processedBookings);
+
+      const uniqueLocations = processedBookings
+        .map(booking => booking._originalBooking.accommodationId)
+        .filter((location, index, self) =>
+          location &&
+          index === self.findIndex((t) => t._id === location._id)
+        );
+
+      setLocations(uniqueLocations);
     }
   }, [bookingsData]);
 
@@ -137,45 +148,56 @@ export default function Booking() {
 
   const handleStatusChange = async (bookingId, newStatus) => {
     try {
-      await updateBooking({
-        id: bookingId,
-        status: newStatus
+      const statusCodeKey = Object.keys(BOOKING_STATUS).find(
+        key => getBookingStatusDisplay(BOOKING_STATUS[key]) === newStatus
+      );
+
+      if (!statusCodeKey) {
+        throw new Error(`Invalid status: ${newStatus}`);
+      }
+
+      const statusCode = BOOKING_STATUS[statusCodeKey];
+      const result = await updateBooking({
+        bookingId,
+        status: statusCode
       }).unwrap();
-      
       refetchBookings();
+
+      return result;
     } catch (error) {
-      console.error("Failed to update booking status:", error);
+      console.error('Error updating booking status:', error);
+      throw error;
     }
   };
 
-  const filteredBookings = selectedLocation === 'all' 
-    ? bookings 
-    : bookings.filter(booking => 
-        booking._originalBooking.accommodationId && 
-        booking._originalBooking.accommodationId._id === selectedLocation
-      );
+  const filteredBookings = selectedLocation === 'all'
+    ? bookings
+    : bookings.filter(booking =>
+      booking._originalBooking.accommodationId &&
+      booking._originalBooking.accommodationId._id === selectedLocation
+    );
 
-  if (skipQuery) {
-    return <div className="error-message">Invalid owner ID. Please check the URL parameters.</div>;
-  }
-  
+  if (isLoadingOwnerDetail) return <div>Loading owner details...</div>;
+  if (ownerDetailError) return <div>Error fetching owner details</div>;
+  if (!userId) return <div>No user ID found</div>;
+  if (!effectiveOwnerId) return <div>Could not retrieve owner ID</div>;
   if (isLoading) return <div>Loading...</div>;
-  if (error) return <div className="error-message">Error: {error.data?.message || error.error || 'Failed to fetch bookings'}</div>;
+  if (error) return <div>Error fetching bookings</div>;
 
   return (
     <div className={styles.content}>
-      <ListPlace 
-        locations={locations} 
+      <ListPlace
+        locations={locations}
         onSelectLocation={handleLocationSelect}
         selectedLocation={selectedLocation}
       />
-      <ListBooking 
-        bookings={filteredBookings} 
+      <ListBooking
+        bookings={filteredBookings}
         bookingStatusCodes={BOOKING_STATUS}
         paymentStatusCodes={PAYMENT_STATUS}
         onStatusChange={handleStatusChange}
         isUpdating={isUpdating}
       />
-    </div>  
+    </div>
   );
 }

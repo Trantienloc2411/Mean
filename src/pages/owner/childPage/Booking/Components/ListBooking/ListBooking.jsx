@@ -1,63 +1,81 @@
-import styles from "./ListBooking.module.scss";
-import { Dropdown, Tag, Input, Button, Menu, message } from "antd";
-import TableModify from "../../../../../dashboard/components/Table";
-import { FilterOutlined, MoreOutlined } from "@ant-design/icons";
-import { useState, useEffect } from "react";
-import debounce from "lodash/debounce";
-import Filter from "../../../../../../components/Filter/Filter";
-import UpdateBookingStatus from "../UpdateBookingStatus/UpdateBookingStatus";
+"use client"
+
+import { useState, useEffect } from "react"
+import { Dropdown, Input, Button, Menu, message } from "antd"
+import { FilterOutlined, SearchOutlined } from "@ant-design/icons"
+import { CreditCardOutlined, DollarOutlined, BankOutlined, WalletOutlined } from "@ant-design/icons"
+import debounce from "lodash/debounce"
+import TableModify from "../../../../../dashboard/components/Table"
+import Filter from "../../../../../../components/Filter/Filter"
+import UpdateBookingStatus from "../UpdateBookingStatus/UpdateBookingStatus"
+import styles from "./ListBooking.module.scss"
+
+const getBookingStatusDisplay = (statusCode, bookingStatusCodes) => {
+  const statusMap = {
+    [bookingStatusCodes.CONFIRMED]: "Confirmed",
+    [bookingStatusCodes.PENDING]: "Pending",
+    [bookingStatusCodes.NEEDCHECKIN]: "Need Check-in",
+    [bookingStatusCodes.CHECKEDIN]: "Checked In",
+    [bookingStatusCodes.NEEDCHECKOUT]: "Need Check-out",
+    [bookingStatusCodes.CHECKEDOUT]: "Checked Out",
+    [bookingStatusCodes.CANCELLED]: "Cancelled",
+    [bookingStatusCodes.COMPLETED]: "Completed"
+  };
+  return statusMap[statusCode] || "Unknown Status";
+};
+
+const HorizontalEllipsisIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="3" cy="8" r="1.5" fill="currentColor" />
+    <circle cx="8" cy="8" r="1.5" fill="currentColor" />
+    <circle cx="13" cy="8" r="1.5" fill="currentColor" />
+  </svg>
+)
 
 export default function ListBooking({ 
   bookings, 
   bookingStatusCodes, 
-  paymentStatusCodes,
-  onStatusChange,
-  onCancelBooking,
-  onConfirmBooking,
-  onCheckInBooking,
-  onCheckOutBooking,
-  isUpdating,
-  isCancelling,
-  isConfirming,
-  isCheckingIn,
-  isCheckingOut
+  paymentStatusCodes, 
+  onStatusChange, 
+  isUpdating 
 }) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredData, setFilteredData] = useState(bookings || []);
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filteredData, setFilteredData] = useState(bookings || [])
   const [selectedValues, setSelectedValues] = useState({
     status: [],
     payment: [],
-  });
-  const [selectedBooking, setSelectedBooking] = useState(null);
-  const [statusModalVisible, setStatusModalVisible] = useState(false);
-  const [actionInProgress, setActionInProgress] = useState(false);
+  })
+  const [selectedBooking, setSelectedBooking] = useState(null)
+  const [statusModalVisible, setStatusModalVisible] = useState(false)
 
   useEffect(() => {
-    setFilteredData(bookings || []);
-  }, [bookings]);
+    setFilteredData(bookings || [])
+  }, [bookings])
 
-  useEffect(() => {
-    setActionInProgress(isUpdating || isCancelling || isConfirming || isCheckingIn || isCheckingOut);
-  }, [isUpdating, isCancelling, isConfirming, isCheckingIn, isCheckingOut]);
+  const getPaymentStatusDisplay = (statusCode) => {
+    const statusMap = {
+      [paymentStatusCodes.BOOKING]: "Booking",
+      [paymentStatusCodes.PENDING]: "Pending",
+      [paymentStatusCodes.PAID]: "Fully Paid",
+      [paymentStatusCodes.REFUND]: "Refunded",
+      [paymentStatusCodes.FAILED]: "Failed",
+    };
+    return statusMap[statusCode] || "Unpaid";
+  };
 
-  const statusOptions = [
-    { label: <Tag color="blue">Confirmed</Tag>, value: "Confirmed" },
-    { label: <Tag color="orange">Pending Check-in</Tag>, value: "Pending Check-in" },
-    { label: <Tag color="purple">Checked In</Tag>, value: "Checked In" },
-    { label: <Tag color="gold">Pending Check-out</Tag>, value: "Pending Check-out" },
-    { label: <Tag color="cyan">Checked Out</Tag>, value: "Checked Out" },
-    { label: <Tag color="red">Canceled</Tag>, value: "Canceled" },
-    { label: <Tag color="green">Complete</Tag>, value: "Complete" },
-  ];
+  const statusOptions = Object.entries(bookingStatusCodes).map(([key, value]) => ({
+    label: <span className={`${styles.statusTag} ${styles[key.toLowerCase()]}`}>
+      {getBookingStatusDisplay(value, bookingStatusCodes)}
+    </span>,
+    value: getBookingStatusDisplay(value, bookingStatusCodes)
+  }));
 
-  const paymentOptions = [
-    { label: <Tag color="blue">Booking</Tag>, value: "Booking" },
-    { label: <Tag color="orange">Pending</Tag>, value: "Pending" },
-    { label: <Tag color="green">Fully Paid</Tag>, value: "Fully Paid" },
-    { label: <Tag color="purple">Refunded</Tag>, value: "Refunded" },
-    { label: <Tag color="red">Failed</Tag>, value: "Failed" },
-    { label: <Tag color="default">Unpaid</Tag>, value: "Unpaid" },
-  ];
+  const paymentOptions = Object.entries(paymentStatusCodes).map(([key, value]) => ({
+    label: <span className={`${styles.paymentTag} ${styles[key.toLowerCase()]}`}>
+      {getPaymentStatusDisplay(value)}
+    </span>,
+    value: getPaymentStatusDisplay(value)
+  }));
 
   const filterGroups = [
     {
@@ -70,367 +88,242 @@ export default function ListBooking({
       title: "Thanh toán",
       options: paymentOptions,
     },
-  ];
+  ]
 
   const applyFilters = (filters) => {
-    let filtered = [...bookings];
+    let filtered = [...bookings]
 
-    if (filters.status.length > 0) {
+    if (filters.bookingStatus && filters.bookingStatus.length > 0) {
       filtered = filtered.filter((item) =>
-        filters.status.includes(item.Status)
-      );
+        filters.bookingStatus.includes(item.Status)
+      )
     }
 
-    if (filters.payment.length > 0) {
+    if (filters.paymentStatus && filters.paymentStatus.length > 0) {
       filtered = filtered.filter((item) =>
-        filters.payment.includes(item.Payment)
-      );
+        filters.paymentStatus.includes(item.Payment)
+      )
     }
 
     if (searchTerm) {
-      filtered = filtered.filter((item) =>
-        item["Customer Name"].toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      filtered = filtered.filter((item) => {
+        const customerName = item._originalBooking.customerId?.userId?.fullName || ""
+        return customerName.toLowerCase().includes(searchTerm.toLowerCase())
+      })
     }
 
-    setFilteredData(filtered);
-  };
+    setFilteredData(filtered)
+  }
 
   const handleFilterChange = (filterName, newValues) => {
     const updatedFilters = {
       ...selectedValues,
       [filterName]: newValues,
-    };
-    
-    setSelectedValues(updatedFilters);
-    applyFilters(updatedFilters);
-  };
+    }
+
+    setSelectedValues(updatedFilters)
+    applyFilters(updatedFilters)
+  }
 
   const debouncedSearch = debounce((value) => {
-    setSearchTerm(value);
+    setSearchTerm(value)
     applyFilters({
       ...selectedValues,
       searchTerm: value,
-    });
-  }, 500);
+    })
+  }, 500)
 
   const handleSearch = (e) => {
-    const value = e.target.value;
-    debouncedSearch(value);
-  };
+    const value = e.target.value
+    debouncedSearch(value)
+  }
 
   useEffect(() => {
     return () => {
-      debouncedSearch.cancel();
-    };
-  }, []);
-
-  const handleViewDetails = (booking) => {
-    console.log("View details:", booking);
-  };
-
-  const handleStatusUpdate = (booking) => {
-    setSelectedBooking(booking);
-    setStatusModalVisible(true);
-  };
-
-  const handleCloseStatusModal = () => {
-    setStatusModalVisible(false);
-    setSelectedBooking(null);
-  };
-
-  const handleCustomStatusChange = async (booking, newStatus) => {
-    if (actionInProgress) {
-      message.warning("Another action is in progress. Please wait.");
-      return;
+      debouncedSearch.cancel()
     }
-    
-    try {
-      await onStatusChange(booking._originalBooking._id, newStatus);
-      message.success("Booking status updated successfully");
-    } catch (error) {
-      message.error("Failed to update booking status");
-    }
-  };
-
-  const handleCancel = async (booking) => {
-    if (actionInProgress) {
-      message.warning("Another action is in progress. Please wait.");
-      return;
-    }
-    
-    try {
-      await onCancelBooking(booking._originalBooking._id);
-      message.success("Booking canceled successfully");
-    } catch (error) {
-      message.error("Failed to cancel booking");
-    }
-  };
-
-  const handleConfirm = async (booking) => {
-    if (actionInProgress) {
-      message.warning("Another action is in progress. Please wait.");
-      return;
-    }
-    
-    try {
-      await onConfirmBooking(booking._originalBooking._id);
-      message.success("Booking confirmed successfully");
-    } catch (error) {
-      message.error("Failed to confirm booking");
-    }
-  };
-
-  const handleCheckIn = async (booking) => {
-    if (actionInProgress) {
-      message.warning("Another action is in progress. Please wait.");
-      return;
-    }
-    
-    try {
-      await onCheckInBooking(booking._originalBooking._id);
-      message.success("Check-in successful");
-    } catch (error) {
-      message.error("Failed to check in");
-    }
-  };
-
-  const handleCheckOut = async (booking) => {
-    if (actionInProgress) {
-      message.warning("Another action is in progress. Please wait.");
-      return;
-    }
-    
-    try {
-      await onCheckOutBooking(booking._originalBooking._id);
-      message.success("Check-out successful");
-    } catch (error) {
-      message.error("Failed to check out");
-    }
-  };
+  }, [])
 
   const getStatusClass = (status) => {
     const statusMap = {
       "Confirmed": "confirmed",
-      "Pending Check-in": "pending",
+      "Pending": "pending",
+      "Need Check-in": "pending",
       "Checked In": "inprogress",
-      "Pending Check-out": "pending",
+      "Need Check-out": "pending",
       "Checked Out": "checkedout",
-      "Canceled": "canceled",
-      "Complete": "complete"
-    };
-    
-    return statusMap[status] || "pending";
-  };
+      "Cancelled": "canceled",
+      "Completed": "complete",
+    }
+
+    return statusMap[status] || "pending"
+  }
 
   const getPaymentClass = (payment) => {
     const paymentMap = {
-      "Booking": "deposited",
+      "Booking": "confirmed",
       "Pending": "pending",
-      "Fully Paid": "fullypaid",
-      "Refunded": "depositreturned",
-      "Failed": "depositforfeited",
-      "Unpaid": "unpaid"
-    };
-    
-    return paymentMap[payment] || "unpaid";
-  };
+      "Fully Paid": "complete",
+      "Refunded": "canceled",
+      "Failed": "canceled",
+      "Unpaid": "pending",
+    }
 
-  const translateStatus = (status) => {
-    const translations = {
-      "Confirmed": "Đã xác nhận",
-      "Pending Check-in": "Đợi nhận phòng",
-      "Checked In": "Đã nhận phòng",
-      "Pending Check-out": "Đợi trả phòng",
-      "Checked Out": "Đã trả phòng",
-      "Canceled": "Đã huỷ",
-      "Complete": "Hoàn tất"
-    };
-    
-    return translations[status] || status;
-  };
+    return paymentMap[payment] || "pending"
+  }
 
-  const translatePayment = (payment) => {
-    const translations = {
-      "Booking": "Đã đặt",
-      "Pending": "Đang xử lý",
-      "Fully Paid": "Thanh toán hoàn tất",
-      "Refunded": "Đã hoàn tiền",
-      "Failed": "Thanh toán thất bại",
-      "Unpaid": "Chưa thanh toán"
-    };
-    
-    return translations[payment] || payment;
-  };
+  const tableColumn = [
+    {
+      title: <span className={styles.tableHeader}>No.</span>,
+      dataIndex: "no",
+      key: "no",
+      render: (_, record, index) => <span className={styles.bookingId}>{index + 1}</span>,
+    },
+    {
+      title: <span className={styles.tableHeader}>Khách Hàng</span>,
+      dataIndex: "customerName",
+      key: "customerName",
+      render: (_, record) => record._originalBooking.customerId?.userId?.fullName || "Không xác định",
+    },
+    {
+      title: <span className={styles.tableHeader}>Loại Phòng</span>,
+      dataIndex: "roomType",
+      key: "roomType",
+      render: (_, record) => record._originalBooking.accommodationId?.accommodationTypeId?.name || "Không xác định",
+    },
+    {
+      title: <span className={styles.tableHeader}>Check-in / Check-out</span>,
+      dataIndex: "bookingTime",
+      key: "bookingTime",
+      render: (_, record) => {
+        const booking = record._originalBooking
+        return (
+          <div className={styles.timeInfo}>
+            {booking.checkInHour} - {booking.checkOutHour}
+          </div>
+        )
+      },
+    },
+    {
+      title: <span className={styles.tableHeader}>Số Người</span>,
+      dataIndex: "peopleCount",
+      key: "peopleCount",
+      render: (_, record) => {
+        const booking = record._originalBooking
+        return (
+          <div className={styles.peopleInfo}>
+            <span>NL: {booking.adultNumber}</span>
+            <span>TE: {booking.childNumber}</span>
+          </div>
+        )
+      },
+    },
+    {
+      title: <span className={styles.tableHeader}>Thanh Toán</span>,
+      dataIndex: "paymentMethod",
+      key: "paymentMethod",
+      render: (_, record) => {
+        const booking = record._originalBooking
+        const paymentStatus = getPaymentStatusDisplay(booking.paymentStatus)
+        const paymentMethod = booking.paymentMethod || "Chưa xác định"
+
+        const getPaymentIcon = (method) => {
+          if (method.toLowerCase().includes("visa") || method.toLowerCase().includes("card")) {
+            return <CreditCardOutlined />
+          } else if (method.toLowerCase().includes("cash")) {
+            return <DollarOutlined />
+          } else if (method.toLowerCase().includes("bank") || method.toLowerCase().includes("transfer")) {
+            return <BankOutlined />
+          } else if (method.toLowerCase().includes("paypal")) {
+            return <WalletOutlined />
+          } else {
+            return <WalletOutlined />
+          }
+        }
+
+        return (
+          <div className={styles.paymentInfo}>
+            <div className={styles.method}>
+              <span className={styles.paymentMethodIcon}>{getPaymentIcon(paymentMethod)}</span>
+              {paymentMethod}
+            </div>
+            <div>
+              <span className={`${styles.paymentTag} ${styles[getPaymentClass(paymentStatus)]}`}>{paymentStatus}</span>
+            </div>
+          </div>
+        )
+      },
+    },
+    {
+      title: <span className={styles.tableHeader}>Trạng Thái</span>,
+      dataIndex: "status",
+      key: "status",
+      render: (status) => <span className={`${styles.statusTag} ${styles[getStatusClass(status)]}`}>{status}</span>,
+    },
+    {
+      title: <span className={styles.tableHeader}>Thao Tác</span>,
+      key: "operation",
+      render: (_, record) => (
+        <Dropdown overlay={<Menu items={getActionMenuItems(record)} />} trigger={["click"]}>
+          <Button type="text" className={styles.actionButton}>
+            <span className={styles.horizontalEllipsis}>⋯</span>
+          </Button>
+        </Dropdown>
+      ),
+    },
+  ]
 
   const getActionMenuItems = (booking) => {
     const items = [
       {
-        key: '1',
-        label: 'Xem chi tiết',
-        onClick: () => handleViewDetails(booking)
-      }
-    ];
+        key: "1",
+        label: "Xem Chi Tiết",
+        onClick: () => handleViewDetails(booking),
+      },
+      {
+        key: "9",
+        label: "Cập Nhật Trạng Thái",
+        onClick: () => handleStatusUpdate(booking),
+      },
+    ]
 
-    const status = booking.Status;
-    const bookingId = booking._originalBooking._id;
+    return items
+  }
 
-    if (status === "Confirmed") {
-      items.push({
-        key: '2',
-        label: 'Nhận phòng',
-        onClick: () => handleCustomStatusChange(booking, bookingStatusCodes.NEEDCHECKIN)
-      });
-      items.push({
-        key: '3',
-        label: 'Huỷ đặt phòng',
-        onClick: () => handleCancel(booking)
-      });
-    } else if (status === "Pending Check-in") {
-      items.push({
-        key: '2',
-        label: 'Xác nhận nhận phòng',
-        onClick: () => handleCheckIn(booking)
-      });
-    } else if (status === "Checked In") {
-      items.push({
-        key: '2',
-        label: 'Trả phòng',
-        onClick: () => handleCustomStatusChange(booking, bookingStatusCodes.NEEDCHECKOUT)
-      });
-    } else if (status === "Pending Check-out") {
-      items.push({
-        key: '2',
-        label: 'Xác nhận trả phòng',
-        onClick: () => handleCheckOut(booking)
-      });
-    } else if (status === "Checked Out") {
-      items.push({
-        key: '2',
-        label: 'Hoàn tất đặt phòng',
-        onClick: () => handleCustomStatusChange(booking, bookingStatusCodes.COMPLETED)
-      });
+  const handleViewDetails = (booking) => {
+    console.log("View details:", booking)
+  }
+
+  const handleStatusUpdate = (booking) => {
+    setSelectedBooking(booking)
+    setStatusModalVisible(true)
+  }
+
+  const handleCloseStatusModal = () => {
+    setStatusModalVisible(false)
+    setSelectedBooking(null)
+  }
+
+  const handleCustomStatusChange = async (booking, newStatus) => {
+    try {
+      await onStatusChange(booking._originalBooking._id, newStatus)
+      message.success("Booking status updated successfully")
+      handleCloseStatusModal()
+    } catch (error) {
+      message.error("Failed to update booking status")
     }
-
-    items.push({
-      key: '9',
-      label: 'Cập nhật trạng thái',
-      onClick: () => handleStatusUpdate(booking)
-    });
-
-    return items;
-  };
-
-  const tableColumn = [
-    {
-      title: <span className="titleTable">No</span>,
-      dataIndex: "No",
-      key: "No",
-    },
-    {
-      title: <span className="titleTable">Tên Khách Hàng</span>,
-      dataIndex: "Customer Name",
-      key: "customerName",
-    },
-    {
-      title: <span className="titleTable">Tên Địa Điểm</span>,
-      dataIndex: "Location",
-      key: "Location",
-    },
-    {
-      title: <span className="titleTable">Thời gian đặt</span>,
-      dataIndex: "Booking Time",
-      key: "bookingTime",
-      sorter: (a, b) => {
-        const dateA = new Date(a["Booking Time"]);
-        const dateB = new Date(b["Booking Time"]);
-        return dateA - dateB;
-      },
-    },
-    {
-      title: <span className="titleTable">Thời gian sử dụng</span>,
-      dataIndex: "Usage Time",
-      key: "usageTime",
-      sorter: (a, b) => {
-        const dateA = new Date(a["Usage Time"].split(" - ")[0]);
-        const dateB = new Date(b["Usage Time"].split(" - ")[0]);
-        return dateA - dateB;
-      },
-    },
-    {
-      title: <span className="titleTable">Tổng hoá đơn</span>,
-      dataIndex: "Total Price",
-      key: "totalPrice",
-      sorter: (a, b) => a["Total Price"] - b["Total Price"],
-      render: (value) => {
-        return `${parseInt(value, 10).toLocaleString("en-US")} vnđ`;
-      },
-    },
-    {
-      title: <span className="titleTable">Trạng thái</span>,
-      dataIndex: "Status",
-      key: "status",
-      align: "center",
-      render: (Status) => {
-        if (!Status) return null;
-        
-        const statusClass = getStatusClass(Status);
-        
-        return (
-          <span className={`${styles.statusTag} ${styles[statusClass]}`}>
-            {translateStatus(Status)}
-          </span>
-        );
-      },
-    },
-    {
-      title: <span className="titleTable">Thanh toán</span>,
-      dataIndex: "Payment",
-      key: "payment",
-      align: "center",
-      render: (Payment) => {
-        const paymentClass = getPaymentClass(Payment);
-        
-        return (
-          <span className={`${styles.paymentTag} ${styles[paymentClass]}`}>
-            {translatePayment(Payment)}
-          </span>
-        );
-      },
-    },
-    {
-      title: <span className="titleTable">Action</span>,
-      key: "operation",
-      render: (_, record) => (
-        <Dropdown
-          overlay={
-            <Menu items={getActionMenuItems(record)} />
-          }
-          trigger={["click"]}
-          disabled={actionInProgress}
-        >
-          <Button type="text" icon={<MoreOutlined />} loading={actionInProgress} />
-        </Dropdown>
-      ),
-    },
-  ];
+  }
 
   return (
-    <div className="content">
-      <h2>Danh sách đặt phòng:</h2>
-      <div className="list-booking">
-        <div
-          style={{
-            marginBottom: "16px",
-            display: "flex",
-            flexDirection: "row",
-            gap: "10px"
-          }}
-        >
+    <div className={styles.contentContainer}>
+      <h2>Danh Sách Booking</h2>
+      <div className={styles.listBooking}>
+        <div className={styles.filterContainer}>
           <Input
             placeholder="Tìm kiếm tên khách hàng"
             onChange={handleSearch}
-            style={{ width: "250px" }}
+            className={styles.searchInput}
+            prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
           />
 
           <Dropdown
@@ -439,28 +332,29 @@ export default function ListBooking({
                 filterGroups={filterGroups}
                 selectedValues={selectedValues}
                 onFilterChange={handleFilterChange}
+                bookingStatusCodes={bookingStatusCodes}
+                paymentStatusCodes={paymentStatusCodes}
               />
             }
             trigger={["click"]}
             placement="bottomRight"
-            overlayStyle={{
-              padding: "8px",
-            }}
           >
-            <Button icon={<FilterOutlined />}>
+            <Button icon={<FilterOutlined />} className={styles.filterButton}>
               Lọc
-              {Object.values(selectedValues).flat().length > 0 &&
-                ` (${Object.values(selectedValues).flat().length})`}
+              {Object.values(selectedValues).flat().length > 0 && (
+                <span className={styles.filterBadge}>{Object.values(selectedValues).flat().length}</span>
+              )}
             </Button>
           </Dropdown>
         </div>
-
-        <TableModify
-          tableColumn={tableColumn}
-          tableData={filteredData}
-          isPagination={true}
-          loading={actionInProgress}
-        />
+        <div className={styles.tableContainer}>
+          <TableModify 
+            tableColumn={tableColumn} 
+            tableData={filteredData} 
+            isPagination={true} 
+            loading={isUpdating} 
+          />
+        </div>
       </div>
 
       {selectedBooking && (
@@ -471,8 +365,9 @@ export default function ListBooking({
           bookingStatusCodes={bookingStatusCodes}
           onStatusChange={(status) => handleCustomStatusChange(selectedBooking, status)}
           isLoading={isUpdating}
+          className={styles.modalContainer}
         />
       )}
     </div>
-  );
+  )
 }

@@ -20,7 +20,7 @@ const ListPlace = ({ locations = [], onSelectLocation, selectedLocation }) => {
         >
           Tất cả
         </Card>
-        
+
         {locations && locations.length > 0 ? (
           locations.map((location) => (
             <Card
@@ -33,9 +33,9 @@ const ListPlace = ({ locations = [], onSelectLocation, selectedLocation }) => {
               }}
               onClick={() => onSelectLocation(location._id)}
             >
-              <strong>{location.description || 'Không có mô tả'}</strong>
-              <p className="booking-dashboard__subtitle">
-                {`ID: ${location._id.substring(location._id.length - 5)}`}
+              <strong>{location.rentalLocationId.name}</strong>
+              <p>
+                {`${location.rentalLocationId.address}, ${location.rentalLocationId.ward}, ${location.rentalLocationId.district}, ${location.rentalLocationId.city}`}
               </p>
             </Card>
           ))

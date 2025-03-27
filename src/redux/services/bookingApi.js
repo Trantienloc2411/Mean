@@ -16,13 +16,17 @@ export const bookingApi = apiSlice.injectEndpoints({
 
         getBookingsByCustomerId: builder.query({
             query: (customerId) => `/booking/booking-history/${customerId}`,
-            transformResponse: (response) => response.data,
+            transformResponse: (response) => response,
             providesTags: ["Booking"],
         }),
 
         getBookingsByOwnerId: builder.query({
             query: (ownerId) => `/booking/all-booking-by-owner/${ownerId}`,
-            transformResponse: (response) => response.data,
+            transformResponse: (response) => {
+                return response.bookings.flatMap(bookingWrapper => 
+                    Object.values(bookingWrapper)
+                );
+            },
             providesTags: ["Booking"],
         }),
 
