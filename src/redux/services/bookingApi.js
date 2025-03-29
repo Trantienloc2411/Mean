@@ -23,13 +23,18 @@ export const bookingApi = apiSlice.injectEndpoints({
         getBookingsByOwnerId: builder.query({
             query: (ownerId) => `/booking/all-booking-by-owner/${ownerId}`,
             transformResponse: (response) => {
-                return response.bookings.flatMap(bookingWrapper => 
-                    Object.values(bookingWrapper)
-                );
+                if (!response || !response.bookings) return [];
+                return response.bookings.flatMap(bookingWrapper => {
+                    if (Array.isArray(bookingWrapper)) {
+                        return bookingWrapper;
+                    } else if (typeof bookingWrapper === 'object') {
+                        return Object.values(bookingWrapper);
+                    }
+                    return [];
+                });
             },
             providesTags: ["Booking"],
         }),
-
         getBookingsByRentalLocationId: builder.query({
             query: (rentalLocationId) => `/booking/all-booking-in-rental-location/${rentalLocationId}`,
             transformResponse: (response) => response.data,

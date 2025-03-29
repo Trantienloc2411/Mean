@@ -2,9 +2,11 @@ import React, { useState, useEffect } from 'react';
 import styles from '../Booking/Booking.module.scss';
 import ListBooking from './Components/ListBooking/ListBooking';
 import ListPlace from './Components/ListPlace/ListPlace';
+import { message } from 'antd';
 import {
   useGetBookingsByOwnerIdQuery,
   useUpdateBookingMutation,
+  useGetBookingByIdQuery,
 } from '../../../../redux/services/bookingApi';
 import { useGetOwnerDetailByUserIdQuery } from '../../../../redux/services/ownerApi';
 
@@ -52,26 +54,23 @@ const getPaymentStatusDisplay = (statusCode) => {
   return statusMap[statusCode] || "Unpaid";
 };
 
-const formatDate = (dateString) => {
-  try {
-    const [datePart, timePart] = dateString.split(' ');
-    const [day, month, year] = datePart.split('/');
-    const [hours, minutes, seconds] = timePart.split(':');
-    const date = new Date(year, month - 1, day, hours, minutes, seconds);
-    return date.toLocaleString();
-  } catch (error) {
-    console.error('Invalid date format:', dateString);
-    return 'Invalid Date';
-  }
-};
-
 export default function Booking() {
   const [effectiveOwnerId, setEffectiveOwnerId] = useState(null);
   const [bookings, setBookings] = useState([]);
   const [locations, setLocations] = useState([]);
   const [selectedLocation, setSelectedLocation] = useState('all');
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
 
   const [updateBooking, { isLoading: isUpdating }] = useUpdateBookingMutation();
+
+  // Query for booking detail with refined query logic
+  const { 
+    data: bookingDetailData, 
+    isLoading: isLoadingBookingDetail,
+    error: bookingDetailError 
+  } = useGetBookingByIdQuery(selectedBookingId, {
+    skip: !selectedBookingId
+  });
 
   const userId = localStorage.getItem('user_id');
 
@@ -82,20 +81,13 @@ export default function Booking() {
   } = useGetOwnerDetailByUserIdQuery(
     userId,
     {
-      skip: !userId,
-      onSuccess: (data) => {
-        console.log('🔍 Owner Detail Query Success:', data);
-      },
-      onError: (error) => {
-        console.error('❌ Owner Detail Query Error:', error);
-      }
+      skip: !userId
     }
   );
 
   useEffect(() => {
     if (ownerDetailData) {
       const ownerId = ownerDetailData.id || ownerDetailData._id;
-      console.log('🔑 Extracted Owner ID:', ownerId);
       setEffectiveOwnerId(ownerId);
     }
   }, [ownerDetailData]);
@@ -108,13 +100,7 @@ export default function Booking() {
   } = useGetBookingsByOwnerIdQuery(
     effectiveOwnerId,
     {
-      skip: !effectiveOwnerId,
-      onSuccess: (data) => {
-        console.log('📋 Bookings Query Full Response:', data);
-      },
-      onError: (error) => {
-        console.error('❌ Bookings Query Error:', error);
-      }
+      skip: !effectiveOwnerId
     }
   );
 
@@ -146,28 +132,37 @@ export default function Booking() {
     setSelectedLocation(locationId);
   };
 
-  const handleStatusChange = async (bookingId, newStatus) => {
+  const handleStatusChange = async (bookingId, newStatusDisplay) => {
     try {
       const statusCodeKey = Object.keys(BOOKING_STATUS).find(
-        key => getBookingStatusDisplay(BOOKING_STATUS[key]) === newStatus
+        key => getBookingStatusDisplay(BOOKING_STATUS[key]) === newStatusDisplay
       );
 
       if (!statusCodeKey) {
-        throw new Error(`Invalid status: ${newStatus}`);
+        throw new Error(`Invalid status: ${newStatusDisplay}`);
       }
 
       const statusCode = BOOKING_STATUS[statusCodeKey];
+
       const result = await updateBooking({
-        bookingId,
+        id: bookingId, 
         status: statusCode
       }).unwrap();
+
+      message.success('Cập nhật trạng thái booking thành công');
       refetchBookings();
 
       return result;
     } catch (error) {
+      message.error(error?.data?.message || 'Cập nhật trạng thái booking thất bại');
       console.error('Error updating booking status:', error);
       throw error;
     }
+  };
+
+  // Function to handle selecting a booking for detail view
+  const handleSelectBookingDetail = (bookingId) => {
+    setSelectedBookingId(bookingId);
   };
 
   const filteredBookings = selectedLocation === 'all'
@@ -177,12 +172,12 @@ export default function Booking() {
       booking._originalBooking.accommodationId._id === selectedLocation
     );
 
-  if (isLoadingOwnerDetail) return <div>Loading owner details...</div>;
-  if (ownerDetailError) return <div>Error fetching owner details</div>;
-  if (!userId) return <div>No user ID found</div>;
-  if (!effectiveOwnerId) return <div>Could not retrieve owner ID</div>;
-  if (isLoading) return <div>Loading...</div>;
-  if (error) return <div>Error fetching bookings</div>;
+  if (isLoadingOwnerDetail) return <div>Đang tải thông tin chủ sở hữu...</div>;
+  if (ownerDetailError) return <div>Lỗi tải thông tin chủ sở hữu</div>;
+  if (!userId) return <div>Không tìm thấy ID người dùng</div>;
+  if (!effectiveOwnerId) return <div>Không thể truy xuất ID chủ sở hữu</div>;
+  if (isLoading) return <div>Đang tải...</div>;
+  if (error) return <div>Lỗi tải booking</div>;
 
   return (
     <div className={styles.content}>
@@ -197,6 +192,8 @@ export default function Booking() {
         paymentStatusCodes={PAYMENT_STATUS}
         onStatusChange={handleStatusChange}
         isUpdating={isUpdating}
+        bookingDetailData={bookingDetailData} 
+        onSelectBookingDetail={handleSelectBookingDetail} 
       />
     </div>
   );

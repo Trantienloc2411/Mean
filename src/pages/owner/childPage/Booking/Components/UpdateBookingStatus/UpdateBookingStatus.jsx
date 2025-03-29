@@ -1,42 +1,36 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Modal, Select, Button, message } from 'antd';
-import { useUpdateBookingMutation } from '../../../../../../redux/services/bookingApi';
 
-const UpdateBookingStatus = ({ booking, visible, onClose, bookingStatusCodes }) => {
-  const [status, setStatus] = useState(
-    booking?.Status ? getStatusCodeFromDisplay(booking.Status, bookingStatusCodes) : null
-  );
-  const [updateBooking, { isLoading }] = useUpdateBookingMutation();
+const UpdateBookingStatus = ({ 
+  booking, 
+  visible, 
+  onClose, 
+  bookingStatusCodes,
+  onStatusChange,
+  isLoading 
+}) => {
+  const [status, setStatus] = useState(null);
 
-  function getStatusCodeFromDisplay(displayStatus, statusCodes) {
-    for (const [key, value] of Object.entries(statusCodes)) {
-      if (getBookingStatusDisplay(value) === displayStatus) {
-        return value;
-      }
+  const getBookingStatusDisplay = (statusCode) => {
+    const statusMap = {
+      [bookingStatusCodes.CONFIRMED]: "Confirmed",
+      [bookingStatusCodes.PENDING]: "Pending",
+      [bookingStatusCodes.NEEDCHECKIN]: "Need Check-in",
+      [bookingStatusCodes.CHECKEDIN]: "Checked In",
+      [bookingStatusCodes.NEEDCHECKOUT]: "Need Check-out",
+      [bookingStatusCodes.CHECKEDOUT]: "Checked Out",
+      [bookingStatusCodes.CANCELLED]: "Cancelled",
+      [bookingStatusCodes.COMPLETED]: "Completed"
+    };
+    return statusMap[statusCode] || "Unknown Status";
+  };
+
+  useEffect(() => {
+    if (booking) {
+      const currentStatusCode = booking._originalBooking.status;
+      setStatus(currentStatusCode);
     }
-    return null;
-  }
-
-  function getBookingStatusDisplay(statusCode) {
-    switch (statusCode) {
-      case bookingStatusCodes.CONFIRMED:
-        return "Confirmed";
-      case bookingStatusCodes.NEEDCHECKIN:
-        return "Pending Check-in";
-      case bookingStatusCodes.CHECKEDIN:
-        return "Checked In";
-      case bookingStatusCodes.NEEDCHECKOUT:
-        return "Pending Check-out";
-      case bookingStatusCodes.CHECKEDOUT:
-        return "Checked Out";
-      case bookingStatusCodes.CANCELLED:
-        return "Canceled";
-      case bookingStatusCodes.COMPLETED:
-        return "Complete";
-      default:
-        return "Pending";
-    }
-  }
+  }, [booking]);
 
   const handleStatusChange = (value) => {
     setStatus(value);
@@ -44,20 +38,14 @@ const UpdateBookingStatus = ({ booking, visible, onClose, bookingStatusCodes }) 
 
   const handleSubmit = async () => {
     if (!status) {
-      message.error('Please select a status');
+      message.error('Vui lòng chọn trạng thái');
       return;
     }
 
     try {
-      await updateBooking({
-        id: booking._originalBooking._id,
-        status: status
-      }).unwrap();
-
-      message.success('Booking status updated successfully');
-      onClose();
+      await onStatusChange(getBookingStatusDisplay(status));
     } catch (error) {
-      message.error(error?.data?.message || 'Failed to update booking status');
+      message.error(error?.message || 'Cập nhật trạng thái thất bại');
     }
   };
 
@@ -66,14 +54,16 @@ const UpdateBookingStatus = ({ booking, visible, onClose, bookingStatusCodes }) 
     value: value,
   }));
 
+  const currentStatusDisplay = getBookingStatusDisplay(booking?._originalBooking?.status);
+
   return (
     <Modal
-      title="Update Booking Status"
+      title="Cập Nhật Trạng Thái Booking"
       open={visible}
       onCancel={onClose}
       footer={[
         <Button key="cancel" onClick={onClose}>
-          Cancel
+          Hủy
         </Button>,
         <Button
           key="submit"
@@ -81,21 +71,21 @@ const UpdateBookingStatus = ({ booking, visible, onClose, bookingStatusCodes }) 
           loading={isLoading}
           onClick={handleSubmit}
         >
-          Update Status
+          Cập Nhật
         </Button>,
       ]}
     >
       <div style={{ marginBottom: 16 }}>
-        <h4>Current Status: {booking?.Status}</h4>
-        <p>Booking ID: {booking?.No}</p>
-        <p>Customer: {booking?.["Customer Name"]}</p>
+        <h4>Trạng Thái Hiện Tại: {currentStatusDisplay}</h4>
+        <p>Mã Booking: {booking?._originalBooking?._id}</p>
+        <p>Khách Hàng: {booking?._originalBooking?.customerId?.userId?.fullName || 'Không xác định'}</p>
       </div>
 
       <div>
-        <label>Select New Status:</label>
+        <label>Chọn Trạng Thái Mới:</label>
         <Select
           style={{ width: '100%', marginTop: 8 }}
-          placeholder="Select new status"
+          placeholder="Chọn trạng thái mới"
           value={status}
           onChange={handleStatusChange}
           options={statusOptions}

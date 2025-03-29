@@ -152,12 +152,29 @@ export const policyOwnerApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["PolicyOwner"],
     }),
+    getPolicyOwnerByOwnerId: builder.query({
+      query: (ownerId) => `/policy-owner/get-policy-owner-by-owner/${ownerId}`,
+      transformResponse: (response) => {
+        if (response) {
+          return {
+            ...response,
+            createdAt: formatDateForDisplay(response.createdAt),
+            updatedAt: formatDateForDisplay(response.updatedAt),
+            startDate: formatDateForDisplay(response.startDate),
+            endDate: formatDateForDisplay(response.endDate)
+          };
+        }
+        return response;
+      },
+      providesTags: ["PolicyOwner"],
+    }),    
   }),
 });
 
 export const {
   useGetAllPolicyOwnersQuery,
   useGetPolicyOwnerByIdQuery,
+  useGetPolicyOwnerByOwnerIdQuery,
   useCreatePolicyOwnerMutation,
   useUpdatePolicyOwnerMutation,
   useDeletePolicyOwnerMutation,

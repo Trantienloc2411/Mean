@@ -1,4 +1,3 @@
-"use client"
 
 import { useState, useEffect } from "react"
 import { Dropdown, Input, Button, Menu, message } from "antd"
@@ -8,6 +7,7 @@ import debounce from "lodash/debounce"
 import TableModify from "../../../../../dashboard/components/Table"
 import Filter from "../../../../../../components/Filter/Filter"
 import UpdateBookingStatus from "../UpdateBookingStatus/UpdateBookingStatus"
+import BookingDetail from "../BookingDetail/BookingDetail"
 import styles from "./ListBooking.module.scss"
 
 const getBookingStatusDisplay = (statusCode, bookingStatusCodes) => {
@@ -32,12 +32,14 @@ const HorizontalEllipsisIcon = () => (
   </svg>
 )
 
-export default function ListBooking({ 
-  bookings, 
-  bookingStatusCodes, 
-  paymentStatusCodes, 
-  onStatusChange, 
-  isUpdating 
+export default function ListBooking({
+  bookings,
+  bookingStatusCodes,
+  paymentStatusCodes,
+  onStatusChange,
+  isUpdating,
+  bookingDetailData, // New prop
+  onSelectBookingDetail
 }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [filteredData, setFilteredData] = useState(bookings || [])
@@ -47,6 +49,10 @@ export default function ListBooking({
   })
   const [selectedBooking, setSelectedBooking] = useState(null)
   const [statusModalVisible, setStatusModalVisible] = useState(false)
+
+  // Add state for booking detail modal
+  const [selectedBookingForDetail, setSelectedBookingForDetail] = useState(null)
+  const [isBookingDetailVisible, setIsBookingDetailVisible] = useState(false)
 
   useEffect(() => {
     setFilteredData(bookings || [])
@@ -62,6 +68,7 @@ export default function ListBooking({
     };
     return statusMap[statusCode] || "Unpaid";
   };
+
 
   const statusOptions = Object.entries(bookingStatusCodes).map(([key, value]) => ({
     label: <span className={`${styles.statusTag} ${styles[key.toLowerCase()]}`}>
@@ -258,7 +265,14 @@ export default function ListBooking({
       title: <span className={styles.tableHeader}>Trạng Thái</span>,
       dataIndex: "status",
       key: "status",
-      render: (status) => <span className={`${styles.statusTag} ${styles[getStatusClass(status)]}`}>{status}</span>,
+      render: (_, record) => {
+        const statusCode = record._originalBooking.status;
+        const statusText = getBookingStatusDisplay(statusCode, bookingStatusCodes);
+
+        return <span className={`${styles.statusTag} ${styles[getStatusClass(statusText)]}`}>
+          {statusText}
+        </span>;
+      },
     },
     {
       title: <span className={styles.tableHeader}>Thao Tác</span>,
@@ -290,8 +304,21 @@ export default function ListBooking({
     return items
   }
 
+  // Modify handleViewDetails to open booking detail modal
   const handleViewDetails = (booking) => {
-    console.log("View details:", booking)
+    const bookingId = booking._originalBooking._id || booking._originalBooking.id;
+
+    // Ensure the selected booking detail is retrieved
+    onSelectBookingDetail(bookingId);
+
+    // Set the selected booking ID and make the modal visible
+    setSelectedBookingForDetail(bookingId);
+    setIsBookingDetailVisible(true);
+  }
+  // Add method to close booking detail modal
+  const handleCloseBookingDetail = () => {
+    setSelectedBookingForDetail(null)
+    setIsBookingDetailVisible(false)
   }
 
   const handleStatusUpdate = (booking) => {
@@ -307,10 +334,9 @@ export default function ListBooking({
   const handleCustomStatusChange = async (booking, newStatus) => {
     try {
       await onStatusChange(booking._originalBooking._id, newStatus)
-      message.success("Booking status updated successfully")
       handleCloseStatusModal()
     } catch (error) {
-      message.error("Failed to update booking status")
+      message.error("Cập nhật trạng thái thất bại")
     }
   }
 
@@ -348,11 +374,11 @@ export default function ListBooking({
           </Dropdown>
         </div>
         <div className={styles.tableContainer}>
-          <TableModify 
-            tableColumn={tableColumn} 
-            tableData={filteredData} 
-            isPagination={true} 
-            loading={isUpdating} 
+          <TableModify
+            tableColumn={tableColumn}
+            tableData={filteredData}
+            isPagination={true}
+            loading={isUpdating}
           />
         </div>
       </div>
@@ -366,6 +392,19 @@ export default function ListBooking({
           onStatusChange={(status) => handleCustomStatusChange(selectedBooking, status)}
           isLoading={isUpdating}
           className={styles.modalContainer}
+        />
+      )}
+
+      {selectedBookingForDetail && (
+        <BookingDetail
+          bookingId={selectedBookingForDetail}
+          visible={isBookingDetailVisible}
+          onClose={handleCloseBookingDetail}
+          preloadedBookingData={
+            bookingDetailData && bookingDetailData._id === selectedBookingForDetail
+              ? bookingDetailData
+              : undefined
+          }
         />
       )}
     </div>
