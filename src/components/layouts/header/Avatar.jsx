@@ -118,7 +118,7 @@ export default function Avatar({ userData }) {
             flexShrink: 1, // Cho phép thu nhỏ nếu cần
           }}
         >
-          {userData?.getUser.fullName}
+          {userData?.getUser?.fullName}
         </span>
         <DownOutlined style={{ fontSize: "12px", color: "#666" }} />
       </div>

@@ -69,7 +69,7 @@ export default function AccountStatus({ userData, refetch }) {
       message.error("Từ chối thất bại!");
     }
   };
-  console.log(userData);
+  // console.log(userData);
 
   return (
     <Card title="Trạng thái tài khoản" style={{ marginTop: 20 }}>
