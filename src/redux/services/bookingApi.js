@@ -9,8 +9,29 @@ export const bookingApi = apiSlice.injectEndpoints({
         }),
 
         getBookingById: builder.query({
-            query: (id) => `/booking/${id}`,
-            transformResponse: (response) => response.data,
+            query: (id) => {
+                console.log("Making API request for booking ID:", id)
+                return `/booking/${id}`
+            },
+            transformResponse: (response, meta, arg) => {
+                console.log("Raw API response for booking ID:", arg, response)
+
+                if (!response) {
+                    console.error("API returned empty response for booking ID:", arg)
+                    return null
+                }
+
+                if (response.data) {
+                    console.log("Response has data property:", response.data)
+                    return response.data
+                }
+
+                console.log("Using response directly as data")
+                return response
+            },
+            onError: (error, arg) => {
+                console.error("Error fetching booking details for ID:", arg, error)
+            },
             providesTags: (result, error, id) => [{ type: "Booking", id }],
         }),
 

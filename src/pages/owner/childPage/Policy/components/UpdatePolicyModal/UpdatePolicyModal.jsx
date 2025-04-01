@@ -1,16 +1,26 @@
+"use client"
+
 import { useState, useEffect } from 'react';
-import { Modal, Input, Form, DatePicker, Button, Space, Divider, Select } from 'antd';
-import { PlusOutlined, DeleteOutlined } from '@ant-design/icons';
+import { Modal, Input, Form, DatePicker, Button, Space, Select, message, Card, Typography, Tooltip, Tag, Divider } from 'antd';
+import { PlusOutlined, DeleteOutlined, InfoCircleOutlined, CalendarOutlined, TagsOutlined, FileTextOutlined, NumberOutlined, AppstoreOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import styles from './UpdatePolicyModal.module.scss';
 
-const SAMPLE_HASHTAGS = ['#giodongmo', '#giamgia','#dichvu', '#thanhtoan'];
+const { TextArea } = Input;
+const { Title, Text } = Typography;
+
+const SAMPLE_HASHTAGS = ['#giodongmo', '#giamgia','#dichvu', '#thanhtoan', '#khuyenmai', '#uudai'];
 
 const UpdatePolicyModal = ({ isOpen, onCancel, onConfirm, initialValues }) => {
-    const { TextArea } = Input;
     const [form] = Form.useForm();
     const [loading, setLoading] = useState(false);
     const [hashtagOptions, setHashtagOptions] = useState([]);
+
+    useEffect(() => {
+        // Initialize hashtag options
+        setHashtagOptions(SAMPLE_HASHTAGS.map(tag => ({ label: tag, value: tag })));
+    }, []);
+
     const filterHashtags = (inputValue) => {
         const value = inputValue.startsWith('#') ? inputValue : `#${inputValue}`;
         const filteredOptions = SAMPLE_HASHTAGS.filter(
@@ -37,10 +47,10 @@ const UpdatePolicyModal = ({ isOpen, onCancel, onConfirm, initialValues }) => {
             Status: initialValues.Status || 1,
             ApplyDate: initialValues.ApplyDate
                 ? dayjs(initialValues.ApplyDate, "HH:mm DD/MM/YYYY")
-                : null,
+                : dayjs(),
             EndDate: initialValues.EndDate
                 ? dayjs(initialValues.EndDate, "HH:mm DD/MM/YYYY")
-                : null,
+                : dayjs().add(30, 'day'),
             values: formattedValues
         };
     };
@@ -50,8 +60,6 @@ const UpdatePolicyModal = ({ isOpen, onCancel, onConfirm, initialValues }) => {
             form.resetFields();
             if (initialValues) {
                 const formValues = getInitialValues();
-                console.log("Setting form values:", formValues);
-                console.log("Values array:", formValues.values);
                 form.setFieldsValue(formValues);
             }
         }
@@ -71,8 +79,10 @@ const UpdatePolicyModal = ({ isOpen, onCancel, onConfirm, initialValues }) => {
                 updateBy: localStorage.getItem('user_id') || initialValues?.updateBy || '',
                 isDelete: initialValues?.isDelete || false
             });
+            message.success("Cập nhật chính sách thành công");
         } catch (error) {
             console.error("Error updating policy:", error);
+            message.error("Có lỗi xảy ra khi cập nhật chính sách");
         } finally {
             setLoading(false);
         }
@@ -81,209 +91,334 @@ const UpdatePolicyModal = ({ isOpen, onCancel, onConfirm, initialValues }) => {
     return (
         <Modal
             className={styles.updatePolicyModal}
-            title="Chỉnh sửa Chính Sách"
+            title={
+                <div className={styles.modalTitle}>
+                    <AppstoreOutlined className={styles.titleIcon} />
+                    <span>Chỉnh sửa Chính Sách</span>
+                </div>
+            }
             open={isOpen}
             onCancel={() => {
                 form.resetFields();
                 onCancel();
             }}
-            onOk={() => form.submit()}
-            confirmLoading={loading}
-            okText="Cập nhật"
-            cancelText="Huỷ"
-            width={700}
+            footer={[
+                <Button
+                    key="cancel"
+                    onClick={() => {
+                        form.resetFields();
+                        onCancel();
+                    }}
+                >
+                    Huỷ
+                </Button>,
+                <Button key="submit" type="primary" loading={loading} onClick={() => form.submit()}>
+                    Cập nhật
+                </Button>,
+            ]}
+            width={800}
+            bodyStyle={{ maxHeight: '80vh', overflowY: 'auto', padding: '24px' }}
+            destroyOnClose
         >
             <Form
                 form={form}
                 onFinish={handleSubmit}
                 layout="vertical"
+                className={styles.policyForm}
+                requiredMark="optional"
             >
-                <Form.Item
-                    name="Name"
-                    label="Tên chính sách"
-                    rules={[{ required: true, message: 'Vui lòng nhập tên chính sách!' }]}
+                <Card
+                    className={styles.formSection}
+                    title={
+                        <div className={styles.sectionTitle}>
+                            <FileTextOutlined className={styles.sectionIcon} />
+                            <span>Thông tin cơ bản</span>
+                        </div>
+                    }
+                    bordered={false}
                 >
-                    <Input placeholder="Nhập tên chính sách" />
-                </Form.Item>
+                    <Form.Item
+                        name="Name"
+                        label={
+                            <Space>
+                                <span>Tên chính sách</span>
+                                <Tooltip title="Nhập tên chính sách ngắn gọn và dễ hiểu">
+                                    <InfoCircleOutlined className={styles.infoIcon} />
+                                </Tooltip>
+                            </Space>
+                        }
+                        rules={[{ required: true, message: 'Vui lòng nhập tên chính sách!' }]}
+                    >
+                        <Input placeholder="Nhập tên chính sách" maxLength={100} showCount />
+                    </Form.Item>
 
-                <Form.Item
-                    name="Description"
-                    label="Mô tả"
-                    rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}
+                    <Form.Item
+                        name="Description"
+                        label={
+                            <Space>
+                                <span>Mô tả</span>
+                                <Tooltip title="Mô tả chi tiết về chính sách này">
+                                    <InfoCircleOutlined className={styles.infoIcon} />
+                                </Tooltip>
+                            </Space>
+                        }
+                        rules={[{ required: true, message: 'Vui lòng nhập mô tả!' }]}
+                    >
+                        <TextArea rows={4} placeholder="Nhập mô tả chính sách" maxLength={500} showCount />
+                    </Form.Item>
+
+                    <Form.Item label="Ngày tạo">
+                        <Input
+                            value={initialValues?.CreatedDate || ''}
+                            disabled
+                            className={styles.disabledInput}
+                        />
+                    </Form.Item>
+                </Card>
+
+                <Card
+                    className={styles.formSection}
+                    title={
+                        <div className={styles.sectionTitle}>
+                            <CalendarOutlined className={styles.sectionIcon} />
+                            <span>Thời gian áp dụng</span>
+                        </div>
+                    }
+                    bordered={false}
                 >
-                    <TextArea rows={4} placeholder="Nhập mô tả chính sách" />
-                </Form.Item>
+                    <div className={styles.dateContainer}>
+                        <Form.Item
+                            name="ApplyDate"
+                            label={
+                                <Space>
+                                    <span>Ngày áp dụng</span>
+                                    <Tooltip title="Thời điểm bắt đầu áp dụng chính sách">
+                                        <InfoCircleOutlined className={styles.infoIcon} />
+                                    </Tooltip>
+                                </Space>
+                            }
+                            rules={[{ required: true, message: 'Vui lòng chọn ngày áp dụng!' }]}
+                            className={styles.dateItem}
+                        >
+                            <DatePicker
+                                format="HH:mm DD/MM/YYYY"
+                                showTime={{ format: 'HH:mm' }}
+                                placeholder="Chọn ngày giờ áp dụng"
+                                style={{ width: '100%' }}
+                                className={styles.datePicker}
+                            />
+                        </Form.Item>
 
-                <Form.Item label="Ngày tạo">
-                    <Input
-                        value={initialValues?.CreatedDate || ''}
-                        disabled
-                        style={{ backgroundColor: '#f5f5f5', color: '#000' }}
-                    />
-                </Form.Item>
+                        <Form.Item
+                            name="EndDate"
+                            label={
+                                <Space>
+                                    <span>Ngày kết thúc</span>
+                                    <Tooltip title="Thời điểm kết thúc áp dụng chính sách">
+                                        <InfoCircleOutlined className={styles.infoIcon} />
+                                    </Tooltip>
+                                </Space>
+                            }
+                            rules={[
+                                { required: true, message: 'Vui lòng chọn ngày kết thúc!' },
+                                ({ getFieldValue }) => ({
+                                    validator(_, value) {
+                                        const applyDate = getFieldValue('ApplyDate');
+                                        if (!value || !applyDate || value.isAfter(applyDate)) {
+                                            return Promise.resolve();
+                                        }
+                                        return Promise.reject(new Error('Ngày kết thúc phải lớn hơn ngày áp dụng (bao gồm cả giờ phút).'));
+                                    },
+                                }),
+                            ]}
+                            className={styles.dateItem}
+                        >
+                            <DatePicker
+                                format="HH:mm DD/MM/YYYY"
+                                showTime={{ format: 'HH:mm' }}
+                                placeholder="Chọn ngày giờ kết thúc"
+                                style={{ width: '100%' }}
+                                className={styles.datePicker}
+                            />
+                        </Form.Item>
+                    </div>
+                </Card>
 
-                <Form.Item
-                    name="ApplyDate"
-                    label="Ngày áp dụng"
-                    rules={[{ required: true, message: 'Vui lòng chọn ngày áp dụng!' }]}
+                <Card
+                    className={styles.formSection}
+                    title={
+                        <div className={styles.sectionTitle}>
+                            <NumberOutlined className={styles.sectionIcon} />
+                            <span>Giá trị chính sách</span>
+                            <Tag color="blue" className={styles.optionalTag}>
+                                Không bắt buộc
+                            </Tag>
+                        </div>
+                    }
+                    bordered={false}
                 >
-                    <DatePicker
-                        format="HH:mm DD/MM/YYYY"
-                        showTime={{ format: 'HH:mm' }}
-                        style={{ width: '100%' }}
-                    />
-                </Form.Item>
+                    <Form.List name="values">
+                        {(fields, { add, remove }) => (
+                            <>
+                                {fields.map(({ key, name, ...restField }) => (
+                                    <Card key={key} className={styles.valueCard} bodyStyle={{ padding: '16px' }}>
+                                        <div className={styles.valueHeader}>
+                                            <Title level={5} className={styles.valueTitle}>
+                                                Giá trị {name + 1}
+                                            </Title>
+                                            {fields.length > 1 ? (
+                                                <Button
+                                                    danger
+                                                    type="text"
+                                                    icon={<DeleteOutlined />}
+                                                    onClick={() => remove(name)}
+                                                    className={styles.deleteBtn}
+                                                >
+                                                    Xóa
+                                                </Button>
+                                            ) : null}
+                                        </div>
 
-                <Form.Item
-                    name="EndDate"
-                    label="Ngày kết thúc"
-                    rules={[
-                        { required: true, message: 'Vui lòng chọn ngày kết thúc!' },
-                        ({ getFieldValue }) => ({
-                            validator(_, value) {
-                                const applyDate = getFieldValue('ApplyDate');
-                                if (!value || !applyDate || value.isAfter(applyDate)) {
-                                    return Promise.resolve();
-                                }
-                                return Promise.reject(
-                                    new Error(
-                                        'Ngày kết thúc phải lớn hơn ngày áp dụng (bao gồm cả giờ phút).'
-                                    )
-                                );
-                            },
-                        }),
-                    ]}
-                >
-                    <DatePicker
-                        format="HH:mm DD/MM/YYYY"
-                        showTime={{ format: 'HH:mm' }}
-                        style={{ width: '100%' }}
-                    />
-                </Form.Item>
-
-                <Form.Item
-                    name="Status"
-                    label="Trạng thái"
-                    rules={[{ required: true, message: 'Vui lòng chọn trạng thái!' }]}
-                >
-                    <Select placeholder="Chọn trạng thái">
-                        <Select.Option value={1}>Đang chờ</Select.Option>
-                        <Select.Option value={2}>Đã duyệt</Select.Option>
-                        <Select.Option value={3}>Từ chối</Select.Option>
-                    </Select>
-                </Form.Item>
-
-                <Divider orientation="left">Giá trị (không bắt buộc)</Divider>
-
-                <Form.List name="values">
-                    {(fields, { add, remove }) => (
-                        <>
-                            {fields.map(({ key, name, ...restField }) => (
-                                <div key={key} style={{ marginBottom: 20 }}>
-                                    <Space
-                                        style={{
-                                            display: 'flex',
-                                            marginBottom: 8,
-                                            justifyContent: 'space-between',
-                                            width: '100%'
-                                        }}
-                                        align="baseline"
-                                    >
-                                        <div style={{ fontWeight: 'bold' }}>Giá trị {name + 1}</div>
-                                        {fields.length > 1 ? (
-                                            <Button
-                                                danger
-                                                type="text"
-                                                icon={<DeleteOutlined />}
-                                                onClick={() => remove(name)}
+                                        <div className={styles.valueRow}>
+                                            <Form.Item
+                                                {...restField}
+                                                name={[name, 'val1']}
+                                                label={
+                                                    <Space>
+                                                        <NumberOutlined className={styles.fieldIcon} />
+                                                        <span>Giá trị 1</span>
+                                                    </Space>
+                                                }
+                                                className={styles.valueField}
                                             >
-                                                Xóa
-                                            </Button>
-                                        ) : null}
-                                    </Space>
+                                                <Input placeholder="Giá trị 1" />
+                                            </Form.Item>
+                                            <Form.Item
+                                                {...restField}
+                                                name={[name, 'val2']}
+                                                label={
+                                                    <Space>
+                                                        <NumberOutlined className={styles.fieldIcon} />
+                                                        <span>Giá trị 2</span>
+                                                    </Space>
+                                                }
+                                                className={styles.valueField}
+                                            >
+                                                <Input placeholder="Giá trị 2" />
+                                            </Form.Item>
+                                        </div>
 
-                                    <div style={{ display: 'flex', gap: '16px', marginBottom: '8px' }}>
                                         <Form.Item
                                             {...restField}
-                                            name={[name, 'val1']}
-                                            style={{ width: '50%', marginBottom: '8px' }}
+                                            name={[name, 'description']}
+                                            label={
+                                                <Space>
+                                                    <FileTextOutlined className={styles.fieldIcon} />
+                                                    <span>Mô tả</span>
+                                                </Space>
+                                            }
+                                            className={styles.fullWidthField}
                                         >
-                                            <Input placeholder="Giá trị 1" />
+                                            <Input placeholder="Mô tả" maxLength={200} showCount />
                                         </Form.Item>
-                                        <Form.Item
-                                            {...restField}
-                                            name={[name, 'val2']}
-                                            style={{ width: '50%', marginBottom: '8px' }}
-                                        >
-                                            <Input placeholder="Giá trị 2" />
-                                        </Form.Item>
-                                    </div>
 
-                                    <Form.Item
-                                        {...restField}
-                                        name={[name, 'description']}
-                                        style={{ marginBottom: '8px' }}
+                                        <div className={styles.valueRow}>
+                                            <Form.Item
+                                                {...restField}
+                                                name={[name, 'unit']}
+                                                label={
+                                                    <Space>
+                                                        <span>Đơn vị</span>
+                                                        <Tooltip title="Đơn vị tính cho giá trị này">
+                                                            <InfoCircleOutlined className={styles.infoIcon} />
+                                                        </Tooltip>
+                                                    </Space>
+                                                }
+                                                className={styles.valueField}
+                                            >
+                                                <Select
+                                                    placeholder="Chọn đơn vị"
+                                                    allowClear
+                                                    className={styles.select}
+                                                    options={[
+                                                        { label: 'Phần trăm (%)', value: 'percent' },
+                                                        { label: 'VND', value: 'vnd' },
+                                                        { label: 'Điểm', value: 'point' },
+                                                    ]}
+                                                />
+                                            </Form.Item>
+                                            <Form.Item
+                                                {...restField}
+                                                name={[name, 'valueType']}
+                                                label={
+                                                    <Space>
+                                                        <span>Loại giá trị</span>
+                                                        <Tooltip title="Phân loại giá trị này thuộc loại nào">
+                                                            <InfoCircleOutlined className={styles.infoIcon} />
+                                                        </Tooltip>
+                                                    </Space>
+                                                }
+                                                className={styles.valueField}
+                                            >
+                                                <Input placeholder="Loại giá trị" />
+                                            </Form.Item>
+                                        </div>
+
+                                        <div className={styles.valueRow}>
+                                            <Form.Item
+                                                {...restField}
+                                                name={[name, 'hashTag']}
+                                                label={
+                                                    <Space>
+                                                        <TagsOutlined className={styles.fieldIcon} />
+                                                        <span>Hashtag</span>
+                                                    </Space>
+                                                }
+                                                className={styles.valueField}
+                                            >
+                                                <Select
+                                                    showSearch
+                                                    placeholder="Nhập hashtag"
+                                                    options={hashtagOptions}
+                                                    onSearch={(value) => filterHashtags(value)}
+                                                    filterOption={false}
+                                                    showArrow={false}
+                                                    notFoundContent={null}
+                                                    allowClear
+                                                    className={styles.select}
+                                                />
+                                            </Form.Item>
+                                            <Form.Item
+                                                {...restField}
+                                                name={[name, 'note']}
+                                                label={
+                                                    <Space>
+                                                        <FileTextOutlined className={styles.fieldIcon} />
+                                                        <span>Ghi chú</span>
+                                                    </Space>
+                                                }
+                                                className={styles.valueField}
+                                            >
+                                                <Input placeholder="Ghi chú" maxLength={100} showCount />
+                                            </Form.Item>
+                                        </div>
+                                    </Card>
+                                ))}
+                                <Form.Item>
+                                    <Button
+                                        type="dashed"
+                                        onClick={() => add()}
+                                        block
+                                        icon={<PlusOutlined />}
+                                        className={styles.addButton}
                                     >
-                                        <Input placeholder="Mô tả" />
-                                    </Form.Item>
-
-                                    <div style={{ display: 'flex', gap: '16px', marginBottom: '8px' }}>
-                                        <Form.Item
-                                            {...restField}
-                                            name={[name, 'unit']}
-                                            style={{ width: '50%', marginBottom: '8px' }}
-                                        >
-                                            <Input placeholder="Đơn vị" />
-                                        </Form.Item>
-                                        <Form.Item
-                                            {...restField}
-                                            name={[name, 'valueType']}
-                                            style={{ width: '50%', marginBottom: '8px' }}
-                                        >
-                                            <Input placeholder="Loại giá trị" />
-                                        </Form.Item>
-                                    </div>
-
-                                    <div style={{ display: 'flex', gap: '16px' }}>
-                                        <Form.Item
-                                            {...restField}
-                                            name={[name, 'hashTag']}
-                                            style={{ width: '50%', marginBottom: '8px' }}
-                                        >
-                                            <Select
-                                                showSearch
-                                                placeholder="Nhập hashtag"
-                                                options={hashtagOptions}
-                                                onSearch={(value) => filterHashtags(value)}
-                                                filterOption={false}
-                                                showArrow={false}
-                                                notFoundContent={null}
-                                                allowClear
-                                            />
-                                        </Form.Item>
-                                        <Form.Item
-                                            {...restField}
-                                            name={[name, 'note']}
-                                            style={{ width: '50%', marginBottom: '8px' }}
-                                        >
-                                            <Input placeholder="Ghi chú" />
-                                        </Form.Item>
-                                    </div>
-                                </div>
-                            ))}
-                            <Form.Item>
-                                <Button
-                                    type="dashed"
-                                    onClick={() => add()}
-                                    block
-                                    icon={<PlusOutlined />}
-                                >
-                                    Thêm giá trị
-                                </Button>
-                            </Form.Item>
-                        </>
-                    )}
-                </Form.List>
+                                        Thêm giá trị
+                                    </Button>
+                                </Form.Item>
+                            </>
+                        )}
+                    </Form.List>
+                </Card>
             </Form>
         </Modal>
     );
