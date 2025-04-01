@@ -36,7 +36,7 @@ export default function ChangePassword() {
         currentPassword,
         newPassword,
       }).unwrap();
-      console.log(response);
+      console.log(response); 
 
       if (response.success) {
         message.success("Cập nhật mật khẩu thành công!");
