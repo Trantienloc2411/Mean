@@ -1,10 +1,11 @@
 import React, { useState, useEffect } from "react";
 import { Table, Button, message, Spin } from "antd";
 import { IoMdAdd } from "react-icons/io";
+import { useParams } from "react-router-dom";
 import SearchAndFilter from "./SearchAndFilter";
 import RoomTableColumns from "./RoomTable";
 import { 
-  useGetAllAccommodationsQuery,
+  useGetAccommodationsByRentalLocationQuery,
   useGetAccommodationByIdQuery 
 } from "../../../../../../redux/services/accommodationApi";
 import AccommodationCreate from "../../../accomodation/childPage/AccomodationCreate/AccomodationCreate";
@@ -12,6 +13,7 @@ import AccomodationEdit from "../../../accomodation/childPage/AccomodationEdit/A
 import AccommodationDetail from "../../../accomodation/childPage/AccomodationDetail/AccomodationDetail";
 
 export default function RoomList() {
+  const { id: rentalLocationId } = useParams();
   const [searchText, setSearchText] = useState("");
   const [filterStatus, setFilterStatus] = useState("all");
   const [createModalVisible, setCreateModalVisible] = useState(false);
@@ -25,7 +27,7 @@ export default function RoomList() {
     isLoading, 
     isError, 
     refetch 
-  } = useGetAllAccommodationsQuery();
+  } = useGetAccommodationsByRentalLocationQuery(rentalLocationId);
 
   const { 
     data: accommodationDetailResponse,
@@ -122,6 +124,7 @@ export default function RoomList() {
         visible={createModalVisible}
         onCancel={() => setCreateModalVisible(false)}
         onSuccess={handleCreateSuccess}
+        rentalLocationId={rentalLocationId}
       />
 
       <AccommodationDetail
@@ -139,6 +142,7 @@ export default function RoomList() {
         accommodationId={selectedAccommodationId}
         accommodationData={accommodationData}
         isLoading={isLoadingDetail}
+        rentalLocationId={rentalLocationId}
       />
     </div>
   );

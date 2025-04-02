@@ -46,9 +46,17 @@ export const policySystemApi = apiSlice.injectEndpoints({
 
     getPolicySystemById: builder.query({
       query: (id) => `/policy-system/${id}`,
-      transformResponse: (response) => ({
-        ...response,
-      }),
+      transformResponse: (response) => {
+        if (response.success) {
+          return {
+            ...response.data,
+            staffId: response.data.staffId || {},
+            policySystemCategoryId: response.data.policySystemCategoryId || {},
+            values: response.data.values || []
+          };
+        }
+        return response;
+      },
       providesTags: ["PolicySystem"],
     }),
 

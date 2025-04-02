@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Input, Button, DatePicker, Dropdown, Table, Spin } from 'antd';
+import { Input, Button, DatePicker, Dropdown, Table, Spin, message } from 'antd';
 import { FilterOutlined, PlusOutlined, MoreOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -15,13 +15,16 @@ import {
   useCreatePolicySystemMutation,
   useUpdatePolicySystemMutation,
   useDeletePolicySystemMutation,
+  useGetPolicySystemByIdQuery
 } from '../../redux/services/policySystemApi.js';
+import { useGetAllPolicySystemCategoriesQuery } from '../../redux/services/policySystemCategoryApi.js';
 
 export default function PolicyApp() {
   dayjs.extend(isBetween);
   const [selectedValues, setSelectedValues] = useState({
     status: [],
     unit: [],
+    category: [],
     dateRange: [],
   });
   const [searchTerm, setSearchTerm] = useState("");
@@ -32,11 +35,27 @@ export default function PolicyApp() {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
+  const [selectedPolicyDetail, setSelectedPolicyDetail] = useState(null);
+  const { data: detailedPolicy, isLoading: isDetailLoading } = useGetPolicySystemByIdQuery(
+    selectedPolicy?._id,
+    {
+      skip: !selectedPolicy?._id || !isDetailModalOpen
+    }
+  );
+
+  // Fetch policy data
   const { data: policyData, isLoading } = useGetAllPolicySystemsQuery(undefined, {
     onSuccess: (data) => {
       console.log('Received policy data:', data);
+      if (data?.success && data.data) {
+        setFilteredData(data.data);
+      }
     }
   });
+
+  // Fetch policy categories for filter
+  const { data: categoryData } = useGetAllPolicySystemCategoriesQuery();
+
   const [createPolicy] = useCreatePolicySystemMutation();
   const [updatePolicy] = useUpdatePolicySystemMutation();
   const [deletePolicy] = useDeletePolicySystemMutation();
@@ -63,6 +82,15 @@ export default function PolicyApp() {
           value: false,
         }
       ]
+    },
+    {
+      name: "category",
+      title: "Danh mục",
+      options: categoryData?.data?.map(category => ({
+        key: category._id,
+        label: category.categoryName,
+        value: category._id // Using _id as value for filtering
+      })) || []
     }
   ];
 
@@ -96,11 +124,13 @@ export default function PolicyApp() {
 
   const handleDeleteConfirm = async () => {
     try {
-      await deletePolicy(selectedPolicy.id).unwrap();
+      await deletePolicy(selectedPolicy._id).unwrap();
       setIsDeleteModalOpen(false);
       setSelectedPolicy(null);
+      message.success('Xóa chính sách thành công');
     } catch (error) {
       console.error("Error deleting policy:", error);
+      message.error('Có lỗi xảy ra khi xóa chính sách');
     }
   };
 
@@ -108,13 +138,11 @@ export default function PolicyApp() {
     try {
       const newPolicy = {
         policySystemCategoryId: values.policySystemCategoryId,
-        policySystemBookingId: values.policySystemBookingId || "",
         name: values.name,
         description: values.description || "",
-        value: values.value || "",
-        unit: values.unit || "",
-        startDate: values.startDate ? dayjs(values.startDate).format('DD-MM-YYYY HH:mm:ss') : null,
-        endDate: values.endDate ? dayjs(values.endDate).format('DD-MM-YYYY HH:mm:ss') : null,
+        values: values.values || [],
+        startDate: values.startDate ? dayjs(values.startDate).format('DD/MM/YYYY HH:mm:ss') : null,
+        endDate: values.endDate ? dayjs(values.endDate).format('DD/MM/YYYY HH:mm:ss') : null,
         isActive: true
       };
 
@@ -135,16 +163,13 @@ export default function PolicyApp() {
   const handleUpdatePolicy = async (values) => {
     try {
       const updatedPolicy = {
-        id: selectedPolicy.id,
-        staffId: values.staffId,
+        _id: selectedPolicy._id,
         policySystemCategoryId: values.policySystemCategoryId,
-        policySystemBookingId: values.policySystemBookingId || "",
         name: values.name,
         description: values.description || "",
-        value: values.value || "",
-        unit: values.unit || "",
-        startDate: dayjs(values.startDate).format('DD-MM-YYYY HH:mm:ss'),
-        endDate: dayjs(values.endDate).format('DD-MM-YYYY HH:mm:ss'),
+        values: values.values || [],
+        startDate: dayjs(values.startDate).format('DD/MM/YYYY HH:mm:ss'),
+        endDate: dayjs(values.endDate).format('DD/MM/YYYY HH:mm:ss'),
         isActive: values.isActive === 'active'
       };
 
@@ -157,6 +182,7 @@ export default function PolicyApp() {
       message.error('Có lỗi xảy ra khi cập nhật chính sách');
     }
   };
+
   const handleFilterChange = (filterName, newValues) => {
     setSelectedValues(prev => ({
       ...prev,
@@ -176,13 +202,14 @@ export default function PolicyApp() {
   }, 500);
 
   useEffect(() => {
-    if (!policyData) return;
+    if (!policyData?.data) return;
 
-    let filtered = [...policyData];
+    let filtered = [...policyData.data];
 
     if (searchTerm) {
       filtered = filtered.filter((item) =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase())
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.description?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -193,8 +220,15 @@ export default function PolicyApp() {
     }
 
     if (selectedValues.unit?.length > 0) {
+      filtered = filtered.filter((item) => {
+        // Check if any value in the values array has a matching unit
+        return item.values?.some(val => selectedValues.unit.includes(val.unit));
+      });
+    }
+
+    if (selectedValues.category?.length > 0) {
       filtered = filtered.filter((item) =>
-        selectedValues.unit.includes(item.unit)
+        selectedValues.category.includes(item.policySystemCategoryId?._id)
       );
     }
 
@@ -211,21 +245,52 @@ export default function PolicyApp() {
   }, [searchTerm, selectedValues, policyData]);
 
   const columns = [
-    { title: "No.", dataIndex: "id", key: "id" },
-    { title: "Tên chính sách", dataIndex: "name", key: "name" },
-    { title: "Đơn vị", dataIndex: "unit", key: "unit" },
-    { title: "Giá trị", dataIndex: "value", key: "value" },
+    {
+      title: "No.",
+      key: "id",
+      render: (_, __, index) => index + 1
+    },
+    {
+      title: "Tên chính sách",
+      dataIndex: "name",
+      key: "name"
+    },
+    {
+      title: "Mô tả",
+      dataIndex: "description",
+      key: "description",
+      render: (desc) => desc || 'N/A'
+    },
+    {
+      title: "Danh mục",
+      key: "category",
+      render: (record) => record.policySystemCategoryId?.categoryName || 'N/A'
+    },
+    {
+      title: "Giá trị",
+      key: "values",
+      render: (record) => {
+        if (!record.values || record.values.length === 0) return 'Không có';
+
+        return record.values.map((val, idx) => (
+          <div key={idx}>
+            {val.val1 && val.val2 ? `${val.val1}-${val.val2}` : val.val1 || val.val2}
+            {val.unit && ` (${val.unit === 'percent' ? 'Phần trăm' : val.unit === 'vnd' ? 'VND' : val.unit})`}
+          </div>
+        ));
+      }
+    },
     {
       title: "Ngày bắt đầu",
       dataIndex: "startDate",
       key: "startDate",
-      render: (date) => dayjs(date, "DD-MM-YYYY HH:mm:ss").format("DD-MM-YYYY HH:mm:ss")
+      render: (date) => date ? dayjs(date, "DD/MM/YYYY HH:mm:ss").format("DD/MM/YYYY HH:mm:ss") : 'N/A'
     },
     {
       title: "Ngày kết thúc",
       dataIndex: "endDate",
       key: "endDate",
-      render: (date) => dayjs(date, "DD-MM-YYYY HH:mm:ss").format("DD-MM-YYYY HH:mm:ss")
+      render: (date) => date ? dayjs(date, "DD/MM/YYYY HH:mm:ss").format("DD/MM/YYYY HH:mm:ss") : 'N/A'
     },
     {
       title: "Trạng thái",
@@ -254,6 +319,12 @@ export default function PolicyApp() {
       ),
     }
   ];
+
+  useEffect(() => {
+    if (detailedPolicy?.success && detailedPolicy.data) {
+      setSelectedPolicyDetail(detailedPolicy.data);
+    }
+  }, [detailedPolicy]);
 
   return (
     <div className={styles.contentContainer}>
@@ -304,6 +375,7 @@ export default function PolicyApp() {
           <Table
             columns={columns}
             dataSource={filteredData}
+            rowKey="_id"
             pagination={{
               total: filteredData.length,
               pageSize: 7,
@@ -342,6 +414,7 @@ export default function PolicyApp() {
           isOpen={isAddModalOpen}
           onCancel={() => setIsAddModalOpen(false)}
           onConfirm={handleAddPolicy}
+          categories={categoryData?.data || []}
         />
 
         <UpdatePolicyModal
@@ -352,17 +425,19 @@ export default function PolicyApp() {
           }}
           onConfirm={handleUpdatePolicy}
           initialValues={selectedPolicy}
+          categories={categoryData?.data || []}
         />
 
         <DetailPolicyModal
           isOpen={isDetailModalOpen}
-          policy={selectedPolicy}
+          policy={detailedPolicy?.data || selectedPolicy}
+          isLoading={isDetailLoading}
           onCancel={() => {
             setIsDetailModalOpen(false);
             setSelectedPolicy(null);
           }}
         />
-
+        
         <DeletePolicyModal
           isOpen={isDeleteModalOpen}
           onCancel={() => {

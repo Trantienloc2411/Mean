@@ -14,6 +14,12 @@ export const accommodationApi = apiSlice.injectEndpoints({
             providesTags: (result, error, id) => [{ type: "Accommodation", id }],
         }),
 
+        getAccommodationsByRentalLocation: builder.query({
+            query: (rentalLocationId) => `/accommodation/rental-location/${rentalLocationId}`,
+            transformResponse: (response) => response.data,
+            providesTags: (result, error, rentalLocationId) => [{ type: "Accommodation", rentalLocationId }],
+        }),
+
         createAccommodation: builder.mutation({
             query: (accommodation) => ({
                 url: "/accommodation/create-accommodation",
@@ -48,6 +54,7 @@ export const accommodationApi = apiSlice.injectEndpoints({
 export const {
     useGetAllAccommodationsQuery,
     useGetAccommodationByIdQuery,
+    useGetAccommodationsByRentalLocationQuery,
     useCreateAccommodationMutation,
     useUpdateAccommodationMutation,
     useDeleteAccommodationMutation,
