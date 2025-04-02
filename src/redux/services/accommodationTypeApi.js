@@ -3,7 +3,13 @@ import { apiSlice } from "./apiSlice";
 export const accommodationTypeApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getAllAccommodationTypes: builder.query({
-            query: () => "/accommodation-type/all-accommodation-types",
+            query: (rentalLocationId) => {
+                let url = "/accommodation-type/all-accommodation-types";
+                if (rentalLocationId) {
+                    url += `?rentalLocationId=${rentalLocationId}`;
+                }
+                return url;
+            },
             providesTags: ["AccommodationType"],
         }),
 
