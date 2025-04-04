@@ -50,7 +50,7 @@ export default function TransactionDetailModal({
             <Text strong>Số tiền:</Text>
             <br />
             <Text style={{ color: "#1890ff", fontWeight: "bold" }}>
-              {transaction.price || "N/A"} VND
+              {transaction.price || "N/A"}
             </Text>
           </Col>
         </Row>
