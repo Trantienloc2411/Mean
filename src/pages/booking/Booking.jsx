@@ -7,7 +7,6 @@ import debounce from "lodash/debounce";
 import Filter from "../../components/Filter/Filter";
 import styles from "./Booking.module.scss";
 import { useGetBookingsQuery } from "../../redux/services/bookingApi";
-import moment from "moment";
 
 export default function Booking() {
   const { data: bookings, error, isLoading } = useGetBookingsQuery();
