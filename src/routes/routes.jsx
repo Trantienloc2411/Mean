@@ -102,6 +102,7 @@ import {
 } from "./ProtectedRoute";
 import NotAuthLayout from "../layouts/NotAuthLayout.jsx";
 import CustomerLayout from "../layouts/CustomerLayout.jsx";
+import SetNewSuccess from "../pages/auth/setNewPassword/SetNewSuccess.jsx";
 
 // Define routes
 export const routes = [
@@ -141,6 +142,10 @@ export const routes = [
       {
         path: "/set-new-password/:token",
         element: <SetNewPassword />,
+      },
+      {
+        path: "/set-new-password-success",
+        element: <SetNewSuccess />,
       },
     ],
   },

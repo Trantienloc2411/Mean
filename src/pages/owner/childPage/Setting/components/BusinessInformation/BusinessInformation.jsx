@@ -273,7 +273,7 @@ export default function BusinessInformation({ businessData, refetch }) {
   }, [businessData]);
 
   // Xử lý khi không có dữ liệu doanh nghiệp
-  if (businessData?.id === null) {
+  if (businessData?.businessId === null) {
     return (
       <NotHaveBusiness
         refetch={refetch}
@@ -292,7 +292,7 @@ export default function BusinessInformation({ businessData, refetch }) {
     if (uploading) return;
     try {
       await updateBusiness({
-        id: businessData.id,
+        id: businessData.businessId,
         updatedBusiness: formData,
       }).unwrap();
       message.success("Cập nhật thông tin doanh nghiệp thành công!");

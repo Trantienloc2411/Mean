@@ -25,6 +25,7 @@ export default function RentalLocation() {
   const [searchValue, setSearchValue] = useState("");
   const [filters, setFilters] = useState({ statuses: [] });
   const [filteredLocations, setFilteredLocations] = useState([]);
+  console.log(ownerDetailData);
 
   useEffect(() => {
     if (rentalData?.data) {
@@ -60,52 +61,79 @@ export default function RentalLocation() {
 
   return (
     <div style={{ padding: "10px 20px" }}>
-      <Flex justify="space-between" align="center" style={{ marginBottom: 16 }}>
-        <Title level={2}>Địa điểm cho thuê</Title>
-        <Button
-          type="primary"
-          onClick={() => navigate("/rental-location/create")}
-          icon={<IoIosAdd />}
-        >
-          Thêm địa điểm mới
-        </Button>
-      </Flex>
+      {ownerDetailData?.isApproved ? (
+        <div>
+          <Flex
+            justify="space-between"
+            align="center"
+            style={{ marginBottom: 16 }}
+          >
+            <Title level={2}>Địa điểm cho thuê</Title>
+            <Button
+              type="primary"
+              onClick={() => navigate("/rental-location/create")}
+              icon={<IoIosAdd />}
+            >
+              Thêm địa điểm mới
+            </Button>
+          </Flex>
 
-      <Flex gap={16} style={{ marginBottom: 16 }}>
-        <Input
-          placeholder="Tìm kiếm địa điểm..."
-          value={searchValue}
-          onChange={handleSearch}
-          style={{ width: 300 }}
-        />
-        <FilterRentalLocation
-          filters={filters}
-          onFilterChange={handleFilterChange}
-          onReset={() => setFilters({ statuses: [] })}
-          onApplyFilters={() =>
-            applyFilters(searchValue, filters, rentalData?.data || [])
-          }
-        />
-      </Flex>
+          <Flex gap={16} style={{ marginBottom: 16 }}>
+            <Input
+              placeholder="Tìm kiếm địa điểm..."
+              value={searchValue}
+              onChange={handleSearch}
+              style={{ width: 300 }}
+            />
+            <FilterRentalLocation
+              filters={filters}
+              onFilterChange={handleFilterChange}
+              onReset={() => setFilters({ statuses: [] })}
+              onApplyFilters={() =>
+                applyFilters(searchValue, filters, rentalData?.data || [])
+              }
+            />
+          </Flex>
 
-      {filteredLocations.length > 0 ? (
-        <RentalLocationTable
-          data={filteredLocations}
-          loading={rentalIsLoading}
-        />
+          {filteredLocations.length > 0 ? (
+            <RentalLocationTable
+              data={filteredLocations}
+              loading={rentalIsLoading}
+            />
+          ) : (
+            <div
+              style={{
+                textAlign: "center",
+                padding: "40px",
+                fontSize: "18px",
+                color: "#888",
+                background: "#fff",
+                borderRadius: "8px",
+                boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+              }}
+            >
+              Không có địa điểm nào phù hợp.
+            </div>
+          )}
+        </div>
       ) : (
         <div
           style={{
             textAlign: "center",
             padding: "40px",
             fontSize: "18px",
-            color: "#888",
+            color: "#ff4d4f",
             background: "#fff",
             borderRadius: "8px",
             boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
           }}
         >
-          Không có địa điểm nào phù hợp.
+          <Title level={3} style={{ color: "#ff4d4f" }}>
+            Tài khoản của bạn chưa được phê duyệt
+          </Title>
+          <p>
+            Vui lòng chờ quản trị viên duyệt trước khi tiếp tục sử dụng dịch vụ.
+          </p>
         </div>
       )}
     </div>

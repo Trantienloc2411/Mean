@@ -1,16 +1,19 @@
 import { Dropdown, Tag, Input, Checkbox, Button, Table, Card } from "antd";
 import TableModify from "../dashboard/components/Table";
-import Overview from "./components/Overview";
-import { FilterOutlined, MoreOutlined, SearchOutlined } from "@ant-design/icons";
+import Overview from "./components/overview/Overview";
+import {
+  FilterOutlined,
+  MoreOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import { useState, useEffect } from "react";
 import debounce from "lodash/debounce";
 import Filter from "../../components/Filter/Filter";
 import styles from "./Booking.module.scss";
-import { useGetBookingsQuery } from "../../redux/services/bookingApi";
-import moment from "moment";
+import { useGetAllBookingsQuery } from "../../redux/services/bookingApi";
 
 export default function Booking() {
-  const { data: bookings, error, isLoading } = useGetBookingsQuery();
+  const { data: bookings, error, isLoading } = useGetAllBookingsQuery();
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [selectedValues, setSelectedValues] = useState({
@@ -22,7 +25,7 @@ export default function Booking() {
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 7,
-    total: 0
+    total: 0,
   });
 
   // Define filterGroups
@@ -89,9 +92,9 @@ export default function Booking() {
         key: booking._id, // Use _id as the key
       }));
       setFilteredData(formattedBookings);
-      setPagination(prev => ({
+      setPagination((prev) => ({
         ...prev,
-        total: formattedBookings.length
+        total: formattedBookings.length,
       }));
     }
   }, [bookings]);
@@ -99,7 +102,7 @@ export default function Booking() {
   // Update search function
   const debouncedSearch = debounce((value) => {
     if (!bookings) return;
-    
+
     const filtered = bookings.filter((booking) =>
       booking.customerId.toLowerCase().includes(value.toLowerCase())
     );
@@ -109,7 +112,7 @@ export default function Booking() {
   // Update filter function to match the filter values
   const applyFilters = (filters) => {
     if (!bookings) return;
-    
+
     let filtered = [...bookings];
 
     if (filters.status.length > 0) {
@@ -118,7 +121,8 @@ export default function Booking() {
         if (booking.isCancel) status = "Canceled";
         else if (booking.completedDate) status = "Complete";
         else if (booking.confirmDate) status = "Confirmed";
-        else if (booking.checkInHour && !booking.checkOutHour) status = "In Progress";
+        else if (booking.checkInHour && !booking.checkOutHour)
+          status = "In Progress";
         else status = "Pending";
 
         return filters.status.includes(status);
@@ -130,8 +134,10 @@ export default function Booking() {
         let paymentStatus = "";
         if (booking.isFullPay) paymentStatus = "Fully Paid";
         else if (booking.isPayOnlyDeposit) paymentStatus = "Deposited";
-        else if (booking.isCancel && booking.isPayOnlyDeposit) paymentStatus = "Deposit Returned";
-        else if (booking.isCancel && !booking.isPayOnlyDeposit) paymentStatus = "Deposit Forfeited";
+        else if (booking.isCancel && booking.isPayOnlyDeposit)
+          paymentStatus = "Deposit Returned";
+        else if (booking.isCancel && !booking.isPayOnlyDeposit)
+          paymentStatus = "Deposit Forfeited";
         else paymentStatus = "Unpaid";
 
         return filters.payment.includes(paymentStatus);
@@ -175,7 +181,7 @@ export default function Booking() {
   const tableColumn = [
     {
       title: <span className={styles.titleTable}>STT</span>,
-      key: 'index',
+      key: "index",
       render: (text, record, index) => index + 1,
       width: 70,
     },
@@ -215,7 +221,7 @@ export default function Booking() {
       dataIndex: "totalPrice",
       key: "totalPrice",
       width: 150,
-      render: (value) => `${parseInt(value).toLocaleString('vi-VN')} VNĐ`,
+      render: (value) => `${parseInt(value).toLocaleString("vi-VN")} VNĐ`,
     },
     {
       title: <span className={styles.titleTable}>Trạng thái</span>,
@@ -302,7 +308,7 @@ export default function Booking() {
   return (
     <div className={styles.contentContainer}>
       <h1 className={styles.sectionTitle}>Quản lý đặt phòng</h1>
-      
+
       <div className={styles.overviewSection}>
         <Overview />
       </div>
@@ -330,7 +336,7 @@ export default function Booking() {
                 trigger={["click"]}
                 placement="bottomRight"
               >
-                <Button 
+                <Button
                   icon={<FilterOutlined />}
                   className={styles.filterButton}
                 >
@@ -343,7 +349,7 @@ export default function Booking() {
           </div>
 
           <div className={styles.tableContainer}>
-            <Table 
+            <Table
               columns={tableColumn}
               dataSource={filteredData}
               loading={isLoading}
@@ -352,10 +358,12 @@ export default function Booking() {
                 showSizeChanger: false,
                 className: styles.customPagination,
                 onChange: (page) => {
-                  setPagination(prev => ({ ...prev, current: page }));
+                  setPagination((prev) => ({ ...prev, current: page }));
                 },
                 itemRender: (page, type, originalElement) => {
-                  const totalPages = Math.ceil(filteredData.length / pagination.pageSize);
+                  const totalPages = Math.ceil(
+                    filteredData.length / pagination.pageSize
+                  );
                   if (type === "prev") {
                     return (
                       <button
