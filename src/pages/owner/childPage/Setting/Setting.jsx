@@ -28,6 +28,7 @@ export default function Setting() {
       fullName: userData?.fullName,
       email: userData?.email,
       phone: userData?.phone,
+      doB: userData?.doB,
       avatar:
         userData?.avatarUrl?.[0] ||
         "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrT_BjEyf_LEpcvb225JX2qFCJcLz5-0RXLg&s",
@@ -41,12 +42,29 @@ export default function Setting() {
     if (!ownerDetail) return null;
     return {
       ownerId: ownerDetail.id,
-      companyName: ownerDetail?.businessInformationId?.companyName,
+      businessId: ownerDetail?.businessInformationId?.id || null,
+      businessLicensesFile:
+        ownerDetail?.businessInformationId?.businessLicensesFile,
+      citizenIdentification:
+        ownerDetail?.businessInformationId?.citizenIdentification,
       companyAddress: ownerDetail?.businessInformationId?.companyAddress,
+      companyName: ownerDetail?.businessInformationId?.companyName,
+      representativeName:
+        ownerDetail?.businessInformationId?.representativeName,
       taxID: ownerDetail?.businessInformationId?.taxID,
     };
   }, [ownerDetail]);
-
+  const bankInfo = useMemo(() => {
+    if (!ownerDetail) return null;
+    return {
+      ownerId: ownerDetail.id,
+      // businessId: ownerDetail?.businessInformationId?.id || null,
+      bankId: ownerDetail?.bankId?.id || null,
+      bankName: ownerDetail?.bankId?.bankName,
+      bankNo: ownerDetail?.bankId?.bankNo,
+      bankAccountName: ownerDetail?.bankId?.bankAccountName,
+    };
+  }, [ownerDetail]);
   if (ownerLoading || !userInfo) {
     return (
       <div
@@ -79,7 +97,7 @@ export default function Setting() {
     {
       key: "bankAccount",
       label: "Tài khoản ngân hàng",
-      children: <BankAccount />,
+      children: <BankAccount refetch={refetch} bankData={bankInfo} />,
     },
     {
       key: "meanWallet",

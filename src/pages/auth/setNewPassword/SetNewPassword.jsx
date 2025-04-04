@@ -42,7 +42,7 @@ const SetNewPassword = () => {
           message: "Thành công",
           description: "Mật khẩu đã được đặt lại. Vui lòng đăng nhập!",
         });
-        navigate("/login");
+        navigate("/set-new-password-success");
       } catch (err) {
         notification.error({
           message: "Lỗi",

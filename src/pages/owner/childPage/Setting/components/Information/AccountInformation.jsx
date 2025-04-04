@@ -23,6 +23,7 @@ export default function AccountInformation({ userData, refetch }) {
   const [updateUser] = useUpdateUserMutation();
   const { id } = useParams();
   const [uploading, setUploading] = useState(false);
+  console.log(userData);
 
   // Cập nhật formData khi userData thay đổi
   useEffect(() => {
@@ -48,7 +49,7 @@ export default function AccountInformation({ userData, refetch }) {
         fullName: formData.fullName,
         phone: formData.phone,
         doB: formData.doB,
-        avatar: formData.avatar,
+        avatarUrl: formData.avatar,
       };
 
       await updateUser({ id, updatedUser: updatedData }).unwrap();
@@ -103,26 +104,28 @@ export default function AccountInformation({ userData, refetch }) {
             size={120}
             src={formData.avatar || "profile-placeholder.jpg"}
           />
-          {isEditing && (
-            <Upload
-              showUploadList={false}
-              beforeUpload={async (file) => {
-                const avatarUrl = await handleUploadAvatar(file);
-                if (avatarUrl) {
-                  setFormData((prev) => ({ ...prev, avatar: avatarUrl }));
-                }
-                return false;
-              }}
-            >
-              <Button
-                icon={<UploadOutlined />}
-                disabled={uploading}
-                style={{ marginTop: 16 }}
+          <div>
+            {isEditing && (
+              <Upload
+                showUploadList={false}
+                beforeUpload={async (file) => {
+                  const avatarUrl = await handleUploadAvatar(file);
+                  if (avatarUrl) {
+                    setFormData((prev) => ({ ...prev, avatar: avatarUrl }));
+                  }
+                  return false;
+                }}
               >
-                {uploading ? "Đang tải..." : "Đổi ảnh đại diện"}
-              </Button>
-            </Upload>
-          )}
+                <Button
+                  icon={<UploadOutlined />}
+                  disabled={uploading}
+                  style={{ marginTop: 16 }}
+                >
+                  {uploading ? "Đang tải..." : "Đổi ảnh đại diện"}
+                </Button>
+              </Upload>
+            )}
+          </div>
         </Col>
         <Col xs={24} sm={24} md={16}>
           <Form layout="vertical">

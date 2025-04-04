@@ -13,7 +13,7 @@ const CompanyInfo = ({ companyInfo }) => {
     representativeId: companyInfo?.citizenIdentification || "Chưa có thông tin",
     companyAddress: companyInfo?.companyAddress || "Chưa có thông tin",
     taxCode: companyInfo?.taxCode || "Chưa có thông tin",
-    file: companyInfo?.businessLicensesFile || "Chưa có thông tin",
+    file: companyInfo?.businessLicensesFile,
   };
 
   const fields = [
@@ -71,12 +71,12 @@ const CompanyInfo = ({ companyInfo }) => {
               <div
                 style={{
                   background: "#f5f5f5",
-                  width: 100,
+                  // width: 100,
                   padding: "4px 12px",
                   borderRadius: 6,
                   border: "1px solid #d9d9d9",
                   textAlign: "center",
-                  display: "block",
+                  // display: "block",
                   marginTop: 5,
                 }}
               >

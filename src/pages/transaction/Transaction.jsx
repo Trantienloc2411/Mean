@@ -94,11 +94,27 @@ export default function Transaction() {
     });
   };
 
+  const transactionOverviewData = {
+    totalTransaction: transformedData.length,
+    pendingCount: transformedData.filter((item) => item.status === "PENDING")
+      .length,
+    completedCount: transformedData.filter(
+      (item) => item.status === "COMPLETED"
+    ).length,
+    failedCount: transformedData.filter((item) => item.status === "FAILED")
+      .length,
+    momoPaymentCount: transformedData.filter(
+      (item) => item.typeTransaction === "MOMO_PAYMENT"
+    ).length,
+  };
+
   return (
     <div className={styles.contentContainer}>
       <h1 className={styles.sectionTitle}>Quản lý giao dịch</h1>
       <div className={styles.overviewSection}>
-        <OverviewTransaction />
+        <OverviewTransaction
+          transactionOverviewData={transactionOverviewData}
+        />
       </div>
       <div className={styles.transactionSection}>
         <h1 className={styles.sectionTitle}>Lịch sử giao dịch</h1>
