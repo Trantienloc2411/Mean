@@ -6,32 +6,34 @@ import { GiPayMoney } from "react-icons/gi";
 import { MdCancel } from "react-icons/md";
 import { GrTransaction } from "react-icons/gr";
 
-export default function OverviewTransaction() {
+export default function OverviewTransaction({ transactionOverviewData }) {
+  console.log(transactionOverviewData);
+
   return (
     <Flex gap={30} justify="space-between" wrap>
       <CardDashboard
         backgroundColorIcon="#e0f7fa"
         colorIcon="#00acc1"
         title="Tổng giao dịch"
-        value="50"
+        value={transactionOverviewData.totalTransaction}
         iconName={<GrTransaction />}
         width={"15%"}
         height={120}
       />
-      <CardDashboard
+      {/* <CardDashboard
         backgroundColorIcon="#fff3cd"
         colorIcon="#ffc107"
-        title="Tổng cọc"
-        value="50"
+        title="Thanh toán Momo"
+        value={transactionOverviewData.momoPaymentCount}
         iconName={<BiMoneyWithdraw />}
         width={"15%"}
         height={120}
-      />
+      /> */}
       <CardDashboard
         backgroundColorIcon="#e8f5e9"
         colorIcon="#43a047"
-        title="Tổng trả hoàn toàn"
-        value="50"
+        title="Hoàn thành"
+        value={transactionOverviewData.completedCount}
         iconName={<FaMoneyBill />}
         width={"15%"}
         height={120}
@@ -39,8 +41,8 @@ export default function OverviewTransaction() {
       <CardDashboard
         backgroundColorIcon="#e3f2fd"
         colorIcon="#2196f3"
-        title="Tổng hoàn tiền"
-        value="50"
+        title="Đang xử lý"
+        value={transactionOverviewData.pendingCount}
         iconName={<GiPayMoney />}
         width={"15%"}
         height={120}
@@ -48,8 +50,8 @@ export default function OverviewTransaction() {
       <CardDashboard
         backgroundColorIcon="#ffebee"
         colorIcon="#d32f2f"
-        title="Tổng Hủy"
-        value="50"
+        title="Thất bại"
+        value={transactionOverviewData.failedCount}
         iconName={<MdCancel />}
         width={"15%"}
         height={120}
