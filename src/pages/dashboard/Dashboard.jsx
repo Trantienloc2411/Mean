@@ -4,7 +4,7 @@ import Table from "./components/Table";
 import ReviewList from "./components/List";
 import moment from "moment";
 import { useGetUsersQuery } from "../../redux/services/userApi";
-import { useGetBookingsQuery } from "../../redux/services/bookingApi";
+import { useGetAllBookingsQuery } from "../../redux/services/bookingApi";
 
 import { placeLove, reviewList } from "./data/dataFake";
 import Overview from "./components/Overview";
@@ -26,8 +26,9 @@ import BookingStatusPieChart from './components/BookingStatusPieChart';
 
 export default function Dashboard() {
   const { data: userData, isLoading: isLoadingUsers } = useGetUsersQuery();
-  const { data: bookingData, isLoading: isLoadingBookings } = useGetBookingsQuery();
+  const { data: bookingData, isLoading: isLoadingBookings } = useGetAllBookingsQuery();
 
+  console.log(bookingData);
 
   const columnPlace = [
     {
@@ -96,6 +97,7 @@ export default function Dashboard() {
       cancel: 0,
       pending: 0
     };
+    console.log(bookings);
     
     bookings.forEach(booking => {
       // Đã hoàn thành: có completedDate hoặc paymentStatus là "Hoàn thành"
@@ -181,11 +183,14 @@ export default function Dashboard() {
   }
 
   const countBooking = (bookings) => {
-    if (!bookings) return 0;
-    return bookings.length;
-  }
+    if (!bookings?.data) return 0; // Check if bookings exists and has 'data'
+    console.log("Line 187",bookings.data.length);
+    return bookings.data.length;
+  };
+  
 
   const countRevenue = (bookings) => {
+    console.log("Line 192",bookings);
     if (!bookings) return 0;
     let revenue = 0;
     bookings.forEach(booking => {
@@ -202,10 +207,10 @@ export default function Dashboard() {
       setQuarterlyData(processUsersByQuarter(userData));
     }
     
-    if (bookingData) {
-      const processedBookings = processBookingsByMonth(bookingData);
+    if (bookingData?.data) {
+      const processedBookings = processBookingsByMonth(bookingData.data);
       setMonthlyData(processedBookings);
-      setBookingStats(processBookingStatus(bookingData));
+      setBookingStats(processBookingStatus(bookingData.data));
     }
   }, [userData, bookingData]);
 

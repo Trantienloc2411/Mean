@@ -6,71 +6,66 @@ import TransactionTable from "./components/TransactionTable";
 import FilterModal from "./components/FilterModal";
 import OverviewTransaction from "./components/OverviewTransaction";
 import styles from "./Transaction.module.scss";
+import { useGetAllTransactionQuery } from "../../redux/services/transactionApi";
 export default function Transaction() {
   const [searchValue, setSearchValue] = useState(""); // Tìm kiếm theo mã giao dịch hoặc mã đặt phòng
   const [filters, setFilters] = useState({
     statuses: [], // Lọc theo trạng thái
     transactionTypes: [], // Lọc theo loại giao dịch
   });
+
+  const { data: transactionData } = useGetAllTransactionQuery();
+  const convertTransactionData = (data) => {
+    return (
+      data?.map((item) => ({
+        id: item._id,
+        transactionCode: item.paymentCode,
+        bookingCode: item.bookingId,
+        createTime: item.transactionCreatedDate,
+        endTime: item.transactionEndDate,
+        price: `${item.amount.toLocaleString("vi-VN")} VND`,
+        status: convertStatus(item.transactionStatus),
+        typeTransaction: convertType(item.typeTransaction),
+      })) || []
+    );
+  };
+
+  const convertStatus = (statusCode) => {
+    switch (statusCode) {
+      case 1:
+        return "PENDING";
+      case 2:
+        return "COMPLETED";
+      case 3:
+        return "FAILED";
+      default:
+        return "unknown";
+    }
+  };
+
+  const convertType = (typeCode) => {
+    switch (typeCode) {
+      case 1:
+        return "MOMO_PAYMENT";
+      default:
+        return "unknown";
+    }
+  };
+  console.log(transactionData);
+
+  const transformedData = convertTransactionData(transactionData?.data);
+
   const [isFilterModalVisible, setIsFilterModalVisible] = useState(false);
 
   const openFilterModal = () => setIsFilterModalVisible(true);
   const closeFilterModal = () => setIsFilterModalVisible(false);
 
-  const data = [
-    {
-      id: 1,
-      transactionCode: "TX123456",
-      bookingCode: "BC98765",
-      createTime: "2025-01-14 10:00",
-      endTime: "2025-01-14 12:00",
-      price: "500,000 VND",
-      status: "active",
-      typeTransaction: "PaymentComplete",
-    },
-    {
-      id: 2,
-      transactionCode: "TX234567",
-      bookingCode: "BC87654",
-      createTime: "2025-01-13 11:00",
-      endTime: "2025-01-13 13:00",
-      price: "1,000,000 VND",
-      status: "pending",
-      typeTransaction: "Refund",
-    },
-    {
-      id: 3,
-      transactionCode: "TX345678",
-      bookingCode: "BC76543",
-      createTime: "2025-01-12 09:00",
-      endTime: "2025-01-12 11:00",
-      price: "200,000 VND",
-      status: "cancel",
-      typeTransaction: "PaymentComplete",
-    },
-    {
-      id: 4,
-      transactionCode: "TX456789",
-      bookingCode: "BC65432",
-      createTime: "2025-01-11 15:00",
-      endTime: "2025-01-11 16:00",
-      price: "750,000 VND",
-      status: "active",
-      typeTransaction: "Refund",
-    },
-  ];
-
   // Dữ liệu mock cho trạng thái và loại giao dịch (tiếng Anh)
-  const statuses = ["Hoạt động", "Chờ xác nhận", "Hủy"];
-  const transactionTypes = [
-    "Tiền cọc",
-    "Trả full",
-    "Hoàn tiền",
-    "Thanh toán cuối",
-  ];
+  const statuses = ["PENDING", "COMPLETED", "FAILED"];
+  const transactionTypes = ["MOMO_PAYMENT"];
 
   // Hàm lọc dữ liệu
-  const filteredData = data.filter((item) => {
+  const filteredData = transformedData.filter((item) => {
     const isStatusMatch =
       filters.statuses.length === 0 || filters.statuses.includes(item.status);
     const isTypeMatch =

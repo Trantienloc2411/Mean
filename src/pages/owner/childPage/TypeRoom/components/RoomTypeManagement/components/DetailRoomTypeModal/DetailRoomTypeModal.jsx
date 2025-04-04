@@ -1,13 +1,24 @@
-import { Modal, Descriptions, Tag, Tooltip } from 'antd';
+import { Modal, Descriptions, Tag, Tooltip, Image, Row, Col } from 'antd';
 import { useEffect, useState } from 'react';
 import styles from './DetailRoomTypeModal.module.scss';
 
 const DetailRoomTypeModal = ({ isOpen, onCancel, roomType, service }) => {
   const [formattedServices, setFormattedServices] = useState([]);
+  const [images, setImages] = useState([]);
 
   useEffect(() => {
     if (roomType?.serviceIds && Array.isArray(roomType.serviceIds)) {
       setFormattedServices(roomType.serviceIds);
+    }
+
+    // Ưu tiên sử dụng trường images nếu có, nếu không thì dùng image
+    if (roomType?.images && Array.isArray(roomType.images)) {
+      setImages(roomType.images);
+    } else if (roomType?.image) {
+      // Xử lý cả trường hợp image là mảng hoặc string
+      setImages(Array.isArray(roomType.image) ? roomType.image : [roomType.image]);
+    } else {
+      setImages([]);
     }
   }, [roomType]);
 
@@ -83,6 +94,33 @@ const DetailRoomTypeModal = ({ isOpen, onCancel, roomType, service }) => {
     return 'Không có dịch vụ';
   };
 
+  const renderImages = () => {
+    if (images.length === 0) {
+      return <div>Không có hình ảnh</div>;
+    }
+
+    return (
+      <Image.PreviewGroup>
+        <Row gutter={[16, 16]}>
+          {images.map((img, index) => (
+            <Col key={index} span={8}>
+              <Image
+                src={img}
+                alt={`Hình ảnh phòng ${index + 1}`}
+                style={{
+                  width: '100%',
+                  height: '120px',
+                  objectFit: 'cover',
+                  borderRadius: '8px'
+                }}
+              />
+            </Col>
+          ))}
+        </Row>
+      </Image.PreviewGroup>
+    );
+  };
+
   return (
     <Modal
       title="Chi tiết loại phòng"
@@ -92,6 +130,9 @@ const DetailRoomTypeModal = ({ isOpen, onCancel, roomType, service }) => {
       width={800}
     >
       <Descriptions bordered column={1} className={styles.modalDescriptions}>
+        <Descriptions.Item label={`Hình ảnh (${images.length})`}>
+          {renderImages()}
+        </Descriptions.Item>
         <Descriptions.Item label="ID">{roomType._id || 'N/A'}</Descriptions.Item>
         <Descriptions.Item label="Tên loại phòng">{roomType.name || 'N/A'}</Descriptions.Item>
         <Descriptions.Item label="Mô tả">

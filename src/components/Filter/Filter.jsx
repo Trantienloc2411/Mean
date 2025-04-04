@@ -1,103 +1,150 @@
-import { Checkbox } from 'antd';
+import React, { useState } from 'react';
+import { Checkbox, DatePicker, Select, Input } from 'antd';
 import styles from './Filter.module.scss';
-/**
- * FilterModify Component
- * 
- * A flexible and reusable filter component that supports multiple filter groups with checkbox selections.
- * Each filter group is displayed in its own column and can have custom options with tags or other elements.
- * 
- * @component
- * 
- * Props:
- * @param {Object[]} filterGroups - Array of filter group configurations
- * @param {string} filterGroups[].name - Unique identifier for the filter group
- * @param {string} filterGroups[].title - Display title for the filter group
- * @param {Object[]} filterGroups[].options - Array of options for the filter group
- * @param {ReactNode} filterGroups[].options[].label - Display element for the option
- * @param {string} filterGroups[].options[].value - Value for the option
- * 
- * @param {Object} selectedValues - Object containing selected values for each filter group
- * @param {function} onFilterChange - Callback function when filters change (groupName, newValues) => void
- * 
- * Example Usage:
- * 
- * const filterGroups = [
- *   {
- *     name: 'status',
- *     title: 'Status',
- *     options: [
- *       {
- *         label: <Tag color="green">Active</Tag>,
- *         value: 'active'
- *       },
- *       {
- *         label: <Tag color="red">Inactive</Tag>,
- *         value: 'inactive'
- *       }
- *     ]
- *   },
- *   {
- *     name: 'type',
- *     title: 'Type',
- *     options: [
- *       {
- *         label: <Tag>Type A</Tag>,
- *         value: 'typeA'
- *       },
- *       {
- *         label: <Tag>Type B</Tag>,
- *         value: 'typeB'
- *       }
- *     ]
- *   }
- * ];
- * 
- * const [selectedValues, setSelectedValues] = useState({
- *   status: [],
- *   type: []
- * });
- * 
- * const handleFilterChange = (filterName, newValues) => {
- *   setSelectedValues(prev => ({
- *     ...prev,
- *     [filterName]: newValues
- *   }));
- * };
- * 
- * <FilterModify
- *   filterGroups={filterGroups}
- *   selectedValues={selectedValues}
- *   onFilterChange={handleFilterChange}
- * />
- */
-export default function Filter(props) {
-    const {
-        filterGroups,
-        selectedValues,
-        onFilterChange
-    } = props;
 
-    return (
-        <div
-            className={styles.filterContainer}
-            style={{
-                gridTemplateColumns: `repeat(${filterGroups.length}, 1fr)`
-            }}
-        >
-            {filterGroups.map((group, index) => (
-                <div
-                    key={group.name}
-                    className={styles.filterGroup}
-                >
-                    <h4>{group.title}</h4>
-                    <Checkbox.Group
-                        className={styles.checkboxGroup}
-                        options={group.options}
-                        value={selectedValues[group.name]}
-                        onChange={(checkedValues) => onFilterChange(group.name, checkedValues)}
-                    />
-                </div>
-            ))}
+const { RangePicker } = DatePicker;
+
+export default function Filter({ 
+    filterGroups, 
+    selectedValues, 
+    onFilterChange,
+    bookingStatusCodes,
+    paymentStatusCodes,
+    bookings
+  }) {
+    const [additionalFilters, setAdditionalFilters] = useState({
+      dateFilter: null,
+      timeFilter: null,
+      priceRange: { min: null, max: null }
+    });
+
+  const generateStatusOptions = (statusCodes, statusMapper) => {
+    return Object.entries(statusCodes).map(([key, value]) => ({
+      label: statusMapper(value),
+      value: statusMapper(value)
+    }));
+  };
+
+  const bookingStatusMapper = (status) => {
+    const statusLabels = {
+      [bookingStatusCodes.CONFIRMED]: "Confirmed",
+      [bookingStatusCodes.PENDING]: "Pending",
+      [bookingStatusCodes.NEEDCHECKIN]: "Need Check-in",
+      [bookingStatusCodes.CHECKEDIN]: "Checked In",
+      [bookingStatusCodes.NEEDCHECKOUT]: "Need Check-out", 
+      [bookingStatusCodes.CHECKEDOUT]: "Checked Out",
+      [bookingStatusCodes.CANCELLED]: "Cancelled",
+      [bookingStatusCodes.COMPLETED]: "Completed"
+    };
+    return statusLabels[status] || "Unknown Status";
+  };
+
+  const paymentStatusMapper = (status) => {
+    const statusLabels = {
+      [paymentStatusCodes.BOOKING]: "Booking",
+      [paymentStatusCodes.PENDING]: "Pending",
+      [paymentStatusCodes.PAID]: "Fully Paid",
+      [paymentStatusCodes.REFUND]: "Refunded",
+      [paymentStatusCodes.FAILED]: "Failed"
+    };
+    return statusLabels[status] || "Unknown Payment";
+  };
+  const additionalFilterGroups = [
+    {
+      name: "bookingStatus",
+      title: "Booking Status",
+      type: "checkbox",
+      options: generateStatusOptions(bookingStatusCodes, bookingStatusMapper)
+    },
+    {
+      name: "paymentStatus",
+      title: "Payment Status", 
+      type: "checkbox",
+      options: generateStatusOptions(paymentStatusCodes, paymentStatusMapper)
+    }
+  ];
+
+  const handleAdditionalFilterChange = (filterName, value) => {
+    const updatedFilters = {
+      ...additionalFilters,
+      [filterName]: value
+    };
+    
+    setAdditionalFilters(updatedFilters);
+    
+    onFilterChange('additionalFilters', updatedFilters);
+  };
+
+  const renderFilterInput = (group) => {
+    switch(group.type) {
+      case "checkbox":
+        return (
+          <Checkbox.Group
+            className={styles.checkboxGroup}
+            options={group.options}
+            value={selectedValues[group.name]}
+            onChange={(checkedValues) => onFilterChange(group.name, checkedValues)}
+          />
+        );
+      default:
+        return null;
+    }
+  };
+
+  return (
+    <div 
+      className={styles.advancedFilterContainer}
+      style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: '16px',
+        padding: '16px',
+        minWidth: '350px'
+      }}
+    >
+      <div 
+        className={styles.dynamicFilterGroups}
+        style={{
+          display: 'grid',
+          gridTemplateColumns: 'repeat(2, 1fr)',
+          gap: '16px'
+        }}
+      >
+        {[...filterGroups, ...additionalFilterGroups].map((group) => (
+          <div 
+            key={group.name} 
+            className={styles.filterGroup}
+          >
+            <h4>{group.title}</h4>
+            {renderFilterInput(group)}
+          </div>
+        ))}
+      </div>
+
+      <div 
+        className={styles.advancedOptions}
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '16px'
+        }}
+      >
+        <div>
+          <h4>Booking Date Range</h4>
+          <RangePicker 
+            style={{ width: '100%' }}
+            onChange={(dates) => handleAdditionalFilterChange('dateRange', dates)}
+          />
         </div>
-    );
-} 
+        <div>
+          <h4>Time Slot</h4>
+          <RangePicker 
+            picker="time"
+            style={{ width: '100%' }}
+            onChange={(times) => handleAdditionalFilterChange('timeRange', times)}
+          />
+        </div>
+      </div>
+    </div>
+  );
+}

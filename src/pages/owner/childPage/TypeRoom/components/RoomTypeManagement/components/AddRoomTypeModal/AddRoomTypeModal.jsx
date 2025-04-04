@@ -1,36 +1,124 @@
-import { Modal, Form, Input, InputNumber, Select, Button } from 'antd';
+import { Modal, Form, Input, InputNumber, Select, Button, Spin, Image, Upload, message } from "antd";
 import { useGetAllAmenitiesQuery } from '../../../../../../../../redux/services/serviceApi';
 import { useGetAllRentalLocationsQuery } from '../../../../../../../../redux/services/rentalLocationApi';
 import styles from './AddRoomTypeModal.module.scss';
+import { useState } from "react";
+import { supabase } from "../../../../../../../../redux/services/supabase";
+import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
 
 const { TextArea } = Input;
 const { Option } = Select;
+const { Dragger } = Upload;
+
+const MAX_IMAGES = 10;
 
 const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
   const [form] = Form.useForm();
   const { data: services, isLoading, error } = useGetAllAmenitiesQuery();
   const { data: rentalLocations, isLoading: isLoadingRentalLocations } = useGetAllRentalLocationsQuery();
+  const [fileList, setFileList] = useState([]);
+  const [uploading, setUploading] = useState(false);
 
   const handleSubmit = () => {
     form.validateFields()
       .then((values) => {
-        const formattedValues = {
+        const formattedValues = { 
           ...values,
+          // Use 'image' field instead of 'images' and always send as array
+          image: fileList.map(file => file.url),
           serviceIds: values.serviceIds ? values.serviceIds : 
-                      values.serviceId ? [values.serviceId] : []
+                    values.serviceId ? [values.serviceId] : []
         };
+        
         if (formattedValues.serviceIds && formattedValues.serviceId) {
           delete formattedValues.serviceId;
         }
 
-        console.log("Dữ liệu được thêm:", formattedValues);
+        console.log('Sending to API:', formattedValues);
         onConfirm(formattedValues);
         form.resetFields();
+        setFileList([]);
       })
       .catch((info) => {
         console.log('Validate Failed:', info);
       });
   };
+
+  const uploadProps = {
+    name: "file",
+    multiple: true,
+    accept: ".jpg,.jpeg,.png",
+    maxCount: MAX_IMAGES,
+    beforeUpload: (file) => {
+      if (fileList.length >= MAX_IMAGES) {
+        message.error(`Bạn chỉ được tải lên tối đa ${MAX_IMAGES} ảnh!`);
+        return Upload.LIST_IGNORE;
+      }
+      const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
+      if (!isJpgOrPng) {
+        message.error("Chỉ cho phép tải lên file JPG/PNG!");
+        return Upload.LIST_IGNORE;
+      }
+      if (file.size / 1024 / 1024 >= 5) {
+        message.error("Hình ảnh phải nhỏ hơn 5MB!");
+        return Upload.LIST_IGNORE;
+      }
+      return true;
+    },
+    customRequest: async ({ file, onSuccess, onError }) => {
+      setUploading(true);
+      const fileName = `${Date.now()}-${file.name}`;
+
+      try {
+        const { data, error } = await supabase.storage
+          .from("image")
+          .upload(fileName, file, { cacheControl: "3600", upsert: false });
+
+        if (error || !data) throw new Error("Tải ảnh lên thất bại!");
+
+        const { data: urlData } = supabase.storage
+          .from("image")
+          .getPublicUrl(data.path);
+        if (!urlData.publicUrl) throw new Error("Không lấy được URL ảnh!");
+
+        setFileList(prev => [
+          ...prev,
+          {
+            uid: file.uid,
+            url: urlData.publicUrl,
+            name: fileName,
+            path: data.path,
+          }
+        ]);
+
+        message.success("Tải ảnh lên thành công!");
+        onSuccess("ok");
+      } catch (error) {
+        message.error(error.message);
+        onError(error);
+      } finally {
+        setUploading(false);
+      }
+    },
+  };
+
+  const handleRemove = async (file) => {
+    setUploading(true);
+    try {
+      const filePath = file.path || file.name;
+      const { error } = await supabase.storage.from("image").remove([filePath]);
+
+      if (error) throw error;
+
+      setFileList(prev => prev.filter(item => item.uid !== file.uid));
+      message.success("Đã xóa ảnh!");
+    } catch (error) {
+      message.error("Lỗi khi xóa ảnh!");
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const getServicesOptions = () => {
     if (!services) return [];
     const servicesList = Array.isArray(services.data) ? services.data : 
@@ -155,6 +243,49 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
             formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
             parser={value => value.replace(/\$\s?|(,*)/g, '')}
           />
+        </Form.Item>
+
+        <Form.Item label={`Hình ảnh loại phòng (${fileList.length}/${MAX_IMAGES})`}>
+          <Spin spinning={uploading} tip="Đang xử lý...">
+            <Dragger {...uploadProps} showUploadList={false}>
+              <p className="ant-upload-drag-icon">
+                <InboxOutlined />
+              </p>
+              <p className="ant-upload-text">
+                Kéo và thả ảnh vào đây hoặc nhấn để tải lên
+              </p>
+              <p className="ant-upload-hint">
+                Hỗ trợ JPG, PNG. Tối đa {MAX_IMAGES} ảnh, mỗi ảnh ≤5MB
+              </p>
+            </Dragger>
+          </Spin>
+
+          <div style={{ display: "flex", flexWrap: "wrap", marginTop: 16, gap: 8 }}>
+            {fileList.map((file) => (
+              <div key={file.uid} style={{ position: "relative" }}>
+                <Image
+                  src={file.url}
+                  width={100}
+                  height={100}
+                  style={{ objectFit: "cover", borderRadius: 8 }}
+                />
+                <DeleteOutlined
+                  onClick={() => handleRemove(file)}
+                  style={{
+                    position: "absolute",
+                    top: 4,
+                    right: 4,
+                    color: "white",
+                    background: "rgba(0, 0, 0, 0.5)",
+                    borderRadius: "50%",
+                    padding: 4,
+                    cursor: "pointer",
+                    fontSize: 16,
+                  }}
+                />
+              </div>
+            ))}
+          </div>
         </Form.Item>
       </Form>
     </Modal>

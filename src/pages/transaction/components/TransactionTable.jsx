@@ -10,6 +10,7 @@ import {
 import TransactionDetailModal from "./TransactionDetailModal";
 import { useState } from "react";
 import styles from "./TransactionTable.module.scss";
+import { FaEye } from "react-icons/fa";
 
 export default function TransactionTable({ data, loading }) {
   const [isDetailModalVisible, setDetailModalVisible] = useState(false);
@@ -27,21 +28,21 @@ export default function TransactionTable({ data, loading }) {
       dataIndex: "transactionCode",
       key: "transactionCode",
     },
-    {
-      title: "Mã đặt phòng",
-      dataIndex: "bookingCode",
-      key: "bookingCode",
-    },
+    // {
+    //   title: "Mã đặt phòng",
+    //   dataIndex: "bookingCode",
+    //   key: "bookingCode",
+    // },
     {
       title: "Thời gian tạo",
       dataIndex: "createTime",
       key: "createTime",
     },
-    {
-      title: "Thời gian kết thúc",
-      dataIndex: "endTime",
-      key: "endTime",
-    },
+    // {
+    //   title: "Thời gian kết thúc",
+    //   dataIndex: "endTime",
+    //   key: "endTime",
+    // },
     {
       title: "Số tiền",
       dataIndex: "price",
@@ -53,20 +54,22 @@ export default function TransactionTable({ data, loading }) {
       align: "center",
       key: "status",
       render: (status) => {
-        return (
-          <span className={`${styles.status} ${styles[status.toLowerCase()]}`}>
-            {status === "active"
-              ? "Hoạt động"
-              : status === "pending"
-              ? "Chờ xác nhận"
-              : status === "inactive"
-              ? "Hủy"
-              : status === "refund"
-              ? "Hoàn tiền"
-              : status === "finalPayment"
-              ? "Thanh toán cuối"
-              : "Không xác định"}
-          </span>
+        return status == "PENDING" ? (
+          <Tag style={{ background: "gray", color: "#fff", borderRadius: 10 }}>
+            PENDING
+          </Tag>
+        ) : status == "COMPLETED" ? (
+          <Tag style={{ background: "green", color: "#fff", borderRadius: 10 }}>
+            COMPLETED
+          </Tag>
+        ) : status == "FAILED" ? (
+          <Tag style={{ background: "red", color: "#fff", borderRadius: 10 }}>
+            FAILED
+          </Tag>
+        ) : (
+          <Tag style={{ background: "#333", color: "#fff", borderRadius: 10 }}>
+            Unknow
+          </Tag>
         );
       },
     },
@@ -76,46 +79,58 @@ export default function TransactionTable({ data, loading }) {
       align: "center",
       key: "typeTransaction",
       render: (typeTransaction) => {
-        return (
-          <span
-            className={`${styles.typeTransaction} ${
-              styles[typeTransaction.toLowerCase()]
-            }`}
+        return typeTransaction == "MOMO_PAYMENT" ? (
+          <Tag
+            style={{ background: "#a21d65", color: "#fff", borderRadius: 10 }}
           >
-            {typeTransaction === "PaymentComplete"
-              ? "Thanh toán hoàn tất"
-              : typeTransaction === "Refund"
-              ? "Hoàn tiền"
-              : "Không xác định"}
-          </span>
+            MOMO
+          </Tag>
+        ) : (
+          <Tag style={{ background: "#333", color: "#fff", borderRadius: 10 }}>
+            Unknow
+          </Tag>
         );
       },
     },
     {
-      title: "Action",
-      key: "action",
+      key: "view",
       align: "center",
-      render: (text, record) => (
-        <Dropdown
-          overlay={
-            <Menu>
-              <Menu.Item key="1" onClick={() => handleViewDetails(record)}>
-                Xem chi tiết
-              </Menu.Item>
-              <Menu.Item key="2" onClick={() => handleChangeStatus(record)}>
-                Thay đổi trạng thái
-              </Menu.Item>
-              <Menu.Item key="3" onClick={() => handleDelete(record)}>
-                Xóa
-              </Menu.Item>
-            </Menu>
-          }
-          trigger={["click"]}
+      render: (_, record) => (
+        <span
+          style={{ cursor: "pointer" }}
+          onClick={(e) => {
+            handleViewDetails(record);
+          }}
         >
-          <MoreOutlined />
-        </Dropdown>
+          <FaEye />
+        </span>
       ),
     },
+    // {
+    //   title: "Action",
+    //   key: "action",
+    //   align: "center",
+    //   render: (text, record) => (
+    //     <Dropdown
+    //       overlay={
+    //         <Menu>
+    //           <Menu.Item key="1" onClick={() => handleViewDetails(record)}>
+    //             Xem chi tiết
+    //           </Menu.Item>
+    //           <Menu.Item key="2" onClick={() => handleChangeStatus(record)}>
+    //             Thay đổi trạng thái
+    //           </Menu.Item>
+    //           <Menu.Item key="3" onClick={() => handleDelete(record)}>
+    //             Xóa
+    //           </Menu.Item>
+    //         </Menu>
+    //       }
+    //       trigger={["click"]}
+    //     >
+    //       <MoreOutlined />
+    //     </Dropdown>
+    //   ),
+    // },
   ];
 
   const handleViewDetails = (record) => {
@@ -138,6 +153,7 @@ export default function TransactionTable({ data, loading }) {
         loading={loading}
         columns={columns}
         rowKey="id"
+        scroll={{ x: "max-content" }}
         pagination={{
           total: data.length,
           pageSize: 7,

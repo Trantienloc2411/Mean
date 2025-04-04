@@ -1,112 +1,159 @@
-import { Modal, Descriptions, Spin } from 'antd';
+import { Modal, Descriptions, Table, Typography, Collapse, Space, Spin, Tag } from 'antd';
 import dayjs from 'dayjs';
 import styles from './DetailPolicyModal.module.scss';
-import { useGetPolicySystemByIdQuery } from '../../../../redux/services/policySystemApi';
 
-const DetailPolicyModal = ({ isOpen, onCancel, policy }) => {
+const { Panel } = Collapse;
+const { Text } = Typography;
+
+const DetailPolicyModal = ({ isOpen, onCancel, policy, isLoading }) => {
   if (!policy) return null;
-  const { data: policyDetail, isLoading } = useGetPolicySystemByIdQuery(policy.id, {
-    skip: !isOpen || !policy.id,
-  });
 
   const formatDate = (dateString) => {
-    if (!dateString) return 'N/A';
-    return dayjs(dateString, "DD/MM/YYYY HH:mm:ss").format("DD/MM/YYYY HH:mm:ss");
+    if (!dateString) return 'Không có';
+    try {
+      return dayjs(dateString, "DD/MM/YYYY HH:mm:ss").format('HH:mm DD/MM/YYYY');
+    } catch (e) {
+      return dateString; 
+    }
   };
 
   const formatUnit = (unit) => {
     if (!unit) return 'N/A';
-    return unit.toLowerCase() === 'percent' ? 'Phần trăm (%)' : unit;
+    return unit.toLowerCase() === 'percent' ? 'Phần trăm (%)' : 
+           unit.toLowerCase() === 'vnd' ? 'VND' : unit;
   };
 
   const getStaffName = (staffId) => {
     if (!staffId) return 'Không có thông tin';
-    if (staffId && staffId.userId && staffId.userId.fullName) {
+    if (staffId.userId?.fullName) {
       return staffId.userId.fullName;
     }
     return 'Không có thông tin';
   };
 
-  const renderBookingInfo = (booking) => {
-    if (!booking) return 'Không có thông tin đặt phòng';
-    return (
-      <>
-        <strong>ID:</strong> {booking._id || 'N/A'}
-        <br />
-        <strong>Giá trị:</strong> {booking.value || 'N/A'}
-        <br />
-        <strong>Đơn vị:</strong> {formatUnit(booking.unit)}
-        <br />
-        <strong>Ngày tạo:</strong> {formatDate(booking.createdAt)}
-        <br />
-        <strong>Ngày cập nhật:</strong> {formatDate(booking.updatedAt)}
-      </>
-    );
-  };
+  const values = policy?.values || [];
 
-  const renderCategoryInfo = (category) => {
-    if (!category) return 'Không có thông tin danh mục';
-    return (
-      <>
-        <strong>ID:</strong> {category._id || 'N/A'}
-        <br />
-        <strong>Tên:</strong> {category.categoryName || 'N/A'}
-        <br />
-        <strong>Mô tả:</strong> {category.categoryDescription || 'Không có mô tả'}
-      </>
-    );
-  };
-  const displayData = policyDetail || policy;
+  const valuesColumns = [
+    { title: 'Giá trị 1', dataIndex: 'val1', key: 'val1' },
+    { title: 'Giá trị 2', dataIndex: 'val2', key: 'val2' },
+    { title: 'Mô tả', dataIndex: 'description', key: 'description' },
+    { title: 'Đơn vị', dataIndex: 'unit', key: 'unit', render: formatUnit },
+    { title: 'Loại giá trị', dataIndex: 'valueType', key: 'valueType' },
+    { title: 'Ghi chú', dataIndex: 'note', key: 'note' },
+    {
+      title: 'Hashtag',
+      dataIndex: 'hashTag',
+      key: 'hashTag',
+      render: (tag) => tag ? <Tag color="blue">{tag}</Tag> : 'Không có',
+    },
+    { title: 'Ngày tạo', dataIndex: 'createdAt', key: 'createdAt', render: formatDate },
+    { title: 'Ngày cập nhật', dataIndex: 'updatedAt', key: 'updatedAt', render: formatDate },
+  ];
 
   return (
     <Modal
-      title="Chi tiết chính sách"
+      title="Chi tiết Chính sách"
       open={isOpen}
       onCancel={onCancel}
       footer={null}
-      width={600}
+      className={styles.detailPolicyModal}
+      width={1000}
+      bodyStyle={{ maxHeight: '80vh', overflowY: 'auto', padding: '24px' }}
     >
       {isLoading ? (
         <div style={{ textAlign: 'center', padding: '20px' }}>
           <Spin size="large" />
         </div>
       ) : (
-        <Descriptions bordered column={1} className={styles.modalDescriptions}>
-          <Descriptions.Item label="ID">{displayData._id || 'N/A'}</Descriptions.Item>
-          <Descriptions.Item label="Tên chính sách">{displayData.name || 'N/A'}</Descriptions.Item>
-          <Descriptions.Item label="Được tạo bởi">{getStaffName(displayData.staffId)}</Descriptions.Item>
-          <Descriptions.Item label="Cập nhật bởi">
-            {displayData.updateBy && displayData.updateBy.userId && displayData.updateBy.userId.fullName 
-              ? displayData.updateBy.userId.fullName 
-              : 'Không có thông tin'}
-          </Descriptions.Item>
-          <Descriptions.Item label="Mô tả">{displayData.description || 'Không có mô tả'}</Descriptions.Item>
-          <Descriptions.Item label="Giá trị">{displayData.value || 'N/A'}</Descriptions.Item>
-          <Descriptions.Item label="Đơn vị">{formatUnit(displayData.unit)}</Descriptions.Item>
-          <Descriptions.Item label="Thông tin đặt phòng">
-            {renderBookingInfo(displayData.policySystemBookingId)}
-          </Descriptions.Item>
-          <Descriptions.Item label="Danh mục">
-            {renderCategoryInfo(displayData.policySystemCategoryId)}
-          </Descriptions.Item>
-          <Descriptions.Item label="Ngày bắt đầu">
-            {formatDate(displayData.startDate)}
-          </Descriptions.Item>
-          <Descriptions.Item label="Ngày kết thúc">
-            {formatDate(displayData.endDate)}
-          </Descriptions.Item>
-          <Descriptions.Item label="Ngày tạo">
-            {formatDate(displayData.createdAt)}
-          </Descriptions.Item>
-          <Descriptions.Item label="Ngày cập nhật">
-            {formatDate(displayData.updatedAt)}
-          </Descriptions.Item>
-          <Descriptions.Item label="Trạng thái">
-            <span className={`${styles.status} ${displayData.isActive ? styles.active : styles.expired}`}>
-              {displayData.isActive ? 'Đang hoạt động' : 'Không hoạt động'}
-            </span>
-          </Descriptions.Item>
-        </Descriptions>
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          <Descriptions
+            title="Thông tin chính sách"
+            bordered
+            column={1}
+            size="middle"
+            labelStyle={{ fontWeight: 'bold', width: '200px' }}
+          >
+            <Descriptions.Item label="ID">
+              <Text copyable>{policy._id || 'Không có'}</Text>
+            </Descriptions.Item>
+            <Descriptions.Item label="Tên chính sách">
+              {policy.name || 'Không có'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Mô tả">
+              {policy.description || 'Không có'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Người tạo">
+              {getStaffName(policy.staffId)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Danh mục">
+              {policy.policySystemCategoryId?.categoryName || 'Không có'}
+            </Descriptions.Item>
+            <Descriptions.Item label="Ngày bắt đầu">
+              {formatDate(policy.startDate)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Ngày kết thúc">
+              {formatDate(policy.endDate)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Ngày tạo">
+              {formatDate(policy.createdAt)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Ngày cập nhật">
+              {formatDate(policy.updatedAt)}
+            </Descriptions.Item>
+            <Descriptions.Item label="Trạng thái">
+              <span className={`${styles.status} ${policy.isActive ? styles.active : styles.expired}`}>
+                {policy.isActive ? 'Đang hoạt động' : 'Không hoạt động'}
+              </span>
+            </Descriptions.Item>
+          </Descriptions>
+
+          {policy.policySystemCategoryId && (
+            <Collapse defaultActiveKey={['1']}>
+              <Panel header="Thông tin danh mục" key="1">
+                <Descriptions
+                  bordered
+                  column={1}
+                  size="small"
+                  labelStyle={{ fontWeight: 'bold' }}
+                >
+                  <Descriptions.Item label="ID">
+                    <Text copyable>{policy.policySystemCategoryId._id || 'Không có'}</Text>
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Tên danh mục">
+                    {policy.policySystemCategoryId.categoryName || 'Không có'}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Mô tả">
+                    {policy.policySystemCategoryId.categoryDescription || 'Không có'}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Key">
+                    {policy.policySystemCategoryId.categoryKey || 'Không có'}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Ngày tạo">
+                    {formatDate(policy.policySystemCategoryId.createdAt)}
+                  </Descriptions.Item>
+                  <Descriptions.Item label="Ngày cập nhật">
+                    {formatDate(policy.policySystemCategoryId.updatedAt)}
+                  </Descriptions.Item>
+                </Descriptions>
+              </Panel>
+            </Collapse>
+          )}
+
+          {values.length > 0 && (
+            <Collapse defaultActiveKey={['1']}>
+              <Panel header={`Giá trị chính sách (${values.length})`} key="1">
+                <Table
+                  dataSource={values}
+                  columns={valuesColumns}
+                  rowKey="_id"
+                  pagination={values.length > 5 ? { pageSize: 5 } : false}
+                  size="small"
+                  scroll={{ x: 'max-content' }}
+                />
+              </Panel>
+            </Collapse>
+          )}
+        </Space>
       )}
     </Modal>
   );
