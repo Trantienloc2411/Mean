@@ -89,6 +89,9 @@ const RentalLocation = lazy(() =>
   import("../pages/rentalLocation/RentalLocation")
 );
 const Messages = lazy(() => import("../pages/messeges/Messeges.jsx"));
+const OwnerMessage = lazy(() =>
+  import("../pages/owner/childPage/messeges/Messeges.jsx")
+);
 
 const Report = lazy(() => import("../pages/report/Report"));
 
@@ -204,6 +207,7 @@ export const routes = [
       { path: "type-room", element: <TypeRoomOwner /> },
       { path: "policy", element: <PolicyOwner /> },
       { path: "setting", element: <SettingOwner /> },
+      { path: "chat", element: <OwnerMessage /> },
       {
         path: "*",
         element: <NotFound />,

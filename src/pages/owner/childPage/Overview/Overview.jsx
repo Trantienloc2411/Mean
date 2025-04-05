@@ -4,11 +4,32 @@ import { TeamOutlined } from "@ant-design/icons";
 import { reviews } from "./data/fakeData.js";
 import ReviewList from "./components/ReviewList.jsx";
 import CalendarList from "./components/CalendarList.jsx";
+import CardListBooking from "./components/CardListBooking.jsx";
 export default function Overview() {
   return (
     <div className={styles.contentContainer}>
+      
+
       <h1>Booking hôm nay: </h1>
-      <CalendarList />  
+      {/* <CalendarList />   */}
+      <div className={styles.bookingOverview}>
+      <CardListBooking
+        stageLevel="1"
+        // bookingList={reviews}
+        listBookingTypeName="Đặt phòng sắp tới"
+      />
+      <CardListBooking
+        stageLevel="2"
+        // bookingList={reviews}
+        listBookingTypeName="Đang đặt phòng"
+      />
+      <CardListBooking
+        stageLevel="2"
+        // bookingList={reviews}
+        listBookingTypeName="Đặt phòng hoàn tất"
+      />
+      </div>
+      
       <h1>Tổng hợp: </h1>
       <div className={styles.rowItems}>
         <CardDashboard

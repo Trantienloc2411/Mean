@@ -10,7 +10,7 @@ import { Layout, Menu } from "antd";
 import Logo from "../assets/images/logo.png";
 import { BsBuildings } from "react-icons/bs";
 import HeaderSimple from "../components/layouts/header/HeaderSimple";
-import { MdOutlinePolicy } from "react-icons/md";
+import { MdChatBubbleOutline, MdOutlinePolicy } from "react-icons/md";
 
 const { Header, Content } = Layout;
 
@@ -52,6 +52,11 @@ const OwnerLayout = () => {
       key: `/owner/${id}/setting`,
       icon: <BarChartOutlined />,
       label: "Cài đặt",
+    },
+    {
+      key: `/owner/${id}/chat`,
+      icon: <MdChatBubbleOutline />,
+      label: "Giao tiếp",
     },
   ];
   const navigate = useNavigate(); // Để điều hướng khi người dùng click Menu
