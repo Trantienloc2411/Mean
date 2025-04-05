@@ -16,7 +16,7 @@ const BOOKING_STATUS = Object.freeze({
   CHECKEDOUT: 5,
   CANCELLED: 6,
   COMPLETED: 7,
-  PENDING: 8,   
+  PENDING: 8,
 });
 
 const PAYMENT_STATUS = Object.freeze({
@@ -24,7 +24,7 @@ const PAYMENT_STATUS = Object.freeze({
   PENDING: 2,
   PAID: 3,
   REFUND: 4,
-  FAILED: 5,        
+  FAILED: 5,
 });
 
 const getBookingStatusDisplay = (statusCode) => {
@@ -58,10 +58,10 @@ export default function Booking() {
 
   const [updateBooking, { isLoading: isUpdating }] = useUpdateBookingMutation();
 
-  const { 
-    data: bookingDetailData, 
+  const {
+    data: bookingDetailData,
     isLoading: isLoadingBookingDetail,
-    error: bookingDetailError 
+    error: bookingDetailError
   } = useGetBookingByIdQuery(selectedBookingId, {
     skip: !selectedBookingId
   });
@@ -73,9 +73,20 @@ export default function Booking() {
     refetch: refetchBookings
   } = useGetAllBookingsQuery();
 
+
   useEffect(() => {
     if (bookingsData && bookingsData.length > 0) {
-      const processedBookings = bookingsData.map(booking => {
+      const sortedBookings = [...bookingsData].sort((a, b) => {
+        const aNeedsRefund = a.status === BOOKING_STATUS.CANCELLED && a.paymentStatus !== PAYMENT_STATUS.REFUND;
+        const bNeedsRefund = b.status === BOOKING_STATUS.CANCELLED && b.paymentStatus !== PAYMENT_STATUS.REFUND;
+
+        if (aNeedsRefund && !bNeedsRefund) return -1;
+        if (!aNeedsRefund && bNeedsRefund) return 1;
+
+        return new Date(b.createdAt) - new Date(a.createdAt);
+      });
+
+      const processedBookings = sortedBookings.map(booking => {
         return {
           _originalBooking: booking,
           Status: getBookingStatusDisplay(booking.status),
@@ -90,13 +101,13 @@ export default function Booking() {
   const handleStatusChange = async (bookingId, updateData) => {
     try {
       const result = await updateBooking({
-        id: bookingId, 
-        ...updateData 
+        id: bookingId,
+        ...updateData
       }).unwrap();
-  
+
       message.success('Cập nhật thành công');
       refetchBookings();
-  
+
       return result;
     } catch (error) {
       message.error(error?.data?.message || 'Cập nhật thất bại');
@@ -120,8 +131,8 @@ export default function Booking() {
         paymentStatusCodes={PAYMENT_STATUS}
         onStatusChange={handleStatusChange}
         isUpdating={isUpdating}
-        bookingDetailData={bookingDetailData} 
-        onSelectBookingDetail={handleSelectBookingDetail} 
+        bookingDetailData={bookingDetailData}
+        onSelectBookingDetail={handleSelectBookingDetail}
       />
     </div>
   );

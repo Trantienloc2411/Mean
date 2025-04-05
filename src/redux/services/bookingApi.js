@@ -89,6 +89,20 @@ export const bookingApi = apiSlice.injectEndpoints({
                 "Booking"
             ],
         }),
+        generateBookingPassword: builder.mutation({
+            query: ({ bookingId, passwordRoomInput }) => ({
+              url: `/booking/${bookingId}/generate-password`,
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: new URLSearchParams({ passwordRoomInput }),
+            }),
+            invalidatesTags: (result, error, { bookingId }) => [
+              { type: 'Booking', id: bookingId },
+              { type: 'Booking', id: 'LIST' },
+            ],
+          }),      
     }),
 });
 
@@ -100,4 +114,5 @@ export const {
     useGetBookingsByRentalLocationIdQuery,
     useCreateBookingMutation,
     useUpdateBookingMutation,
+    useGenerateBookingPasswordMutation
 } = bookingApi;
