@@ -3,7 +3,13 @@ import { apiSlice } from "./apiSlice";
 export const serviceApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getAllAmenities: builder.query({
-            query: () => "/service/all-services",
+            query: ({ rentalLocationId } = {}) => {
+                let url = "/service/all-services";
+                if (rentalLocationId) {
+                    url += `?rentalLocationId=${rentalLocationId}`;
+                }
+                return url;
+            },
             transformResponse: (response) => response.data,
             providesTags: ["Service"],
         }),

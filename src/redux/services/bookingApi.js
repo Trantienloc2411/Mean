@@ -4,8 +4,15 @@ export const bookingApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getAllBookings: builder.query({
             query: () => "/booking/all-bookings",
-            transformResponse: (response) => response.data,
-            providesTags: ["Booking"],
+            transformResponse: (response) => {
+                console.log("API Response:", response); 
+                return response.data || []; 
+            },
+            providesTags: (result) => 
+                result ? [
+                    ...result.map(({ _id }) => ({ type: 'Booking', id: _id })),
+                    { type: 'Booking', id: 'LIST' }
+                ] : [{ type: 'Booking', id: 'LIST' }],
         }),
 
         getBookingById: builder.query({

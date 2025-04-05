@@ -3,12 +3,12 @@ import { Dropdown, Input, Button, Menu, message, Spin } from "antd";
 import { FilterOutlined, SearchOutlined } from "@ant-design/icons";
 import { CreditCardOutlined, DollarOutlined, BankOutlined, WalletOutlined } from "@ant-design/icons";
 import debounce from "lodash/debounce";
-import TableModify from "../../../../../dashboard/components/Table";
-import Filter from "../../../../../../components/Filter/Filter";
+import TableModify from "../../../dashboard/components/Table";
+import Filter from "../../../../components/Filter/Filter";
 import UpdateBookingStatus from "../UpdateBookingStatus/UpdateBookingStatus";
 import BookingDetail from "../BookingDetail/BookingDetail";
 import styles from "./ListBooking.module.scss";
-import { useGetBookingByIdQuery } from "../../../../../../redux/services/bookingApi";
+import { useGetBookingByIdQuery } from "../../../../redux/services/bookingApi";
 
 const HorizontalEllipsisIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -173,8 +173,8 @@ export default function ListBooking({
     const paymentMap = {
       "Booking": "confirmed",
       "Pending": "pending",
-      "Fully Paid": "complete",
-      "Refunded": "canceled",
+      "Paid": "complete",
+      "Refund": "canceled",
       "Failed": "canceled",
       "Unpaid": "pending",
     };
@@ -183,6 +183,7 @@ export default function ListBooking({
   };
 
   const getPaymentIcon = (method) => {
+    // Đảm bảo method là string trước khi gọi toLowerCase()
     const methodStr = String(method || '').toLowerCase();
 
     if (methodStr.includes("visa") || methodStr.includes("card")) {
@@ -193,10 +194,10 @@ export default function ListBooking({
       return <BankOutlined />;
     } else if (methodStr.includes("paypal")) {
       return <WalletOutlined />;
+    } else {
+      return <WalletOutlined />;
     }
-    return <WalletOutlined />;
   };
-
 
   const tableColumn = [
     {
@@ -251,7 +252,7 @@ export default function ListBooking({
       render: (_, record) => {
         const booking = record._originalBooking;
         const paymentStatus = getPaymentStatusDisplay(booking.paymentStatus);
-        const paymentMethod = String(booking.paymentMethod || "Chưa xác định");
+        const paymentMethod = booking.paymentMethod ? String(booking.paymentMethod) : "Chưa xác định";
 
         return (
           <div className={styles.paymentInfo}>
@@ -284,36 +285,38 @@ export default function ListBooking({
     {
       title: <span className={styles.tableHeader}>Thao Tác</span>,
       key: "operation",
-      render: (_, record) => (
-        <Dropdown overlay={<Menu items={getActionMenuItems(record)} />} trigger={["click"]}>
-          <Button type="text" className={styles.actionButton}>
-            <span className={styles.horizontalEllipsis}>⋯</span>
-          </Button>
-        </Dropdown>
-      ),
+      render: (_, record) => {
+        const isCancelled = record._originalBooking.status === bookingStatusCodes.CANCELLED;
+        const menuItems = [
+          {
+            key: "1",
+            label: "Xem Chi Tiết",
+            onClick: () => handleViewDetails(record),
+          }
+        ];
+
+        if (record._originalBooking.status === bookingStatusCodes.CANCELLED &&
+          record._originalBooking.paymentStatus !== paymentStatusCodes.REFUND) {
+          menuItems.push({
+            key: "2",
+            label: "Hoàn Tiền",
+            onClick: () => handleStatusUpdate(record),
+          });
+        }
+
+        return (
+          <Dropdown overlay={<Menu items={menuItems} />} trigger={["click"]}>
+            <Button type="text" className={styles.actionButton}>
+              <span className={styles.horizontalEllipsis}>⋯</span>
+            </Button>
+          </Dropdown>
+        );
+      },
     },
   ];
 
-  const getActionMenuItems = (booking) => {
-    const items = [
-      {
-        key: "1",
-        label: "Xem Chi Tiết",
-        onClick: () => handleViewDetails(booking),
-      },
-      {
-        key: "9",
-        label: "Cập Nhật Trạng Thái",
-        onClick: () => handleStatusUpdate(booking),
-      },
-    ];
-
-    return items;
-  };
-
   const handleViewDetails = (booking) => {
     const bookingId = booking._originalBooking._id || booking._originalBooking.id;
-    console.log("Opening booking detail with ID:", bookingId);
     setSelectedBookingId(bookingId);
     setIsBookingDetailVisible(true);
   };
@@ -333,12 +336,21 @@ export default function ListBooking({
     setSelectedBooking(null);
   };
 
-  const handleCustomStatusChange = async (booking, newStatus) => {
+  const handleCustomStatusChange = async (booking) => {
     try {
-      await onStatusChange(booking._originalBooking._id, newStatus);
+      if (booking._originalBooking.status !== bookingStatusCodes.CANCELLED) {
+        message.warning("Chỉ có thể hoàn tiền cho booking đã hủy");
+        return;
+      }
+
+      await onStatusChange(booking._originalBooking._id, {
+        paymentStatus: paymentStatusCodes.REFUND
+      });
+
+      message.success("Hoàn tiền thành công");
       handleCloseStatusModal();
     } catch (error) {
-      message.error("Cập nhật trạng thái thất bại");
+      message.error(error?.message || "Hoàn tiền thất bại");
     }
   };
 
@@ -391,9 +403,9 @@ export default function ListBooking({
           visible={statusModalVisible}
           onClose={handleCloseStatusModal}
           bookingStatusCodes={bookingStatusCodes}
+          paymentStatusCodes={paymentStatusCodes}
           onStatusChange={(status) => handleCustomStatusChange(selectedBooking, status)}
           isLoading={isUpdating}
-          className={styles.modalContainer}
         />
       )}
 

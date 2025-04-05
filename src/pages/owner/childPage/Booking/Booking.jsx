@@ -11,21 +11,21 @@ import {
 import { useGetOwnerDetailByUserIdQuery } from '../../../../redux/services/ownerApi';
 
 const BOOKING_STATUS = Object.freeze({
-  CONFIRMED: 1,     
-  PENDING: 2,    
-  NEEDCHECKIN: 3,  
-  CHECKEDIN: 4,   
-  NEEDCHECKOUT: 5, 
-  CHECKEDOUT: 6,   
-  CANCELLED: 7,   
-  COMPLETED: 8,    
+  CONFIRMED: 1,
+  NEEDCHECKIN: 2,
+  CHECKEDIN: 3,
+  NEEDCHECKOUT: 4,
+  CHECKEDOUT: 5,
+  CANCELLED: 6,
+  COMPLETED: 7,
+  PENDING: 8,  
 });
 
 const PAYMENT_STATUS = Object.freeze({
-  BOOKING: 1,   
-  PENDING: 2,      
-  PAID: 3,          
-  REFUND: 4,        
+  BOOKING: 1,
+  PENDING: 2,
+  PAID: 3,
+  REFUND: 4,
   FAILED: 5,         
 });
 
@@ -47,8 +47,8 @@ const getPaymentStatusDisplay = (statusCode) => {
   const statusMap = {
     [PAYMENT_STATUS.BOOKING]: "Booking",
     [PAYMENT_STATUS.PENDING]: "Pending",
-    [PAYMENT_STATUS.PAID]: "Fully Paid",
-    [PAYMENT_STATUS.REFUND]: "Refunded",
+    [PAYMENT_STATUS.PAID]: "Paid",
+    [PAYMENT_STATUS.REFUND]: "Refund",
     [PAYMENT_STATUS.FAILED]: "Failed",
   };
   return statusMap[statusCode] || "Unpaid";
