@@ -7,6 +7,7 @@ import {
   useGetBookingsByOwnerIdQuery,
   useUpdateBookingMutation,
   useGetBookingByIdQuery,
+  useGenerateBookingPasswordMutation,
 } from '../../../../redux/services/bookingApi';
 import { useGetOwnerDetailByUserIdQuery } from '../../../../redux/services/ownerApi';
 
@@ -62,8 +63,8 @@ export default function Booking() {
   const [selectedBookingId, setSelectedBookingId] = useState(null);
 
   const [updateBooking, { isLoading: isUpdating }] = useUpdateBookingMutation();
+  const [generatePassword] = useGenerateBookingPasswordMutation();
 
-  // Query for booking detail with refined query logic
   const { 
     data: bookingDetailData, 
     isLoading: isLoadingBookingDetail,
@@ -160,7 +161,20 @@ export default function Booking() {
     }
   };
 
-  // Function to handle selecting a booking for detail view
+  const handleGeneratePassword = async ({ bookingId, passwordRoomInput }) => {
+    try {
+      const result = await generatePassword({
+        bookingId,
+        passwordRoomInput
+      }).unwrap();
+      message.success('Mật khẩu phòng đã được cập nhật thành công');
+      return result;
+    } catch (error) {
+      message.error(error?.data?.message || 'Cập nhật mật khẩu phòng thất bại');
+      throw error;
+    }
+  };
+
   const handleSelectBookingDetail = (bookingId) => {
     setSelectedBookingId(bookingId);
   };
@@ -192,8 +206,9 @@ export default function Booking() {
         paymentStatusCodes={PAYMENT_STATUS}
         onStatusChange={handleStatusChange}
         isUpdating={isUpdating}
-        bookingDetailData={bookingDetailData} 
-        onSelectBookingDetail={handleSelectBookingDetail} 
+        bookingDetailData={bookingDetailData}
+        onSelectBookingDetail={handleSelectBookingDetail}
+        generatePassword={handleGeneratePassword}
       />
     </div>
   );

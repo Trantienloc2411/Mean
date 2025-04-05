@@ -24,6 +24,7 @@ export default function ListBooking({
   paymentStatusCodes,
   onStatusChange,
   isUpdating,
+  generatePassword,
 }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState(bookings || []);
@@ -196,7 +197,6 @@ export default function ListBooking({
     }
     return <WalletOutlined />;
   };
-
 
   const tableColumn = [
     {
@@ -392,6 +392,7 @@ export default function ListBooking({
           onClose={handleCloseStatusModal}
           bookingStatusCodes={bookingStatusCodes}
           onStatusChange={(status) => handleCustomStatusChange(selectedBooking, status)}
+          onGeneratePassword={generatePassword}
           isLoading={isUpdating}
           className={styles.modalContainer}
         />
