@@ -11,7 +11,7 @@ import {
   useGetNotificationByIdQuery,
   useUpdateNotificationMutation 
 } from "../../../redux/services/notificationApi";
-import NotificationDetailModal from "../../../pages/Notification/NotificationDetailModal";
+import NotificationDetailModal from "../../../pages/notification/NotificationDetailModal";
 
 const { Title, Paragraph } = Typography;
 const ITEMS_PER_PAGE = 8;
@@ -28,6 +28,7 @@ export default function NotificationPanel({ onClose }) {
   const [updateNotification] = useUpdateNotificationMutation();
   const [showPanel, setShowPanel] = useState(true);
   const panelRef = useRef(null);
+  const filterButtonsRef = useRef([]); // Thêm ref cho các nút filter
   const navigate = useNavigate();
 
   const { data: notificationDetail, isFetching: isDetailLoading } = 
@@ -65,10 +66,16 @@ export default function NotificationPanel({ onClose }) {
 
   useEffect(() => {
     const handleClickOutside = (event) => {
+      // Kiểm tra xem click có phải trên panel hoặc các nút filter không
+      const isFilterButton = filterButtonsRef.current.some(
+        button => button && button.contains(event.target)
+      );
+      
       if (
         panelRef.current &&
         !panelRef.current.contains(event.target) &&
         !event.target.closest(".ant-btn") &&
+        !isFilterButton &&
         showPanel 
       ) {
         onClose();
@@ -105,6 +112,12 @@ export default function NotificationPanel({ onClose }) {
     setSelectedNotificationId(null);
     setSelectedNotification(null);
     onClose(); 
+  };
+
+  // Hàm xử lý filter với ngăn sự kiện lan truyền
+  const handleFilterClick = (type, e) => {
+    e.stopPropagation(); // Ngăn sự kiện lan truyền
+    setFilter(type);
   };
 
   if (isLoading) return <Spin size="small" />;
@@ -148,16 +161,18 @@ export default function NotificationPanel({ onClose }) {
             </Flex>
             <Flex gap={10} style={{ marginBottom: 10 }}>
               <Button
+                ref={el => filterButtonsRef.current[0] = el}
                 type={filter === "all" ? "primary" : "text"}
-                onClick={() => setFilter("all")}
+                onClick={(e) => handleFilterClick("all", e)}
                 style={{ borderRadius: 10, border: "1px solid #999" }}
               >
                 Tất cả
               </Button>
               <Button
+                ref={el => filterButtonsRef.current[1] = el}
                 type={filter === "unread" ? "primary" : "text"}
                 style={{ borderRadius: 10, border: "1px solid #999" }}
-                onClick={() => setFilter("unread")}
+                onClick={(e) => handleFilterClick("unread", e)}
               >
                 Chưa đọc
               </Button>
