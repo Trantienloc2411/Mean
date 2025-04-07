@@ -3,7 +3,13 @@ import { apiSlice } from "./apiSlice";
 export const rentalLocationApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getAllRentalLocations: builder.query({
-            query: () => "/rental-location/all-rental-location",
+            query: (ownerId) => {
+                let url = "/rental-location/all-rental-location";
+                if (ownerId) {
+                    url += `?ownerId=${ownerId}`;
+                }
+                return url;
+            },
             providesTags: ["RentalLocation"],
         }),
 

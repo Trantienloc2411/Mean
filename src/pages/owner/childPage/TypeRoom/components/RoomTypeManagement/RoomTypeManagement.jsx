@@ -9,7 +9,7 @@ import DetailRoomTypeModal from "./components/DetailRoomTypeModal/DetailRoomType
 import Filter from "./components/Filter/Filter";
 import debounce from "lodash/debounce";
 import {
-  useGetAllAccommodationTypesQuery,
+  useGetAccommodationTypesByOwnerQuery,
   useCreateAccommodationTypeMutation,
   useUpdateAccommodationTypeMutation,
   useDeleteAccommodationTypeMutation,
@@ -19,8 +19,11 @@ import {
   useGetAmenityByIdQuery
 } from "../../../../../../redux/services/serviceApi";
 import { Tag } from "antd";
+import { useGetOwnerDetailByUserIdQuery } from "../../../../../../redux/services/ownerApi";
+import { useParams } from "react-router-dom";
 
 const RoomTypeManagement = () => {
+  const { id } = useParams();
   const [selectedValues, setSelectedValues] = useState({
     maxOccupancy: [],
     priceRange: [],
@@ -35,7 +38,12 @@ const RoomTypeManagement = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [serviceNames, setServiceNames] = useState({});
 
-  const { data: roomTypesData, isLoading: isRoomTypesLoading } = useGetAllAccommodationTypesQuery();
+  const { data: ownerDetailData, isLoading: isOwnerDetailLoading } = useGetOwnerDetailByUserIdQuery(id);
+  const ownerId = ownerDetailData?.id;
+
+  const { data: roomTypesData, isLoading: isRoomTypesLoading } = useGetAccommodationTypesByOwnerQuery(ownerId, {
+    skip: !ownerId
+  });
   const { data: servicesData, isLoading: isServicesLoading } = useGetAllAmenitiesQuery();
 
   const roomTypes = Array.isArray(roomTypesData?.data) ? roomTypesData.data : Array.isArray(roomTypesData) ? roomTypesData : [];
@@ -162,7 +170,6 @@ const RoomTypeManagement = () => {
       message.error(error?.data?.message || "Xóa loại phòng thất bại");
     }
   };
-
 
   const handleAddRoomType = async (values) => {
     try {
@@ -367,7 +374,30 @@ const RoomTypeManagement = () => {
     },
   ];
 
-  const isLoading = isRoomTypesLoading || isServicesLoading;
+  const isLoading = isRoomTypesLoading || isServicesLoading || isOwnerDetailLoading;
+
+  if (!ownerDetailData?.isApproved) {
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          padding: "40px",
+          fontSize: "18px",
+          color: "#ff4d4f",
+          background: "#fff",
+          borderRadius: "8px",
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        <h2 style={{ color: "#ff4d4f" }}>
+          Tài khoản của bạn chưa được phê duyệt
+        </h2>
+        <p>
+          Vui lòng chờ quản trị viên duyệt trước khi tiếp tục sử dụng dịch vụ.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.contentContainer}>
@@ -458,7 +488,6 @@ const RoomTypeManagement = () => {
           onConfirm={handleDeleteConfirm}
           roomTypeName={selectedRoomType?.name}
         />
-
       </div>
     </div>
   );

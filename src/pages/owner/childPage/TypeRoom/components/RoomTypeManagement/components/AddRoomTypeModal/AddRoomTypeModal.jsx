@@ -5,6 +5,8 @@ import styles from './AddRoomTypeModal.module.scss';
 import { useState } from "react";
 import { supabase } from "../../../../../../../../redux/services/supabase";
 import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
+import { useGetOwnerDetailByUserIdQuery } from '../../../../../../../../redux/services/ownerApi';
+import { useParams } from "react-router-dom";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -13,9 +15,17 @@ const { Dragger } = Upload;
 const MAX_IMAGES = 10;
 
 const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
+  const { id } = useParams();
   const [form] = Form.useForm();
-  const { data: services, isLoading, error } = useGetAllAmenitiesQuery();
-  const { data: rentalLocations, isLoading: isLoadingRentalLocations } = useGetAllRentalLocationsQuery();
+  const { data: services, isLoading: isServicesLoading, error: servicesError } = useGetAllAmenitiesQuery();
+  
+  const { data: ownerDetailData, isLoading: isOwnerDetailLoading } = useGetOwnerDetailByUserIdQuery(id);
+  const ownerId = ownerDetailData?.id;
+
+  const { data: rentalLocations, isLoading: isLoadingRentalLocations, error: rentalLocationsError } = useGetAllRentalLocationsQuery(ownerId, {
+    skip: !ownerId
+  });
+
   const [fileList, setFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
 
@@ -24,7 +34,6 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
       .then((values) => {
         const formattedValues = { 
           ...values,
-          // Use 'image' field instead of 'images' and always send as array
           image: fileList.map(file => file.url),
           serviceIds: values.serviceIds ? values.serviceIds : 
                     values.serviceId ? [values.serviceId] : []
@@ -153,7 +162,12 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
         <Button key="cancel" onClick={onCancel}>
           Huỷ
         </Button>,
-        <Button key="submit" type="primary" onClick={handleSubmit}>
+        <Button 
+          key="submit" 
+          type="primary" 
+          onClick={handleSubmit}
+          loading={uploading}
+        >
           Thêm loại phòng
         </Button>
       ]}
@@ -172,7 +186,7 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
         >
           <Select 
             placeholder="Chọn địa điểm thuê" 
-            loading={isLoadingRentalLocations}
+            loading={isLoadingRentalLocations || isOwnerDetailLoading}
             options={getLocationsOptions()}
           />
         </Form.Item>
@@ -184,7 +198,7 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
         >
           <Select 
             placeholder="Chọn dịch vụ" 
-            loading={isLoading}
+            loading={isServicesLoading}
             mode="multiple"
             options={getServicesOptions()}
           />
