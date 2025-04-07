@@ -1,9 +1,32 @@
+import { useEffect } from "react";
 import { Modal, Typography, Divider, Button, Spin, Tag, Badge } from "antd";
 import dayjs from "dayjs";
+import { useUpdateNotificationMutation } from "../../redux/services/notificationApi";
+
 
 const { Title, Text } = Typography;
 
-const NotificationDetailModal = ({ visible, notification, onClose, loading }) => {
+const NotificationDetailModal = ({ visible, notification, onClose, loading, onUpdate  }) => {
+  const [updateNotification] = useUpdateNotificationMutation();
+
+  useEffect(() => {
+    const markAsRead = async () => {
+      if (visible && notification?.isRead === false) {
+        try {
+          await updateNotification({
+            id: notification._id,
+            isRead: true
+          });
+          onUpdate?.();
+        } catch (error) {
+          console.error("Update failed:", error);
+        }
+      }
+    };
+  
+    markAsRead();
+  }, [visible, notification]);
+
   const formatDate = (dateString) => {
     try {
       return dayjs(dateString, 'DD/MM/YYYY HH:mm:ss').format('HH:mm DD/MM/YYYY');

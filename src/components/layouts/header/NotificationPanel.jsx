@@ -286,6 +286,7 @@ export default function NotificationPanel({ onClose }) {
         notification={selectedNotification}
         onClose={handleCloseModal}
         loading={isDetailLoading}
+        onUpdate={refetch}
       />
     </>
   );
