@@ -170,12 +170,13 @@ export default function Report() {
       width: 50,
       render: (_, record) => (
         <Dropdown
+        trigger={["click"]} 
           menu={{
             items: getMenuItems(record),
             onClick: ({ key }) => handleMenuClick(key, record),
           }}
         >
-          <MoreOutlined className={styles.actionIcon} />
+          <MoreOutlined onClick={(e) => e.preventDefault()}  className={styles.actionIcon} />
         </Dropdown>
       ),
     },

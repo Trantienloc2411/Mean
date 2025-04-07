@@ -307,6 +307,7 @@ export default function PolicyApp() {
       key: "operation",
       render: (_, record) => (
         <Dropdown
+        trigger={["click"]} 
           menu={{
             items: menuItems.map((item) => ({
               ...item,
@@ -314,7 +315,7 @@ export default function PolicyApp() {
             })),
           }}
         >
-          <MoreOutlined />
+          <MoreOutlined onClick={(e) => e.preventDefault()} />
         </Dropdown>
       ),
     }

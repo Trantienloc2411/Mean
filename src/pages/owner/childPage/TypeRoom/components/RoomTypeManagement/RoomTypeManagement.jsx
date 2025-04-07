@@ -353,6 +353,7 @@ const RoomTypeManagement = () => {
       fixed: 'right',
       render: (_, record) => (
         <Dropdown
+        trigger={["click"]} 
           menu={{
             items: menuItems.map((item) => ({
               ...item,
@@ -360,7 +361,7 @@ const RoomTypeManagement = () => {
             })),
           }}
         >
-          <MoreOutlined />
+          <MoreOutlined onClick={(e) => e.preventDefault()} />
         </Dropdown>
       ),
     },
