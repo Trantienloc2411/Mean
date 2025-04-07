@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Select, Button, message } from 'antd';
+import { Modal, Select, Button, message, Form, Input } from 'antd';
 
 const UpdateBookingStatus = ({ 
   booking, 
@@ -7,9 +7,12 @@ const UpdateBookingStatus = ({
   onClose, 
   bookingStatusCodes,
   onStatusChange,
+  onGeneratePassword,
   isLoading 
 }) => {
   const [status, setStatus] = useState(null);
+  const [passwordInput, setPasswordInput] = useState('');
+  const [showPasswordField, setShowPasswordField] = useState(false);
 
   const getBookingStatusDisplay = (statusCode) => {
     const statusMap = {
@@ -29,11 +32,21 @@ const UpdateBookingStatus = ({
     if (booking) {
       const currentStatusCode = booking._originalBooking.status;
       setStatus(currentStatusCode);
+      setPasswordInput('');
+      setShowPasswordField(currentStatusCode === bookingStatusCodes.CONFIRMED);
     }
-  }, [booking]);
+  }, [booking, bookingStatusCodes.CONFIRMED]);
+
+  useEffect(() => {
+    setShowPasswordField(status === bookingStatusCodes.CONFIRMED);
+  }, [status, bookingStatusCodes.CONFIRMED]);
 
   const handleStatusChange = (value) => {
     setStatus(value);
+  };
+
+  const handlePasswordChange = (e) => {
+    setPasswordInput(e.target.value);
   };
 
   const handleSubmit = async () => {
@@ -44,8 +57,19 @@ const UpdateBookingStatus = ({
 
     try {
       await onStatusChange(getBookingStatusDisplay(status));
+      
+      if (status === bookingStatusCodes.CONFIRMED && passwordInput.trim()) {
+        await onGeneratePassword({
+          bookingId: booking._originalBooking._id,
+          passwordRoomInput: passwordInput
+        });
+        message.success('Đã cập nhật trạng thái và mật khẩu phòng thành công');
+      } else {
+        message.success('Đã cập nhật trạng thái thành công');
+      }
+      onClose();
     } catch (error) {
-      message.error(error?.message || 'Cập nhật trạng thái thất bại');
+      message.error(error?.data?.message || 'Cập nhật thất bại');
     }
   };
 
@@ -84,13 +108,30 @@ const UpdateBookingStatus = ({
       <div>
         <label>Chọn Trạng Thái Mới:</label>
         <Select
-          style={{ width: '100%', marginTop: 8 }}
+          style={{ width: '100%', marginTop: 8, marginBottom: 16 }}
           placeholder="Chọn trạng thái mới"
           value={status}
           onChange={handleStatusChange}
           options={statusOptions}
         />
       </div>
+
+      {showPasswordField && (
+        <div style={{ marginTop: 16 }}>
+          <Form.Item
+            label="Mật Khẩu Phòng"
+            help="Nhập mật khẩu phòng (bắt buộc khi xác nhận booking)"
+          >
+            <Input.Password
+              placeholder="Nhập mật khẩu phòng"
+              value={passwordInput}
+              onChange={handlePasswordChange}
+              maxLength={20}
+              required={status === bookingStatusCodes.CONFIRMED}
+            />
+          </Form.Item>
+        </div>
+      )}
     </Modal>
   );
 };

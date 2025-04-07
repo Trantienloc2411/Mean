@@ -11,9 +11,9 @@ import {
 import { SaveOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import { useLocation } from "react-router-dom";
-import ImageUpload from "../../../rentalLocation/create/ImageUpload"; 
-import { useCreateAccommodationMutation } from "../../../../../../redux/services/accommodationApi"; 
-import { useGetAllAccommodationTypesQuery } from "../../../../../../redux/services/accommodationTypeApi"; 
+import ImageUpload from "../../../rentalLocation/create/ImageUpload";
+import { useCreateAccommodationMutation } from "../../../../../../redux/services/accommodationApi";
+import { useGetAllAccommodationTypesQuery } from "../../../../../../redux/services/accommodationTypeApi";
 import styles from "./AccomodationCreate.module.scss";
 
 const { Title, Text } = Typography;
@@ -22,13 +22,13 @@ const { Option } = Select;
 export default function AccommodationCreate({ visible, onCancel, onSuccess }) {
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState([]);
-  
+
   const location = useLocation();
   const pathnameParts = location.pathname.split("/");
   const rentalLocationId = pathnameParts[pathnameParts.indexOf("rental-location") + 1];
-  
+
   const [createAccommodation, { isLoading }] = useCreateAccommodationMutation();
-  const { data: accommodationTypes } = useGetAllAccommodationTypesQuery();
+  const { data: accommodationTypes } = useGetAllAccommodationTypesQuery(rentalLocationId); 
 
   useEffect(() => {
     if (visible) {
@@ -75,7 +75,7 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess }) {
       bodyStyle={{ padding: '20px' }}
     >
       <Divider className={styles.modalDivider} />
-      
+
       <Form
         form={form}
         onFinish={handleSaveAction}
@@ -86,12 +86,12 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess }) {
         className={styles.formContainer}
       >
         <div className={styles.formSection}>
-          <Form.Item 
+          <Form.Item
             name="accommodationTypeId"
             label={<Text strong>Loại phòng</Text>}
             rules={[{ required: true, message: "Vui lòng chọn loại phòng!" }]}
           >
-            <Select 
+            <Select
               placeholder="Chọn loại phòng"
               size="large"
               style={{ width: '100%' }}
@@ -102,8 +102,8 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess }) {
             </Select>
           </Form.Item>
 
-          <Form.Item 
-            name="description" 
+          <Form.Item
+            name="description"
             label={<Text strong>Mô tả</Text>}
           >
             <TextArea
@@ -115,9 +115,9 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess }) {
             />
           </Form.Item>
         </div>
-        
+
         <div className={styles.imageUploadSection}>
-          <Form.Item 
+          <Form.Item
             label={<Text strong>Hình ảnh phòng</Text>}
           >
             <ImageUpload fileList={fileList} setFileList={setFileList} />
@@ -129,8 +129,8 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess }) {
         </div>
 
         <div className={styles.footerButtons}>
-          <Button 
-            onClick={onCancel} 
+          <Button
+            onClick={onCancel}
             size="large"
             className={styles.cancelButton}
           >

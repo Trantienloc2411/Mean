@@ -4,8 +4,15 @@ export const bookingApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getAllBookings: builder.query({
             query: () => "/booking/all-bookings",
-            transformResponse: (response) => response.data,
-            providesTags: ["Booking"],
+            transformResponse: (response) => {
+                console.log("API Response:", response); 
+                return response.data || []; 
+            },
+            providesTags: (result) => 
+                result ? [
+                    ...result.map(({ _id }) => ({ type: 'Booking', id: _id })),
+                    { type: 'Booking', id: 'LIST' }
+                ] : [{ type: 'Booking', id: 'LIST' }],
         }),
 
         getBookingById: builder.query({
@@ -82,6 +89,20 @@ export const bookingApi = apiSlice.injectEndpoints({
                 "Booking"
             ],
         }),
+        generateBookingPassword: builder.mutation({
+            query: ({ bookingId, passwordRoomInput }) => ({
+              url: `/booking/${bookingId}/generate-password`,
+              method: 'PUT',
+              headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+              },
+              body: new URLSearchParams({ passwordRoomInput }),
+            }),
+            invalidatesTags: (result, error, { bookingId }) => [
+              { type: 'Booking', id: bookingId },
+              { type: 'Booking', id: 'LIST' },
+            ],
+          }),      
     }),
 });
 
@@ -93,4 +114,5 @@ export const {
     useGetBookingsByRentalLocationIdQuery,
     useCreateBookingMutation,
     useUpdateBookingMutation,
+    useGenerateBookingPasswordMutation
 } = bookingApi;

@@ -3,10 +3,10 @@ import { Typography, Button, Space, Spin, Badge } from "antd";
 import dayjs from "dayjs";
 import NotificationDetailModal from "./NotificationDetailModal";
 import { useSelector } from "react-redux";
-import { 
+import {
   useGetNotificationsByUserQuery,
   useGetNotificationByIdQuery,
-  useUpdateNotificationMutation 
+  useUpdateNotificationMutation
 } from "../../redux/services/notificationApi";
 
 const { Title, Text } = Typography;
@@ -15,13 +15,13 @@ export default function Notification() {
   const userId = useSelector((state) => state.auth.userId);
   const { data: response, isLoading, refetch } = useGetNotificationsByUserQuery(userId);
   const notifications = response?.data || [];
-  
+
   const [filter, setFilter] = useState("all");
   const [selectedNotificationId, setSelectedNotificationId] = useState(null);
   const [selectedNotification, setSelectedNotification] = useState(null);
   const [updateNotification] = useUpdateNotificationMutation();
 
-  const { data: notificationDetail, isFetching: isDetailLoading } = 
+  const { data: notificationDetail, isFetching: isDetailLoading } =
     useGetNotificationByIdQuery(selectedNotificationId, {
       skip: !selectedNotificationId
     });
@@ -189,6 +189,7 @@ export default function Notification() {
         notification={selectedNotification}
         onClose={handleCloseModal}
         loading={isDetailLoading}
+        onUpdate={refetch}
       />
     </div>
   );

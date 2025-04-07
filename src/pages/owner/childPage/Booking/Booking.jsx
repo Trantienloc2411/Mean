@@ -7,25 +7,26 @@ import {
   useGetBookingsByOwnerIdQuery,
   useUpdateBookingMutation,
   useGetBookingByIdQuery,
+  useGenerateBookingPasswordMutation,
 } from '../../../../redux/services/bookingApi';
 import { useGetOwnerDetailByUserIdQuery } from '../../../../redux/services/ownerApi';
 
 const BOOKING_STATUS = Object.freeze({
-  CONFIRMED: 1,     
-  PENDING: 2,    
-  NEEDCHECKIN: 3,  
-  CHECKEDIN: 4,   
-  NEEDCHECKOUT: 5, 
-  CHECKEDOUT: 6,   
-  CANCELLED: 7,   
-  COMPLETED: 8,    
+  CONFIRMED: 1,
+  NEEDCHECKIN: 2,
+  CHECKEDIN: 3,
+  NEEDCHECKOUT: 4,
+  CHECKEDOUT: 5,
+  CANCELLED: 6,
+  COMPLETED: 7,
+  PENDING: 8,  
 });
 
 const PAYMENT_STATUS = Object.freeze({
-  BOOKING: 1,   
-  PENDING: 2,      
-  PAID: 3,          
-  REFUND: 4,        
+  BOOKING: 1,
+  PENDING: 2,
+  PAID: 3,
+  REFUND: 4,
   FAILED: 5,         
 });
 
@@ -47,8 +48,8 @@ const getPaymentStatusDisplay = (statusCode) => {
   const statusMap = {
     [PAYMENT_STATUS.BOOKING]: "Booking",
     [PAYMENT_STATUS.PENDING]: "Pending",
-    [PAYMENT_STATUS.PAID]: "Fully Paid",
-    [PAYMENT_STATUS.REFUND]: "Refunded",
+    [PAYMENT_STATUS.PAID]: "Paid",
+    [PAYMENT_STATUS.REFUND]: "Refund",
     [PAYMENT_STATUS.FAILED]: "Failed",
   };
   return statusMap[statusCode] || "Unpaid";
@@ -62,8 +63,8 @@ export default function Booking() {
   const [selectedBookingId, setSelectedBookingId] = useState(null);
 
   const [updateBooking, { isLoading: isUpdating }] = useUpdateBookingMutation();
+  const [generatePassword] = useGenerateBookingPasswordMutation();
 
-  // Query for booking detail with refined query logic
   const { 
     data: bookingDetailData, 
     isLoading: isLoadingBookingDetail,
@@ -160,7 +161,20 @@ export default function Booking() {
     }
   };
 
-  // Function to handle selecting a booking for detail view
+  const handleGeneratePassword = async ({ bookingId, passwordRoomInput }) => {
+    try {
+      const result = await generatePassword({
+        bookingId,
+        passwordRoomInput
+      }).unwrap();
+      message.success('Mật khẩu phòng đã được cập nhật thành công');
+      return result;
+    } catch (error) {
+      message.error(error?.data?.message || 'Cập nhật mật khẩu phòng thất bại');
+      throw error;
+    }
+  };
+
   const handleSelectBookingDetail = (bookingId) => {
     setSelectedBookingId(bookingId);
   };
@@ -192,8 +206,9 @@ export default function Booking() {
         paymentStatusCodes={PAYMENT_STATUS}
         onStatusChange={handleStatusChange}
         isUpdating={isUpdating}
-        bookingDetailData={bookingDetailData} 
-        onSelectBookingDetail={handleSelectBookingDetail} 
+        bookingDetailData={bookingDetailData}
+        onSelectBookingDetail={handleSelectBookingDetail}
+        generatePassword={handleGeneratePassword}
       />
     </div>
   );
