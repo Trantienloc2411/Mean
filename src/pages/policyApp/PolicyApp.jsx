@@ -274,7 +274,7 @@ export default function PolicyApp() {
 
         return record.values.map((val, idx) => (
           <div key={idx}>
-            {val.val1 && val.val2 ? `${val.val1}-${val.val2}` : val.val1 || val.val2}
+            {val.val1 && val.val2 ? `${val.val1} - ${val.val2}` : val.val1 || val.val2}
             {val.unit && ` (${val.unit === 'percent' ? 'Phần trăm' : val.unit === 'vnd' ? 'VND' : val.unit})`}
           </div>
         ));

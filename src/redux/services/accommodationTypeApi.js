@@ -23,6 +23,11 @@ export const accommodationTypeApi = apiSlice.injectEndpoints({
             providesTags: ["AccommodationType"],
         }),
 
+        getAccommodationTypesByOwner: builder.query({
+            query: (ownerId) => `/accommodation-type/by-owner?ownerId=${ownerId}`,
+            providesTags: ["AccommodationType"],
+        }),
+
         createAccommodationType: builder.mutation({
             query: (accommodationType) => ({
                 url: "/accommodation-type/create-accommodation-type",
@@ -55,6 +60,7 @@ export const {
     useGetAllAccommodationTypesQuery,
     useGetAccommodationTypeByIdQuery,
     useGetAccommodationTypeDetailQuery,
+    useGetAccommodationTypesByOwnerQuery,
     useCreateAccommodationTypeMutation,
     useUpdateAccommodationTypeMutation,
     useDeleteAccommodationTypeMutation,

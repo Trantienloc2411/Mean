@@ -9,7 +9,7 @@ import UpdatePolicyModal from './components/UpdatePolicyModal/UpdatePolicyModal.
 import DetailPolicyModal from './components/DetailPolicyModal/DetailPolicyModal.jsx';
 import dayjs from 'dayjs';
 import {
-  useGetAllPolicyOwnersQuery,
+  useGetPolicyOwnerByOwnerIdQuery,
   useCreatePolicyOwnerMutation,
   useUpdatePolicyOwnerMutation,
   useDeletePolicyOwnerMutation
@@ -29,43 +29,55 @@ export default function Policy() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [ownerId, setOwnerId] = useState(null);
+  const [effectiveOwnerId, setEffectiveOwnerId] = useState(null);
+
   const userId = localStorage.getItem('user_id');
 
   const {
     data: ownerData,
-    isLoading: isOwnerLoading
+    isLoading: isOwnerLoading,
+    error: ownerError
   } = useGetOwnerDetailByUserIdQuery(userId, {
     skip: !userId
   });
 
   useEffect(() => {
-    if (ownerData && ownerData._id) {
-      setOwnerId(ownerData._id);
-      console.log("Owner ID set:", ownerData._id);
+    if (ownerData) {
+      const ownerId = ownerData.id || ownerData._id;
+      setEffectiveOwnerId(ownerId);
+      console.log("Owner ID set:", ownerId);
     }
   }, [ownerData]);
 
   const {
-    data: policiesData = { success: false, data: [] },
-    isLoading,
+    data: policiesData,
+    isLoading: isPoliciesLoading,
     refetch,
-    error
-  } = useGetAllPolicyOwnersQuery();
+    error: policiesError
+  } = useGetPolicyOwnerByOwnerIdQuery(effectiveOwnerId, {
+    skip: !effectiveOwnerId
+  });
+
   const [createPolicy, { isLoading: isCreating }] = useCreatePolicyOwnerMutation();
   const [updatePolicy, { isLoading: isUpdating }] = useUpdatePolicyOwnerMutation();
   const [deletePolicy, { isLoading: isDeleting }] = useDeletePolicyOwnerMutation();
 
   useEffect(() => {
-    console.log("API Response:", { policiesData, isLoading, error });
-    if ((!policiesData || !policiesData.data || policiesData.data.length === 0) && !isLoading) {
+    console.log("API Response:", { policiesData, isPoliciesLoading, policiesError });
+    console.log("Raw API Response structure:", policiesData);
+    
+    if (policiesData && policiesData.owners && policiesData.owners.length > 0) {
+      console.log("Processing API data with owners:", policiesData.owners);
+      processData({ success: true, data: policiesData.owners });
+    } 
+    else if ((!policiesData || !policiesData.owners || policiesData.owners.length === 0) && !isPoliciesLoading) {
       console.log("Using test data because API response is empty or invalid");
       const testData = {
         success: true,
         data: [
           {
             "_id": "67bd845aa8453ac3505d6aab",
-            "ownerId": "63b92f4e17d7b3c2a4e4f3d2",
+            "ownerId": effectiveOwnerId || "63b92f4e17d7b3c2a4e4f3d2",
             "policyTitle": "Cancellation Policy",
             "policyDescription": "This policy covers cancellation terms for bookings.",
             "startDate": "01/02/2025 19:00:00",
@@ -79,10 +91,8 @@ export default function Policy() {
         ]
       };
       processData(testData);
-    } else if (policiesData && policiesData.data) {
-      processData(policiesData);
     }
-  }, [policiesData, isLoading, error]);
+  }, [policiesData, isPoliciesLoading, policiesError, effectiveOwnerId]);
 
   const filterGroups = [
     {
@@ -142,6 +152,9 @@ export default function Policy() {
     try {
       const mappedData = data.data.map((item, index) => {
         console.log("Processing item:", item);
+        
+        const ownerIdValue = typeof item.ownerId === 'object' ? item.ownerId._id : item.ownerId;
+        
         const itemStatus = item.status !== undefined ? item.status :
           getStatusFromDates(item.startDate, item.endDate);
   
@@ -155,9 +168,9 @@ export default function Policy() {
           Status: itemStatus,
           id: item.id || item._id,
           _id: item._id || item.id,
-          ownerId: item.ownerId || "",
+          ownerId: ownerIdValue || "",
           isDelete: item.isDelete || false,
-          values: item.values || [], // Add this line to include values
+          values: item.values || [],
           _original: { ...item }
         };
   
@@ -172,7 +185,6 @@ export default function Policy() {
       console.error("Error processing data:", error);
     }
   };
-
 
   const menuItems = [
     {
@@ -237,7 +249,7 @@ export default function Policy() {
       };
       const newPolicy = {
         _id: `temp_${Date.now()}`,
-        ownerId: ownerId || "63b92f4e17d7b3c2a4e4f3d2",
+        ownerId: effectiveOwnerId || "63b92f4e17d7b3c2a4e4f3d2",
         policyTitle: formattedValues.Name,
         policyDescription: formattedValues.Description,
         startDate: formattedValues.ApplyDate ? formattedValues.ApplyDate.format('DD/MM/YYYY HH:mm:ss') : null,
@@ -252,7 +264,7 @@ export default function Policy() {
       try {
         await createPolicy({
           ...formattedValues,
-          ownerId: ownerId || "63b92f4e17d7b3c2a4e4f3d2",
+          ownerId: effectiveOwnerId || "63b92f4e17d7b3c2a4e4f3d2",
           status: 1
         }).unwrap();
         refetch();
@@ -275,7 +287,6 @@ export default function Policy() {
     }
   };
 
-
   const handleUpdatePolicy = async (values) => {
     try {
       const formattedValues = {
@@ -287,7 +298,7 @@ export default function Policy() {
       const updatedPolicyData = {
         ...formattedValues,
         id: selectedPolicy._id,
-        ownerId: selectedPolicy.ownerId || ownerId,
+        ownerId: selectedPolicy.ownerId || effectiveOwnerId,
         status: values.Status
       };
 
@@ -346,6 +357,7 @@ export default function Policy() {
       dateRange: dates ? dateStrings : [],
     }));
   };
+
   useEffect(() => {
     if (!baseData || baseData.length === 0) return;
 
@@ -411,7 +423,7 @@ export default function Policy() {
       key: "operation",
       render: (_, record) => (
         <Dropdown
-        trigger={["click"]} 
+          trigger={["click"]} 
           menu={{
             items: menuItems.map((item) => ({
               ...item,
@@ -425,11 +437,15 @@ export default function Policy() {
     }
   ];
 
+  if (isOwnerLoading) return <div>Đang tải thông tin chủ sở hữu...</div>;
+  if (ownerError) return <div>Lỗi tải thông tin chủ sở hữu</div>;
+  if (!userId) return <div>Không tìm thấy ID người dùng</div>;
+  if (!effectiveOwnerId) return <div>Không thể truy xuất ID chủ sở hữu</div>;
+
   return (
     <div className={styles.contentContainer}>
       <h1>Quản lý Chính Sách</h1>
-      {isOwnerLoading && <div>Đang tải thông tin chủ sở hữu...</div>}
-      {filteredData.length === 0 && !isLoading && (
+      {filteredData.length === 0 && !isPoliciesLoading && (
         <div style={{ marginBottom: '10px' }}>
           Không có dữ liệu để hiển thị.
         </div>
@@ -477,7 +493,7 @@ export default function Policy() {
         <Table
           columns={columns}
           dataSource={filteredData}
-          loading={isLoading || isOwnerLoading}
+          loading={isPoliciesLoading || isOwnerLoading}
           rowKey={(record) => record._id || record.id || record.No}
           pagination={{
             total: filteredData.length,
