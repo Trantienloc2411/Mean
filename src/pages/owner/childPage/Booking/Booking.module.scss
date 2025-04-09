@@ -1,6 +1,26 @@
-.content{
+.bookingDashboard {
     display: flex;
-    flex-direction: row;
-    justify-content: space-between;
-    padding: 5px;
-}
+    gap: 24px;
+    padding: 24px;
+    background-color: #f8f9fa;
+    min-height: calc(100vh - 64px);
+    
+    @media (max-width: 768px) {
+      flex-direction: column;
+    }
+  }
+  
+  .loadingContainer {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 300px;
+    flex-direction: column;
+    
+    p {
+      margin-top: 16px;
+      color: #64748b;
+      font-size: 0.875rem;
+    }
+  }
+  
