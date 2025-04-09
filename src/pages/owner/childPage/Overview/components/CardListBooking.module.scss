@@ -1,0 +1,34 @@
+.cardListBooking {
+  display: flex;
+  flex-direction: column;
+  height: 50vh;
+  background-color: #f9f9f9;
+  border-radius: 8px;
+  padding: 16px;
+
+  
+  .title {
+    font-size: 18px;
+    font-weight: 600;
+    margin-bottom: 16px;
+    color: #333;
+  }
+  
+  .bookingList {
+    flex: 1;
+    overflow-y: auto;
+    
+    &::-webkit-scrollbar {
+      width: 4px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: #f1f1f1;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #ccc;
+      border-radius: 4px;
+    }
+  }
+}

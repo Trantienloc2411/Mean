@@ -16,7 +16,7 @@ import {
   setRole,
   setUser,
 } from "../../../redux/slices/authSlice";
-import { saveToken, saveUserId, saveRole } from "../../../utils/storage";
+import { saveToken, saveUserId, saveRole, saveUsername } from "../../../utils/storage";
 import { message } from "antd";
 
 const Login = () => {
@@ -36,6 +36,7 @@ const Login = () => {
     "src/assets/images/mountain.jpg",
   ];
 
+  
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -51,6 +52,7 @@ const Login = () => {
       if (loginResult?.accessToken) {
         saveToken(loginResult.accessToken);
         saveUserId(loginResult._id);
+        saveUsername(loginResult.fullName);
 
         const userData = await getUserById(loginResult._id).unwrap();
 
