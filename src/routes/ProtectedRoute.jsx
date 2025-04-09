@@ -19,7 +19,7 @@ export const NotAuthRoute = ({ children }) => {
     if (role === "Owner") {
       return (
         <Navigate
-          to={`/owner/${userId}/dashboard`}
+          to={`/owner/${userId}/information`}
           state={{ from: location }}
           replace
         />

@@ -10,7 +10,6 @@ export default function Information() {
   const { data: ownerDetail, isLoading: ownerLoading } =
     useGetOwnerDetailByUserIdQuery(id);
   const userData = ownerDetail?.userId;
-
   if (ownerLoading) {
     return (
       <div

@@ -166,7 +166,7 @@ export default function AccountTable({ data, loading }) {
     navigate(
       user.roleName === "Customer"
         ? `/customer/${user._id}`
-        : `/owner/${user._id}/dashboard`
+        : `/owner/${user._id}/information`
     );
   };
 

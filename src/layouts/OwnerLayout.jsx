@@ -19,14 +19,14 @@ const OwnerLayout = () => {
   const { id } = useParams(); // Lấy ID từ URL
   const menuItems = [
     {
-      key: `/owner/${id}/dashboard`,
-      icon: <HomeOutlined />,
-      label: "Tổng quan",
-    },
-    {
       key: `/owner/${id}/information`,
       icon: <UserOutlined />,
       label: "Thông tin",
+    },
+    {
+      key: `/owner/${id}/dashboard`,
+      icon: <HomeOutlined />,
+      label: "Tổng quan",
     },
     {
       key: `/owner/${id}/rental-location`,

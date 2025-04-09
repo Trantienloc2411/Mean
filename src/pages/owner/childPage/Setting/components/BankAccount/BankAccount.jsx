@@ -13,7 +13,7 @@ export default function BankInfo({ bankData, refetch }) {
   const [updateOwner] = useUpdateOwnerMutation();
   const ownerId = bankData.ownerId;
 
-  console.log(bankData);
+  // console.log(bankData);
 
   const defaultValue = "Chưa có thông tin";
   const [formData, setFormData] = useState({
@@ -139,12 +139,13 @@ function NotHaveBank({ refetch, createBank, updateOwner, ownerId }) {
     try {
       const bankInfo = await createBank({ data: bankDataSubmit }).unwrap();
       message.success("Tạo tài khoản ngân hàng thành công!");
+      console.log(bankInfo);
 
       try {
         const updatedData = {
           paymentInformationId: bankInfo.id,
         };
-        console.log(updatedData);
+        // console.log(updatedData);
 
         const res = await updateOwner({
           id: ownerId,

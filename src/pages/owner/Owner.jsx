@@ -9,17 +9,17 @@ import Setting from "./childPage/Setting/Setting.jsx";
 import TypeRoom from "./childPage/TypeRoom/TypeRoom.jsx";
 
 export default function Owner() {
-  const storedKey = localStorage.getItem('ownerActiveTab') || "1";
+  const storedKey = localStorage.getItem("ownerActiveTab") || "1";
   const [activeTab, setActiveTab] = useState(storedKey);
-  
+
   const handleTabChange = (key) => {
     setActiveTab(key);
-    localStorage.setItem('ownerActiveTab', key);
+    localStorage.setItem("ownerActiveTab", key);
   };
-  
+
   const items = [
-    { key: "1", label: "Tổng quan", children: <Overview /> },
-    { key: "2", label: "Thông tin", children: <Information /> },
+    { key: "1", label: "Thông tin", children: <Information /> },
+    { key: "2", label: "Tổng quan", children: <Overview /> },
     { key: "3", label: "Địa điểm", children: <Place /> },
     { key: "4", label: "Đặt phòng", children: <Booking /> },
     { key: "5", label: "Loại phòng", children: <TypeRoom /> },

@@ -23,7 +23,7 @@ export default function AccountInformation({ userData, refetch }) {
   const [updateUser] = useUpdateUserMutation();
   const { id } = useParams();
   const [uploading, setUploading] = useState(false);
-  console.log(userData);
+  // console.log(userData);
 
   // Cập nhật formData khi userData thay đổi
   useEffect(() => {

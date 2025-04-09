@@ -54,15 +54,17 @@ export default function Setting() {
       taxID: ownerDetail?.businessInformationId?.taxID,
     };
   }, [ownerDetail]);
+  // console.log(ownerDetail);
+
   const bankInfo = useMemo(() => {
     if (!ownerDetail) return null;
     return {
       ownerId: ownerDetail.id,
       // businessId: ownerDetail?.businessInformationId?.id || null,
-      bankId: ownerDetail?.bankId?.id || null,
-      bankName: ownerDetail?.bankId?.bankName,
-      bankNo: ownerDetail?.bankId?.bankNo,
-      bankAccountName: ownerDetail?.bankId?.bankAccountName,
+      bankId: ownerDetail?.paymentInformationId?.id || null,
+      bankName: ownerDetail?.paymentInformationId?.bankName,
+      bankNo: ownerDetail?.paymentInformationId?.bankNo,
+      bankAccountName: ownerDetail?.paymentInformationId?.bankAccountName,
     };
   }, [ownerDetail]);
   if (ownerLoading || !userInfo) {
