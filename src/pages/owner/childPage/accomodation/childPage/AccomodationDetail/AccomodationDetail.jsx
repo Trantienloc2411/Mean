@@ -24,6 +24,7 @@ export default function AccommodationDetail(props) {
   console.log("Normalized data for display:", data);
   
   const roomName = data?.accommodationTypeId?.name || "";
+  const roomNo = data?.roomNo || "";
   const status = data?.status || 0;
   const description = data?.description || "";
   const maxPeople = data?.accommodationTypeId?.maxPeopleNumber || 0;
@@ -95,6 +96,11 @@ export default function AccommodationDetail(props) {
                   <span>{locationAddress}</span>
                 </div>
               )}
+              
+              <div style={{ display: "flex", marginBottom: "8px" }}>
+                <h4 style={{ marginRight: "8px", minWidth: "150px" }}>Số phòng: </h4>
+                <span>{roomNo}</span>
+              </div>
               
               <div style={{ display: "flex", marginBottom: "8px" }}>
                 <h4 style={{ marginRight: "8px", minWidth: "150px" }}>Số người ở tối đa: </h4>

@@ -7,10 +7,15 @@ import Place from "./childPage/accomodation/Accomodation.jsx";
 import Policy from "./childPage/Policy/Policy.jsx";
 import Setting from "./childPage/Setting/Setting.jsx";
 import TypeRoom from "./childPage/TypeRoom/TypeRoom.jsx";
+import ChatList from "./childPage/messeges/Messeges.jsx";
+import {supabase} from "../../redux/services/supabase";
 
 export default function Owner() {
   const storedKey = localStorage.getItem("ownerActiveTab") || "1";
   const [activeTab, setActiveTab] = useState(storedKey);
+
+  //Check user is exist on supabase/c{hat
+  
 
   const handleTabChange = (key) => {
     setActiveTab(key);
@@ -25,6 +30,7 @@ export default function Owner() {
     { key: "5", label: "Loại phòng", children: <TypeRoom /> },
     { key: "6", label: "Chính sách", children: <Policy /> },
     { key: "7", label: "Cài đặt", children: <Setting /> },
+    {key : "8", label: "Tin nhắn", children: <ChatList />}
   ];
 
   return (

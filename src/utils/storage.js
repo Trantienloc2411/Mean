@@ -5,6 +5,12 @@ export const saveToken = (token) => {
 export const saveUserId = (userId) => {
   localStorage.setItem("user_id", userId);
 };
+export const saveUsername = (username) => {
+  localStorage.setItem("username", username);
+}
+export const saveChatInfo = (chatInfo) => {
+  localStorage.setItem("chat_info", JSON.stringify(chatInfo));
+}
 
 export const saveRole = (role) => {
   localStorage.setItem("user_role", JSON.stringify(role));

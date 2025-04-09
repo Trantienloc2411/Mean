@@ -15,7 +15,7 @@ const ACCOMMODATION_STATUS = Object.freeze({
     INUSE: 7
 });
 
-const BookingDetail = ({ bookingId, visible, onClose, bookingData, isLoading, isError }) => {
+const BookingDetail = ({ bookingId, visible, onClose, bookingData, isLoading, isError, bookingStatusCodes, paymentStatusCodes  }) => {
   const [booking, setBooking] = useState(null)
 
   useEffect(() => {
@@ -31,14 +31,14 @@ const BookingDetail = ({ bookingId, visible, onClose, bookingData, isLoading, is
 
   const getStatusTag = (status) => {
     const statusMap = {
-      1: { text: "Đã xác nhận", color: "blue" },
-      2: { text: "Chờ xác nhận", color: "orange" },
-      3: { text: "Cần check-in", color: "cyan" },
-      4: { text: "Đã check-in", color: "green" },
-      5: { text: "Cần check-out", color: "purple" },
-      6: { text: "Đã check-out", color: "geekblue" },
-      7: { text: "Đã huỷ", color: "red" },
-      8: { text: "Hoàn tất", color: "green" },
+      [bookingStatusCodes.CONFIRMED]: { text: "Đã xác nhận", color: "blue" },
+      [bookingStatusCodes.PENDING]: { text: "Chờ xác nhận", color: "orange" },
+      [bookingStatusCodes.NEEDCHECKIN]: { text: "Cần check-in", color: "cyan" },
+      [bookingStatusCodes.CHECKEDIN]: { text: "Đã check-in", color: "green" },
+      [bookingStatusCodes.NEEDCHECKOUT]: { text: "Cần check-out", color: "purple" },
+      [bookingStatusCodes.CHECKEDOUT]: { text: "Đã check-out", color: "geekblue" },
+      [bookingStatusCodes.CANCELLED]: { text: "Đã huỷ", color: "red" },
+      [bookingStatusCodes.COMPLETED]: { text: "Hoàn tất", color: "green" },
     }
 
     return <Tag color={statusMap[status]?.color || "default"}>{statusMap[status]?.text || "Unknown"}</Tag>
@@ -46,11 +46,11 @@ const BookingDetail = ({ bookingId, visible, onClose, bookingData, isLoading, is
 
   const getPaymentStatusTag = (status) => {
     const paymentStatusMap = {
-      1: { text: "Đã đặt", color: "green" },
-      2: { text: "Chờ thanh toán", color: "orange" },
-      3: { text: "Đã thanh toán", color: "blue" },
-      4: { text: "Đã hoàn tiền", color: "red" },
-      5: { text: "Thanh toán thất bại", color: "red" },
+      [paymentStatusCodes.BOOKING]: { text: "Đã đặt", color: "green" },
+      [paymentStatusCodes.PENDING]: { text: "Chờ thanh toán", color: "orange" },
+      [paymentStatusCodes.PAID]: { text: "Đã thanh toán", color: "blue" },
+      [paymentStatusCodes.REFUND]: { text: "Đã hoàn tiền", color: "red" },
+      [paymentStatusCodes.FAILED]: { text: "Thanh toán thất bại", color: "red" },
     }
 
     return <Tag color={paymentStatusMap[status]?.color || "default"}>{paymentStatusMap[status]?.text || "Unknown"}</Tag>
