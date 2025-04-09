@@ -173,6 +173,16 @@
     background: #e0f2fe;
     color: #0284c7;
   }
+  
+  &.needcheckin {
+    background: #f0f9ff;
+    color: #0369a1;
+  }
+  
+  &.needcheckout {
+    background: #f5f3ff;
+    color: #7c3aed;
+  }
 }
 
 .paymentTag {
@@ -193,7 +203,7 @@
     margin-right: 6px;
   }
   
-  &.inprogress {
+  &.paid {
     background: #e6fffa;
     color: #0d9488;
     
@@ -202,7 +212,7 @@
     }
   }
   
-  &.confirmed {
+  &.booked {
     background: #fff8e6;
     color: #d97706;
     
@@ -211,7 +221,7 @@
     }
   }
   
-  &.canceled {
+  &.cancelled {
     background: #fee2e2;
     color: #dc2626;
     
@@ -244,6 +254,15 @@
     
     &::before {
       background-color: #4b5563;
+    }
+  }
+  
+  &.refund {
+    background: #f5f3ff;
+    color: #7c3aed;
+    
+    &::before {
+      background-color: #7c3aed;
     }
   }
 }
