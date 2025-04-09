@@ -1,50 +1,64 @@
-import React from 'react';
-import { Card, Divider } from 'antd';
+import { Button, Badge } from "antd"
+import { EnvironmentOutlined, AimOutlined, AppstoreOutlined } from "@ant-design/icons"
+import styles from "./ListPlace.module.scss"
 
-const ListPlace = ({ locations = [], onSelectLocation, selectedLocation }) => {
+export default function ListPlace({ locations = [], onSelectLocation, selectedLocation }) {
+  const hasLocations = locations && locations.length > 0
+
   return (
-    <div className="booking-dashboard__sidebar">
-      <h2 className="booking-dashboard__title">Địa điểm đặt phòng</h2>
-      <Divider />
-      <div className="booking-dashboard__locations">
-        <Card 
-          size='small' 
-          hoverable 
-          style={{
-            fontWeight: 'bold', 
-            textAlign: 'center', 
-            marginBottom: 20,
-            backgroundColor: selectedLocation === 'all' ? '#e6f7ff' : 'white'
-          }}
-          onClick={() => onSelectLocation('all')}
-        >
-          Tất cả
-        </Card>
+    <div className={styles.listPlaceContainer}>
+      <div className={styles.header}>
+        <h2 className={styles.title}>Địa Điểm</h2>
+        <Badge count={locations.length} className={styles.locationCount} />
+      </div>
 
-        {locations && locations.length > 0 ? (
-          locations.map((location) => (
-            <Card
-              key={location._id}
-              hoverable
-              className="booking-dashboard__location-card"
-              bordered={false}
-              style={{
-                backgroundColor: selectedLocation === location._id ? '#e6f7ff' : 'white'
-              }}
-              onClick={() => onSelectLocation(location._id)}
-            >
-              <strong>{location.rentalLocationId.name}</strong>
-              <p>
-                {`${location.rentalLocationId.address}, ${location.rentalLocationId.ward}, ${location.rentalLocationId.district}, ${location.rentalLocationId.city}`}
-              </p>
-            </Card>
-          ))
+      <div className={styles.locationList}>
+        <Button
+          onClick={() => onSelectLocation("all")}
+          className={`${styles.locationButton} ${selectedLocation === "all" ? styles.activeButton : ""}`}
+          icon={<AppstoreOutlined className={styles.locationIcon} />}
+        >
+          Tất Cả
+        </Button>
+
+        {hasLocations ? (
+          locations.map((location) => {
+            const locationId = location.rentalLocationId?._id || location._id
+            const locationData = location.rentalLocationId || {}
+
+            const locationName = locationData.name || "Địa điểm không xác định"
+            const address = locationData.address || ""
+            const ward = locationData.ward || ""
+            const district = locationData.district || ""
+            const city = locationData.city || ""
+
+            return (
+              <Button
+                key={locationId}
+                onClick={() => onSelectLocation(locationId)}
+                className={`${styles.locationButton} ${selectedLocation === locationId ? styles.activeButton : ""}`}
+                icon={<EnvironmentOutlined className={styles.locationIcon} />}
+              >
+                <div className={styles.locationContent}>
+                  <span className={styles.locationName}>{locationName}</span>
+                  <div className={styles.locationDetails}>
+                    <div className={styles.addressLine}>{address}</div>
+                    <div className={styles.addressLine}>
+                      {ward}, {district}
+                    </div>
+                    <div className={styles.addressLine}>{city}</div>
+                  </div>
+                </div>
+              </Button>
+            )
+          })
         ) : (
-          <p>Không có địa điểm</p>
+          <div className={styles.noLocations}>
+            <AimOutlined className={styles.emptyIcon} />
+            <p>Không có địa điểm nào</p>
+          </div>
         )}
       </div>
     </div>
-  );
-};
-
-export default ListPlace;
+  )
+}

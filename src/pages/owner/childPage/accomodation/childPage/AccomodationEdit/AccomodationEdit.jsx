@@ -9,7 +9,8 @@ import {
   Divider,
   Space,
   Spin,
-  Badge
+  Badge,
+  Input
 } from "antd";
 import { SaveOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
@@ -47,7 +48,6 @@ function getStatusColor(status) {
   }
 }
 
-
 function getStatusLabel(status) {
   switch (status) {
     case 'AVAILABLE': return 'Có sẵn';
@@ -83,6 +83,7 @@ export default function AccommodationEdit({
     if (visible && accommodationData) {
       form.setFieldsValue({
         accommodationTypeId: accommodationData.accommodationTypeId?._id,
+        roomNo: accommodationData.roomNo || "",
         description: accommodationData.description || "",
         status: accommodationData.status
       });
@@ -114,8 +115,9 @@ export default function AccommodationEdit({
         id: accommodationId,
         rentalLocationId: rentalLocationId,
         accommodationTypeId: values.accommodationTypeId,
+        roomNo: values.roomNo,
         description: values.description || "",
-        image: imageUrls.length > 0 ? imageUrls : [""], // Use all images or empty array with one empty string
+        image: imageUrls.length > 0 ? imageUrls : [""], 
         status: values.status
       };
       
@@ -179,6 +181,18 @@ export default function AccommodationEdit({
                   <Option key={type._id} value={type._id}>{type.name}</Option>
                 ))}
               </Select>
+            </Form.Item>
+
+            <Form.Item
+              name="roomNo"
+              label={<Text strong>Số phòng</Text>}
+              rules={[{ required: true, message: "Vui lòng nhập số phòng!" }]}
+            >
+              <Input
+                placeholder="Nhập số phòng (vd: 001)"
+                size="large"
+                className={styles.inputField}
+              />
             </Form.Item>
 
             <Form.Item 

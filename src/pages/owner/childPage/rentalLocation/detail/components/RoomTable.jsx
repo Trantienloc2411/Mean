@@ -31,10 +31,10 @@ export default function RoomTableColumns({ onDetailClick, onEditClick }) {
 
   return [
     {
-      title: "Số phòng",
-      dataIndex: "name",
-      key: "name",
-      render: (name, record) => record.accommodationTypeId?.name || name
+      title: 'Số phòng',
+      dataIndex: 'roomNo',
+      key: 'roomNo',
+      render: (text) => text || 'N/A',
     },
     {
       title: "Loại phòng",

@@ -1,22 +1,14 @@
-import { useState, useEffect } from "react";
-import { Dropdown, Input, Button, Menu, message, Spin } from "antd";
-import { FilterOutlined, SearchOutlined } from "@ant-design/icons";
-import { CreditCardOutlined, DollarOutlined, BankOutlined, WalletOutlined } from "@ant-design/icons";
-import debounce from "lodash/debounce";
-import TableModify from "../../../../../dashboard/components/Table";
-import Filter from "../../../../../../components/Filter/Filter";
-import UpdateBookingStatus from "../UpdateBookingStatus/UpdateBookingStatus";
-import BookingDetail from "../BookingDetail/BookingDetail";
-import styles from "./ListBooking.module.scss";
-import { useGetBookingByIdQuery } from "../../../../../../redux/services/bookingApi";
-
-const HorizontalEllipsisIcon = () => (
-  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-    <circle cx="3" cy="8" r="1.5" fill="currentColor" />
-    <circle cx="8" cy="8" r="1.5" fill="currentColor" />
-    <circle cx="13" cy="8" r="1.5" fill="currentColor" />
-  </svg>
-);
+import { useState, useEffect } from "react"
+import { Dropdown, Input, Button, Menu, message } from "antd"
+import { FilterOutlined, SearchOutlined } from "@ant-design/icons"
+import { CreditCardOutlined, DollarOutlined, BankOutlined, WalletOutlined } from "@ant-design/icons"
+import debounce from "lodash/debounce"
+import TableModify from "../../../../../dashboard/components/Table"
+import Filter from "../../../../../../components/Filter/Filter"
+import UpdateBookingStatus from "../UpdateBookingStatus/UpdateBookingStatus"
+import BookingDetail from "../BookingDetail/BookingDetail"
+import styles from "./ListBooking.module.scss"
+import { useGetBookingByIdQuery } from "../../../../../../redux/services/bookingApi"
 
 export default function ListBooking({
   bookings,
@@ -24,69 +16,68 @@ export default function ListBooking({
   paymentStatusCodes,
   onStatusChange,
   isUpdating,
+  onSelectBookingDetail,
   generatePassword,
 }) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredData, setFilteredData] = useState(bookings || []);
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filteredData, setFilteredData] = useState(bookings || [])
   const [selectedValues, setSelectedValues] = useState({
     status: [],
     payment: [],
-  });
-  const [selectedBooking, setSelectedBooking] = useState(null);
-  const [statusModalVisible, setStatusModalVisible] = useState(false);
-  const [selectedBookingId, setSelectedBookingId] = useState(null);
-  const [isBookingDetailVisible, setIsBookingDetailVisible] = useState(false);
+  })
+  const [selectedBooking, setSelectedBooking] = useState(null)
+  const [statusModalVisible, setStatusModalVisible] = useState(false)
+  const [selectedBookingId, setSelectedBookingId] = useState(null)
+  const [isBookingDetailVisible, setIsBookingDetailVisible] = useState(false)
 
   const {
     data: bookingDetailData,
     isLoading: isDetailLoading,
-    isError: isDetailError
+    isError: isDetailError,
   } = useGetBookingByIdQuery(selectedBookingId, {
     skip: !selectedBookingId,
-  });
+  })
 
   useEffect(() => {
-    setFilteredData(bookings || []);
-  }, [bookings]);
+    setFilteredData(bookings || [])
+  }, [bookings])
 
   const getBookingStatusDisplay = (statusCode) => {
     const statusMap = {
-      [bookingStatusCodes.CONFIRMED]: "Confirmed",
-      [bookingStatusCodes.PENDING]: "Pending",
-      [bookingStatusCodes.NEEDCHECKIN]: "Need Check-in",
-      [bookingStatusCodes.CHECKEDIN]: "Checked In",
-      [bookingStatusCodes.NEEDCHECKOUT]: "Need Check-out",
-      [bookingStatusCodes.CHECKEDOUT]: "Checked Out",
-      [bookingStatusCodes.CANCELLED]: "Cancelled",
-      [bookingStatusCodes.COMPLETED]: "Completed"
-    };
-    return statusMap[statusCode] || "Unknown Status";
-  };
+      [bookingStatusCodes.CONFIRMED]: "Đã xác nhận",
+      [bookingStatusCodes.PENDING]: "Chờ xác nhận",
+      [bookingStatusCodes.NEEDCHECKIN]: "Cần check-in",
+      [bookingStatusCodes.CHECKEDIN]: "Đã check-in",
+      [bookingStatusCodes.NEEDCHECKOUT]: "Cần check-out",
+      [bookingStatusCodes.CHECKEDOUT]: "Đã check-out",
+      [bookingStatusCodes.CANCELLED]: "Đã hủy",
+      [bookingStatusCodes.COMPLETED]: "Hoàn tất",
+    }
+    return statusMap[statusCode] || "Trạng thái không xác định"
+  }
 
   const getPaymentStatusDisplay = (statusCode) => {
     const statusMap = {
-      [paymentStatusCodes.BOOKING]: "Booking",
-      [paymentStatusCodes.PENDING]: "Pending",
-      [paymentStatusCodes.PAID]: "Paid",
-      [paymentStatusCodes.REFUND]: "Refund",
-      [paymentStatusCodes.FAILED]: "Failed",
-    };
-    return statusMap[statusCode] || "Unpaid";
-  };
+      [paymentStatusCodes.BOOKING]: "Đã đặt",
+      [paymentStatusCodes.PENDING]: "Chờ thanh toán",
+      [paymentStatusCodes.PAID]: "Đã thanh toán",
+      [paymentStatusCodes.REFUND]: "Đã hoàn tiền",
+      [paymentStatusCodes.FAILED]: "Thanh toán thất bại",
+    }
+    return statusMap[statusCode] || "Chưa thanh toán"
+  }
 
   const statusOptions = Object.entries(bookingStatusCodes).map(([key, value]) => ({
-    label: <span className={`${styles.statusTag} ${styles[key.toLowerCase()]}`}>
-      {getBookingStatusDisplay(value, bookingStatusCodes)}
-    </span>,
-    value: getBookingStatusDisplay(value, bookingStatusCodes)
-  }));
+    label: <span className={`${styles.statusTag} ${styles[key.toLowerCase()]}`}>{getBookingStatusDisplay(value)}</span>,
+    value: getBookingStatusDisplay(value),
+  }))
 
   const paymentOptions = Object.entries(paymentStatusCodes).map(([key, value]) => ({
-    label: <span className={`${styles.paymentTag} ${styles[key.toLowerCase()]}`}>
-      {getPaymentStatusDisplay(value)}
-    </span>,
-    value: getPaymentStatusDisplay(value)
-  }));
+    label: (
+      <span className={`${styles.paymentTag} ${styles[key.toLowerCase()]}`}>{getPaymentStatusDisplay(value)}</span>
+    ),
+    value: getPaymentStatusDisplay(value),
+  }))
 
   const filterGroups = [
     {
@@ -99,104 +90,98 @@ export default function ListBooking({
       title: "Thanh toán",
       options: paymentOptions,
     },
-  ];
+  ]
 
   const applyFilters = (filters) => {
-    let filtered = [...bookings];
+    let filtered = [...bookings]
 
-    if (filters.bookingStatus && filters.bookingStatus.length > 0) {
-      filtered = filtered.filter((item) =>
-        filters.bookingStatus.includes(item.Status)
-      );
+    if (filters.status && filters.status.length > 0) {
+      filtered = filtered.filter((item) => filters.status.includes(item.Status))
     }
 
-    if (filters.paymentStatus && filters.paymentStatus.length > 0) {
-      filtered = filtered.filter((item) =>
-        filters.paymentStatus.includes(item.Payment)
-      );
+    if (filters.payment && filters.payment.length > 0) {
+      filtered = filtered.filter((item) => filters.payment.includes(item.Payment))
     }
 
     if (searchTerm) {
       filtered = filtered.filter((item) => {
-        const customerName = item._originalBooking.customerId?.userId?.fullName || "";
-        return customerName.toLowerCase().includes(searchTerm.toLowerCase());
-      });
+        const customerName = item._originalBooking.customerId?.userId?.fullName || ""
+        return customerName.toLowerCase().includes(searchTerm.toLowerCase())
+      })
     }
 
-    setFilteredData(filtered);
-  };
+    setFilteredData(filtered)
+  }
 
   const handleFilterChange = (filterName, newValues) => {
     const updatedFilters = {
       ...selectedValues,
       [filterName]: newValues,
-    };
+    }
 
-    setSelectedValues(updatedFilters);
-    applyFilters(updatedFilters);
-  };
+    setSelectedValues(updatedFilters)
+    applyFilters(updatedFilters)
+  }
 
   const debouncedSearch = debounce((value) => {
-    setSearchTerm(value);
+    setSearchTerm(value)
     applyFilters({
       ...selectedValues,
       searchTerm: value,
-    });
-  }, 500);
+    })
+  }, 500)
 
   const handleSearch = (e) => {
-    const value = e.target.value;
-    debouncedSearch(value);
-  };
+    const value = e.target.value
+    debouncedSearch(value)
+  }
 
   useEffect(() => {
     return () => {
-      debouncedSearch.cancel();
-    };
-  }, []);
+      debouncedSearch.cancel()
+    }
+  }, [])
 
   const getStatusClass = (status) => {
     const statusMap = {
-      "Confirmed": "confirmed",
-      "Pending": "pending",
-      "Need Check-in": "pending",
-      "Checked In": "inprogress",
-      "Need Check-out": "pending",
-      "Checked Out": "checkedout",
-      "Cancelled": "canceled",
-      "Completed": "complete",
-    };
-
-    return statusMap[status] || "pending";
-  };
+      "Đã xác nhận": "confirmed",
+      "Chờ xác nhận": "pending",
+      "Cần check-in": "needcheckin",
+      "Đã check-in": "inprogress",
+      "Cần check-out": "needcheckout",
+      "Đã check-out": "checkedout",
+      "Đã hủy": "canceled",
+      "Hoàn tất": "complete",
+    }
+  
+    return statusMap[status] || "pending"
+  }
 
   const getPaymentClass = (payment) => {
     const paymentMap = {
-      "Booking": "confirmed",
-      "Pending": "pending",
-      "Fully Paid": "complete",
-      "Refunded": "canceled",
-      "Failed": "canceled",
-      "Unpaid": "pending",
-    };
-
-    return paymentMap[payment] || "pending";
-  };
-
+      "Đã đặt": "booked",
+      "Chờ thanh toán": "pending",
+      "Đã thanh toán": "paid",
+      "Đã hoàn tiền": "refund",
+      "Thanh toán thất bại": "cancelled",
+    }
+  
+    return paymentMap[payment] || "pending"
+  }
   const getPaymentIcon = (method) => {
-    const methodStr = String(method || '').toLowerCase();
+    const methodStr = String(method || "").toLowerCase()
 
     if (methodStr.includes("visa") || methodStr.includes("card")) {
-      return <CreditCardOutlined />;
+      return <CreditCardOutlined />
     } else if (methodStr.includes("cash")) {
-      return <DollarOutlined />;
+      return <DollarOutlined />
     } else if (methodStr.includes("bank") || methodStr.includes("transfer")) {
-      return <BankOutlined />;
+      return <BankOutlined />
     } else if (methodStr.includes("paypal")) {
-      return <WalletOutlined />;
+      return <WalletOutlined />
     }
-    return <WalletOutlined />;
-  };
+    return <WalletOutlined />
+  }
 
   const tableColumn = [
     {
@@ -222,12 +207,12 @@ export default function ListBooking({
       dataIndex: "bookingTime",
       key: "bookingTime",
       render: (_, record) => {
-        const booking = record._originalBooking;
+        const booking = record._originalBooking
         return (
           <div className={styles.timeInfo}>
             {booking.checkInHour} - {booking.checkOutHour}
           </div>
-        );
+        )
       },
     },
     {
@@ -235,13 +220,13 @@ export default function ListBooking({
       dataIndex: "peopleCount",
       key: "peopleCount",
       render: (_, record) => {
-        const booking = record._originalBooking;
+        const booking = record._originalBooking
         return (
           <div className={styles.peopleInfo}>
             <span>NL: {booking.adultNumber}</span>
             <span>TE: {booking.childNumber}</span>
           </div>
-        );
+        )
       },
     },
     {
@@ -249,9 +234,9 @@ export default function ListBooking({
       dataIndex: "paymentMethod",
       key: "paymentMethod",
       render: (_, record) => {
-        const booking = record._originalBooking;
-        const paymentStatus = getPaymentStatusDisplay(booking.paymentStatus);
-        const paymentMethod = String(booking.paymentMethod || "Chưa xác định");
+        const booking = record._originalBooking
+        const paymentStatus = getPaymentStatusDisplay(booking.paymentStatus)
+        const paymentMethod = String(booking.paymentMethod || "Chưa xác định")
 
         return (
           <div className={styles.paymentInfo}>
@@ -260,12 +245,10 @@ export default function ListBooking({
               {paymentMethod}
             </div>
             <div>
-              <span className={`${styles.paymentTag} ${styles[getPaymentClass(paymentStatus)]}`}>
-                {paymentStatus}
-              </span>
+              <span className={`${styles.paymentTag} ${styles[getPaymentClass(paymentStatus)]}`}>{paymentStatus}</span>
             </div>
           </div>
-        );
+        )
       },
     },
     {
@@ -273,12 +256,10 @@ export default function ListBooking({
       dataIndex: "status",
       key: "status",
       render: (_, record) => {
-        const statusCode = record._originalBooking.status;
-        const statusText = getBookingStatusDisplay(statusCode, bookingStatusCodes);
+        const statusCode = record._originalBooking.status
+        const statusText = getBookingStatusDisplay(statusCode)
 
-        return <span className={`${styles.statusTag} ${styles[getStatusClass(statusText)]}`}>
-          {statusText}
-        </span>;
+        return <span className={`${styles.statusTag} ${styles[getStatusClass(statusText)]}`}>{statusText}</span>
       },
     },
     {
@@ -292,10 +273,10 @@ export default function ListBooking({
         </Dropdown>
       ),
     },
-  ];
+  ]
 
   const getActionMenuItems = (booking) => {
-    const items = [
+    return [
       {
         key: "1",
         label: "Xem Chi Tiết",
@@ -306,41 +287,42 @@ export default function ListBooking({
         label: "Cập Nhật Trạng Thái",
         onClick: () => handleStatusUpdate(booking),
       },
-    ];
-
-    return items;
-  };
+    ]
+  }
 
   const handleViewDetails = (booking) => {
-    const bookingId = booking._originalBooking._id || booking._originalBooking.id;
-    console.log("Opening booking detail with ID:", bookingId);
-    setSelectedBookingId(bookingId);
-    setIsBookingDetailVisible(true);
-  };
+    const bookingId = booking._originalBooking._id || booking._originalBooking.id
+    setSelectedBookingId(bookingId)
+    setIsBookingDetailVisible(true)
+
+    if (onSelectBookingDetail) {
+      onSelectBookingDetail(bookingId)
+    }
+  }
 
   const handleCloseBookingDetail = () => {
-    setIsBookingDetailVisible(false);
-    setSelectedBookingId(null);
-  };
+    setIsBookingDetailVisible(false)
+    setSelectedBookingId(null)
+  }
 
   const handleStatusUpdate = (booking) => {
-    setSelectedBooking(booking);
-    setStatusModalVisible(true);
-  };
+    setSelectedBooking(booking)
+    setStatusModalVisible(true)
+  }
 
   const handleCloseStatusModal = () => {
-    setStatusModalVisible(false);
-    setSelectedBooking(null);
-  };
+    setStatusModalVisible(false)
+    setSelectedBooking(null)
+  }
 
   const handleCustomStatusChange = async (booking, newStatus) => {
     try {
-      await onStatusChange(booking._originalBooking._id, newStatus);
-      handleCloseStatusModal();
+      await onStatusChange(booking._originalBooking._id, newStatus)
+      handleCloseStatusModal()
     } catch (error) {
-      message.error("Cập nhật trạng thái thất bại");
+      message.error("Cập nhật trạng thái thất bại")
     }
-  };
+  }
 
   return (
     <div className={styles.contentContainer}>
@@ -376,12 +358,7 @@ export default function ListBooking({
           </Dropdown>
         </div>
         <div className={styles.tableContainer}>
-          <TableModify
-            tableColumn={tableColumn}
-            tableData={filteredData}
-            isPagination={true}
-            loading={isUpdating}
-          />
+          <TableModify tableColumn={tableColumn} tableData={filteredData} isPagination={true} loading={isUpdating} />
         </div>
       </div>
 
@@ -405,7 +382,9 @@ export default function ListBooking({
         bookingData={bookingDetailData}
         isLoading={isDetailLoading}
         isError={isDetailError}
+        bookingStatusCodes={bookingStatusCodes}
+        paymentStatusCodes={paymentStatusCodes}
       />
     </div>
-  );
+  )
 }
