@@ -6,7 +6,8 @@ import {
   Modal,
   message,
   Typography,
-  Divider
+  Divider,
+  Input
 } from "antd";
 import { SaveOutlined, InfoCircleOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
@@ -42,6 +43,7 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess }) {
       const accommodationData = {
         rentalLocationId: rentalLocationId,
         accommodationTypeId: values.accommodationTypeId,
+        roomNo: values.roomNo,
         description: values.description || "",
         image: fileList.length > 0 ? fileList[0].url : "",
         status: 1
@@ -100,6 +102,18 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess }) {
                 <Option key={type._id} value={type._id}>{type.name}</Option>
               ))}
             </Select>
+          </Form.Item>
+
+          <Form.Item
+            name="roomNo"
+            label={<Text strong>Số phòng</Text>}
+            rules={[{ required: true, message: "Vui lòng nhập số phòng!" }]}
+          >
+            <Input
+              placeholder="Nhập số phòng (vd: 001)"
+              size="large"
+              className={styles.inputField}
+            />
           </Form.Item>
 
           <Form.Item
