@@ -3,15 +3,32 @@ import { apiSlice } from "./apiSlice";
 export const serviceApi = apiSlice.injectEndpoints({
     endpoints: (builder) => ({
         getAllAmenities: builder.query({
-            query: ({ rentalLocationId } = {}) => {
+            query: ({ ownerId, rentalLocationId } = {}) => {
                 let url = "/service/all-services";
-                if (rentalLocationId) {
-                    url += `?rentalLocationId=${rentalLocationId}`;
+                const params = new URLSearchParams();
+
+                if (ownerId) {
+                    params.append('ownerId', ownerId);
                 }
+
+                if (rentalLocationId) {
+                    params.append('rentalLocationId', rentalLocationId);
+                }
+
+                if (params.toString()) {
+                    url += `?${params.toString()}`;
+                }
+
                 return url;
             },
             transformResponse: (response) => response.data,
-            providesTags: ["Service"],
+            providesTags: (result) =>
+                result
+                    ? [
+                        ...result.map(({ id }) => ({ type: 'Service', id })),
+                        { type: 'Service', id: 'LIST' },
+                    ]
+                    : [{ type: 'Service', id: 'LIST' }],
         }),
 
         getAmenityById: builder.query({
