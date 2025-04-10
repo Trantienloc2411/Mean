@@ -18,6 +18,10 @@ import { useParams } from "react-router-dom";
 import { supabase } from "../../../../../../redux/services/supabase";
 
 export default function AccountInformation({ userData, refetch }) {
+  const userRole = localStorage.getItem("user_role")?.toLowerCase(); // "owner" | "admin"
+  const canEdit = userRole === `"owner"`;
+
+
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(userData);
   const [updateUser] = useUpdateUserMutation();
@@ -178,11 +182,11 @@ export default function AccountInformation({ userData, refetch }) {
                   </Button>
                   <Button onClick={handleCancel}>Thoát</Button>
                 </div>
-              ) : (
+              ) : canEdit ? (
                 <div style={{ display: "flex", justifyContent: "flex-end" }}>
                   <Button onClick={() => setIsEditing(true)}>Chỉnh sửa</Button>
                 </div>
-              )}
+              ) : null}
             </Form.Item>
           </Form>
         </Col>

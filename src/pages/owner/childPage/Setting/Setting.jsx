@@ -35,6 +35,7 @@ export default function Setting() {
       isVerifiedEmail: userData?.isVerifiedEmail,
       isActive: userData?.isActive,
       isApproved: ownerDetail?.isApproved,
+      note: ownerDetail?.note || null,
     };
   }, [ownerDetail]);
 

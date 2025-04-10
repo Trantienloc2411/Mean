@@ -95,7 +95,7 @@ const Signup = () => {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
-                placeholder="Zane Phạm"
+                placeholder="Họ và tên"
                 className={styles.formInput}
                 required
               />
@@ -107,7 +107,7 @@ const Signup = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="zanepham@gmail.com"
+                placeholder="Nhập email của bạn"
                 className={styles.formInput}
                 required
               />

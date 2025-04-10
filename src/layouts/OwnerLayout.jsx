@@ -17,7 +17,43 @@ const { Header, Content } = Layout;
 const OwnerLayout = () => {
   // useAppInit();
   const { id } = useParams(); // Lấy ID từ URL
+  const userRole = localStorage.getItem("user_role"); // "admin" hoặc "owner"
+  console.log(userRole);
+
   const menuItems = [
+    {
+      key: `/owner/${id}/information`,
+      icon: <UserOutlined />,
+      label: "Thông tin",
+    },
+
+    {
+      key: `/owner/${id}/rental-location`,
+      icon: <BsBuildings />,
+      label: "Địa điểm",
+    },
+    {
+      key: `/owner/${id}/booking`,
+      icon: <CalendarOutlined />,
+      label: "Đặt phòng",
+    },
+    {
+      key: `/owner/${id}/type-room`,
+      icon: <TagOutlined />,
+      label: "Loại phòng",
+    },
+    {
+      key: `/owner/${id}/policy`,
+      icon: <MdOutlinePolicy />,
+      label: "Chính sách",
+    },
+    {
+      key: `/owner/${id}/setting`,
+      icon: <BarChartOutlined />,
+      label: "Cài đặt",
+    },
+  ];
+  const menuItemsOwner = [
     {
       key: `/owner/${id}/information`,
       icon: <UserOutlined />,
@@ -61,6 +97,7 @@ const OwnerLayout = () => {
   ];
   const navigate = useNavigate(); // Để điều hướng khi người dùng click Menu
   const location = useLocation(); // Để lấy path hiện tại
+  const menuItemsToRender = userRole === `"Owner"` ? menuItemsOwner : menuItems;
 
   return (
     <Layout style={{ minHeight: "100vh" }}>
@@ -95,7 +132,7 @@ const OwnerLayout = () => {
             mode="horizontal"
             selectedKeys={[location.pathname]} // Đặt key dựa trên path hiện tại
             onClick={({ key }) => navigate(key)} // Điều hướng khi click menu
-            items={menuItems}
+            items={menuItemsToRender}
             style={{
               // flex: 1,
               // justifyContent: "center",

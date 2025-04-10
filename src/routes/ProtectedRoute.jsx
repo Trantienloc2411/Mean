@@ -11,7 +11,7 @@ export const NotAuthRoute = ({ children }) => {
   // });
 
   if (isAuthenticated) {
-    if (role === "Staff") {
+    if (role === "Staff" || role === "Admin") {
       return (
         <Navigate to="/admin/dashboard" state={{ from: location }} replace />
       );
@@ -60,7 +60,7 @@ export const AdminRoute = ({ children }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (role !== "Staff") {
+  if (role !== "Staff" && role !== "Admin") {
     return <Navigate to="/404" replace />;
   }
 
@@ -81,7 +81,7 @@ export const OwnerRoute = ({ children }) => {
     return <Navigate to="/login" state={{ from: location }} replace />;
   }
 
-  if (role !== "Owner" && role !== "Staff") {
+  if (role !== "Owner" && role !== "Staff" && role !== "Admin") {
     return <Navigate to="/404" replace />;
   }
 
