@@ -20,6 +20,17 @@ export const ownerApi = apiSlice.injectEndpoints({
       query: (id) => `owner/detail-owner/${id}`,
       providesTags: (result, error, id) => [{ type: "OwnerDetail", id }],
     }),
+
+    createOwner: builder.mutation(
+        {
+          query: ({createOwnerData}) => ({
+            url: `owner/create-owner/`,
+            method: "POST",
+            body: createOwnerData,
+          }),
+          providesTags: (result, error, id) => [{ type: "OwnerDetail", id }],
+        }
+    )
   }),
 });
 
@@ -28,4 +39,5 @@ export const {
   useGetOwnerByIdQuery,
   useUpdateOwnerMutation,
   useGetOwnerDetailByUserIdQuery,
+  useCreateOwnerMutation: useCreateOwnerMutation,
 } = ownerApi;
