@@ -1,68 +1,92 @@
 import { useState, useEffect } from "react";
-import { Form, Input, Button, Modal, message } from "antd";
+import { Form, Input, Button, Modal, message, Select, Spin } from "antd";
 import {
   useCreateBankMutation,
   useUpdateBankMutation,
 } from "../../../../../../redux/services/paymentInfoApi";
-import { useUpdateOwnerMutation } from "../../../../../../redux/services/ownerApi";
 
 export default function BankInfo({ bankData, refetch }) {
   const [isEditing, setIsEditing] = useState(false);
+  const [form] = Form.useForm();
   const [updateBank] = useUpdateBankMutation();
   const [createBank] = useCreateBankMutation();
-  const [updateOwner] = useUpdateOwnerMutation();
-  const ownerId = bankData.ownerId;
+  const [loading, setLoading] = useState(false);
+  const [bankOptions, setBankOptions] = useState([]);
 
-  console.log(bankData);
-
-  const defaultValue = "Chưa có thông tin";
-  const [formData, setFormData] = useState({
-    bankName: defaultValue,
-    accountNumber: defaultValue,
-    accountHolder: defaultValue,
-  });
+  useEffect(() => {
+    fetchBanks();
+  }, []);
 
   useEffect(() => {
     if (bankData) {
-      setFormData({
-        bankName: bankData.bankName || defaultValue,
-        accountNumber: bankData.accountNumber || defaultValue,
-        accountHolder: bankData.accountHolder || defaultValue,
+      form.setFieldsValue({
+        bankName: bankData.bankName,
+        bankNo: bankData.bankNo,
+        bankAccountName: bankData.bankAccountName,
       });
     }
-  }, [bankData]);
+  }, [bankData, form]);
 
-  if (bankData.bankId === null) {
+  const fetchBanks = async () => {
+    setLoading(true);
+    try {
+      const res = await fetch("https://api.vietqr.io/v2/banks");
+      const json = await res.json();
+      const options = json.data.map((bank) => ({
+        label: bank.name,
+        value: bank.name,
+      }));
+      setBankOptions(options);
+    } catch (err) {
+      console.error("Lỗi khi fetch ngân hàng:", err);
+    }
+    setLoading(false);
+  };
+
+  const hasBankInfo = bankData && bankData.bankName;
+
+  if (!hasBankInfo) {
     return (
       <NotHaveBank
-        ownerId={ownerId}
-        updateOwner={updateOwner}
-        refetch={refetch}
+        ownerId={bankData?.ownerId}
         createBank={createBank}
+        refetch={refetch}
       />
     );
   }
 
-  const handleChange = (key, value) => {
-    setFormData((prev) => ({ ...prev, [key]: value }));
-  };
-
   const handleSave = async () => {
+    const values = await form.validateFields();
+
+    const formUpdate = {
+      ownerId: bankData.ownerId,
+      bankName: values.bankName,
+      bankNo: values.bankNo,
+      bankAccountName: values.bankAccountName,
+    };
+    console.log(formUpdate);
+
     try {
-      await updateBank({ id: bankData.id, updatedBank: formData }).unwrap();
+      const result = await updateBank({
+        id: bankData.bankId,
+        data: formUpdate,
+      }).unwrap();
+      console.log(result);
+
       message.success("Cập nhật thông tin thành công!");
       setIsEditing(false);
       await refetch();
     } catch (error) {
+      console.error("Update error:", error);
       message.error("Cập nhật thất bại, vui lòng thử lại!");
     }
   };
 
   const handleCancel = () => {
-    setFormData({
-      bankName: bankData.bankName || defaultValue,
-      accountNumber: bankData.accountNumber || defaultValue,
-      accountHolder: bankData.accountHolder || defaultValue,
+    form.setFieldsValue({
+      bankName: bankData.bankName,
+      bankNo: bankData.bankNo,
+      bankAccountName: bankData.bankAccountName,
     });
     setIsEditing(false);
   };
@@ -70,11 +94,48 @@ export default function BankInfo({ bankData, refetch }) {
   return (
     <div>
       <h3>Thông tin Tài Khoản Ngân Hàng</h3>
-      <BankForm
-        formData={formData}
-        isEditing={isEditing}
-        handleChange={handleChange}
-      />
+      <Form form={form} layout="vertical">
+        <Form.Item
+          label="Tên ngân hàng"
+          name="bankName"
+          rules={[{ required: true }]}
+        >
+          {isEditing ? (
+            <Select
+              loading={loading}
+              showSearch
+              placeholder="Chọn ngân hàng"
+              optionFilterProp="label"
+              options={bankOptions}
+              filterOption={(input, option) =>
+                option.label.toLowerCase().includes(input.toLowerCase())
+              }
+              notFoundContent={
+                loading ? <Spin size="small" /> : "Không có kết quả"
+              }
+            />
+          ) : (
+            <Input disabled />
+          )}
+        </Form.Item>
+
+        <Form.Item
+          label="Số tài khoản"
+          name="bankNo"
+          rules={[{ required: true }]}
+        >
+          <Input disabled={!isEditing} />
+        </Form.Item>
+
+        <Form.Item
+          label="Tên chủ tài khoản"
+          name="bankAccountName"
+          rules={[{ required: true }]}
+        >
+          <Input disabled={!isEditing} />
+        </Form.Item>
+      </Form>
+
       <div
         style={{
           display: "flex",
@@ -97,64 +158,47 @@ export default function BankInfo({ bankData, refetch }) {
     </div>
   );
 }
-function BankForm({ formData, isEditing, handleChange }) {
-  return (
-    <Form layout="vertical">
-      <Form.Item label="Tên ngân hàng">
-        <Input
-          value={formData.bankName}
-          disabled={!isEditing}
-          onChange={(e) => handleChange("bankName", e.target.value)}
-        />
-      </Form.Item>
-      <Form.Item label="Số tài khoản">
-        <Input
-          value={formData.accountNumber}
-          disabled={!isEditing}
-          onChange={(e) => handleChange("accountNumber", e.target.value)}
-        />
-      </Form.Item>
-      <Form.Item label="Tên chủ tài khoản">
-        <Input
-          value={formData.accountHolder}
-          disabled={!isEditing}
-          onChange={(e) => handleChange("accountHolder", e.target.value)}
-        />
-      </Form.Item>
-    </Form>
-  );
-}
 
-function NotHaveBank({ refetch, createBank, updateOwner, ownerId }) {
+function NotHaveBank({ ownerId, createBank, refetch }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [bankOptions, setBankOptions] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [form] = Form.useForm();
 
-  const handleCreate = async () => {
-    const values = await form.validateFields();
-    const bankDataSubmit = {
-      bankName: values.bankName,
-      bankNo: values.accountNumber,
-      bankAccountName: values.accountHolder,
-    };
+  useEffect(() => {
+    fetchBanks();
+  }, []);
+
+  const fetchBanks = async () => {
+    setLoading(true);
     try {
-      const bankInfo = await createBank({ data: bankDataSubmit }).unwrap();
+      const res = await fetch("https://api.vietqr.io/v2/banks");
+      const json = await res.json();
+      const options = json.data.map((bank) => ({
+        label: bank.name,
+        value: bank.name,
+      }));
+      setBankOptions(options);
+    } catch (err) {
+      console.error("Lỗi khi fetch ngân hàng:", err);
+    }
+    setLoading(false);
+  };
+
+  const handleCreate = async () => {
+    try {
+      const values = await form.validateFields();
+      const bankDataSubmit = {
+        ownerId: ownerId,
+        bankName: values.bankName,
+        bankNo: values.accountNumber,
+        bankAccountName: values.accountHolder,
+      };
+
+      await createBank({ data: bankDataSubmit }).unwrap();
       message.success("Tạo tài khoản ngân hàng thành công!");
-
-      try {
-        const updatedData = {
-          paymentInformationId: bankInfo.id,
-        };
-        console.log(updatedData);
-
-        const res = await updateOwner({
-          id: ownerId,
-          updatedData: updatedData,
-        }).unwrap();
-        console.log(res);
-      } catch (error) {
-        message.error("Tạo thông cho owner thất bại!");
-      }
       setIsModalOpen(false);
+      form.resetFields();
       await refetch();
     } catch (error) {
       message.error("Tạo tài khoản thất bại, vui lòng thử lại!");
@@ -177,11 +221,21 @@ function NotHaveBank({ refetch, createBank, updateOwner, ownerId }) {
           <Form.Item
             label="Tên ngân hàng"
             name="bankName"
-            rules={[
-              { required: true, message: "Vui lòng nhập tên ngân hàng!" },
-            ]}
+            rules={[{ required: true, message: "Vui lòng chọn ngân hàng!" }]}
           >
-            <Input />
+            <Select
+              loading={loading}
+              showSearch
+              placeholder="Chọn ngân hàng"
+              optionFilterProp="label"
+              options={bankOptions}
+              filterOption={(input, option) =>
+                option.label.toLowerCase().includes(input.toLowerCase())
+              }
+              notFoundContent={
+                loading ? <Spin size="small" /> : "Không có kết quả"
+              }
+            />
           </Form.Item>
           <Form.Item
             label="Số tài khoản"

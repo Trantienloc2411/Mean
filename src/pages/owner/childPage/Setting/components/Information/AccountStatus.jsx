@@ -12,6 +12,8 @@ export default function AccountStatus({ userData, refetch }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [isLocking, setIsLocking] = useState(false);
+  const userRole = localStorage.getItem("user_role")?.toLowerCase(); // "owner" | "admin"
+  const canEdit = userRole === `"admin"` || userRole === `"staff"`;
 
   const handleToggleAccountStatus = async () => {
     try {
@@ -83,15 +85,17 @@ export default function AccountStatus({ userData, refetch }) {
               <Tag color="red">Bị khóa</Tag>
             )}
           </div>
-          <Button
-            type="text"
-            danger={userData.isActive}
-            onClick={() => {
-              setIsLocking(userData.isActive);
-              setConfirmVisible(true);
-            }}
-            icon={<EditOutlined />}
-          />
+          {canEdit ? (
+            <Button
+              type="text"
+              danger={userData.isActive}
+              onClick={() => {
+                setIsLocking(userData.isActive);
+                setConfirmVisible(true);
+              }}
+              icon={<EditOutlined />}
+            />
+          ) : null}
         </Flex>
 
         <Flex>
@@ -103,11 +107,13 @@ export default function AccountStatus({ userData, refetch }) {
               <Tag color="red">Chưa phê duyệt</Tag>
             )}
           </div>
-          <Button
-            type="text"
-            icon={<EditOutlined />}
-            onClick={() => setModalVisible(true)}
-          />
+          {canEdit ? (
+            <Button
+              type="text"
+              icon={<EditOutlined />}
+              onClick={() => setModalVisible(true)}
+            />
+          ) : null}
         </Flex>
 
         <Flex>
@@ -120,6 +126,7 @@ export default function AccountStatus({ userData, refetch }) {
             )}
           </div>
         </Flex>
+        {console.log(userData)}
         {!userData.isApproved && userData.note && (
           <p>
             <strong>Lý do chưa phê duyệt:</strong> {userData.note}

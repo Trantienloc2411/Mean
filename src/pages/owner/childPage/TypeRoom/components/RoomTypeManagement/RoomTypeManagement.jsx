@@ -16,13 +16,13 @@ import {
 } from "../../../../../../redux/services/accommodationTypeApi";
 import {
   useGetAllAmenitiesQuery,
-  useGetAmenityByIdQuery
+  useGetAmenityByIdQuery,
 } from "../../../../../../redux/services/serviceApi";
 import { Tag } from "antd";
 import { useGetOwnerDetailByUserIdQuery } from "../../../../../../redux/services/ownerApi";
 import { useParams } from "react-router-dom";
 
-const RoomTypeManagement = () => {
+const RoomTypeManagement = ({ isOwner }) => {
   const { id } = useParams();
   const [selectedValues, setSelectedValues] = useState({
     maxOccupancy: [],
@@ -38,20 +38,33 @@ const RoomTypeManagement = () => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [serviceNames, setServiceNames] = useState({});
 
-  const { data: ownerDetailData, isLoading: isOwnerDetailLoading } = useGetOwnerDetailByUserIdQuery(id);
+  const { data: ownerDetailData, isLoading: isOwnerDetailLoading } =
+    useGetOwnerDetailByUserIdQuery(id);
   const ownerId = ownerDetailData?.id;
 
-  const { data: roomTypesData, isLoading: isRoomTypesLoading } = useGetAccommodationTypesByOwnerQuery(ownerId, {
-    skip: !ownerId
-  });
-  const { data: servicesData, isLoading: isServicesLoading } = useGetAllAmenitiesQuery();
+  const { data: roomTypesData, isLoading: isRoomTypesLoading } =
+    useGetAccommodationTypesByOwnerQuery(ownerId, {
+      skip: !ownerId,
+    });
+  const { data: servicesData, isLoading: isServicesLoading } =
+    useGetAllAmenitiesQuery();
 
-  const roomTypes = Array.isArray(roomTypesData?.data) ? roomTypesData.data : Array.isArray(roomTypesData) ? roomTypesData : [];
-  const services = Array.isArray(servicesData?.data) ? servicesData.data : Array.isArray(servicesData) ? servicesData : [];
+  const roomTypes = Array.isArray(roomTypesData?.data)
+    ? roomTypesData.data
+    : Array.isArray(roomTypesData)
+    ? roomTypesData
+    : [];
+  const services = Array.isArray(servicesData?.data)
+    ? servicesData.data
+    : Array.isArray(servicesData)
+    ? servicesData
+    : [];
 
   useEffect(() => {
     const fetchServiceNames = async () => {
-      const uniqueServiceIds = [...new Set(filteredData.map(room => room.serviceId))];
+      const uniqueServiceIds = [
+        ...new Set(filteredData.map((room) => room.serviceId)),
+      ];
       const newServiceNames = { ...serviceNames };
       let hasChanges = false;
 
@@ -63,8 +76,11 @@ const RoomTypeManagement = () => {
             newServiceNames[serviceId] = data.name;
             hasChanges = true;
           } catch (error) {
-            console.error(`Error fetching service name for ID ${serviceId}:`, error);
-            newServiceNames[serviceId] = 'Unknown Service';
+            console.error(
+              `Error fetching service name for ID ${serviceId}:`,
+              error
+            );
+            newServiceNames[serviceId] = "Unknown Service";
           }
         }
       }
@@ -113,33 +129,33 @@ const RoomTypeManagement = () => {
 
   const filterGroups = [
     {
-      name: 'maxOccupancy',
-      title: 'Số người tối đa',
+      name: "maxOccupancy",
+      title: "Số người tối đa",
       options: [
-        { label: '2 người', value: 2 },
-        { label: '4 người', value: 4 },
-        { label: '6 người', value: 6 },
-        { label: '8 người', value: 8 },
-        { label: '10 người', value: 10 },
+        { label: "2 người", value: 2 },
+        { label: "4 người", value: 4 },
+        { label: "6 người", value: 6 },
+        { label: "8 người", value: 8 },
+        { label: "10 người", value: 10 },
       ],
     },
     {
-      name: 'priceRange',
-      title: 'Khoảng giá',
+      name: "priceRange",
+      title: "Khoảng giá",
       options: [
-        { label: 'Dưới 100.000đ', value: '0-100000' },
-        { label: '100.000đ - 200.000đ', value: '100000-200000' },
-        { label: '200.000đ - 300.000đ', value: '200000-300000' },
-        { label: '300.000đ - 500.000đ', value: '300000-500000' },
-        { label: 'Trên 500.000đ', value: '500000' },
+        { label: "Dưới 100.000đ", value: "0-100000" },
+        { label: "100.000đ - 200.000đ", value: "100000-200000" },
+        { label: "200.000đ - 300.000đ", value: "200000-300000" },
+        { label: "300.000đ - 500.000đ", value: "300000-500000" },
+        { label: "Trên 500.000đ", value: "500000" },
       ],
     },
     {
-      name: 'serviceTypes',
-      title: 'Loại dịch vụ',
-      options: services.map(service => ({
+      name: "serviceTypes",
+      title: "Loại dịch vụ",
+      options: services.map((service) => ({
         label: service.name,
-        value: service._id
+        value: service._id,
       })),
     },
   ];
@@ -177,14 +193,14 @@ const RoomTypeManagement = () => {
       if (formattedValues.serviceIds && formattedValues.serviceIds.length > 0) {
         formattedValues.serviceId = formattedValues.serviceIds[0];
       }
-      
-      console.log('Sending to API:', formattedValues);
+
+      console.log("Sending to API:", formattedValues);
       await createAccommodationType(formattedValues).unwrap();
-      message.success('Thêm loại phòng thành công');
+      message.success("Thêm loại phòng thành công");
       setIsAddModalOpen(false);
     } catch (error) {
-      console.error('Error details:', error);
-      message.error('Thêm loại phòng thất bại');
+      console.error("Error details:", error);
+      message.error("Thêm loại phòng thất bại");
     }
   };
 
@@ -194,11 +210,11 @@ const RoomTypeManagement = () => {
         id: selectedRoomType._id,
         ...values,
       }).unwrap();
-      message.success('Cập nhật loại phòng thành công');
+      message.success("Cập nhật loại phòng thành công");
       setIsUpdateModalOpen(false);
       setSelectedRoomType(null);
     } catch (error) {
-      message.error('Cập nhật loại phòng thất bại');
+      message.error("Cập nhật loại phòng thất bại");
     }
   };
 
@@ -229,7 +245,7 @@ const RoomTypeManagement = () => {
     if (selectedValues.priceRange.length > 0) {
       filtered = filtered.filter((item) => {
         return selectedValues.priceRange.some((range) => {
-          const [min, max] = range.split('-').map(Number);
+          const [min, max] = range.split("-").map(Number);
           if (max === undefined) return item.basePrice >= min;
           return item.basePrice >= min && item.basePrice <= max;
         });
@@ -247,20 +263,20 @@ const RoomTypeManagement = () => {
 
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleString('vi-VN', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
+    return date.toLocaleString("vi-VN", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
   const customTagStyle = {
-    borderRadius: '16px',
-    padding: '4px 12px',
-    fontSize: '12px',
-    background: '#e2e3e5',
-    color: '#343a40',
+    borderRadius: "16px",
+    padding: "4px 12px",
+    fontSize: "12px",
+    background: "#e2e3e5",
+    color: "#343a40",
   };
 
   const columns = [
@@ -270,7 +286,7 @@ const RoomTypeManagement = () => {
       key: "_id",
       align: "center",
       width: 60,
-      render: (_, __, index) => index + 1
+      render: (_, __, index) => index + 1,
     },
     {
       title: "Tên loại phòng",
@@ -288,9 +304,9 @@ const RoomTypeManagement = () => {
       ellipsis: true,
       render: (description) => (
         <Tooltip placement="topLeft" title={description}>
-          {description || 'N/A'}
+          {description || "N/A"}
         </Tooltip>
-      )
+      ),
     },
     {
       title: "Số người tối đa",
@@ -298,7 +314,7 @@ const RoomTypeManagement = () => {
       key: "maxPeopleNumber",
       align: "center",
       width: 120,
-      render: (value) => value || 'N/A',
+      render: (value) => value || "N/A",
     },
     {
       title: "Giá cơ bản",
@@ -306,7 +322,7 @@ const RoomTypeManagement = () => {
       key: "basePrice",
       align: "center",
       width: 120,
-      render: (price) => price ? `${price.toLocaleString()}đ` : 'N/A',
+      render: (price) => (price ? `${price.toLocaleString()}đ` : "N/A"),
     },
     {
       title: "Giá theo giờ",
@@ -314,7 +330,7 @@ const RoomTypeManagement = () => {
       key: "overtimeHourlyPrice",
       align: "center",
       width: 120,
-      render: (price) => price ? `${price.toLocaleString()}đ/giờ` : 'N/A',
+      render: (price) => (price ? `${price.toLocaleString()}đ/giờ` : "N/A"),
     },
     {
       title: "Địa điểm",
@@ -324,14 +340,15 @@ const RoomTypeManagement = () => {
       width: 120,
       ellipsis: true,
       render: (location) => {
-        if (!location) return 'N/A';
-        const locationName = typeof location === 'object' ? location.name : location;
+        if (!location) return "N/A";
+        const locationName =
+          typeof location === "object" ? location.name : location;
         return (
           <Tooltip placement="topLeft" title={locationName}>
             {locationName}
           </Tooltip>
         );
-      }
+      },
     },
     {
       title: "Dịch vụ",
@@ -341,26 +358,24 @@ const RoomTypeManagement = () => {
       width: 100,
       render: (serviceIds, record) => {
         if (serviceIds && Array.isArray(serviceIds) && serviceIds.length > 0) {
-          return (
-            <div style={customTagStyle}>{serviceIds.length} dịch vụ</div>
-          );
+          return <div style={customTagStyle}>{serviceIds.length} dịch vụ</div>;
         }
         if (record.serviceId) {
           return <div style={customTagStyle}>1 dịch vụ</div>;
         }
 
-        return 'N/A';
-      }
+        return "N/A";
+      },
     },
     {
       title: "",
       key: "operation",
       align: "center",
       width: 60,
-      fixed: 'right',
+      fixed: "right",
       render: (_, record) => (
         <Dropdown
-        trigger={["click"]} 
+          trigger={["click"]}
           menu={{
             items: menuItems.map((item) => ({
               ...item,
@@ -374,30 +389,8 @@ const RoomTypeManagement = () => {
     },
   ];
 
-  const isLoading = isRoomTypesLoading || isServicesLoading || isOwnerDetailLoading;
-
-  if (!ownerDetailData?.isApproved) {
-    return (
-      <div
-        style={{
-          textAlign: "center",
-          padding: "40px",
-          fontSize: "18px",
-          color: "#ff4d4f",
-          background: "#fff",
-          borderRadius: "8px",
-          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-        }}
-      >
-        <h2 style={{ color: "#ff4d4f" }}>
-          Tài khoản của bạn chưa được phê duyệt
-        </h2>
-        <p>
-          Vui lòng chờ quản trị viên duyệt trước khi tiếp tục sử dụng dịch vụ.
-        </p>
-      </div>
-    );
-  }
+  const isLoading =
+    isRoomTypesLoading || isServicesLoading || isOwnerDetailLoading;
 
   return (
     <div className={styles.contentContainer}>
@@ -408,10 +401,10 @@ const RoomTypeManagement = () => {
             <Input
               placeholder="Tìm kiếm tên loại phòng"
               onChange={(e) => debouncedSearch(e.target.value)}
-              style={{ width: '250px' }}
+              style={{ width: "250px" }}
             />
             <Dropdown
-              trigger={['click']}
+              trigger={["click"]}
               dropdownRender={() => (
                 <Filter
                   filterGroups={filterGroups}
@@ -426,14 +419,16 @@ const RoomTypeManagement = () => {
               </Button>
             </Dropdown>
           </div>
-          <Button
-            type="primary"
-            onClick={() => setIsAddModalOpen(true)}
-            icon={<PlusOutlined />}
-            className={styles.addRoomButton}
-          >
-            Thêm loại phòng
-          </Button>
+          {isOwner && (
+            <Button
+              type="primary"
+              onClick={() => setIsAddModalOpen(true)}
+              icon={<PlusOutlined />}
+              className={styles.addRoomButton}
+            >
+              Thêm loại phòng
+            </Button>
+          )}
         </div>
 
         <Table
@@ -472,7 +467,7 @@ const RoomTypeManagement = () => {
         <DetailRoomTypeModal
           isOpen={isDetailModalOpen}
           roomType={selectedRoomType}
-          service={services.find(s => s._id === selectedRoomType?.serviceId)}
+          service={services.find((s) => s._id === selectedRoomType?.serviceId)}
           onCancel={() => {
             setIsDetailModalOpen(false);
             setSelectedRoomType(null);
