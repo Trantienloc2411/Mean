@@ -102,19 +102,19 @@ export default function Setting() {
       label: "Tài khoản ngân hàng",
       children: <BankAccount refetch={refetch} bankData={bankInfo} />,
     },
-    {
-      key: "meanWallet",
-      label: "Ví",
-      children: (
-        <MeanWallet
-          walletData={{
-            availableBalance: "900,000 vnd",
-            pendingBalance: "20,000 vnd",
-            userName: "Alexa Rawles",
-          }}
-        />
-      ),
-    },
+    // {
+    //   key: "meanWallet",
+    //   label: "Ví",
+    //   children: (
+    //     <MeanWallet
+    //       walletData={{
+    //         availableBalance: "900,000 vnd",
+    //         pendingBalance: "20,000 vnd",
+    //         userName: "Alexa Rawles",
+    //       }}
+    //     />
+    //   ),
+    // },
   ];
 
   return (
