@@ -45,9 +45,9 @@ export default function ModalViewDetailRental({ visible, onClose, data }) {
     bgColor: "#E0E0E0",
     color: "#000000",
   };
-  const handleViewOwner = () => {
-    navigate(`/owner/${data?.ownerId?.userId?.id}/dashboard`);
-  };
+  // const handleViewOwner = () => {
+  //   navigate(`/owner/${data?.ownerId?.userId?.id}/information`);
+  // };
   const handleViewMap = () => {
     if (data.latitude && data.longitude) {
       window.open(
@@ -79,13 +79,16 @@ export default function ModalViewDetailRental({ visible, onClose, data }) {
         <Descriptions.Item label="Tên địa điểm">{data.name}</Descriptions.Item>
         <Descriptions.Item label="Người đại diện">
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-            <Text>{data?.ownerId?.userId?.fullName || "Chưa cập nhật"}</Text>
-            <span
+            <Text>
+              {data?.ownerId?.businessInformationId?.companyName ||
+                "Chưa cập nhật"}
+            </Text>
+            {/* <span
               className={styles.iconViewDetail}
               onClick={() => handleViewOwner()}
             >
               <FaEye />
-            </span>
+            </span> */}
           </div>
         </Descriptions.Item>
         <Descriptions.Item label="Địa chỉ">
