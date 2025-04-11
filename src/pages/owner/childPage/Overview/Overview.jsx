@@ -1,5 +1,3 @@
-"use client"
-
 import { useState } from "react"
 import styles from "./Overview.module.scss"
 import CardDashboard from "../../../../components/Card/CardDashboard"
