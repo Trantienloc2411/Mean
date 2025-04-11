@@ -1,21 +1,24 @@
-import { useState, useEffect } from "react";
-import { Table, Button, Input, Dropdown, message } from "antd";
-import { MoreOutlined, PlusOutlined, FilterOutlined } from "@ant-design/icons";
-import styles from "./RoomAmenitiesManagement.module.scss";
-import DeleteAmenityModal from "./components/DeleteAmenityModal/DeleteAmenityModal.jsx";
-import AddAmenityModal from "./components/AddAmenityModal/AddAmenityModal.jsx";
-import UpdateAmenityModal from "./components/UpdateAmenityModal/UpdateAmenityModal.jsx";
-import DetailAmenityModal from "./components/DetailAmenityModal/DetailAmenityModal.jsx";
-import Filter from "./components/Filter/Filter.jsx";
-import debounce from "lodash/debounce";
-import {
-  useGetAllAmenitiesQuery,
-  useDeleteAmenityMutation,
-  useCreateAmenityMutation,
-  useUpdateAmenityMutation,
-} from "../../../../../../redux/services/serviceApi.js";
+import { useState, useEffect } from 'react';
+import { Table, Button, Input, Dropdown, message } from 'antd';
+import { MoreOutlined, PlusOutlined, FilterOutlined } from '@ant-design/icons';
+import styles from './RoomAmenitiesManagement.module.scss';
+import DeleteAmenityModal from './components/DeleteAmenityModal/DeleteAmenityModal.jsx';
+import AddAmenityModal from './components/AddAmenityModal/AddAmenityModal.jsx';
+import UpdateAmenityModal from './components/UpdateAmenityModal/UpdateAmenityModal.jsx';
+import DetailAmenityModal from './components/DetailAmenityModal/DetailAmenityModal.jsx';
+import Filter from './components/Filter/Filter.jsx';
+import debounce from 'lodash/debounce';
+import { 
+  useGetAllAmenitiesQuery, 
+  useDeleteAmenityMutation, 
+  useCreateAmenityMutation, 
+  useUpdateAmenityMutation 
+} from '../../../../../../redux/services/serviceApi.js';
+import { useGetOwnerDetailByUserIdQuery } from '../../../../../../redux/services/ownerApi';
+import { useParams } from 'react-router-dom';
 
 const RoomAmenitiesManagement = ({ isOwner }) => {
+  const { id } = useParams();
   const [selectedValues, setSelectedValues] = useState({
     status: [],
   });
@@ -27,8 +30,13 @@ const RoomAmenitiesManagement = ({ isOwner }) => {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  // API queries and mutations
-  const { data: amenitiesData, isLoading, refetch } = useGetAllAmenitiesQuery();
+  const { data: ownerDetailData, isLoading: isOwnerDetailLoading } = useGetOwnerDetailByUserIdQuery(id);
+  const ownerId = ownerDetailData?.id;
+
+  const { data: amenitiesData, isLoading: isAmenitiesLoading, refetch } = useGetAllAmenitiesQuery(
+    { ownerId },
+    { skip: !ownerId }
+  );
   const [deleteAmenity, { isLoading: isDeleting }] = useDeleteAmenityMutation();
   const [createAmenity, { isLoading: isCreating }] = useCreateAmenityMutation();
   const [updateAmenity, { isLoading: isUpdating }] = useUpdateAmenityMutation();
@@ -87,7 +95,7 @@ const RoomAmenitiesManagement = ({ isOwner }) => {
     try {
       await createAmenity({
         ...values,
-        accommodationTypeId: "63b92f4e17d7b3c2a4e4f3d2",
+        ownerId: ownerId,
         status: values.status === "Active",
         isDelete: false,
       }).unwrap();
@@ -234,6 +242,31 @@ const RoomAmenitiesManagement = ({ isOwner }) => {
       ),
     },
   ];
+
+  const isLoading = isAmenitiesLoading || isOwnerDetailLoading;
+
+  if (!ownerDetailData?.isApproved) {
+    return (
+      <div
+        style={{
+          textAlign: "center",
+          padding: "40px",
+          fontSize: "18px",
+          color: "#ff4d4f",
+          background: "#fff",
+          borderRadius: "8px",
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+        }}
+      >
+        <h2 style={{ color: "#ff4d4f" }}>
+          Tài khoản của bạn chưa được phê duyệt
+        </h2>
+        <p>
+          Vui lòng chờ quản trị viên duyệt trước khi tiếp tục sử dụng dịch vụ.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.contentContainer}>

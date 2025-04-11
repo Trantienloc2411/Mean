@@ -47,7 +47,7 @@ export default function AccountTable({ data, loading }) {
       key: "roleName",
       render: (role) => (
         <span className={`${styles.role} ${styles[role.toLowerCase()]}`}>
-          {role === "Staff"
+          {role === "Admin"
             ? "Nhân viên"
             : role === "Owner"
             ? "Chủ hộ"
