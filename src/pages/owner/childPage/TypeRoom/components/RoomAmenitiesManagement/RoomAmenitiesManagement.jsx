@@ -17,12 +17,12 @@ import {
 import { useGetOwnerDetailByUserIdQuery } from '../../../../../../redux/services/ownerApi';
 import { useParams } from 'react-router-dom';
 
-const RoomAmenitiesManagement = () => {
+const RoomAmenitiesManagement = ({ isOwner }) => {
   const { id } = useParams();
   const [selectedValues, setSelectedValues] = useState({
     status: [],
   });
-  const [searchTerm, setSearchTerm] = useState('');
+  const [searchTerm, setSearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [selectedAmenity, setSelectedAmenity] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -43,24 +43,24 @@ const RoomAmenitiesManagement = () => {
 
   const menuItems = [
     {
-      key: '1',
-      label: 'Chi tiết',
+      key: "1",
+      label: "Chi tiết",
       onClick: (record) => {
         setSelectedAmenity(record);
         setIsDetailModalOpen(true);
       },
     },
     {
-      key: '2',
-      label: 'Chỉnh sửa',
+      key: "2",
+      label: "Chỉnh sửa",
       onClick: (record) => {
         setSelectedAmenity(record);
         setIsUpdateModalOpen(true);
       },
     },
     {
-      key: '3',
-      label: 'Xoá',
+      key: "3",
+      label: "Xoá",
       danger: true,
       onClick: (record) => {
         setSelectedAmenity(record);
@@ -96,10 +96,10 @@ const RoomAmenitiesManagement = () => {
       await createAmenity({
         ...values,
         ownerId: ownerId,
-        status: values.status === 'Active', 
-        isDelete: false
+        status: values.status === "Active",
+        isDelete: false,
       }).unwrap();
-      message.success('Thêm tiện ích thành công');
+      message.success("Thêm tiện ích thành công");
       setIsAddModalOpen(false);
     } catch (error) {
       message.error(`Thêm tiện ích thất bại: ${error.message}`);
@@ -111,9 +111,9 @@ const RoomAmenitiesManagement = () => {
       await updateAmenity({
         id: selectedAmenity.id,
         ...values,
-        status: values.status === 'Active',
+        status: values.status === "Active",
       }).unwrap();
-      message.success('Cập nhật tiện ích thành công');
+      message.success("Cập nhật tiện ích thành công");
       setIsUpdateModalOpen(false);
       setSelectedAmenity(null);
     } catch (error) {
@@ -125,19 +125,20 @@ const RoomAmenitiesManagement = () => {
     setSearchTerm(value);
   }, 500);
 
-  const transformedData = amenitiesData?.map((item, index) => ({
-    key: item.id,
-    No: index + 1,
-    id: item.id,
-    _id: item._id,
-    name: item.name,
-    description: item.description,
-    status: item.status ? 'Active' : 'Inactive',
-    createdAt: item.createdAt,
-    updatedAt: item.updatedAt,
-    accommodationTypeId: item.accommodationTypeId,
-    isDelete: item.isDelete
-  })) || [];
+  const transformedData =
+    amenitiesData?.map((item, index) => ({
+      key: item.id,
+      No: index + 1,
+      id: item.id,
+      _id: item._id,
+      name: item.name,
+      description: item.description,
+      status: item.status ? "Active" : "Inactive",
+      createdAt: item.createdAt,
+      updatedAt: item.updatedAt,
+      accommodationTypeId: item.accommodationTypeId,
+      isDelete: item.isDelete,
+    })) || [];
 
   useEffect(() => {
     if (amenitiesData) {
@@ -161,48 +162,64 @@ const RoomAmenitiesManagement = () => {
 
   const filterGroups = [
     {
-      name: 'status',
-      title: 'Trạng thái',
+      name: "status",
+      title: "Trạng thái",
       options: [
-        { label: <span className={`${styles.status} ${styles.active}`}>Đang hoạt động</span>, value: 'Active' },
-        { label: <span className={`${styles.status} ${styles.inactive}`}>Không hoạt động</span>, value: 'Inactive' },
+        {
+          label: (
+            <span className={`${styles.status} ${styles.active}`}>
+              Đang hoạt động
+            </span>
+          ),
+          value: "Active",
+        },
+        {
+          label: (
+            <span className={`${styles.status} ${styles.inactive}`}>
+              Không hoạt động
+            </span>
+          ),
+          value: "Inactive",
+        },
       ],
     },
   ];
 
   const columns = [
     {
-      title: 'No.',
-      dataIndex: 'No',
-      key: 'No',
-      align: 'center',
+      title: "No.",
+      dataIndex: "No",
+      key: "No",
+      align: "center",
     },
     {
-      title: 'Tên tiện ích',
-      dataIndex: 'name',
-      key: 'name',
-      align: 'left',
+      title: "Tên tiện ích",
+      dataIndex: "name",
+      key: "name",
+      align: "left",
     },
     {
-      title: 'Mô tả',
-      dataIndex: 'description',
-      key: 'description',
-      align: 'left',
+      title: "Mô tả",
+      dataIndex: "description",
+      key: "description",
+      align: "left",
       ellipsis: true,
-      width: '40%',
+      width: "40%",
     },
     {
-      title: 'Trạng thái',
-      dataIndex: 'status',
-      key: 'status',
-      align: 'center',
+      title: "Trạng thái",
+      dataIndex: "status",
+      key: "status",
+      align: "center",
       render: (status) => {
-        const isActive = status === 'Active';
+        const isActive = status === "Active";
         return (
           <span
-            className={`${styles.status} ${isActive ? styles.active : styles.inactive}`}
+            className={`${styles.status} ${
+              isActive ? styles.active : styles.inactive
+            }`}
           >
-            {isActive ? 'Đang hoạt động' : 'Không hoạt động'}
+            {isActive ? "Đang hoạt động" : "Không hoạt động"}
           </span>
         );
       },
@@ -212,7 +229,7 @@ const RoomAmenitiesManagement = () => {
       key: "operation",
       render: (_, record) => (
         <Dropdown
-        trigger={["click"]} 
+          trigger={["click"]}
           menu={{
             items: menuItems.map((item) => ({
               ...item,
@@ -223,7 +240,7 @@ const RoomAmenitiesManagement = () => {
           <MoreOutlined onClick={(e) => e.preventDefault()} />
         </Dropdown>
       ),
-    }
+    },
   ];
 
   const isLoading = isAmenitiesLoading || isOwnerDetailLoading;
@@ -260,10 +277,10 @@ const RoomAmenitiesManagement = () => {
             <Input
               placeholder="Tìm kiếm tên tiện ích"
               onChange={(e) => debouncedSearch(e.target.value)}
-              style={{ width: '250px' }}
+              style={{ width: "250px" }}
             />
             <Dropdown
-              trigger={['click']}
+              trigger={["click"]}
               dropdownRender={() => (
                 <Filter
                   filterGroups={filterGroups}
@@ -278,14 +295,16 @@ const RoomAmenitiesManagement = () => {
               </Button>
             </Dropdown>
           </div>
-          <Button
-            type="primary"
-            onClick={() => setIsAddModalOpen(true)}
-            icon={<PlusOutlined />}
-            className={styles.addRoomButton}
-          >
-            Thêm tiện ích
-          </Button>
+          {isOwner && (
+            <Button
+              type="primary"
+              onClick={() => setIsAddModalOpen(true)}
+              icon={<PlusOutlined />}
+              className={styles.addRoomButton}
+            >
+              Thêm tiện ích
+            </Button>
+          )}
         </div>
 
         <Table
@@ -299,7 +318,7 @@ const RoomAmenitiesManagement = () => {
             className: styles.customPagination,
             itemRender: (page, type, originalElement) => {
               const totalPages = Math.ceil(filteredData.length / 7);
-              if (type === 'prev') {
+              if (type === "prev") {
                 return (
                   <button
                     className={styles.paginationButton}
@@ -309,7 +328,7 @@ const RoomAmenitiesManagement = () => {
                   </button>
                 );
               }
-              if (type === 'next') {
+              if (type === "next") {
                 return (
                   <button
                     className={styles.paginationButton}

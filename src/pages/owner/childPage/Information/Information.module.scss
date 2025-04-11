@@ -1,43 +1,172 @@
 .contentContainer {
     width: 100%;
-    padding: 24px;
+    padding: 1rem;
     max-width: 1440px;
     margin: 0 auto;
     display: flex;
+    flex-direction: column;
 
+    @media (min-width: 768px) {
+        padding: 1.5rem;
+    }
+
+    @media (min-width: 1024px) {
+        padding: 2rem;
+    }
 
     .infoHorizontal {
         display: flex;
-        flex-direction: row;
-        justify-content: space-around; // Ensures proper spacing between items
-        align-items: flex-start;       // Aligns items to the top
+        flex-direction: column;
         width: 100%;
-        gap: 24px;
+        gap: 1.5rem;
+
+        @media (min-width: 1024px) {
+            flex-direction: row;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
 
         .infoVertical {
-            flex: 0 0 auto;  // Prevents shrinking or growing
-            width: 400px;    // Fixed width
+            width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 24px;
+            gap: 1.5rem;
+
+            @media (min-width: 1024px) {
+                flex: 0 0 auto;
+                width: calc(50% - 0.75rem);
+            }
         }
 
         .companySection {
-            flex: 1;         // Takes up remaining space
-            max-width: calc(100% - 424px); // Ensures it doesn't overlap when `gap` is applied
-        }
-    }
+            width: 100%;
 
-    // Responsive behavior
-    @media (max-width: 1024px) {
-        .infoHorizontal {
-            flex-direction: column;
-
-            .infoVertical,
-            .companySection {
-                flex: none;
-                width: 100%;
+            @media (min-width: 1024px) {
+                flex: 0 0 auto;
+                width: calc(50% - 0.75rem);
             }
         }
+    }
+}
+
+// Status card styles
+.statusCard {
+    margin-top: 1rem;
+
+    @media (min-width: 768px) {
+        margin-top: 1.25rem;
+    }
+}
+
+.statusItem {
+    display: grid;
+    grid-template-columns: 1fr auto auto;
+    align-items: center;
+    gap: 0.5rem;
+    margin-bottom: 0.75rem;
+
+    @media (min-width: 768px) {
+        grid-template-columns: 150px auto auto;
+        gap: 0.75rem;
+    }
+}
+
+.statusLabel {
+    font-weight: normal;
+}
+
+.statusValue {
+    padding: 0.25rem 0.75rem;
+    border-radius: 16px;
+    text-align: center;
+    max-width: 120px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.statusTrue {
+    background-color: #e6f7f0;
+    color: #52c41a;
+}
+
+.statusFalse {
+    background-color: #FBDED1;
+    color: #f69871;
+}
+
+// Company info styles
+.companyCard {
+    border-radius: 8px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+    margin: 1rem 0;
+
+    @media (min-width: 768px) {
+        margin: 1.25rem;
+    }
+}
+
+.companyField {
+    margin-bottom: 1rem;
+}
+
+.companyLabel {
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+}
+
+.companyValue {
+    background: #f5f5f5;
+    padding: 0.5rem 0.75rem;
+    border-radius: 6px;
+    margin-top: 0.25rem;
+}
+
+.fileLink {
+    display: block;
+    background: #f5f5f5;
+    width: 130px;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #d9d9d9;
+    text-align: center;
+    margin-top: 0.25rem;
+}
+
+.noFile {
+    background: #f5f5f5;
+    padding: 0.25rem 0.75rem;
+    border-radius: 6px;
+    border: 1px solid #d9d9d9;
+    text-align: center;
+    margin-top: 0.25rem;
+}
+
+.informationContainer {
+    padding: 20px;
+    width: 100%;
+    max-width: 1440px;
+    margin: 0 auto;
+}
+
+.leftColumn, .rightColumn {
+    height: 100%;
+}
+
+/* Add responsive spacing */
+@media (max-width: 767px) {
+    .informationContainer {
+        padding: 10px;
+    }
+
+    .leftColumn {
+        margin-bottom: 20px;
+    }
+}
+
+/* Increase gutter on larger screens */
+@media (min-width: 1200px) {
+    .informationContainer {
+        padding: 30px;
     }
 }

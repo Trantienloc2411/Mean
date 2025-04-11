@@ -7,10 +7,10 @@ export const saveUserId = (userId) => {
 };
 export const saveUsername = (username) => {
   localStorage.setItem("username", username);
-}
+};
 export const saveChatInfo = (chatInfo) => {
   localStorage.setItem("chat_info", JSON.stringify(chatInfo));
-}
+};
 
 export const saveRole = (role) => {
   localStorage.setItem("user_role", JSON.stringify(role));
@@ -18,13 +18,13 @@ export const saveRole = (role) => {
 
 export const getToken = () => {
   try {
-    const token = localStorage.getItem('access_token');
+    const token = localStorage.getItem("access_token");
     if (!token) {
       return null;
     }
     return token;
   } catch (error) {
-    console.error('Error getting token:', error);
+    console.error("Error getting token:", error);
     return null;
   }
 };

@@ -1,0 +1,68 @@
+.companyCard {
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+  height: 100%;
+}
+
+.companyField {
+  margin-bottom: 1rem;
+}
+
+.companyLabel {
+  font-weight: 600;
+  margin-bottom: 0.25rem;
+  display: block;
+}
+
+.companyValue {
+  background: #f5f5f5;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  margin-top: 0.25rem;
+  word-break: break-word;
+}
+
+.fileLink {
+  display: block;
+  background: #f5f5f5;
+  width: 130px;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+  text-align: center;
+  margin-top: 0.25rem;
+  transition: all 0.3s ease;
+
+  &:hover {
+    background: #e6e6e6;
+    border-color: #bfbfbf;
+  }
+}
+
+.noFile {
+  background: #f5f5f5;
+  padding: 0.25rem 0.75rem;
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+  text-align: center;
+  margin-top: 0.25rem;
+
+  p {
+    margin: 0;
+    padding: 0.25rem 0;
+  }
+}
+
+.editForm {
+  width: 100%;
+}
+
+.uploadContainer {
+  margin-top: 1rem;
+}
+
+.buttonContainer {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: 1rem;
+}

@@ -8,6 +8,7 @@ import { IoIosAdd } from "react-icons/io";
 import { Typography } from "antd";
 import RentalLocationTable from "./components/RentalLocationTable";
 import FilterRentalLocation from "./components/FilterRentalLocation";
+import NotApprove from "../notApprove/NotApprove";
 
 const { Title } = Typography;
 
@@ -18,6 +19,9 @@ export default function RentalLocation() {
   const { data: ownerDetailData, isLoading: ownerDetailIsLoading } =
     useGetOwnerDetailByUserIdQuery(id);
   const ownerId = ownerDetailData?.id;
+  const userRole = localStorage.getItem("user_role")?.toLowerCase(); // "owner" | "admin"
+  const isAdmin = userRole === `"admin"` || userRole === `"staff"`;
+  const isOwner = userRole === `"owner"`;
 
   const { data: rentalData, isLoading: rentalIsLoading } =
     useGetRentalLocationByOwnerIdQuery(ownerId, { skip: !ownerId });
@@ -58,10 +62,11 @@ export default function RentalLocation() {
     return (
       <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} />
     );
+  console.log(isAdmin);
 
   return (
     <div style={{ padding: "10px 20px" }}>
-      {ownerDetailData?.isApproved ? (
+      {ownerDetailData?.isApproved || isAdmin ? (
         <div>
           <Flex
             justify="space-between"
@@ -69,15 +74,17 @@ export default function RentalLocation() {
             style={{ marginBottom: 16 }}
           >
             <Title level={2}>Địa điểm cho thuê</Title>
-            <Button
-              type="primary"
-              onClick={() => navigate("/rental-location/create")}
-              icon={<IoIosAdd />}
-            >
-              Thêm địa điểm mới
-            </Button>
-          </Flex>
 
+            {isOwner && (
+              <Button
+                type="primary"
+                onClick={() => navigate("/rental-location/create")}
+                icon={<IoIosAdd />}
+              >
+                Thêm địa điểm mới
+              </Button>
+            )}
+          </Flex>
           <Flex gap={16} style={{ marginBottom: 16 }}>
             <Input
               placeholder="Tìm kiếm địa điểm..."
@@ -117,24 +124,7 @@ export default function RentalLocation() {
           )}
         </div>
       ) : (
-        <div
-          style={{
-            textAlign: "center",
-            padding: "40px",
-            fontSize: "18px",
-            color: "#ff4d4f",
-            background: "#fff",
-            borderRadius: "8px",
-            boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
-          }}
-        >
-          <Title level={3} style={{ color: "#ff4d4f" }}>
-            Tài khoản của bạn chưa được phê duyệt
-          </Title>
-          <p>
-            Vui lòng chờ quản trị viên duyệt trước khi tiếp tục sử dụng dịch vụ.
-          </p>
-        </div>
+        <NotApprove />
       )}
     </div>
   );

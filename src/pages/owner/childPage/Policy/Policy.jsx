@@ -1,20 +1,21 @@
-import { useState, useEffect } from 'react';
-import { Input, Button, Dropdown, Table, message } from 'antd';
-import { FilterOutlined, PlusOutlined, MoreOutlined } from '@ant-design/icons';
-import styles from './Policy.module.scss';
-import Filter from './components/Filter/Filter.jsx';
-import DeletePolicyModal from './components/DeletePolicyModal/DeletePolicyModal.jsx';
-import AddPolicyModal from './components/AddPolicyModal/AddPolicyModal.jsx';
-import UpdatePolicyModal from './components/UpdatePolicyModal/UpdatePolicyModal.jsx';
-import DetailPolicyModal from './components/DetailPolicyModal/DetailPolicyModal.jsx';
-import dayjs from 'dayjs';
+import { useState, useEffect } from "react";
+import { Input, Button, Dropdown, Table, message } from "antd";
+import { FilterOutlined, PlusOutlined, MoreOutlined } from "@ant-design/icons";
+import styles from "./Policy.module.scss";
+import Filter from "./components/Filter/Filter.jsx";
+import DeletePolicyModal from "./components/DeletePolicyModal/DeletePolicyModal.jsx";
+import AddPolicyModal from "./components/AddPolicyModal/AddPolicyModal.jsx";
+import UpdatePolicyModal from "./components/UpdatePolicyModal/UpdatePolicyModal.jsx";
+import DetailPolicyModal from "./components/DetailPolicyModal/DetailPolicyModal.jsx";
+import dayjs from "dayjs";
 import {
   useGetPolicyOwnerByOwnerIdQuery,
   useCreatePolicyOwnerMutation,
   useUpdatePolicyOwnerMutation,
-  useDeletePolicyOwnerMutation
-} from '../../../../redux/services/policyOwnerApi.js';
-import { useGetOwnerDetailByUserIdQuery } from '../../../../redux/services/ownerApi.js';
+  useDeletePolicyOwnerMutation,
+} from "../../../../redux/services/policyOwnerApi.js";
+import { useGetOwnerDetailByUserIdQuery } from "../../../../redux/services/ownerApi.js";
+import { useParams } from "react-router-dom";
 
 export default function Policy() {
   const [selectedValues, setSelectedValues] = useState({
@@ -31,14 +32,15 @@ export default function Policy() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [effectiveOwnerId, setEffectiveOwnerId] = useState(null);
 
-  const userId = localStorage.getItem('user_id');
+  // const userId = localStorage.getItem("user_id");
+  const { id } = useParams();
 
   const {
     data: ownerData,
     isLoading: isOwnerLoading,
-    error: ownerError
-  } = useGetOwnerDetailByUserIdQuery(userId, {
-    skip: !userId
+    error: ownerError,
+  } = useGetOwnerDetailByUserIdQuery(id, {
+    skip: !id,
   });
 
   useEffect(() => {
@@ -53,92 +55,118 @@ export default function Policy() {
     data: policiesData,
     isLoading: isPoliciesLoading,
     refetch,
-    error: policiesError
+    error: policiesError,
   } = useGetPolicyOwnerByOwnerIdQuery(effectiveOwnerId, {
-    skip: !effectiveOwnerId
+    skip: !effectiveOwnerId,
   });
 
-  const [createPolicy, { isLoading: isCreating }] = useCreatePolicyOwnerMutation();
-  const [updatePolicy, { isLoading: isUpdating }] = useUpdatePolicyOwnerMutation();
-  const [deletePolicy, { isLoading: isDeleting }] = useDeletePolicyOwnerMutation();
+  const [createPolicy, { isLoading: isCreating }] =
+    useCreatePolicyOwnerMutation();
+  const [updatePolicy, { isLoading: isUpdating }] =
+    useUpdatePolicyOwnerMutation();
+  const [deletePolicy, { isLoading: isDeleting }] =
+    useDeletePolicyOwnerMutation();
 
   useEffect(() => {
-    console.log("API Response:", { policiesData, isPoliciesLoading, policiesError });
+    console.log("API Response:", {
+      policiesData,
+      isPoliciesLoading,
+      policiesError,
+    });
     console.log("Raw API Response structure:", policiesData);
-    
+
     if (policiesData && policiesData.owners && policiesData.owners.length > 0) {
       console.log("Processing API data with owners:", policiesData.owners);
       processData({ success: true, data: policiesData.owners });
-    } 
-    else if ((!policiesData || !policiesData.owners || policiesData.owners.length === 0) && !isPoliciesLoading) {
+    } else if (
+      (!policiesData ||
+        !policiesData.owners ||
+        policiesData.owners.length === 0) &&
+      !isPoliciesLoading
+    ) {
       console.log("Using test data because API response is empty or invalid");
-      const testData = {
-        success: true,
-        data: [
-          {
-            "_id": "67bd845aa8453ac3505d6aab",
-            "ownerId": effectiveOwnerId || "63b92f4e17d7b3c2a4e4f3d2",
-            "policyTitle": "Cancellation Policy",
-            "policyDescription": "This policy covers cancellation terms for bookings.",
-            "startDate": "01/02/2025 19:00:00",
-            "endDate": "31/12/2025 19:00:00",
-            "isDelete": false,
-            "createdAt": "25/02/2025 15:50:34",
-            "updatedAt": "25/02/2025 15:50:34",
-            "__v": 0,
-            "id": "67bd845aa8453ac3505d6aab"
-          }
-        ]
-      };
-      processData(testData);
+      // const testData = {
+      //   success: true,
+      //   data: [
+      //     {
+      //       _id: "67bd845aa8453ac3505d6aab",
+      //       ownerId: effectiveOwnerId || "63b92f4e17d7b3c2a4e4f3d2",
+      //       policyTitle: "Cancellation Policy",
+      //       policyDescription:
+      //         "This policy covers cancellation terms for bookings.",
+      //       startDate: "01/02/2025 19:00:00",
+      //       endDate: "31/12/2025 19:00:00",
+      //       isDelete: false,
+      //       createdAt: "25/02/2025 15:50:34",
+      //       updatedAt: "25/02/2025 15:50:34",
+      //       __v: 0,
+      //       id: "67bd845aa8453ac3505d6aab",
+      //     },
+      //   ],
+      // };
+      processData([]);
     }
   }, [policiesData, isPoliciesLoading, policiesError, effectiveOwnerId]);
 
   const filterGroups = [
     {
-      name: 'status',
-      title: 'Trạng thái',
+      name: "status",
+      title: "Trạng thái",
       options: [
         {
-          label: <span className={`${styles.status} ${styles.approved}`}>Đã duyệt</span>,
+          label: (
+            <span className={`${styles.status} ${styles.approved}`}>
+              Đã duyệt
+            </span>
+          ),
           value: 2,
         },
         {
-          label: <span className={`${styles.status} ${styles.pending}`}>Đang chờ</span>,
-          value: 1, 
+          label: (
+            <span className={`${styles.status} ${styles.pending}`}>
+              Đang chờ
+            </span>
+          ),
+          value: 1,
         },
         {
-          label: <span className={`${styles.status} ${styles.rejected}`}>Bị từ chối</span>,
+          label: (
+            <span className={`${styles.status} ${styles.rejected}`}>
+              Bị từ chối
+            </span>
+          ),
           value: 3,
         },
       ],
-    }
+    },
   ];
 
   const formatDate = (dateString) => {
     try {
-      if (!dateString) return '';
-      return dayjs(dateString, "DD/MM/YYYY HH:mm:ss").format('HH:mm DD/MM/YYYY');
+      if (!dateString) return "";
+      return dayjs(dateString, "DD/MM/YYYY HH:mm:ss").format(
+        "HH:mm DD/MM/YYYY"
+      );
     } catch (error) {
       console.error("Error formatting date:", dateString, error);
-      return dateString || '';
+      return dateString || "";
     }
   };
 
   const getStatusFromDates = (startDate, endDate) => {
     try {
       const now = dayjs();
-      if (!startDate || !endDate) return 1; 
+      if (!startDate || !endDate) return 1;
 
       const start = dayjs(startDate, "DD/MM/YYYY HH:mm:ss");
       const end = dayjs(endDate, "DD/MM/YYYY HH:mm:ss");
 
-      if (now.isBefore(start)) return 1; 
-      if (now.isAfter(end)) return 3; 
-      return 2; 
+      if (now.isBefore(start)) return 1;
+      if (now.isAfter(end)) return 3;
+      return 2;
     } catch (error) {
       console.error("Error determining status:", { startDate, endDate }, error);
-      return 1; 
+      return 1;
     }
   };
 
@@ -148,16 +176,19 @@ export default function Policy() {
       console.error("Invalid data structure:", data);
       return;
     }
-  
+
     try {
       const mappedData = data.data.map((item, index) => {
         console.log("Processing item:", item);
-        
-        const ownerIdValue = typeof item.ownerId === 'object' ? item.ownerId._id : item.ownerId;
-        
-        const itemStatus = item.status !== undefined ? item.status :
-          getStatusFromDates(item.startDate, item.endDate);
-  
+
+        const ownerIdValue =
+          typeof item.ownerId === "object" ? item.ownerId._id : item.ownerId;
+
+        const itemStatus =
+          item.status !== undefined
+            ? item.status
+            : getStatusFromDates(item.startDate, item.endDate);
+
         const tableRow = {
           No: index + 1,
           Name: item.policyTitle || "Unnamed Policy",
@@ -171,13 +202,13 @@ export default function Policy() {
           ownerId: ownerIdValue || "",
           isDelete: item.isDelete || false,
           values: item.values || [],
-          _original: { ...item }
+          _original: { ...item },
         };
-  
+
         console.log("Created table row:", tableRow);
         return tableRow;
       });
-  
+
       console.log("Mapped data for table:", mappedData);
       setBaseData(mappedData);
       setFilteredData(mappedData);
@@ -188,16 +219,16 @@ export default function Policy() {
 
   const menuItems = [
     {
-      key: '1',
-      label: 'Chi tiết',
+      key: "1",
+      label: "Chi tiết",
       onClick: (record) => {
         setSelectedPolicy(record);
         setIsDetailModalOpen(true);
       },
     },
     {
-      key: '2',
-      label: 'Chỉnh sửa',
+      key: "2",
+      label: "Chỉnh sửa",
       onClick: (record) => {
         console.log("Selected policy for update:", record);
         console.log("Original policy data:", record._original);
@@ -206,14 +237,14 @@ export default function Policy() {
       },
     },
     {
-      key: '3',
-      label: 'Xoá',
+      key: "3",
+      label: "Xoá",
       danger: true,
       onClick: (record) => {
         setSelectedPolicy(record);
         setIsDeleteModalOpen(true);
       },
-    }
+    },
   ];
 
   const handleDeleteConfirm = async () => {
@@ -221,19 +252,23 @@ export default function Policy() {
       console.log("Attempting to delete policy with ID:", selectedPolicy._id);
       try {
         await deletePolicy(selectedPolicy._id).unwrap();
-        message.success('Xóa chính sách thành công!');
+        message.success("Xóa chính sách thành công!");
         refetch();
       } catch (apiError) {
         console.error("API delete error:", apiError);
         console.log("API call failed, using local state update");
-        const newData = baseData.filter(item => item._id !== selectedPolicy._id);
+        const newData = baseData.filter(
+          (item) => item._id !== selectedPolicy._id
+        );
         setBaseData(newData);
         setFilteredData(newData);
-        message.success('Xóa chính sách thành công (chế độ ngoại tuyến)!');
+        message.success("Xóa chính sách thành công (chế độ ngoại tuyến)!");
       }
     } catch (error) {
       console.error("Delete operation completely failed:", error);
-      message.error('Xóa chính sách thất bại: ' + (error.data?.message || 'Đã xảy ra lỗi'));
+      message.error(
+        "Xóa chính sách thất bại: " + (error.data?.message || "Đã xảy ra lỗi")
+      );
     } finally {
       setIsDeleteModalOpen(false);
       setSelectedPolicy(null);
@@ -245,19 +280,23 @@ export default function Policy() {
       const formattedValues = {
         ...values,
         ApplyDate: values.ApplyDate ? values.ApplyDate : null,
-        EndDate: values.EndDate ? values.EndDate : null
+        EndDate: values.EndDate ? values.EndDate : null,
       };
       const newPolicy = {
         _id: `temp_${Date.now()}`,
         ownerId: effectiveOwnerId || "63b92f4e17d7b3c2a4e4f3d2",
         policyTitle: formattedValues.Name,
         policyDescription: formattedValues.Description,
-        startDate: formattedValues.ApplyDate ? formattedValues.ApplyDate.format('DD/MM/YYYY HH:mm:ss') : null,
-        endDate: formattedValues.EndDate ? formattedValues.EndDate.format('DD/MM/YYYY HH:mm:ss') : null,
-        status: 1, 
+        startDate: formattedValues.ApplyDate
+          ? formattedValues.ApplyDate.format("DD/MM/YYYY HH:mm:ss")
+          : null,
+        endDate: formattedValues.EndDate
+          ? formattedValues.EndDate.format("DD/MM/YYYY HH:mm:ss")
+          : null,
+        status: 1,
         isDelete: false,
-        createdAt: dayjs().format('DD/MM/YYYY HH:mm:ss'),
-        updatedAt: dayjs().format('DD/MM/YYYY HH:mm:ss')
+        createdAt: dayjs().format("DD/MM/YYYY HH:mm:ss"),
+        updatedAt: dayjs().format("DD/MM/YYYY HH:mm:ss"),
       };
 
       console.log("Creating new policy with data:", newPolicy);
@@ -265,23 +304,28 @@ export default function Policy() {
         await createPolicy({
           ...formattedValues,
           ownerId: effectiveOwnerId || "63b92f4e17d7b3c2a4e4f3d2",
-          status: 1
+          status: 1,
         }).unwrap();
         refetch();
       } catch (apiError) {
         console.warn("API error, falling back to UI update:", apiError);
-        const updatedBaseData = [...baseData.map(item => item._original), newPolicy];
+        const updatedBaseData = [
+          ...baseData.map((item) => item._original),
+          newPolicy,
+        ];
         processData({
           success: true,
-          data: updatedBaseData
+          data: updatedBaseData,
         });
         console.log("Updated data after add:", updatedBaseData);
       }
 
-      message.success('Tạo chính sách mới thành công!');
+      message.success("Tạo chính sách mới thành công!");
     } catch (error) {
       console.error("Error creating policy:", error);
-      message.error('Tạo chính sách thất bại: ' + (error.data?.message || 'Đã xảy ra lỗi'));
+      message.error(
+        "Tạo chính sách thất bại: " + (error.data?.message || "Đã xảy ra lỗi")
+      );
     } finally {
       setIsAddModalOpen(false);
     }
@@ -292,41 +336,52 @@ export default function Policy() {
       const formattedValues = {
         ...values,
         ApplyDate: values.ApplyDate ? values.ApplyDate : null,
-        EndDate: values.EndDate ? values.EndDate : null
+        EndDate: values.EndDate ? values.EndDate : null,
       };
 
       const updatedPolicyData = {
         ...formattedValues,
         id: selectedPolicy._id,
         ownerId: selectedPolicy.ownerId || effectiveOwnerId,
-        status: values.Status
+        status: values.Status,
       };
 
       console.log("Updating policy with data:", updatedPolicyData);
 
       try {
         await updatePolicy(updatedPolicyData).unwrap();
-        message.success('Cập nhật chính sách thành công!');
+        message.success("Cập nhật chính sách thành công!");
         refetch();
       } catch (apiError) {
-        console.warn("API error during update, falling back to UI update:", apiError);
-        const updatedBaseData = baseData.map(item => {
+        console.warn(
+          "API error during update, falling back to UI update:",
+          apiError
+        );
+        const updatedBaseData = baseData.map((item) => {
           if (item._id === selectedPolicy._id) {
             return {
               ...item,
               Name: formattedValues.Name,
               Description: formattedValues.Description,
-              ApplyDate: formattedValues.ApplyDate ? formattedValues.ApplyDate.format('HH:mm DD/MM/YYYY') : item.ApplyDate,
-              EndDate: formattedValues.EndDate ? formattedValues.EndDate.format('HH:mm DD/MM/YYYY') : item.EndDate,
-              Status: formattedValues.Status, 
+              ApplyDate: formattedValues.ApplyDate
+                ? formattedValues.ApplyDate.format("HH:mm DD/MM/YYYY")
+                : item.ApplyDate,
+              EndDate: formattedValues.EndDate
+                ? formattedValues.EndDate.format("HH:mm DD/MM/YYYY")
+                : item.EndDate,
+              Status: formattedValues.Status,
               _original: {
                 ...item._original,
                 policyTitle: formattedValues.Name,
                 policyDescription: formattedValues.Description,
                 status: formattedValues.Status,
-                startDate: formattedValues.ApplyDate ? formattedValues.ApplyDate.format('DD/MM/YYYY HH:mm:ss') : item._original.startDate,
-                endDate: formattedValues.EndDate ? formattedValues.EndDate.format('DD/MM/YYYY HH:mm:ss') : item._original.endDate
-              }
+                startDate: formattedValues.ApplyDate
+                  ? formattedValues.ApplyDate.format("DD/MM/YYYY HH:mm:ss")
+                  : item._original.startDate,
+                endDate: formattedValues.EndDate
+                  ? formattedValues.EndDate.format("DD/MM/YYYY HH:mm:ss")
+                  : item._original.endDate,
+              },
             };
           }
           return item;
@@ -337,7 +392,10 @@ export default function Policy() {
       }
     } catch (error) {
       console.error("Error updating policy:", error);
-      message.error('Cập nhật chính sách thất bại: ' + (error.data?.message || 'Đã xảy ra lỗi'));
+      message.error(
+        "Cập nhật chính sách thất bại: " +
+          (error.data?.message || "Đã xảy ra lỗi")
+      );
     } finally {
       setIsUpdateModalOpen(false);
       setSelectedPolicy(null);
@@ -345,14 +403,14 @@ export default function Policy() {
   };
 
   const handleFilterChange = (filterName, newValues) => {
-    setSelectedValues(prev => ({
+    setSelectedValues((prev) => ({
       ...prev,
       [filterName]: newValues,
     }));
   };
 
   const handleDateRangeChange = (dates, dateStrings) => {
-    setSelectedValues(prev => ({
+    setSelectedValues((prev) => ({
       ...prev,
       dateRange: dates ? dateStrings : [],
     }));
@@ -399,12 +457,12 @@ export default function Policy() {
       dataIndex: "Status",
       key: "Status",
       render: (status) => {
-        let className = '';
+        let className = "";
         switch (status) {
-          case 2: 
+          case 2:
             className = styles.approved;
             break;
-          case 1: 
+          case 1:
             className = styles.pending;
             break;
           case 3:
@@ -413,9 +471,15 @@ export default function Policy() {
           default:
             break;
         }
-        return <span className={`${styles.status} ${className}`}>
-          {status === 2 ? 'Đã duyệt' : status === 1 ? 'Đang chờ' : 'Bị từ chối'}
-        </span>;
+        return (
+          <span className={`${styles.status} ${className}`}>
+            {status === 2
+              ? "Đã duyệt"
+              : status === 1
+              ? "Đang chờ"
+              : "Bị từ chối"}
+          </span>
+        );
       },
     },
     {
@@ -423,7 +487,7 @@ export default function Policy() {
       key: "operation",
       render: (_, record) => (
         <Dropdown
-          trigger={["click"]} 
+          trigger={["click"]}
           menu={{
             items: menuItems.map((item) => ({
               ...item,
@@ -434,20 +498,20 @@ export default function Policy() {
           <MoreOutlined onClick={(e) => e.preventDefault()} />
         </Dropdown>
       ),
-    }
+    },
   ];
 
   if (isOwnerLoading) return <div>Đang tải thông tin chủ sở hữu...</div>;
   if (ownerError) return <div>Lỗi tải thông tin chủ sở hữu</div>;
-  if (!userId) return <div>Không tìm thấy ID người dùng</div>;
+  if (!id) return <div>Không tìm thấy ID người dùng</div>;
   if (!effectiveOwnerId) return <div>Không thể truy xuất ID chủ sở hữu</div>;
 
   return (
     <div className={styles.contentContainer}>
       <h1>Quản lý Chính Sách</h1>
       {filteredData.length === 0 && !isPoliciesLoading && (
-        <div style={{ marginBottom: '10px' }}>
-          Không có dữ liệu để hiển thị.
+        <div style={{ marginBottom: "10px" }}>
+          {/* Không có dữ liệu để hiển thị. */}
         </div>
       )}
       <div className={styles.contentTable}>
@@ -473,7 +537,7 @@ export default function Policy() {
               <Button icon={<FilterOutlined />}>
                 Lọc
                 {Object.values(selectedValues).flat().length > 0 &&
-                  (`(${Object.values(selectedValues).flat().length})`)}
+                  `(${Object.values(selectedValues).flat().length})`}
               </Button>
             </Dropdown>
           </div>

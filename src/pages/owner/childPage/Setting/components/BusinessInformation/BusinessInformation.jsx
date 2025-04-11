@@ -7,9 +7,11 @@ import {
 } from "../../../../../../redux/services/businessApi";
 import { supabase } from "../../../../../../redux/services/supabase";
 import { useUpdateOwnerMutation } from "../../../../../../redux/services/ownerApi";
+import { useParams } from "react-router-dom";
 
 const useFileUpload = (businessId) => {
   const [uploading, setUploading] = useState(false);
+  const {} = useParams();
 
   const handleUploadFile = async (file) => {
     if (file.type !== "application/pdf") {
@@ -117,7 +119,7 @@ function BusinessForm({
   );
 }
 
-function NotHaveBusiness({ refetch, createBusiness, updateOwner, ownerId }) {
+function NotHaveBusiness({ refetch, createBusiness, ownerId }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
   const { uploading, handleUploadFile } = useFileUpload();
@@ -125,27 +127,17 @@ function NotHaveBusiness({ refetch, createBusiness, updateOwner, ownerId }) {
 
   const handleCreate = async () => {
     const values = await form.validateFields();
-    const formData = { ...values, businessLicensesFile: fileUrl };
+    const formData = {
+      ...values,
+      businessLicensesFile: fileUrl,
+      ownerId: ownerId,
+    };
     try {
       const businessInfo = await createBusiness({
         data: formData,
       }).unwrap();
       message.success("Tạo thông tin doanh nghiệp thành công!");
 
-      try {
-        const updatedData = {
-          businessInformationId: businessInfo.id,
-        };
-        console.log(updatedData);
-
-        const res = await updateOwner({
-          id: ownerId,
-          updatedData: updatedData,
-        }).unwrap();
-        console.log(res);
-      } catch (error) {
-        message.error("Tạo thông cho owner thất bại!");
-      }
       setIsModalOpen(false);
 
       await refetch();

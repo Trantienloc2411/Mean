@@ -1,28 +1,246 @@
 .filterContainer {
-    padding: 16px;
-    background: white;
-    width: 600px;
-    display: grid;
-    gap: 20px;
+  background-color: white;
+  border-radius: 12px;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  padding: 20px;
+  width: 350px;
+  max-height: 80vh;
+  overflow-y: auto;
+}
+
+.filterHeader {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+
+  h3 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #111827;
+  }
+}
+
+.resetButton {
+  color: #2563eb;
+  padding: 0;
+  height: auto;
+  font-weight: 500;
+  
+  &:hover {
+    color: #1d4ed8;
+    background: transparent;
+  }
+}
+
+.divider {
+  margin: 16px 0;
+  border-color: #f3f4f6;
+}
+
+.dateSection {
+  margin-bottom: 16px;
+  
+  h4 {
+    margin-bottom: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #374151;
+  }
+}
+
+.datePicker {
+  width: 100%;
+  
+  :global(.ant-picker) {
     border-radius: 8px;
-    box-shadow: 0 3px 6px -4px rgba(0, 0, 0, 0.12), 
-                0 6px 16px 0 rgba(0, 0, 0, 0.08), 
-                0 9px 28px 8px rgba(0, 0, 0, 0.05);
+    
+    &:hover, &:focus {
+      border-color: #2563eb;
+    }
+  }
+}
+
+.timeSection {
+  margin-bottom: 16px;
+  
+  h4 {
+    margin-bottom: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #374151;
+  }
+}
+
+.timePicker {
+  width: 100%;
+  
+  :global(.ant-picker) {
+    border-radius: 8px;
+    
+    &:hover, &:focus {
+      border-color: #2563eb;
+    }
+  }
+}
+
+.timeHint {
+  display: block;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.filterGroup {
+  margin-bottom: 20px;
+  
+  h4 {
+    margin-bottom: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #374151;
+  }
+}
+
+.optionsContainer {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.filterOption {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: #f9fafb;
   }
   
-  .filterGroup {
-    padding: 12px;
-    background: #fafafa;
-    border-radius: 6px;
+  &.selected {
+    background-color: #eff6ff;
+  }
   
-    h4 {
-      margin-bottom: 12px;
-      color: #1f1f1f;
+  :global(.ant-checkbox-wrapper) {
+    &:hover {
+      :global(.ant-checkbox-inner) {
+        border-color: #2563eb;
+      }
     }
   }
   
-  .checkboxGroup {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
+  :global(.ant-checkbox-checked) {
+    :global(.ant-checkbox-inner) {
+      background-color: #2563eb;
+      border-color: #2563eb;
+    }
   }
+}
+
+.statusBadge {
+  padding: 4px 10px;
+  border-radius: 16px;
+  font-size: 13px;
+  font-weight: 500;
+  display: inline-block;
+  
+  &.confirmed {
+    background-color: #dcfce7;
+    color: #166534;
+  }
+  
+  &.pending {
+    background-color: #fff7ed;
+    color: #9a3412;
+  }
+  
+  &.needcheckin, &.needcheckout {
+    background-color: #e0f2fe;
+    color: #0369a1;
+  }
+  
+  &.checkedin {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+  
+  &.checkedout {
+    background-color: #e0e7ff;
+    color: #4338ca;
+  }
+  
+  &.cancelled {
+    background-color: #fee2e2;
+    color: #b91c1c;
+  }
+  
+  &.completed {
+    background-color: #ecfdf5;
+    color: #047857;
+  }
+  
+  &.booking {
+    background-color: #e0f2fe;
+    color: #0369a1;
+  }
+  
+  &.paid {
+    background-color: #d1fae5;
+    color: #065f46;
+  }
+  
+  &.refund {
+    background-color: #fee2e2;
+    color: #b91c1c;
+  }
+  
+  &.failed {
+    background-color: #fee2e2;
+    color: #b91c1c;
+  }
+}
+
+.activeFilters {
+  h4 {
+    margin-bottom: 12px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #374151;
+  }
+}
+
+.filterTags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.filterTag {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 4px 12px;
+  background-color: #f3f4f6;
+  border-radius: 16px;
+  font-size: 13px;
+  color: #4b5563;
+  transition: all 0.2s ease;
+  
+  &:hover {
+    background-color: #e5e7eb;
+  }
+  
+  .removeTag {
+    cursor: pointer;
+    font-size: 12px;
+    color: #6b7280;
+    
+    &:hover {
+      color: #ef4444;
+    }
+  }
+}

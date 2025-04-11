@@ -1,0 +1,416 @@
+.bookingCalendar {
+    height: 100vh;
+    background-color: #f5f7fa;
+  }
+  
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: white;
+    padding: 0 24px;
+    height: 64px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .title {
+    font-size: 18px;
+    font-weight: 600;
+    color: #000;
+  }
+  
+  .searchContainer {
+    flex: 1;
+    max-width: 400px;
+    margin: 0 24px;
+  }
+  
+  .searchInput {
+    border-radius: 4px;
+    background-color: #f5f7fa;
+  }
+  
+  .searchIcon {
+    color: #8c8c8c;
+  }
+  
+  .userInfo {
+    display: flex;
+    align-items: center;
+  }
+  
+  .userDetails {
+    text-align: right;
+    margin-right: 12px;
+  }
+  
+  .userName {
+    font-weight: 500;
+    font-size: 14px;
+  }
+  
+  .userRole {
+    font-size: 12px;
+    color: #8c8c8c;
+  }
+  
+  .userAvatar {
+    background-color: #1890ff;
+  }
+  
+  .content {
+    padding: 0;
+    overflow: auto;
+  }
+  
+  .calendarHeader {
+    padding: 16px 24px;
+    background-color: white;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .calendarControls {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 16px;
+  }
+  
+  .viewToggle {
+    display: flex;
+  }
+  
+  .viewButton {
+    color: #8c8c8c;
+    
+    &:hover {
+      color: #1890ff;
+    }
+  }
+  
+  .dateNavigation {
+    display: flex;
+    align-items: center;
+  }
+  
+  .navButton {
+    color: #8c8c8c;
+    
+    &:hover {
+      color: #1890ff;
+    }
+  }
+  
+  .currentDate {
+    margin: 0 16px;
+    display: flex;
+    align-items: center;
+  }
+  
+  .dateLabel {
+    font-weight: 600;
+    margin-right: 8px;
+  }
+  
+  .todayLabel {
+    font-size: 12px;
+    color: #8c8c8c;
+  }
+  
+  .viewOptions {
+    display: flex;
+    align-items: center;
+  }
+  
+  .viewOption {
+    margin-right: 8px;
+    border-radius: 16px;
+    
+    &.active {
+      background-color: #e6f7ff;
+      color: #1890ff;
+      border-color: #e6f7ff;
+    }
+  }
+  
+  .workOrderButton {
+    margin-left: auto;
+    border-radius: 4px;
+    background-color: #00c2a8;
+    border-color: #00c2a8;
+    
+    &:hover {
+      background-color: #00a892;
+      border-color: #00a892;
+    }
+  }
+  
+  .calendarContent {
+    display: flex;
+    height: calc(100vh - 160px);
+    position: relative;
+  }
+  
+  .allDayLabel {
+    position: absolute;
+    left: 24px;
+    top: 16px;
+    font-size: 12px;
+    color: #8c8c8c;
+  }
+  
+  .calendarGrid {
+    display: flex;
+    width: 100%;
+    padding: 16px 0 0 0;
+    overflow: hidden;
+  }
+  
+  .timeColumn {
+    width: 60px;
+    padding-top: 40px;
+  }
+  
+  .timeSlot {
+    height: 60px;
+    position: relative;
+    padding-right: 8px;
+    text-align: right;
+  }
+  
+  .timeLabel {
+    font-size: 12px;
+    color: #8c8c8c;
+    position: absolute;
+    top: -10px;
+    right: 8px;
+  }
+  
+  .bookingsContainer {
+    display: flex;
+    flex: 1;
+    overflow-x: auto;
+    border-left: 1px solid #f0f0f0;
+  }
+  
+  .staffColumn {
+    min-width: 240px;
+    border-right: 1px solid #f0f0f0;
+  }
+  
+  .staffHeader {
+    display: flex;
+    align-items: center;
+    padding: 8px 16px;
+    height: 40px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  
+  .staffAvatar {
+    margin-right: 8px;
+  }
+  
+  .staffInfo {
+    flex: 1;
+  }
+  
+  .staffName {
+    font-size: 14px;
+    font-weight: 500;
+  }
+  
+  .staffHours {
+    font-size: 12px;
+    color: #8c8c8c;
+  }
+  
+  .addButton {
+    color: #8c8c8c;
+    
+    &:hover {
+      color: #1890ff;
+    }
+  }
+  
+  .bookingsList {
+    padding: 8px;
+  }
+  
+  .bookingItem {
+    display: flex;
+    align-items: flex-start;
+    padding: 8px;
+    border-radius: 4px;
+    margin-bottom: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    
+    &:hover {
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.09);
+    }
+    
+    &.maintenanceRequest {
+      background-color: #fff7e6;
+      border-left: 3px solid #ffa940;
+    }
+    
+    &.personalTask {
+      background-color: #e6f7ff;
+      border-left: 3px solid #1890ff;
+    }
+  }
+  
+  .bookingIcon {
+    margin-right: 8px;
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: white;
+    border-radius: 4px;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .iconTool, .iconFile, .iconDelete, .iconEnvironment, .iconFire, .iconThunderbolt, .iconPaint {
+    font-size: 14px;
+  }
+  
+  .bookingContent {
+    flex: 1;
+  }
+  
+  .bookingHeader {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 4px;
+  }
+  
+  .bookingTitle {
+    font-weight: 500;
+    font-size: 14px;
+  }
+  
+  .bookingId {
+    font-size: 12px;
+    color: #8c8c8c;
+  }
+  
+  .bookingDetails {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: #8c8c8c;
+  }
+  
+  .bookingTime, .bookingType {
+    font-size: 12px;
+  }
+  
+  .bookingActions {
+    margin-left: 8px;
+  }
+  
+  .moreButton {
+    color: #8c8c8c;
+    padding: 0;
+    
+    &:hover {
+      color: #1890ff;
+    }
+  }
+  
+  .detailsPanel {
+    width: 300px;
+    background-color: white;
+    border-left: 1px solid #f0f0f0;
+    padding: 16px;
+    overflow-y: auto;
+  }
+  
+  .bookingDetailHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+  }
+  
+  .bookingDetailTitle {
+    margin: 0;
+  }
+  
+  .maintenanceTag {
+    display: inline-block;
+    background-color: #fff7e6;
+    color: #fa8c16;
+    font-size: 12px;
+    font-weight: 500;
+    padding: 4px 8px;
+    border-radius: 2px;
+    margin-bottom: 24px;
+  }
+  
+  .detailSection {
+    margin-bottom: 24px;
+  }
+  
+  .sectionTitle {
+    font-size: 12px;
+    color: #8c8c8c;
+    margin-bottom: 8px;
+  }
+  
+  .unitCard, .assigneeCard, .dateTimeCard {
+    border-radius: 4px;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+  }
+  
+  .unitNumber {
+    font-weight: 500;
+    margin-bottom: 4px;
+  }
+  
+  .unitAddress {
+    font-size: 12px;
+    color: #8c8c8c;
+  }
+  
+  .viewMore {
+    text-align: right;
+    color: #8c8c8c;
+    margin-top: 8px;
+  }
+  
+  .assigneeCard {
+    display: flex;
+    align-items: center;
+    padding: 12px;
+  }
+  
+  .assigneeAvatar {
+    margin-right: 12px;
+  }
+  
+  .assigneeName {
+    font-weight: 500;
+  }
+  
+  .dateTimeCard {
+    padding: 12px;
+  }
+  
+  .dateRow, .timeRow {
+    display: flex;
+    align-items: center;
+    margin-bottom: 8px;
+  }
+  
+  .dateIcon, .timeIcon {
+    margin-right: 8px;
+    color: #8c8c8c;
+  }
+  
+  .dateText, .timeText {
+    font-size: 14px;
+  }
+  
+  

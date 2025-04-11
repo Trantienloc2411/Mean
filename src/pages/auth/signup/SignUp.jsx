@@ -18,7 +18,7 @@ const Signup = () => {
     password: "",
     confirmPassword: "",
     doB: "",
-    roleID: "67927ff7a0a58ce4f7e8e83d",
+    roleID: "67f87ca3c19b91da666bbdc7",
   });
   const navigate = useNavigate();
   const [createUser, { isLoading }] = useCreateUserMutation();
@@ -95,7 +95,7 @@ const Signup = () => {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
-                placeholder="Zane Phạm"
+                placeholder="Họ và tên"
                 className={styles.formInput}
                 required
               />
@@ -107,7 +107,7 @@ const Signup = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="zanepham@gmail.com"
+                placeholder="Nhập email của bạn"
                 className={styles.formInput}
                 required
               />

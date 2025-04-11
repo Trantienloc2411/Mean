@@ -1,15 +1,17 @@
-import { useState, useEffect } from "react"
-import styles from "./Booking.module.scss"
-import ListBooking from "./Components/ListBooking/ListBooking"
-import ListPlace from "./Components/ListPlace/ListPlace"
-import { message, Spin } from "antd"
+import { useState, useEffect } from "react";
+import styles from "./Booking.module.scss";
+import ListBooking from "./Components/ListBooking/ListBooking";
+import ListPlace from "./Components/ListPlace/ListPlace";
+import { message, Spin } from "antd";
 import {
   useGetBookingsByOwnerIdQuery,
   useUpdateBookingMutation,
   useGetBookingByIdQuery,
   useGenerateBookingPasswordMutation,
-} from "../../../../redux/services/bookingApi"
-import { useGetOwnerDetailByUserIdQuery } from "../../../../redux/services/ownerApi"
+} from "../../../../redux/services/bookingApi";
+import { useGetOwnerDetailByUserIdQuery } from "../../../../redux/services/ownerApi";
+import NotApprove from "../notApprove/NotApprove";
+import { useParams } from "react-router-dom";
 
 const BOOKING_STATUS = Object.freeze({
   CONFIRMED: 1,
@@ -20,7 +22,7 @@ const BOOKING_STATUS = Object.freeze({
   CANCELLED: 6,
   COMPLETED: 7,
   PENDING: 8,
-})
+});
 
 const PAYMENT_STATUS = Object.freeze({
   BOOKING: 1,
@@ -28,7 +30,7 @@ const PAYMENT_STATUS = Object.freeze({
   PAID: 3,
   REFUND: 4,
   FAILED: 5,
-})
+});
 
 const getBookingStatusDisplay = (statusCode) => {
   const statusMap = {
@@ -40,9 +42,9 @@ const getBookingStatusDisplay = (statusCode) => {
     [BOOKING_STATUS.CHECKEDOUT]: "Checked Out",
     [BOOKING_STATUS.CANCELLED]: "Cancelled",
     [BOOKING_STATUS.COMPLETED]: "Completed",
-  }
-  return statusMap[statusCode] || "Unknown Status"
-}
+  };
+  return statusMap[statusCode] || "Unknown Status";
+};
 
 const getPaymentStatusDisplay = (statusCode) => {
   const statusMap = {
@@ -51,151 +53,169 @@ const getPaymentStatusDisplay = (statusCode) => {
     [PAYMENT_STATUS.PAID]: "Paid",
     [PAYMENT_STATUS.REFUND]: "Refund",
     [PAYMENT_STATUS.FAILED]: "Failed",
-  }
-  return statusMap[statusCode] || "Unpaid"
-}
+  };
+  return statusMap[statusCode] || "Unpaid";
+};
 
 export default function Booking() {
-  const [effectiveOwnerId, setEffectiveOwnerId] = useState(null)
-  const [bookings, setBookings] = useState([])
-  const [locations, setLocations] = useState([])
-  const [selectedLocation, setSelectedLocation] = useState("all")
-  const [selectedBookingId, setSelectedBookingId] = useState(null)
-  const [filteredBookings, setFilteredBookings] = useState([])
+  const [effectiveOwnerId, setEffectiveOwnerId] = useState(null);
+  const [bookings, setBookings] = useState([]);
+  const [locations, setLocations] = useState([]);
+  const [selectedLocation, setSelectedLocation] = useState("all");
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
+  const [filteredBookings, setFilteredBookings] = useState([]);
 
-  const [updateBooking, { isLoading: isUpdating }] = useUpdateBookingMutation()
-  const [generatePassword] = useGenerateBookingPasswordMutation()
+  const [updateBooking, { isLoading: isUpdating }] = useUpdateBookingMutation();
+  const [generatePassword] = useGenerateBookingPasswordMutation();
+  const userRole = localStorage.getItem("user_role")?.toLowerCase(); // "owner" | "admin"
+  const isAdmin = userRole === `"admin"` || userRole === `"staff"`;
 
-  const { data: bookingDetailData, isLoading: isLoadingBookingDetail } = useGetBookingByIdQuery(selectedBookingId, {
-    skip: !selectedBookingId,
-  })
+  const { data: bookingDetailData, isLoading: isLoadingBookingDetail } =
+    useGetBookingByIdQuery(selectedBookingId, {
+      skip: !selectedBookingId,
+    });
 
-  const userId = localStorage.getItem("user_id")
+  const { id } = useParams();
 
-  const { data: ownerDetailData, isLoading: isLoadingOwnerDetail } = useGetOwnerDetailByUserIdQuery(userId, {
-    skip: !userId,
-  })
+  const { data: ownerDetailData, isLoading: isLoadingOwnerDetail } =
+    useGetOwnerDetailByUserIdQuery(id, {
+      skip: !id,
+    });
 
   useEffect(() => {
     if (ownerDetailData) {
-      const ownerId = ownerDetailData.id || ownerDetailData._id
-      setEffectiveOwnerId(ownerId)
+      const ownerId = ownerDetailData.id || ownerDetailData._id;
+      setEffectiveOwnerId(ownerId);
     }
-  }, [ownerDetailData])
+  }, [ownerDetailData]);
 
   const {
     data: bookingsData,
     isLoading,
     refetch: refetchBookings,
-  } = useGetBookingsByOwnerIdQuery(effectiveOwnerId, { skip: !effectiveOwnerId })
+  } = useGetBookingsByOwnerIdQuery(effectiveOwnerId, {
+    skip: !effectiveOwnerId,
+  });
 
   useEffect(() => {
     if (bookingsData) {
-      let processedBookings = []
-      const locationMap = new Map()
+      let processedBookings = [];
+      const locationMap = new Map();
 
       if (bookingsData.bookings && Array.isArray(bookingsData.bookings)) {
         processedBookings = bookingsData.bookings.map((bookingWrapper) => {
-          const bookingKey = Object.keys(bookingWrapper).find((key) => key.startsWith("booking_"))
-          const booking = bookingKey ? bookingWrapper[bookingKey] : bookingWrapper
+          const bookingKey = Object.keys(bookingWrapper).find((key) =>
+            key.startsWith("booking_")
+          );
+          const booking = bookingKey
+            ? bookingWrapper[bookingKey]
+            : bookingWrapper;
 
           return {
             _originalBooking: booking,
             Status: getBookingStatusDisplay(booking.status),
             Payment: getPaymentStatusDisplay(booking.paymentStatus),
-          }
-        })
+          };
+        });
       } else if (Array.isArray(bookingsData)) {
         processedBookings = bookingsData.map((booking) => {
           return {
             _originalBooking: booking,
             Status: getBookingStatusDisplay(booking.status),
             Payment: getPaymentStatusDisplay(booking.paymentStatus),
-          }
-        })
+          };
+        });
       }
 
       processedBookings.forEach((bookingData) => {
-        const booking = bookingData._originalBooking
-        if (booking && booking.accommodationId && booking.accommodationId.rentalLocationId) {
-          const locationId = booking.accommodationId.rentalLocationId._id
+        const booking = bookingData._originalBooking;
+        if (
+          booking &&
+          booking.accommodationId &&
+          booking.accommodationId.rentalLocationId
+        ) {
+          const locationId = booking.accommodationId.rentalLocationId._id;
 
           if (!locationMap.has(locationId)) {
-            locationMap.set(locationId, booking.accommodationId)
+            locationMap.set(locationId, booking.accommodationId);
           }
         }
-      })
+      });
 
-      setBookings(processedBookings)
-      setLocations(Array.from(locationMap.values()))
+      setBookings(processedBookings);
+      setLocations(Array.from(locationMap.values()));
     }
-  }, [bookingsData])
+  }, [bookingsData]);
 
   useEffect(() => {
     if (bookings.length > 0) {
       if (selectedLocation === "all") {
-        setFilteredBookings(bookings)
+        setFilteredBookings(bookings);
       } else {
         const filtered = bookings.filter((booking) => {
-          const locationId = booking._originalBooking.accommodationId?.rentalLocationId?._id
-          return locationId === selectedLocation
-        })
-        setFilteredBookings(filtered)
+          const locationId =
+            booking._originalBooking.accommodationId?.rentalLocationId?._id;
+          return locationId === selectedLocation;
+        });
+        setFilteredBookings(filtered);
       }
     } else {
-      setFilteredBookings([])
+      setFilteredBookings([]);
     }
-  }, [selectedLocation, bookings])
+  }, [selectedLocation, bookings]);
 
   const handleLocationSelect = (locationId) => {
-    setSelectedLocation(locationId)
-  }
+    setSelectedLocation(locationId);
+  };
 
   const handleStatusChange = async (bookingId, newStatusDisplay) => {
     try {
       const statusCodeKey = Object.keys(BOOKING_STATUS).find(
-        (key) => getBookingStatusDisplay(BOOKING_STATUS[key]) === newStatusDisplay,
-      )
+        (key) =>
+          getBookingStatusDisplay(BOOKING_STATUS[key]) === newStatusDisplay
+      );
 
       if (!statusCodeKey) {
-        throw new Error(`Invalid status: ${newStatusDisplay}`)
+        throw new Error(`Invalid status: ${newStatusDisplay}`);
       }
 
-      const statusCode = BOOKING_STATUS[statusCodeKey]
+      const statusCode = BOOKING_STATUS[statusCodeKey];
 
       const result = await updateBooking({
         id: bookingId,
         status: statusCode,
-      }).unwrap()
+      }).unwrap();
 
-      message.success("Cập nhật trạng thái booking thành công")
-      refetchBookings()
+      message.success("Cập nhật trạng thái booking thành công");
+      refetchBookings();
 
-      return result
+      return result;
     } catch (error) {
-      message.error(error?.data?.message || "Cập nhật trạng thái booking thất bại")
-      console.error("Error updating booking status:", error)
-      throw error
+      message.error(
+        error?.data?.message || "Cập nhật trạng thái booking thất bại"
+      );
+      console.error("Error updating booking status:", error);
+      throw error;
     }
-  }
+  };
 
   const handleGeneratePassword = async ({ bookingId, passwordRoomInput }) => {
     try {
       const result = await generatePassword({
         bookingId,
         passwordRoomInput,
-      }).unwrap()
-      message.success("Mật khẩu phòng đã được cập nhật thành công")
-      return result
+      }).unwrap();
+      message.success("Mật khẩu phòng đã được cập nhật thành công");
+      return result;
     } catch (error) {
-      message.error(error?.data?.message || "Cập nhật mật khẩu phòng thất bại")
-      throw error
+      message.error(error?.data?.message || "Cập nhật mật khẩu phòng thất bại");
+      throw error;
     }
-  }
+  };
 
   const handleSelectBookingDetail = (bookingId) => {
-    setSelectedBookingId(bookingId)
-  }
+    setSelectedBookingId(bookingId);
+  };
 
   if (isLoadingOwnerDetail || isLoading) {
     return (
@@ -203,22 +223,32 @@ export default function Booking() {
         <Spin size="large" />
         <p>Đang tải dữ liệu...</p>
       </div>
-    )
+    );
   }
 
   return (
-    <div className={styles.bookingDashboard}>
-      <ListPlace locations={locations} onSelectLocation={handleLocationSelect} selectedLocation={selectedLocation} />
-      <ListBooking
-        bookings={filteredBookings}
-        bookingStatusCodes={BOOKING_STATUS}
-        paymentStatusCodes={PAYMENT_STATUS}
-        onStatusChange={handleStatusChange}
-        isUpdating={isUpdating}
-        bookingDetailData={bookingDetailData}
-        onSelectBookingDetail={handleSelectBookingDetail}
-        generatePassword={handleGeneratePassword}
-      />
-    </div>
-  )
+    <>
+      {ownerDetailData?.isApproved || isAdmin ? (
+        <div className={styles.bookingDashboard}>
+          <ListPlace
+            locations={locations}
+            onSelectLocation={handleLocationSelect}
+            selectedLocation={selectedLocation}
+          />
+          <ListBooking
+            bookings={filteredBookings}
+            bookingStatusCodes={BOOKING_STATUS}
+            paymentStatusCodes={PAYMENT_STATUS}
+            onStatusChange={handleStatusChange}
+            isUpdating={isUpdating}
+            bookingDetailData={bookingDetailData}
+            onSelectBookingDetail={handleSelectBookingDetail}
+            generatePassword={handleGeneratePassword}
+          />
+        </div>
+      ) : (
+        <NotApprove />
+      )}
+    </>
+  );
 }

@@ -47,7 +47,7 @@ export default function AccountTable({ data, loading }) {
       key: "roleName",
       render: (role) => (
         <span className={`${styles.role} ${styles[role.toLowerCase()]}`}>
-          {role === "Staff"
+          {role === "Admin"
             ? "Nhân viên"
             : role === "Owner"
             ? "Chủ hộ"
@@ -166,7 +166,7 @@ export default function AccountTable({ data, loading }) {
     navigate(
       user.roleName === "Customer"
         ? `/customer/${user._id}`
-        : `/owner/${user._id}/dashboard`
+        : `/owner/${user._id}/information`
     );
   };
 

@@ -35,6 +35,7 @@ export default function Setting() {
       isVerifiedEmail: userData?.isVerifiedEmail,
       isActive: userData?.isActive,
       isApproved: ownerDetail?.isApproved,
+      note: ownerDetail?.note || null,
     };
   }, [ownerDetail]);
 
@@ -54,15 +55,17 @@ export default function Setting() {
       taxID: ownerDetail?.businessInformationId?.taxID,
     };
   }, [ownerDetail]);
+  // console.log(ownerDetail);
+
   const bankInfo = useMemo(() => {
     if (!ownerDetail) return null;
     return {
       ownerId: ownerDetail.id,
       // businessId: ownerDetail?.businessInformationId?.id || null,
-      bankId: ownerDetail?.bankId?.id || null,
-      bankName: ownerDetail?.bankId?.bankName,
-      bankNo: ownerDetail?.bankId?.bankNo,
-      bankAccountName: ownerDetail?.bankId?.bankAccountName,
+      bankId: ownerDetail?.paymentInformationId?.id || null,
+      bankName: ownerDetail?.paymentInformationId?.bankName,
+      bankNo: ownerDetail?.paymentInformationId?.bankNo,
+      bankAccountName: ownerDetail?.paymentInformationId?.bankAccountName,
     };
   }, [ownerDetail]);
   if (ownerLoading || !userInfo) {
@@ -99,19 +102,19 @@ export default function Setting() {
       label: "Tài khoản ngân hàng",
       children: <BankAccount refetch={refetch} bankData={bankInfo} />,
     },
-    {
-      key: "meanWallet",
-      label: "Ví",
-      children: (
-        <MeanWallet
-          walletData={{
-            availableBalance: "900,000 vnd",
-            pendingBalance: "20,000 vnd",
-            userName: "Alexa Rawles",
-          }}
-        />
-      ),
-    },
+    // {
+    //   key: "meanWallet",
+    //   label: "Ví",
+    //   children: (
+    //     <MeanWallet
+    //       walletData={{
+    //         availableBalance: "900,000 vnd",
+    //         pendingBalance: "20,000 vnd",
+    //         userName: "Alexa Rawles",
+    //       }}
+    //     />
+    //   ),
+    // },
   ];
 
   return (
