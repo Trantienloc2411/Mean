@@ -18,18 +18,14 @@ import { useParams } from "react-router-dom";
 import { supabase } from "../../../../../../redux/services/supabase";
 
 export default function AccountInformation({ userData, refetch }) {
-  const userRole = localStorage.getItem("user_role")?.toLowerCase(); // "owner" | "admin"
+  const userRole = localStorage.getItem("user_role")?.toLowerCase();
   const canEdit = userRole === `"owner"`;
-
 
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState(userData);
   const [updateUser] = useUpdateUserMutation();
   const { id } = useParams();
   const [uploading, setUploading] = useState(false);
-  // console.log(userData);
-
-  // Cập nhật formData khi userData thay đổi
   useEffect(() => {
     setFormData(userData);
   }, [userData]);

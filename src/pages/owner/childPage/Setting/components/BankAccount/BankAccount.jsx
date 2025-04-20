@@ -6,6 +6,9 @@ import {
 } from "../../../../../../redux/services/paymentInfoApi";
 
 export default function BankInfo({ bankData, refetch }) {
+  const userRole = localStorage.getItem("user_role")?.toLowerCase();
+  const canEdit = userRole === `"owner"`;
+
   const [isEditing, setIsEditing] = useState(false);
   const [form] = Form.useForm();
   const [updateBank] = useUpdateBankMutation();
@@ -115,7 +118,7 @@ export default function BankInfo({ bankData, refetch }) {
               }
             />
           ) : (
-            <Input disabled />
+            <Input readOnly />
           )}
         </Form.Item>
 
@@ -124,7 +127,7 @@ export default function BankInfo({ bankData, refetch }) {
           name="bankNo"
           rules={[{ required: true }]}
         >
-          <Input disabled={!isEditing} />
+          <Input readOnly={!isEditing} />
         </Form.Item>
 
         <Form.Item
@@ -132,7 +135,7 @@ export default function BankInfo({ bankData, refetch }) {
           name="bankAccountName"
           rules={[{ required: true }]}
         >
-          <Input disabled={!isEditing} />
+          <Input readOnly={!isEditing} />
         </Form.Item>
       </Form>
 
@@ -144,16 +147,18 @@ export default function BankInfo({ bankData, refetch }) {
           marginTop: "20px",
         }}
       >
-        {isEditing ? (
-          <>
-            <Button type="primary" onClick={handleSave}>
-              Lưu
-            </Button>
-            <Button onClick={handleCancel}>Thoát</Button>
-          </>
-        ) : (
-          <Button onClick={() => setIsEditing(true)}>Chỉnh sửa</Button>
-        )}
+        {canEdit ? (
+          isEditing ? (
+            <>
+              <Button type="primary" onClick={handleSave}>
+                Lưu
+              </Button>
+              <Button onClick={handleCancel}>Thoát</Button>
+            </>
+          ) : (
+            <Button onClick={() => setIsEditing(true)}>Chỉnh sửa</Button>
+          )
+        ) : null}
       </div>
     </div>
   );

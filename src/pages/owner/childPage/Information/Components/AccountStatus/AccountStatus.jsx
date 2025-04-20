@@ -1,18 +1,18 @@
-import { Card, Typography, Space, Tooltip } from "antd"
-import { InfoCircleOutlined } from "@ant-design/icons"
-import styles from "./AccountStatus.module.scss"
+import { Card, Typography, Space, Tooltip } from "antd";
+import { InfoCircleOutlined } from "@ant-design/icons";
+import styles from "./AccountStatus.module.scss";
 
-const { Text } = Typography
+const { Text } = Typography;
 
 export default function StatusInfo({
-                                     userInfo,
-                                     isApproved,
-                                     note,
-                                     isAccountActive,
-                                     tooltipAccountStatus,
-                                     isAccountVerified,
-                                     tooltipAccountVerified,
-                                   }) {
+  userInfo,
+  isApproved,
+  note,
+  isAccountActive,
+  tooltipAccountStatus,
+  isAccountVerified,
+  tooltipAccountVerified,
+}) {
   const statusInfo = [
     {
       label: "Trạng thái hoạt động:",
@@ -35,23 +35,27 @@ export default function StatusInfo({
       tooltip: note,
       valueStyle: isApproved ? styles.statusTrue : styles.statusFalse,
     },
-  ]
+  ];
 
   return (
-      <Card title="Trạng thái tài khoản" className={styles.cardStyle}>
-        <Space direction="vertical" size="middle" style={{ width: "100%" }}>
-          {statusInfo.map((item, index) => (
-              <div key={index} className={styles.statusItem}>
-                <Text className={styles.statusLabel}>{item.label}</Text>
-                <span className={`${styles.statusValue} ${item.valueStyle}`}>{item.value}</span>
-                {item.status ? null : (
-                    <Tooltip title={item.tooltip}>
-                      <InfoCircleOutlined style={{ color: "#1890ff", cursor: "pointer" }} />
-                    </Tooltip>
-                )}
-              </div>
-          ))}
-        </Space>
-      </Card>
-  )
+    <Card title="Trạng thái tài khoản" className={styles.cardStyle}>
+      <Space direction="vertical" size="middle" style={{ width: "100%" }}>
+        {statusInfo.map((item, index) => (
+          <div key={index} className={styles.statusItem}>
+            <Text className={styles.statusLabel}>{item.label}</Text>
+            <span className={`${styles.statusValue} ${item.valueStyle}`}>
+              {item.value}
+            </span>
+            {item.status ? null : (
+              <Tooltip title={item.tooltip}>
+                <InfoCircleOutlined
+                  style={{ color: "#1890ff", cursor: "pointer" }}
+                />
+              </Tooltip>
+            )}
+          </div>
+        ))}
+      </Space>
+    </Card>
+  );
 }

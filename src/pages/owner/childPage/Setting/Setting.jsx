@@ -80,18 +80,18 @@ export default function Setting() {
   }
 
   const tabItems = [
-    {
-      key: "accountInfo",
-      label: "Thông tin tài khoản",
-      children: <Information refetch={refetch} userData={userInfo} />,
-    },
-    {
-      key: "businessInfo",
-      label: "Thông tin doanh nghiệp",
-      children: (
-        <BusinessInformation refetch={refetch} businessData={businessInfo} />
-      ),
-    },
+    // {
+    //   key: "accountInfo",
+    //   label: "Thông tin tài khoản",
+    //   children: <Information refetch={refetch} userData={userInfo} />,
+    // },
+    // {
+    //   key: "businessInfo",
+    //   label: "Thông tin doanh nghiệp",
+    //   children: (
+    //     <BusinessInformation refetch={refetch} businessData={businessInfo} />
+    //   ),
+    // },
     {
       key: "changePassword",
       label: "Đổi mật khẩu",

@@ -1,20 +1,30 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { MoreOutlined } from "@ant-design/icons";
-import { Dropdown, Menu, Table, message } from "antd";
+import { Table, message } from "antd";
 import styles from "../components/AccountTable.module.scss";
 import UserDetailModal from "./UserDetailModal";
 import {
   useActiveUserMutation,
   useBlockUserMutation,
 } from "../../../redux/services/userApi";
-import { FaEye } from "react-icons/fa";
+import { FaEye, FaLock, FaLockOpen } from "react-icons/fa";
 import dayjs from "dayjs";
+import OwnerDetailModal from "./OwnerDetailModal";
+import {
+  useLazyGetOwnerDetailByUserIdQuery,
+  useUpdateOwnerMutation,
+} from "../../../redux/services/ownerApi";
+import { Modal } from "antd";
 
 export default function AccountTable({ data, loading }) {
   const navigate = useNavigate();
+  // const [triggerGetOwnerDetail] = useLazyGetOwnerDetailByUserIdQuery();
+  const [updateOwner] = useUpdateOwnerMutation();
+
   const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUserOwner, setSelectedUserOwner] = useState(null);
   const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isDetailOpenOwner, setIsDetailOpenOwner] = useState(false);
   const [activeUser] = useActiveUserMutation();
   const [blockUser] = useBlockUserMutation();
   const [pagination, setPagination] = useState({
@@ -66,31 +76,31 @@ export default function AccountTable({ data, loading }) {
         </span>
       ),
     },
-    {
-      title: "Xác thực",
-      dataIndex: "isVerified",
-      align: "center",
+    // {
+    //   title: "Xác thực",
+    //   dataIndex: "isVerified",
+    //   align: "center",
 
-      key: "isVerified",
-      render: (_, record) => (
-        <div className={styles.verifyContainer}>
-          <span
-            className={`${styles.isVerifiedEmail} ${
-              styles[record.isVerifiedEmail]
-            }`}
-          >
-            Email
-          </span>
-          <span
-            className={`${styles.isVerifiedPhone} ${
-              styles[record.isVerifiedPhone]
-            }`}
-          >
-            Phone
-          </span>
-        </div>
-      ),
-    },
+    //   key: "isVerified",
+    //   render: (_, record) => (
+    //     <div className={styles.verifyContainer}>
+    //       <span
+    //         className={`${styles.isVerifiedEmail} ${
+    //           styles[record.isVerifiedEmail]
+    //         }`}
+    //       >
+    //         Email
+    //       </span>
+    //       <span
+    //         className={`${styles.isVerifiedPhone} ${
+    //           styles[record.isVerifiedPhone]
+    //         }`}
+    //       >
+    //         Phone
+    //       </span>
+    //     </div>
+    //   ),
+    // },
     // {
     //   title: "Ngày tạo",
     //   dataIndex: "createdAt",
@@ -113,85 +123,135 @@ export default function AccountTable({ data, loading }) {
     },
     {
       key: "view",
+      title: "Xem",
       align: "center",
       render: (_, record) => (
-        <span
-          className={styles.iconViewDetail}
-          onClick={(e) => {
-            handleViewModel(record);
-          }}
-        >
-          <FaEye />
-        </span>
+        <>
+          {/* Bạn có thể giữ lại dòng này để debug nếu muốn */}
+          {/* {console.log(record.roleName)} */}
+
+          {record.roleName === "Owner" ? (
+            <span
+              className={styles.iconViewDetail}
+              onClick={() => {
+                handleViewModelOwner(record);
+              }}
+            >
+              <FaEye />
+            </span>
+          ) : (
+            <span
+              className={styles.iconViewDetail}
+              onClick={() => {
+                handleViewModel(record);
+              }}
+            >
+              <FaEye />
+            </span>
+          )}
+        </>
       ),
     },
+
     {
-      // title: "Thao tác",
-      key: "action",
+      key: "status",
+      title: "Khóa",
       align: "center",
       render: (_, record) => (
-        <Dropdown
-          overlay={
-            <Menu onClick={(e) => e.domEvent.stopPropagation()}>
-              {["Customer", "Owner"].includes(record.roleName) && (
-                <Menu.Item key="1" onClick={() => handleViewDetails(record)}>
-                  Xem Chi Tiết
-                </Menu.Item>
-              )}
-
-              {/* <Menu.Item key="1" onClick={() => handleViewDetails(record)}>
-                Xem Chi Tiết
-              </Menu.Item> */}
-              {record.isActive ? (
-                <Menu.Item key="2" onClick={() => handleBlockUser(record)}>
-                  Khóa tài khoản
-                </Menu.Item>
-              ) : (
-                <Menu.Item key="3" onClick={() => handleActiveUser(record)}>
-                  Cho phép hoạt động
-                </Menu.Item>
-              )}
-            </Menu>
-          }
-          trigger={["click"]}
-          className="action-menu" // Thêm class này để kiểm tra trong onRow
-        >
-          <MoreOutlined />
-        </Dropdown>
+        <>
+          {["Customer", "Owner"].includes(record.roleName) &&
+            (record.isActive ? (
+              <span
+                className={styles.iconViewDetail}
+                onClick={(e) => {
+                  handleBlockUser(record);
+                }}
+              >
+                <FaLockOpen style={{ color: "green" }} />
+              </span>
+            ) : (
+              <span
+                className={styles.iconViewDetail}
+                onClick={(e) => {
+                  handleActiveUser(record);
+                }}
+              >
+                <FaLock style={{ color: "red" }} />
+              </span>
+            ))}
+        </>
       ),
     },
   ];
 
-  const handleViewDetails = (user) => {
-    navigate(
-      user.roleName === "Customer"
-        ? `/customer/${user._id}`
-        : `/owner/${user._id}/information`
-    );
+  // const handleViewDetails = (user) => {
+  //   navigate(
+  //     user.roleName === "Customer"
+  //       ? `/customer/${user._id}`
+  //       : `/owner/${user._id}/information`
+  //   );
+  // };
+
+  const handleBlockUser = (user) => {
+    Modal.confirm({
+      title: "Xác nhận khóa tài khoản?",
+      content: `Bạn có chắc chắn muốn khóa tài khoản "${user.fullName}" không?`,
+      okText: "Khóa",
+      cancelText: "Hủy",
+      okType: "danger",
+      onOk: async () => {
+        try {
+          await blockUser(user._id).unwrap();
+          message.success("Khóa tài khoản thành công!");
+        } catch {
+          message.error("Lỗi khi cập nhật trạng thái!");
+        }
+      },
+    });
   };
 
-  const handleActiveUser = async (user) => {
-    try {
-      await activeUser(user._id).unwrap();
-      message.success("Cho phép hoạt động thành công!");
-    } catch {
-      message.error("Lỗi khi cập nhật trạng thái!");
-    }
+  const handleActiveUser = (user) => {
+    Modal.confirm({
+      title: "Xác nhận mở khóa tài khoản?",
+      content: `Bạn có chắc chắn muốn cho phép tài khoản "${user.fullName}" hoạt động trở lại?`,
+      okText: "Mở khóa",
+      cancelText: "Hủy",
+      okType: "primary",
+      onOk: async () => {
+        try {
+          await activeUser(user._id).unwrap();
+          message.success("Cho phép hoạt động thành công!");
+        } catch {
+          message.error("Lỗi khi cập nhật trạng thái!");
+        }
+      },
+    });
   };
 
-  const handleBlockUser = async (user) => {
-    try {
-      await blockUser(user._id).unwrap();
-      message.success("Khóa tài khoản thành công!");
-    } catch {
-      message.error("Lỗi khi cập nhật trạng thái!");
-    }
-  };
   const handleViewModel = (user) => {
     setSelectedUser(user); // Lưu user được chọn
     setIsDetailOpen(true); // Mở modal
   };
+  const handleViewModelOwner = async (user) => {
+    // console.log("Opening owner details for:", user.fullName);
 
+    // Có thể fetch dữ liệu của owner từ API nếu cần
+    // Ví dụ:
+    // try {
+    //   const ownerDetails = await triggerGetOwnerDetail(user._id);
+    //   // setSelectedUserOwner({
+    //   //   ...user,
+    //   // });
+    setSelectedUserOwner(user);
+    // } catch (error) {
+    // message.error("Không thể tải thông tin chủ sở hữu");
+    // console.error("Error fetching owner details:", error);
+    // return;
+    // }
+
+    // Nếu không fetch thì chỉ cần set user hiện tại
+    setIsDetailOpenOwner(true);
+  };
   return (
     <div style={{ marginTop: 10 }}>
       <Table
@@ -213,6 +273,14 @@ export default function AccountTable({ data, loading }) {
         open={isDetailOpen}
         onClose={() => setIsDetailOpen(false)}
         user={selectedUser}
+      />
+      <OwnerDetailModal
+        open={isDetailOpenOwner}
+        onClose={() => setIsDetailOpenOwner(false)}
+        user={selectedUserOwner}
+        handleBlockUser={handleBlockUser}
+        handleActiveUser={handleActiveUser}
+        updateOwner={updateOwner}
       />
     </div>
   );

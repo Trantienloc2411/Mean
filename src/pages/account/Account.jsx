@@ -14,7 +14,7 @@ import CreateAccountForm from "./components/CreateAccountForm";
 import { IoCreate } from "react-icons/io5";
 
 export default function Account() {
-  const { data: users, error, isLoading } = useGetUsersQuery();
+  const { data: users, refetch, error, isLoading } = useGetUsersQuery();
   const { data: roles } = useGetRolesQuery();
   const [openCreateUser, setOpenCreateUser] = useState(false);
   // const [refreshToken, { isFetching }] = useLazyRefreshTokenQuery();
@@ -39,7 +39,7 @@ export default function Account() {
 
   const countUser = (users) => {
     if (!users) return { totalUser: 0, countCustomer: 0, countStaff: 0 };
-    
+
     let totalUser = users.length;
     let countCustomer = 0;
     let countStaff = 0;
@@ -54,8 +54,6 @@ export default function Account() {
 
     return { totalUser, countCustomer, countStaff };
   };
-
-
 
   useEffect(() => {
     if (users) {
@@ -107,10 +105,14 @@ export default function Account() {
   return (
     <div className={styles.contentContainer}>
       <h2 className={styles.sectionTitle}>Quản lý tài khoản</h2>
-      
+
       {/* Overview Section */}
       <div className={styles.overviewSection}>
-        <OverviewAccount totalUser={countUser(users).totalUser} countCustomer={countUser(users).countCustomer} countStaff={countUser(users).countStaff} />
+        <OverviewAccount
+          totalUser={countUser(users).totalUser}
+          countCustomer={countUser(users).countCustomer}
+          countStaff={countUser(users).countStaff}
+        />
       </div>
 
       {/* Account List Section */}
@@ -140,14 +142,17 @@ export default function Account() {
               type="primary"
               className={styles.createButton}
               onClick={() => setOpenCreateUser(true)}
-
             >
               Tạo tài khoản
             </Button>
           </div>
 
           <div className={styles.tableContainer}>
-            <AccountTable loading={isLoading} data={filteredUsers} />
+            <AccountTable
+              loading={isLoading}
+              data={filteredUsers}
+              refetch={refetch}
+            />
           </div>
         </Card>
       </div>
