@@ -187,3 +187,30 @@
     color: #0056b3;
   }
 }
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 24px;
+}
+
+.infoItem {
+  display: flex;
+  flex-direction: column;
+}
+
+.infoLabel {
+  font-weight: 500;
+  color: #666;
+}
+
+.infoValue {
+  font-size: 15px;
+}
+
+.true {
+  color: #52c41a;
+}
+
+.false {
+  color: #ff4d4f;
+}

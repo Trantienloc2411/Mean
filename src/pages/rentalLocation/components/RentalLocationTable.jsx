@@ -65,7 +65,9 @@ export default function RentalLocationTable({ data, loading }) {
     setSelectedRental(record);
     setIsDetailModalVisible(true);
   };
-
+  const handleViewRental = (record) => {
+    window.open(`/rental-location/${record.id}`, "_blank");
+  };
   const columns = [
     {
       title: "No.",
@@ -159,26 +161,26 @@ export default function RentalLocationTable({ data, loading }) {
         </span>
       ),
     },
-    {
-      key: "action",
-      align: "center",
-      render: (_, record) => (
-        <Dropdown
-          menu={{
-            items: [
-              {
-                key: "1",
-                label: "Xem chi tiết",
-                onClick: () => navigate(`/rental-location/${record.id}`),
-              },
-            ],
-          }}
-          trigger={["click"]}
-        >
-          <MoreOutlined style={{ cursor: "pointer", fontSize: "16px" }} />
-        </Dropdown>
-      ),
-    },
+    // {
+    //   key: "action",
+    //   align: "center",
+    //   render: (_, record) => (
+    //     <Dropdown
+    //       menu={{
+    //         items: [
+    //           {
+    //             key: "1",
+    //             label: "Xem chi tiết",
+    //             onClick: () => navigate(`/rental-location/${record.id}`),
+    //           },
+    //         ],
+    //       }}
+    //       trigger={["click"]}
+    //     >
+    //       <MoreOutlined style={{ cursor: "pointer", fontSize: "16px" }} />
+    //     </Dropdown>
+    //   ),
+    // },
   ];
 
   return (
@@ -228,6 +230,7 @@ export default function RentalLocationTable({ data, loading }) {
         visible={isDetailModalVisible}
         onClose={() => setIsDetailModalVisible(false)}
         data={selectedRental}
+        onViewFullDetail={handleViewRental}
       />
     </>
   );

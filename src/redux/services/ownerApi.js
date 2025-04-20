@@ -21,23 +21,22 @@ export const ownerApi = apiSlice.injectEndpoints({
       providesTags: (result, error, id) => [{ type: "OwnerDetail", id }],
     }),
 
-    createOwner: builder.mutation(
-        {
-          query: ({createOwnerData}) => ({
-            url: `owner/create-owner/`,
-            method: "POST",
-            body: createOwnerData,
-          }),
-          providesTags: (result, error, id) => [{ type: "OwnerDetail", id }],
-        }
-    )
+    createOwner: builder.mutation({
+      query: ({ createOwnerData }) => ({
+        url: `owner/create-owner/`,
+        method: "POST",
+        body: createOwnerData,
+      }),
+      providesTags: (result, error, id) => [{ type: "OwnerDetail", id }],
+    }),
   }),
 });
 
 export const {
   useLazyGetOwnerByIdQuery,
+  useLazyGetOwnerDetailByUserIdQuery,
   useGetOwnerByIdQuery,
   useUpdateOwnerMutation,
   useGetOwnerDetailByUserIdQuery,
-  useCreateOwnerMutation: useCreateOwnerMutation,
+  useCreateOwnerMutation,
 } = ownerApi;

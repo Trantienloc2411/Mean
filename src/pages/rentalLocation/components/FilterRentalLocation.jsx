@@ -1,9 +1,14 @@
 import { Dropdown, Menu, Button, Checkbox, Flex } from "antd";
 import { DownOutlined } from "@ant-design/icons";
 
+// Đồng bộ với RENTALLOCATION_STATUS
 const statusOptions = [
-  { value: "Active", label: "Hoạt động" },
-  { value: "Paused", label: "Không hoạt động" },
+  { value: 1, label: "Chờ duyệt" }, // PENDING
+  { value: 2, label: "Không hoạt động" }, // INACTIVE
+  { value: 3, label: "Hoạt động" }, // ACTIVE
+  { value: 4, label: "Tạm dừng" }, // PAUSE
+  { value: 5, label: "Đã xóa" }, // DELETED
+  { value: 6, label: "Cần cập nhật" }, // NEEDS_UPDATE
 ];
 
 export default function FilterRentalLocation({

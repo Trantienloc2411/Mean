@@ -1,21 +1,21 @@
-import { useState, useEffect } from 'react';
-import { Table, Button, Input, Dropdown, message } from 'antd';
-import { MoreOutlined, PlusOutlined, FilterOutlined } from '@ant-design/icons';
-import styles from './RoomAmenitiesManagement.module.scss';
-import DeleteAmenityModal from './components/DeleteAmenityModal/DeleteAmenityModal.jsx';
-import AddAmenityModal from './components/AddAmenityModal/AddAmenityModal.jsx';
-import UpdateAmenityModal from './components/UpdateAmenityModal/UpdateAmenityModal.jsx';
-import DetailAmenityModal from './components/DetailAmenityModal/DetailAmenityModal.jsx';
-import Filter from './components/Filter/Filter.jsx';
-import debounce from 'lodash/debounce';
-import { 
-  useGetAllAmenitiesQuery, 
-  useDeleteAmenityMutation, 
-  useCreateAmenityMutation, 
-  useUpdateAmenityMutation 
-} from '../../../../../../redux/services/serviceApi.js';
-import { useGetOwnerDetailByUserIdQuery } from '../../../../../../redux/services/ownerApi';
-import { useParams } from 'react-router-dom';
+import { useState, useEffect } from "react";
+import { Table, Button, Input, Dropdown, message } from "antd";
+import { MoreOutlined, PlusOutlined, FilterOutlined } from "@ant-design/icons";
+import styles from "./RoomAmenitiesManagement.module.scss";
+import DeleteAmenityModal from "./components/DeleteAmenityModal/DeleteAmenityModal.jsx";
+import AddAmenityModal from "./components/AddAmenityModal/AddAmenityModal.jsx";
+import UpdateAmenityModal from "./components/UpdateAmenityModal/UpdateAmenityModal.jsx";
+import DetailAmenityModal from "./components/DetailAmenityModal/DetailAmenityModal.jsx";
+import Filter from "./components/Filter/Filter.jsx";
+import debounce from "lodash/debounce";
+import {
+  useGetAllAmenitiesQuery,
+  useDeleteAmenityMutation,
+  useCreateAmenityMutation,
+  useUpdateAmenityMutation,
+} from "../../../../../../redux/services/serviceApi.js";
+import { useGetOwnerDetailByUserIdQuery } from "../../../../../../redux/services/ownerApi";
+import { useParams } from "react-router-dom";
 
 const RoomAmenitiesManagement = ({ isOwner }) => {
   const { id } = useParams();
@@ -30,13 +30,14 @@ const RoomAmenitiesManagement = ({ isOwner }) => {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
 
-  const { data: ownerDetailData, isLoading: isOwnerDetailLoading } = useGetOwnerDetailByUserIdQuery(id);
+  const { data: ownerDetailData, isLoading: isOwnerDetailLoading } =
+    useGetOwnerDetailByUserIdQuery(id);
   const ownerId = ownerDetailData?.id;
-
-  const { data: amenitiesData, isLoading: isAmenitiesLoading, refetch } = useGetAllAmenitiesQuery(
-    { ownerId },
-    { skip: !ownerId }
-  );
+  const {
+    data: amenitiesData,
+    isLoading: isAmenitiesLoading,
+    refetch,
+  } = useGetAllAmenitiesQuery({ ownerId }, { skip: !ownerId });
   const [deleteAmenity, { isLoading: isDeleting }] = useDeleteAmenityMutation();
   const [createAmenity, { isLoading: isCreating }] = useCreateAmenityMutation();
   const [updateAmenity, { isLoading: isUpdating }] = useUpdateAmenityMutation();

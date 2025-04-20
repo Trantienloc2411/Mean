@@ -67,8 +67,6 @@ export default function UserDetailModal({ open, onClose, user }) {
         </Descriptions.Item>
 
         <Descriptions.Item label="Xác thực SĐT">
-          
-
           {user && (
             <span
               className={`${styles.isVerifiedPhone} ${
