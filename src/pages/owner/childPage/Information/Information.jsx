@@ -1,73 +1,85 @@
 import { useParams } from "react-router-dom";
+import { Skeleton, Row, Col, message } from "antd";
+import { useState, useEffect } from "react";
 import AccountInfo from "./Components/AccountInfo/AccountInfo";
 import AccountStatus from "./Components/AccountStatus/AccountStatus";
 import CompanyInfo from "./Components/CompanyInfo/CompanyInfo";
-import { Skeleton, Row, Col, message } from "antd";
-import { useGetOwnerDetailByUserIdQuery } from "../../../../redux/services/ownerApi";
-import { useState, useEffect } from "react";
 import styles from "./Information.module.scss";
+
+import {
+  useGetOwnerDetailByUserIdQuery,
+  useUpdateOwnerMutation,
+} from "../../../../redux/services/ownerApi";
+import { useGetOwnerLogsByOwnerIdQuery } from "../../../../redux/services/ownerLogApi";
 
 export default function Information() {
   const { id } = useParams();
-  const { data: ownerDetail, isLoading: ownerLoading } =
-    useGetOwnerDetailByUserIdQuery(id);
 
+  // Get owner detail
+  const {
+    data: ownerDetail,
+    refetch: refreshOwner,
+    isLoading: ownerLoading,
+  } = useGetOwnerDetailByUserIdQuery(id);
+  const [updateOwner] = useUpdateOwnerMutation();
+  // State
   const [userInfo, setUserInfo] = useState(null);
   const [companyInfo, setCompanyInfo] = useState(null);
 
-  console.log("Owner detail", ownerDetail);
-  // Initialize data when it's loaded
+  // Get logs (only when owner loaded)
+  const ownerId = ownerDetail?._id;
+  const { data: logsData, refetch: refetchLogs } =
+    useGetOwnerLogsByOwnerIdQuery(ownerId, {
+      skip: !ownerId,
+    });
+
+  console.log(ownerDetail?.approvalStatus);
+
+  // Extract + map data
   useEffect(() => {
     if (ownerDetail && !ownerLoading) {
-      const userData = ownerDetail?.userId;
+      const user = ownerDetail.userId || {};
+      const business = ownerDetail.businessInformationId || {};
 
       setUserInfo({
-        isApproved: ownerDetail?.isApproved,
-        note: ownerDetail?.note,
-        fullName: userData?.fullName,
-        email: userData?.email,
-        phone: userData?.phone,
+        approvalStatus: ownerDetail?.approvalStatus || 4,
+        note: ownerDetail?.note || "",
+        fullName: user.fullName,
+        email: user.email,
+        phone: user.phone,
         avatar:
-          userData?.avatarUrl?.[0] ||
+          user.avatarUrl?.[0] ||
           "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTrT_BjEyf_LEpcvb225JX2qFCJcLz5-0RXLg&s",
-        isActive: userData?.isActive,
-        messageIsActive: userData?.isActive
-          ? "Tài khoản đang hoạt thành công"
+        isActive: user.isActive,
+        messageIsActive: user.isActive
+          ? "Tài khoản đang hoạt động"
           : "Tài khoản đang bị khóa",
-        isVerifiedEmail: userData?.isVerifiedEmail,
-        isVerify: userData?.isVerifiedEmail,
-        messageIsVerify: userData?.isVerifiedEmail
+        isVerifiedEmail: user.isVerifiedEmail,
+        isVerify: user.isVerifiedEmail,
+        messageIsVerify: user.isVerifiedEmail
           ? "Đã xác thực"
           : "Số điện thoại/Email chưa xác thực",
       });
 
       setCompanyInfo({
-        businessLicensesFile:
-          ownerDetail?.businessInformationId?.businessLicensesFile,
-        citizenIdentification:
-          ownerDetail?.businessInformationId?.citizenIdentification,
-        companyAddress: ownerDetail?.businessInformationId?.companyAddress,
-        companyName: ownerDetail?.businessInformationId?.companyName,
-        representativeName:
-          ownerDetail?.businessInformationId?.representativeName,
-        taxCode: ownerDetail?.businessInformationId?.taxID,
+        id: business.id,
+        businessLicensesFile: business.businessLicensesFile,
+        citizenIdentification: business.citizenIdentification,
+        companyAddress: business.companyAddress,
+        companyName: business.companyName,
+        representativeName: business.representativeName,
+        taxCode: business.taxID,
       });
     }
   }, [ownerDetail, ownerLoading]);
 
+  // Update info (fake logic)
   const handleUpdateUserInfo = async (updatedInfo) => {
     try {
-      // Here you would make an API call to update the user info
-      // For example:
-      // const response = await updateUserInfo(id, updatedInfo);
-
-      // Update local state
-      setUserInfo({
-        ...userInfo,
+      setUserInfo((prev) => ({
+        ...prev,
         ...updatedInfo,
-      });
-
-      // message.success("Thông tin tài khoản đã được cập nhật thành công!")
+      }));
     } catch (error) {
       console.error("Error updating user info:", error);
       message.error("Có lỗi xảy ra khi cập nhật thông tin tài khoản!");
@@ -76,24 +88,20 @@ export default function Information() {
 
   const handleUpdateCompanyInfo = async (updatedInfo) => {
     try {
-      setCompanyInfo({
-        ...companyInfo,
+      setCompanyInfo((prev) => ({
+        ...prev,
         ...updatedInfo,
-      });
-
-      // message.success("Thông tin doanh nghiệp đã được cập nhật thành công!")
+      }));
     } catch (error) {
       console.error("Error updating company info:", error);
       message.error("Có lỗi xảy ra khi cập nhật thông tin doanh nghiệp!");
     }
   };
 
+  // Loading state
   if (ownerLoading || !userInfo || !companyInfo) {
     return (
-      <div
-        className="loadingContainer"
-        style={{ textAlign: "center", padding: "20px" }}
-      >
+      <div style={{ textAlign: "center", padding: "20px" }}>
         <Skeleton />
       </div>
     );
@@ -114,12 +122,18 @@ export default function Information() {
               tooltipAccountStatus={userInfo.messageIsActive}
               isAccountVerified={userInfo.isVerify}
               tooltipAccountVerified={userInfo.messageIsVerify}
-              isApproved={userInfo.isApproved}
+              approvalStatus={userInfo.approvalStatus}
               note={userInfo.note}
+              ownerId={ownerId}
+              approvalLogs={logsData || []}
               userInfo={userInfo}
+              refetchLogs={refetchLogs}
+              updateOwner={updateOwner}
+              refreshOwner={refreshOwner}
             />
           </div>
         </Col>
+
         {/* Cột phải: Thông tin công ty */}
         <Col xs={24} md={12}>
           <div className={styles.rightColumn}>
