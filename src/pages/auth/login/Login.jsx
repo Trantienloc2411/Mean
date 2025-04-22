@@ -16,7 +16,12 @@ import {
   setRole,
   setUser,
 } from "../../../redux/slices/authSlice";
-import { saveToken, saveUserId, saveRole, saveUsername } from "../../../utils/storage";
+import {
+  saveToken,
+  saveUserId,
+  saveRole,
+  saveUsername,
+} from "../../../utils/storage";
 import { message } from "antd";
 
 const Login = () => {
@@ -36,7 +41,6 @@ const Login = () => {
     "src/assets/images/mountain.jpg",
   ];
 
-  
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
@@ -46,7 +50,11 @@ const Login = () => {
     setIsLoading(true);
 
     try {
-      const loginResult = await login({ email, password }).unwrap();
+      const formLogin = {
+        email: email.toLowerCase().trim(),
+        password: password,
+      };
+      const loginResult = await login({ data: formLogin }).unwrap();
       console.log("Login response:", loginResult);
 
       if (loginResult?.accessToken) {
@@ -79,7 +87,7 @@ const Login = () => {
             console.log(response);
             notification.success({
               message: response.message,
-              description: "Xin hay kiểm tra email của bạn.",
+              description: "Xin hãy kiểm tra email của bạn.",
             });
             setIsLoading(false);
 

@@ -59,6 +59,7 @@ const Signup = () => {
     try {
       const response = await createUser({
         ...formData,
+        email: formData.email.toLowerCase().trim(),
         avatarUrl: [],
       }).unwrap();
       message.success("Đăng ký thành công!");

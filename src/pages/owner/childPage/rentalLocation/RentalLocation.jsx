@@ -66,7 +66,7 @@ export default function RentalLocation() {
 
   return (
     <div style={{ padding: "10px 20px" }}>
-      {ownerDetailData?.isApproved || isAdmin ? (
+      {ownerDetailData?.approvalStatus == 2 || isAdmin ? (
         <div>
           <Flex
             justify="space-between"

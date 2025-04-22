@@ -34,7 +34,7 @@ export default function TypeRoom() {
 
   return (
     <div className={styles.container}>
-      {ownerDetailData?.isApproved || isAdmin ? (
+      {ownerDetailData?.approvalStatus == 2 || isAdmin ? (
         <div className={styles.sidebar}>
           <Tabs
             activeKey={activeKey}

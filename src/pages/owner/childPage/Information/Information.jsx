@@ -63,6 +63,7 @@ export default function Information() {
 
       setCompanyInfo({
         id: business.id,
+        ownerId: ownerId,
         businessLicensesFile: business.businessLicensesFile,
         citizenIdentification: business.citizenIdentification,
         companyAddress: business.companyAddress,
