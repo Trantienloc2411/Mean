@@ -228,7 +228,7 @@ export default function Booking() {
 
   return (
     <>
-      {ownerDetailData?.isApproved || isAdmin ? (
+      {ownerDetailData?.approvalStatus == 2 || isAdmin ? (
         <div className={styles.bookingDashboard}>
           <ListPlace
             locations={locations}

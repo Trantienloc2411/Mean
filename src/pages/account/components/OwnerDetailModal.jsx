@@ -12,6 +12,7 @@ import { Input } from "antd";
 import { message } from "antd";
 import { useGetOwnerDetailByUserIdQuery } from "../../../redux/services/ownerApi";
 import { Spin } from "antd";
+import { useGetOwnerLogsByOwnerIdQuery } from "../../../redux/services/ownerLogApi";
 
 const { TabPane } = Tabs;
 
@@ -25,6 +26,10 @@ export default function OwnerDetailModal({
 }) {
   if (!user) return null;
   const { data: owner, refetch } = useGetOwnerDetailByUserIdQuery(user?.id);
+  const { data: logsData, refetch: refetchLogs } =
+    useGetOwnerLogsByOwnerIdQuery(owner?._id, {
+      skip: !owner?._id,
+    });
 
   const handleRedirect = () => {
     window.open(`/owner/${owner?.userId._id}/information`, "_blank");
@@ -85,6 +90,8 @@ export default function OwnerDetailModal({
             owner={owner}
             updateOwner={updateOwner}
             refetch={refetch}
+            logsData={logsData}
+            refetchLogs={refetchLogs}
           />
         </TabPane>
       </Tabs>
@@ -193,67 +200,94 @@ function BusinessInfo({ business }) {
   );
 }
 
-function ProfileInfo({ owner, updateOwner, refetch }) {
+const OWNER_STATUS = {
+  APPROVING: 1,
+  APPROVED: 2,
+  DENIED: 3,
+  PENDING: 4,
+};
+
+const formatStatus = (status) => {
+  switch (status) {
+    case OWNER_STATUS.APPROVED:
+      return <span className={styles.true}>Đã duyệt</span>;
+    case OWNER_STATUS.DENIED:
+      return <span className={styles.false}>Từ chối</span>;
+    case OWNER_STATUS.PENDING:
+      return <span className={styles.pending}>Chờ cập nhật</span>;
+    case OWNER_STATUS.APPROVING:
+      return <span className={styles.pending}>Chờ duyệt</span>;
+    default:
+      return <span>Không xác định</span>;
+  }
+};
+
+function ProfileInfo({ owner, updateOwner, refetch, logsData, refetchLogs }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [reason, setReason] = useState("");
 
-  const approvalHistory = owner.approvalHistory || [];
+  const approvalHistory = [...(logsData || [])].sort(
+    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+  );
 
   const handleApprove = async () => {
     try {
       await updateOwner({
         id: owner._id,
-        updatedData: { isApproved: true, reason: null },
+        updatedData: {
+          approvalStatus: OWNER_STATUS.APPROVED,
+          note: reason,
+        },
       }).unwrap();
-
-      message.success("Đã phê duyệt chủ sở hữu!");
+      // message.success(" Đã phê duyệt chủ sở hữu!");
       setReason("");
+      refetchLogs();
       setModalVisible(false);
       await refetch();
     } catch (error) {
-      message.error("Phê duyệt thất bại!");
+      message.error(" Phê duyệt thất bại!");
     }
   };
 
   const handleReject = async () => {
+    if (!reason.trim()) {
+      message.warning("Vui lòng nhập lý do từ chối!");
+      return;
+    }
     try {
       await updateOwner({
         id: owner._id,
-        updatedData: { isApproved: false, note: reason },
+        updatedData: {
+          approvalStatus: OWNER_STATUS.DENIED,
+          note: reason,
+        },
       }).unwrap();
-
-      message.success("Đã từ chối phê duyệt!");
+      // message.success(" Đã từ chối phê duyệt!");
       setReason("");
+      refetchLogs();
       setModalVisible(false);
       await refetch();
     } catch (error) {
-      message.error("Từ chối phê duyệt thất bại!");
+      message.error(" Từ chối phê duyệt thất bại!");
     }
   };
 
   const approvalColumns = [
     {
       title: "Thời điểm",
-      dataIndex: "timestamp",
-      key: "timestamp",
+      dataIndex: "createdAt",
+      key: "createdAt",
     },
     {
       title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      render: (status) =>
-        status === "approved" ? (
-          <span className={styles.true}>Đã duyệt</span>
-        ) : status === "rejected" ? (
-          <span className={styles.false}>Từ chối</span>
-        ) : (
-          <span>Chờ duyệt</span>
-        ),
+      dataIndex: "newStatus",
+      key: "newStatus",
+      render: (status) => formatStatus(status),
     },
     {
-      title: "Lý do",
-      dataIndex: "reason",
-      key: "reason",
+      title: "Ghi chú",
+      dataIndex: "note",
+      key: "note",
       render: (text) => <span>{text || "—"}</span>,
     },
   ];
@@ -265,7 +299,7 @@ function ProfileInfo({ owner, updateOwner, refetch }) {
           label="Trạng thái duyệt"
           value={
             <div style={{ display: "flex", alignItems: "center" }}>
-              {owner.isApproved ? "Đã duyệt" : "Chưa duyệt"}
+              {formatStatus(owner?.approvalStatus)}
               <FaEdit
                 color="#0366d6"
                 style={{ marginLeft: 12, cursor: "pointer" }}
@@ -273,7 +307,6 @@ function ProfileInfo({ owner, updateOwner, refetch }) {
               />
             </div>
           }
-          isStatus={owner.isApproved ? "true" : "false"}
         />
         <InfoItem
           label="Trạng thái xóa"
@@ -292,11 +325,13 @@ function ProfileInfo({ owner, updateOwner, refetch }) {
         size="small"
       />
 
-      {/* Modal cập nhật phê duyệt */}
       <Modal
         title="Cập nhật phê duyệt"
         open={modalVisible}
-        onCancel={() => setModalVisible(false)}
+        onCancel={() => {
+          setModalVisible(false);
+          setReason("");
+        }}
         footer={[
           <Button key="reject" danger onClick={handleReject}>
             Từ chối
@@ -309,12 +344,12 @@ function ProfileInfo({ owner, updateOwner, refetch }) {
         maskClosable
       >
         <p>
-          Nhập lý do nếu bạn muốn từ chối phê duyệt, để trống nếu muốn phê
+          Nhập lý do nếu bạn muốn từ chối phê duyệt. Để trống nếu muốn phê
           duyệt.
         </p>
         <Input.TextArea
           rows={4}
-          placeholder="Nhập lý do từ chối (nếu có)..."
+          placeholder="Nhập lý do từ chối (bắt buộc)..."
           value={reason}
           onChange={(e) => setReason(e.target.value)}
         />

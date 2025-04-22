@@ -34,6 +34,7 @@ const CompanyInfo = ({ companyInfo, onUpdate }) => {
   const { id } = useParams();
   const [updateBusiness] = useUpdateBusinessMutation();
   const [createBusiness] = useCreateBusinessMutation();
+  console.log(companyInfo.ownerId);
 
   const defaultData = {
     companyName: companyInfo?.companyName || "Chưa có thông tin",
@@ -154,7 +155,7 @@ const CompanyInfo = ({ companyInfo, onUpdate }) => {
         await createBusiness({
           data: {
             ...businessData,
-            ownerId: id, // Using the owner ID from URL params
+            ownerId: companyInfo.ownerId,
           },
         });
         message.success("Thông tin doanh nghiệp đã được tạo thành công!");
@@ -289,6 +290,7 @@ const CompanyInfo = ({ companyInfo, onUpdate }) => {
         <Upload
           listType="text"
           fileList={fileList}
+          accept=".pdf"
           beforeUpload={beforeUpload}
           onChange={handleChange}
           maxCount={1}
