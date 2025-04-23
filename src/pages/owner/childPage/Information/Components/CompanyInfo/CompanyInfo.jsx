@@ -241,7 +241,7 @@ const CompanyInfo = ({ companyInfo, onUpdate }) => {
     <Form form={form} layout="vertical" className={styles.editForm}>
       <Form.Item
         name="companyName"
-        label="Tên kinh doanh"
+        label="Tên công ty"
         rules={[
           { required: true, message: "Vui lòng nhập tên công ty kinh doanh!" },
         ]}
@@ -278,14 +278,19 @@ const CompanyInfo = ({ companyInfo, onUpdate }) => {
         <Input placeholder="Nhập địa chỉ công ty" />
       </Form.Item>
 
-      <Form.Item name="taxCode" label="Mã số thuế (nếu có)  ">
+      <Form.Item
+        name="taxCode"
+        label="Mã số thuế  "
+        rules={[{ required: true, message: "Vui lòng nhập mã số thuế!" }]}
+      >
         <Input placeholder="Nhập mã số thuế" />
       </Form.Item>
 
       <Form.Item
         name="businessLicense"
-        label="File giấy phép kinh doanh"
+        label="File giấy phép kinh doanh (.pdf)"
         className={styles.uploadContainer}
+        // rules={[{ required: true, message: "Vui lòng thêm giấy phép kinh doanh (.pdf)!" }]}
       >
         <Upload
           listType="text"
