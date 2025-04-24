@@ -153,7 +153,7 @@ export default function ListBooking({
       "Đã hủy": "canceled",
       "Hoàn tất": "complete",
     }
-  
+
     return statusMap[status] || "pending"
   }
 
@@ -165,7 +165,7 @@ export default function ListBooking({
       "Đã hoàn tiền": "refund",
       "Thanh toán thất bại": "cancelled",
     }
-  
+
     return paymentMap[payment] || "pending"
   }
   const getPaymentIcon = (method) => {
@@ -276,19 +276,26 @@ export default function ListBooking({
   ]
 
   const getActionMenuItems = (booking) => {
-    return [
+    const currentStatus = booking._originalBooking.status;
+    const allowedStatuses = [bookingStatusCodes.CONFIRMED, bookingStatusCodes.PENDING];
+    const items = [
       {
         key: "1",
         label: "Xem Chi Tiết",
         onClick: () => handleViewDetails(booking),
       },
-      {
+    ];
+  
+    if (allowedStatuses.includes(currentStatus)) {
+      items.push({
         key: "9",
         label: "Cập Nhật Trạng Thái",
         onClick: () => handleStatusUpdate(booking),
-      },
-    ]
-  }
+      });
+    }
+  
+    return items;
+  };
 
   const handleViewDetails = (booking) => {
     const bookingId = booking._originalBooking._id || booking._originalBooking.id
@@ -315,14 +322,14 @@ export default function ListBooking({
     setSelectedBooking(null)
   }
 
-  const handleCustomStatusChange = async (booking, newStatus) => {
+  const handleCustomStatusChange = async (bookingId, newStatusDisplay, cancelReason) => {
     try {
-      await onStatusChange(booking._originalBooking._id, newStatus)
-      handleCloseStatusModal()
+      await onStatusChange(bookingId, newStatusDisplay, cancelReason);
+      handleCloseStatusModal();
     } catch (error) {
-      message.error("Cập nhật trạng thái thất bại")
+      message.error("Cập nhật trạng thái thất bại");
     }
-  }
+  };
 
   return (
     <div className={styles.contentContainer}>
@@ -368,7 +375,9 @@ export default function ListBooking({
           visible={statusModalVisible}
           onClose={handleCloseStatusModal}
           bookingStatusCodes={bookingStatusCodes}
-          onStatusChange={(status) => handleCustomStatusChange(selectedBooking, status)}
+          onStatusChange={(bookingId, statusDisplay, cancelReason) =>
+            handleCustomStatusChange(bookingId, statusDisplay, cancelReason)
+          }
           onGeneratePassword={generatePassword}
           isLoading={isUpdating}
           className={styles.modalContainer}

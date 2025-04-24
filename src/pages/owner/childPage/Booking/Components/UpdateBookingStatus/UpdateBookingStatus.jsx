@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Modal, Select, Button, message, Form, Input } from 'antd';
+import { Modal, Select, Button, message, Input } from 'antd';
+
+const { TextArea } = Input;
 
 const UpdateBookingStatus = ({ 
   booking, 
@@ -7,12 +9,10 @@ const UpdateBookingStatus = ({
   onClose, 
   bookingStatusCodes,
   onStatusChange,
-  onGeneratePassword,
   isLoading 
 }) => {
   const [status, setStatus] = useState(null);
-  const [passwordInput, setPasswordInput] = useState('');
-  const [showPasswordField, setShowPasswordField] = useState(false);
+  const [cancelReason, setCancelReason] = useState('');
 
   const getBookingStatusDisplay = (statusCode) => {
     const statusMap = {
@@ -28,57 +28,65 @@ const UpdateBookingStatus = ({
     return statusMap[statusCode] || "Unknown Status";
   };
 
+  const getAvailableNextStatuses = (currentStatus) => {
+    const statusFlow = {
+      [bookingStatusCodes.PENDING]: [bookingStatusCodes.CONFIRMED, bookingStatusCodes.CANCELLED],
+      [bookingStatusCodes.CONFIRMED]: [bookingStatusCodes.CANCELLED],
+    };
+    
+    return [currentStatus, ...(statusFlow[currentStatus] || [])];
+  };
+
   useEffect(() => {
     if (booking) {
       const currentStatusCode = booking._originalBooking.status;
       setStatus(currentStatusCode);
-      setPasswordInput('');
-      setShowPasswordField(currentStatusCode === bookingStatusCodes.CONFIRMED);
+      setCancelReason(''); 
     }
-  }, [booking, bookingStatusCodes.CONFIRMED]);
-
-  useEffect(() => {
-    setShowPasswordField(status === bookingStatusCodes.CONFIRMED);
-  }, [status, bookingStatusCodes.CONFIRMED]);
+  }, [booking]);
 
   const handleStatusChange = (value) => {
     setStatus(value);
+    if (value !== bookingStatusCodes.CANCELLED) {
+      setCancelReason('');
+    }
   };
 
-  const handlePasswordChange = (e) => {
-    setPasswordInput(e.target.value);
+  const handleCancelReasonChange = (e) => {
+    setCancelReason(e.target.value);
   };
 
   const handleSubmit = async () => {
-    if (!status) {
-      message.error('Vui lòng chọn trạng thái');
+    if (status === bookingStatusCodes.CANCELLED && !cancelReason.trim()) {
+      message.error('Vui lòng nhập lý do hủy đặt phòng');
       return;
     }
-
     try {
-      await onStatusChange(getBookingStatusDisplay(status));
-      
-      if (status === bookingStatusCodes.CONFIRMED && passwordInput.trim()) {
-        await onGeneratePassword({
-          bookingId: booking._originalBooking._id,
-          passwordRoomInput: passwordInput
-        });
-        message.success('Đã cập nhật trạng thái và mật khẩu phòng thành công');
-      } else {
-        message.success('Đã cập nhật trạng thái thành công');
-      }
+      await onStatusChange(
+        booking._originalBooking._id, 
+        getBookingStatusDisplay(status),
+        cancelReason 
+      );
+      message.success('Đã cập nhật trạng thái thành công');
       onClose();
     } catch (error) {
       message.error(error?.data?.message || 'Cập nhật thất bại');
     }
   };
 
-  const statusOptions = Object.entries(bookingStatusCodes).map(([key, value]) => ({
-    label: getBookingStatusDisplay(value),
-    value: value,
-  }));
+  const currentStatus = booking?._originalBooking?.status;
+  
+  const availableStatuses = currentStatus ? getAvailableNextStatuses(currentStatus) : [];
+
+  const statusOptions = Object.entries(bookingStatusCodes)
+    .filter(([_, value]) => availableStatuses.includes(value))
+    .map(([key, value]) => ({
+      label: getBookingStatusDisplay(value),
+      value: value,
+    }));
 
   const currentStatusDisplay = getBookingStatusDisplay(booking?._originalBooking?.status);
+  const isCancelSelected = status === bookingStatusCodes.CANCELLED;
 
   return (
     <Modal
@@ -116,20 +124,16 @@ const UpdateBookingStatus = ({
         />
       </div>
 
-      {showPasswordField && (
+      {isCancelSelected && (
         <div style={{ marginTop: 16 }}>
-          <Form.Item
-            label="Mật Khẩu Phòng"
-            help="Nhập mật khẩu phòng (bắt buộc khi xác nhận booking)"
-          >
-            <Input.Password
-              placeholder="Nhập mật khẩu phòng"
-              value={passwordInput}
-              onChange={handlePasswordChange}
-              maxLength={20}
-              required={status === bookingStatusCodes.CONFIRMED}
-            />
-          </Form.Item>
+          <label>Lý Do Hủy Đặt Phòng:</label>
+          <TextArea
+            rows={4}
+            placeholder="Nhập lý do hủy đặt phòng"
+            value={cancelReason}
+            onChange={handleCancelReasonChange}
+            style={{ marginTop: 8 }}
+          />
         </div>
       )}
     </Modal>

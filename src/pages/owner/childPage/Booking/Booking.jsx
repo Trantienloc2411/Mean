@@ -7,7 +7,6 @@ import {
   useGetBookingsByOwnerIdQuery,
   useUpdateBookingMutation,
   useGetBookingByIdQuery,
-  useGenerateBookingPasswordMutation,
 } from "../../../../redux/services/bookingApi";
 import { useGetOwnerDetailByUserIdQuery } from "../../../../redux/services/ownerApi";
 import NotApprove from "../notApprove/NotApprove";
@@ -66,8 +65,7 @@ export default function Booking() {
   const [filteredBookings, setFilteredBookings] = useState([]);
 
   const [updateBooking, { isLoading: isUpdating }] = useUpdateBookingMutation();
-  const [generatePassword] = useGenerateBookingPasswordMutation();
-  const userRole = localStorage.getItem("user_role")?.toLowerCase(); // "owner" | "admin"
+  const userRole = localStorage.getItem("user_role")?.toLowerCase();
   const isAdmin = userRole === `"admin"` || userRole === `"staff"`;
 
   const { data: bookingDetailData, isLoading: isLoadingBookingDetail } =
@@ -168,47 +166,38 @@ export default function Booking() {
     setSelectedLocation(locationId);
   };
 
-  const handleStatusChange = async (bookingId, newStatusDisplay) => {
+  const handleStatusChange = async (bookingId, newStatusDisplay, cancelReason = '') => {
     try {
       const statusCodeKey = Object.keys(BOOKING_STATUS).find(
-        (key) =>
-          getBookingStatusDisplay(BOOKING_STATUS[key]) === newStatusDisplay
+        key => getBookingStatusDisplay(BOOKING_STATUS[key]) === newStatusDisplay
       );
-
-      if (!statusCodeKey) {
-        throw new Error(`Invalid status: ${newStatusDisplay}`);
-      }
-
       const statusCode = BOOKING_STATUS[statusCodeKey];
-
-      const result = await updateBooking({
+  
+      const currentBooking = bookings.find(
+        b => b._originalBooking._id === bookingId
+      );
+  
+      const updateData = {
         id: bookingId,
         status: statusCode,
-      }).unwrap();
-
-      message.success("Cập nhật trạng thái booking thành công");
+        ...(statusCode === BOOKING_STATUS.CANCELLED && { 
+          note: cancelReason,
+          ...(currentBooking?._originalBooking.paymentStatus === PAYMENT_STATUS.PAID && {
+            paymentStatus: PAYMENT_STATUS.REFUND
+          })
+        })
+      };
+  
+      await updateBooking(updateData).unwrap();
       refetchBookings();
-
-      return result;
+      
+      const successMessage = statusCode === BOOKING_STATUS.CANCELLED 
+        ? `Đã hủy booking${currentBooking?._originalBooking.paymentStatus === PAYMENT_STATUS.PAID ? ' và yêu cầu hoàn tiền' : ''}`
+        : "Cập nhật trạng thái thành công";
+      
+      message.success(successMessage);
     } catch (error) {
-      message.error(
-        error?.data?.message || "Cập nhật trạng thái booking thất bại"
-      );
-      console.error("Error updating booking status:", error);
-      throw error;
-    }
-  };
-
-  const handleGeneratePassword = async ({ bookingId, passwordRoomInput }) => {
-    try {
-      const result = await generatePassword({
-        bookingId,
-        passwordRoomInput,
-      }).unwrap();
-      message.success("Mật khẩu phòng đã được cập nhật thành công");
-      return result;
-    } catch (error) {
-      message.error(error?.data?.message || "Cập nhật mật khẩu phòng thất bại");
+      message.error(error?.data?.message || "Cập nhật thất bại");
       throw error;
     }
   };
@@ -243,7 +232,6 @@ export default function Booking() {
             isUpdating={isUpdating}
             bookingDetailData={bookingDetailData}
             onSelectBookingDetail={handleSelectBookingDetail}
-            generatePassword={handleGeneratePassword}
           />
         </div>
       ) : (
