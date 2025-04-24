@@ -15,7 +15,9 @@ const ACCOMMODATION_STATUS = Object.freeze({
     INUSE: 7
 });
 
-const BookingDetail = ({ bookingId, visible, onClose, bookingData, isLoading, isError, bookingStatusCodes, paymentStatusCodes  }) => {
+
+
+const BookingDetail = ({ bookingId, visible, onClose, bookingData, isLoading, isError, bookingStatusCodes, paymentStatusCodes ,paymentMethodCodes  }) => {
   const [booking, setBooking] = useState(null)
 
   useEffect(() => {
@@ -58,14 +60,10 @@ const BookingDetail = ({ bookingId, visible, onClose, bookingData, isLoading, is
 
   const getPaymentMethod = (method) => {
     const methods = {
-      "1": "Tiền mặt",
-      "2": "Chuyển khoản",
-      "3": "Thẻ tín dụng",
-      "4": "Ví điện tử",
-    }
-    return methods[method] || "Không xác định"
-  }
-
+      [paymentMethodCodes.MOMO]: "Ví MoMo",
+    };
+    return methods[method] || "Không xác định";
+  };
   const getAccommodationStatusTag = (status) => {
     const statusMap = {
       [ACCOMMODATION_STATUS.AVAILABLE]: { text: "Có sẵn", color: "green" },

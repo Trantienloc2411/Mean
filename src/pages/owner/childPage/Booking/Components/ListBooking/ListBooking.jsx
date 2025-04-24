@@ -9,11 +9,13 @@ import UpdateBookingStatus from "../UpdateBookingStatus/UpdateBookingStatus"
 import BookingDetail from "../BookingDetail/BookingDetail"
 import styles from "./ListBooking.module.scss"
 import { useGetBookingByIdQuery } from "../../../../../../redux/services/bookingApi"
+import momoIcon from '../../../../../../../src/assets/momo.png';
 
 export default function ListBooking({
   bookings,
   bookingStatusCodes,
   paymentStatusCodes,
+  paymentMethodCodes,
   onStatusChange,
   isUpdating,
   onSelectBookingDetail,
@@ -67,6 +69,13 @@ export default function ListBooking({
     return statusMap[statusCode] || "Chưa thanh toán"
   }
 
+  const getPaymentMethod = (method) => {
+    const methods = {
+      [paymentMethodCodes.MOMO]: "MoMo",
+    };
+    return methods[method] || "Không xác định";
+  };
+  
   const statusOptions = Object.entries(bookingStatusCodes).map(([key, value]) => ({
     label: <span className={`${styles.statusTag} ${styles[key.toLowerCase()]}`}>{getBookingStatusDisplay(value)}</span>,
     value: getBookingStatusDisplay(value),
@@ -168,20 +177,19 @@ export default function ListBooking({
 
     return paymentMap[payment] || "pending"
   }
-  const getPaymentIcon = (method) => {
-    const methodStr = String(method || "").toLowerCase()
 
-    if (methodStr.includes("visa") || methodStr.includes("card")) {
-      return <CreditCardOutlined />
-    } else if (methodStr.includes("cash")) {
-      return <DollarOutlined />
-    } else if (methodStr.includes("bank") || methodStr.includes("transfer")) {
-      return <BankOutlined />
-    } else if (methodStr.includes("paypal")) {
-      return <WalletOutlined />
-    }
-    return <WalletOutlined />
-  }
+  const getPaymentIcon = (method) => {
+    const iconMap = {
+      [paymentMethodCodes.MOMO]: (
+        <img 
+          src={momoIcon}
+          alt="MoMo" 
+          className={styles.paymentIcon}
+        />
+      ),
+    };
+    return iconMap[method] || <WalletOutlined />;
+  };
 
   const tableColumn = [
     {
@@ -236,16 +244,20 @@ export default function ListBooking({
       render: (_, record) => {
         const booking = record._originalBooking
         const paymentStatus = getPaymentStatusDisplay(booking.paymentStatus)
-        const paymentMethod = String(booking.paymentMethod || "Chưa xác định")
-
+        const paymentMethod = booking.paymentMethod
+    
         return (
           <div className={styles.paymentInfo}>
             <div className={styles.method}>
-              <span className={styles.paymentMethodIcon}>{getPaymentIcon(paymentMethod)}</span>
-              {paymentMethod}
+              <span className={styles.paymentMethodIcon}>
+                {getPaymentIcon(paymentMethod)}
+              </span>
+              {getPaymentMethod(paymentMethod)}
             </div>
             <div>
-              <span className={`${styles.paymentTag} ${styles[getPaymentClass(paymentStatus)]}`}>{paymentStatus}</span>
+              <span className={`${styles.paymentTag} ${styles[getPaymentClass(paymentStatus)]}`}>
+                {paymentStatus}
+              </span>
             </div>
           </div>
         )
@@ -393,6 +405,7 @@ export default function ListBooking({
         isError={isDetailError}
         bookingStatusCodes={bookingStatusCodes}
         paymentStatusCodes={paymentStatusCodes}
+        paymentMethodCodes={paymentMethodCodes}
       />
     </div>
   )

@@ -31,6 +31,10 @@ const PAYMENT_STATUS = Object.freeze({
   FAILED: 5,
 });
 
+const PAYMENT_METHOD = Object.freeze({
+  MOMO: 1,
+});
+
 const getBookingStatusDisplay = (statusCode) => {
   const statusMap = {
     [BOOKING_STATUS.CONFIRMED]: "Confirmed",
@@ -55,6 +59,7 @@ const getPaymentStatusDisplay = (statusCode) => {
   };
   return statusMap[statusCode] || "Unpaid";
 };
+
 
 export default function Booking() {
   const [effectiveOwnerId, setEffectiveOwnerId] = useState(null);
@@ -228,6 +233,7 @@ export default function Booking() {
             bookings={filteredBookings}
             bookingStatusCodes={BOOKING_STATUS}
             paymentStatusCodes={PAYMENT_STATUS}
+            paymentMethodCodes={PAYMENT_METHOD} 
             onStatusChange={handleStatusChange}
             isUpdating={isUpdating}
             bookingDetailData={bookingDetailData}
