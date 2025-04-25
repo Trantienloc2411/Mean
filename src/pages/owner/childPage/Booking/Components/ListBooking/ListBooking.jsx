@@ -112,13 +112,11 @@ export default function ListBooking({
     },
   ]
 
-  // Function to parse date time string from format "DD/MM/YYYY HH:mm:ss"
   const parseDateTime = (dateTimeStr) => {
     if (!dateTimeStr) return null;
     return dayjs(dateTimeStr, "DD/MM/YYYY HH:mm:ss");
   };
 
-  // Function to check if booking date/time matches filter criteria
   const matchesDateTimeFilter = (booking, dateFilter) => {
     if (!dateFilter) return true;
     if (!booking || !booking._originalBooking) return false;
@@ -128,7 +126,6 @@ export default function ListBooking({
     
     if (!checkInDateTime || !checkOutDateTime) return false;
     
-    // Check for date match if date filter is provided
     if (dateFilter.date) {
       const filterDate = dateFilter.date.format('DD/MM/YYYY');
       const bookingDate = checkInDateTime.format('DD/MM/YYYY');
@@ -136,20 +133,15 @@ export default function ListBooking({
       if (filterDate !== bookingDate) return false;
     }
     
-    // Check for time range match if time range filter is provided
     if (dateFilter.timeRange) {
       const [filterStartTime, filterEndTime] = dateFilter.timeRange;
       
-      // Extract only the time part for comparison
       const checkInTime = checkInDateTime.hour() * 60 + checkInDateTime.minute();
       const checkOutTime = checkOutDateTime.hour() * 60 + checkOutDateTime.minute();
       
       const filterStartMinutes = filterStartTime.hour() * 60 + filterStartTime.minute();
       const filterEndMinutes = filterEndTime.hour() * 60 + filterEndTime.minute();
       
-      // Check if booking time range overlaps with filter time range
-      // A booking matches if either check-in or check-out time falls within the filter range,
-      // or if the booking spans the entire filter range
       const checkInInRange = checkInTime >= filterStartMinutes && checkInTime <= filterEndMinutes;
       const checkOutInRange = checkOutTime >= filterStartMinutes && checkOutTime <= filterEndMinutes;
       const bookingSpansFilterRange = checkInTime <= filterStartMinutes && checkOutTime >= filterEndMinutes;
@@ -179,7 +171,6 @@ export default function ListBooking({
       });
     }
   
-    // Apply payment filter
     if (filters.payment && filters.payment.length > 0) {
       filtered = filtered.filter((item) => {
         if (!item || !item._originalBooking) return false;
@@ -189,7 +180,6 @@ export default function ListBooking({
       });
     }
   
-    // Apply date and time filter
     if (filters.dateFilter) {
       filtered = filtered.filter(item => matchesDateTimeFilter(item, filters.dateFilter));
     }
@@ -324,7 +314,6 @@ export default function ListBooking({
         }
         const booking = record._originalBooking;
         
-        // Parse the datetime strings
         const checkInDateTime = parseDateTime(booking.checkInHour);
         const checkOutDateTime = parseDateTime(booking.checkOutHour);
         

@@ -17,28 +17,32 @@ const MAX_IMAGES = 10;
 const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
   const { id } = useParams();
   const [form] = Form.useForm();
-  const { data: services, isLoading: isServicesLoading, error: servicesError } = useGetAllAmenitiesQuery();
-  
+
+
   const { data: ownerDetailData, isLoading: isOwnerDetailLoading } = useGetOwnerDetailByUserIdQuery(id);
   const ownerId = ownerDetailData?.id;
 
   const { data: rentalLocations, isLoading: isLoadingRentalLocations, error: rentalLocationsError } = useGetAllRentalLocationsQuery(ownerId, {
     skip: !ownerId
   });
-
+  const { data: services, isLoading: isServicesLoading, error: servicesError } = useGetAllAmenitiesQuery(
+    { ownerId },
+    { skip: !ownerId }
+  );
   const [fileList, setFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
 
   const handleSubmit = () => {
     form.validateFields()
       .then((values) => {
-        const formattedValues = { 
+        const formattedValues = {
           ...values,
+          numberOfPasswordRoom: values.numberOfPasswordRoom || 0,
           image: fileList.map(file => file.url),
-          serviceIds: values.serviceIds ? values.serviceIds : 
-                    values.serviceId ? [values.serviceId] : []
+          serviceIds: values.serviceIds ? values.serviceIds :
+            values.serviceId ? [values.serviceId] : []
         };
-        
+
         if (formattedValues.serviceIds && formattedValues.serviceId) {
           delete formattedValues.serviceId;
         }
@@ -130,9 +134,9 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
 
   const getServicesOptions = () => {
     if (!services) return [];
-    const servicesList = Array.isArray(services.data) ? services.data : 
-                          Array.isArray(services) ? services : [];
-    
+    const servicesList = Array.isArray(services.data) ? services.data :
+      Array.isArray(services) ? services : [];
+
     return servicesList
       .filter(service => service.status === true)
       .map(service => ({
@@ -143,10 +147,10 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
 
   const getLocationsOptions = () => {
     if (!rentalLocations) return [];
-    
+
     const locationsList = Array.isArray(rentalLocations.data) ? rentalLocations.data :
-                           Array.isArray(rentalLocations) ? rentalLocations : [];
-    
+      Array.isArray(rentalLocations) ? rentalLocations : [];
+
     return locationsList.map(location => ({
       label: location.name,
       value: location._id || location.id
@@ -162,9 +166,9 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
         <Button key="cancel" onClick={onCancel}>
           Huỷ
         </Button>,
-        <Button 
-          key="submit" 
-          type="primary" 
+        <Button
+          key="submit"
+          type="primary"
           onClick={handleSubmit}
           loading={uploading}
         >
@@ -184,8 +188,8 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
           label="Địa điểm thuê"
           rules={[{ required: true, message: 'Vui lòng chọn địa điểm thuê' }]}
         >
-          <Select 
-            placeholder="Chọn địa điểm thuê" 
+          <Select
+            placeholder="Chọn địa điểm thuê"
             loading={isLoadingRentalLocations || isOwnerDetailLoading}
             options={getLocationsOptions()}
           />
@@ -196,8 +200,8 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
           label="Dịch vụ"
           rules={[{ required: true, message: 'Vui lòng chọn dịch vụ' }]}
         >
-          <Select 
-            placeholder="Chọn dịch vụ" 
+          <Select
+            placeholder="Chọn dịch vụ"
             loading={isServicesLoading}
             mode="multiple"
             options={getServicesOptions()}
@@ -233,11 +237,11 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
             label="Giá cơ bản"
             rules={[{ required: true, message: 'Vui lòng nhập giá cơ bản' }]}
           >
-            <InputNumber 
-              min={0} 
-              step={100000} 
-              placeholder="200000" 
-              addonAfter="VNĐ" 
+            <InputNumber
+              min={0}
+              step={100000}
+              placeholder="200000"
+              addonAfter="VNĐ"
               formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
               parser={value => value.replace(/\$\s?|(,*)/g, '')}
             />
@@ -249,14 +253,34 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
           label="Giá phụ trội theo giờ"
           rules={[{ required: true, message: 'Vui lòng nhập giá phụ trội theo giờ' }]}
         >
-          <InputNumber 
-            min={0} 
-            step={10000} 
-            placeholder="20000" 
+          <InputNumber
+            min={0}
+            step={10000}
+            placeholder="20000"
             addonAfter="VNĐ"
             formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
             parser={value => value.replace(/\$\s?|(,*)/g, '')}
           />
+        </Form.Item>
+
+        <Form.Item
+          name="numberOfPasswordRoom"
+          label="Mật khẩu loại phòng gồm mấy số?"
+          rules={[{
+            required: true,
+            message: 'Vui lòng chọn độ dài mật khẩu'
+          }]}
+        >
+          <Select
+            placeholder="Chọn độ dài mật khẩu"
+            style={{ width: '100%' }}
+          >
+            <Option value={0}>0 số (Không có mật khẩu)</Option>
+            <Option value={1}>2 số</Option>
+            <Option value={2}>4 số</Option>
+            <Option value={3}>6 số</Option>
+            <Option value={4}>8 số</Option>
+          </Select>
         </Form.Item>
 
         <Form.Item label={`Hình ảnh loại phòng (${fileList.length}/${MAX_IMAGES})`}>

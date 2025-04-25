@@ -460,7 +460,7 @@ const RoomTypeManagement = ({ isOwner }) => {
             setSelectedRoomType(null);
           }}
           onConfirm={handleUpdateRoomType}
-          initialValues={selectedRoomType}
+          initialValues={{ _id: selectedRoomType?._id }} 
           services={services}
         />
 
