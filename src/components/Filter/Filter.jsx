@@ -1,9 +1,11 @@
 import { useState } from "react";
-import { Checkbox, Button, Divider, Typography } from "antd";
+import { Checkbox, Button, Divider, Typography, DatePicker, TimePicker } from "antd";
 import { CloseOutlined } from "@ant-design/icons";
 import styles from "./Filter.module.scss";
+import dayjs from 'dayjs';
 
 const { Text } = Typography;
+const { RangePicker } = TimePicker;
 
 export default function Filter({
   filterGroups,
@@ -12,13 +14,26 @@ export default function Filter({
   bookingStatusCodes,
   paymentStatusCodes
 }) {
+  const [dateTime, setDateTime] = useState({
+    date: null,
+    timeRange: null
+  });
+
   const handleResetFilters = () => {
     const emptyFilters = Object.keys(selectedValues).reduce((acc, key) => {
       acc[key] = [];
       return acc;
     }, {});
 
-    onFilterChange("reset", emptyFilters);
+    setDateTime({
+      date: null,
+      timeRange: null
+    });
+
+    onFilterChange("reset", {
+      ...emptyFilters,
+      dateFilter: null
+    });
   };
 
   const getStatusClass = (status) => {
@@ -49,6 +64,52 @@ export default function Filter({
     return paymentMap[payment] || "pending";
   };
 
+  const handleDateChange = (date) => {
+    setDateTime(prev => ({
+      ...prev,
+      date
+    }));
+    
+    if (!date && !dateTime.timeRange) {
+      onFilterChange("dateFilter", null);
+      return;
+    }
+    
+    onFilterChange("dateFilter", {
+      date: date,
+      timeRange: dateTime.timeRange
+    });
+  };
+
+  const handleTimeRangeChange = (times) => {
+    setDateTime(prev => ({
+      ...prev,
+      timeRange: times
+    }));
+    
+    if (!times && !dateTime.date) {
+      onFilterChange("dateFilter", null);
+      return;
+    }
+    
+    onFilterChange("dateFilter", {
+      date: dateTime.date,
+      timeRange: times
+    });
+  };
+
+  const isDateTimeFilterActive = dateTime.date || dateTime.timeRange;
+
+  const hasActiveFilters = () => {
+    const hasRegularFilters = Object.entries(selectedValues).some(([key, values]) => 
+      key !== 'dateFilter' && Array.isArray(values) && values.length > 0
+    );
+    
+    const hasDateFilter = !!selectedValues.dateFilter;
+    
+    return hasRegularFilters || hasDateFilter || isDateTimeFilterActive;
+  };
+
   return (
     <div className={styles.filterContainer}>
       <div className={styles.filterHeader}>
@@ -60,19 +121,50 @@ export default function Filter({
 
       <Divider className={styles.divider} />
 
+      <div className={styles.filterGroup}>
+        <h4>Ngày và Giờ</h4>
+        <div className={styles.dateTimeContainer}>
+          <div className={styles.datePickerWrapper}>
+            <div className={styles.filterLabel}>Ngày:</div>
+            <DatePicker
+              placeholder="Chọn ngày"
+              format="DD/MM/YYYY"
+              value={dateTime.date}
+              onChange={handleDateChange}
+              className={styles.datePicker}
+            />
+          </div>
+          
+          <div className={styles.timePickerWrapper}>
+            <div className={styles.filterLabel}>Thời gian:</div>
+            <RangePicker
+              format="HH:mm"
+              value={dateTime.timeRange}
+              onChange={handleTimeRangeChange}
+              className={styles.timePicker}
+              placeholder={['Giờ check-in', 'Giờ check-out']}
+            />
+          </div>
+        </div>
+      </div>
+
+      <Divider className={styles.divider} />
+
       {filterGroups.map((group) => (
         <div key={group.name} className={styles.filterGroup}>
           <h4>{group.title}</h4>
           <div className={styles.optionsContainer}>
             {group.options.map((option) => {
-              const isSelected = selectedValues[group.name]?.includes(option.value);
+              const isSelected = Array.isArray(selectedValues[group.name]) && 
+                selectedValues[group.name].includes(option.value);
               
               return (
                 <div
                   key={option.value}
                   className={`${styles.filterOption} ${isSelected ? styles.selected : ""}`}
                   onClick={() => {
-                    const currentValues = [...(selectedValues[group.name] || [])];
+                    const currentValues = Array.isArray(selectedValues[group.name]) ? 
+                      [...selectedValues[group.name]] : [];
                     const newValues = isSelected
                       ? currentValues.filter((val) => val !== option.value)
                       : [...currentValues, option.value];
@@ -99,12 +191,12 @@ export default function Filter({
 
       <Divider className={styles.divider} />
 
-      {Object.values(selectedValues).some(values => values.length > 0) && (
+      {hasActiveFilters() && (
         <div className={styles.activeFilters}>
           <h4>Bộ lọc đang áp dụng</h4>
           <div className={styles.filterTags}>
             {Object.entries(selectedValues).map(([key, values]) =>
-              values.map((value) => (
+              key !== "dateFilter" && Array.isArray(values) && values.length > 0 && values.map((value) => (
                 <div key={`${key}-${value}`} className={styles.filterTag}>
                   {key === "status" ? (
                     <span className={`${styles.statusBadge} ${styles[getStatusClass(value)]}`}>
@@ -124,6 +216,27 @@ export default function Filter({
                   />
                 </div>
               ))
+            )}
+            
+            {isDateTimeFilterActive && (
+              <div className={styles.filterTag}>
+                <span className={styles.dateTimeTag}>
+                  {dateTime.date ? dateTime.date.format('DD/MM/YYYY') : 'Mọi ngày'}{' '}
+                  {dateTime.timeRange ? 
+                    `(${dateTime.timeRange[0].format('HH:mm')} - ${dateTime.timeRange[1].format('HH:mm')})` : 
+                    '(Mọi giờ)'}
+                </span>
+                <CloseOutlined
+                  className={styles.removeTag}
+                  onClick={() => {
+                    setDateTime({
+                      date: null,
+                      timeRange: null
+                    });
+                    onFilterChange("dateFilter", null);
+                  }}
+                />
+              </div>
             )}
           </div>
         </div>

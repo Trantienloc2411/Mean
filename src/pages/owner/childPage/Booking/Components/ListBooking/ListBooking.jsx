@@ -8,6 +8,7 @@ import BookingDetail from "../BookingDetail/BookingDetail";
 import styles from "./ListBooking.module.scss";
 import { useGetBookingByIdQuery } from "../../../../../../redux/services/bookingApi";
 import momoIcon from '../../../../../../../src/assets/momo.png';
+import dayjs from 'dayjs';
 
 export default function ListBooking({
   bookings = [],
@@ -24,6 +25,7 @@ export default function ListBooking({
   const [selectedValues, setSelectedValues] = useState({
     status: [],
     payment: [],
+    dateFilter: null
   });
   const [selectedBooking, setSelectedBooking] = useState(null);
   const [statusModalVisible, setStatusModalVisible] = useState(false);
@@ -110,6 +112,56 @@ export default function ListBooking({
     },
   ]
 
+  // Function to parse date time string from format "DD/MM/YYYY HH:mm:ss"
+  const parseDateTime = (dateTimeStr) => {
+    if (!dateTimeStr) return null;
+    return dayjs(dateTimeStr, "DD/MM/YYYY HH:mm:ss");
+  };
+
+  // Function to check if booking date/time matches filter criteria
+  const matchesDateTimeFilter = (booking, dateFilter) => {
+    if (!dateFilter) return true;
+    if (!booking || !booking._originalBooking) return false;
+    
+    const checkInDateTime = parseDateTime(booking._originalBooking.checkInHour);
+    const checkOutDateTime = parseDateTime(booking._originalBooking.checkOutHour);
+    
+    if (!checkInDateTime || !checkOutDateTime) return false;
+    
+    // Check for date match if date filter is provided
+    if (dateFilter.date) {
+      const filterDate = dateFilter.date.format('DD/MM/YYYY');
+      const bookingDate = checkInDateTime.format('DD/MM/YYYY');
+      
+      if (filterDate !== bookingDate) return false;
+    }
+    
+    // Check for time range match if time range filter is provided
+    if (dateFilter.timeRange) {
+      const [filterStartTime, filterEndTime] = dateFilter.timeRange;
+      
+      // Extract only the time part for comparison
+      const checkInTime = checkInDateTime.hour() * 60 + checkInDateTime.minute();
+      const checkOutTime = checkOutDateTime.hour() * 60 + checkOutDateTime.minute();
+      
+      const filterStartMinutes = filterStartTime.hour() * 60 + filterStartTime.minute();
+      const filterEndMinutes = filterEndTime.hour() * 60 + filterEndTime.minute();
+      
+      // Check if booking time range overlaps with filter time range
+      // A booking matches if either check-in or check-out time falls within the filter range,
+      // or if the booking spans the entire filter range
+      const checkInInRange = checkInTime >= filterStartMinutes && checkInTime <= filterEndMinutes;
+      const checkOutInRange = checkOutTime >= filterStartMinutes && checkOutTime <= filterEndMinutes;
+      const bookingSpansFilterRange = checkInTime <= filterStartMinutes && checkOutTime >= filterEndMinutes;
+      
+      if (!(checkInInRange || checkOutInRange || bookingSpansFilterRange)) {
+        return false;
+      }
+    }
+    
+    return true;
+  };
+
   const applyFilters = (filters) => {
     if (!bookings || bookings.length === 0) {
       setFilteredData([]);
@@ -135,6 +187,11 @@ export default function ListBooking({
         const paymentText = getPaymentStatusDisplay(paymentCode);
         return filters.payment.includes(paymentText);
       });
+    }
+  
+    // Apply date and time filter
+    if (filters.dateFilter) {
+      filtered = filtered.filter(item => matchesDateTimeFilter(item, filters.dateFilter));
     }
   
     const search = filters.searchTerm || searchTerm;
@@ -266,9 +323,23 @@ export default function ListBooking({
           return "N/A";
         }
         const booking = record._originalBooking;
+        
+        // Parse the datetime strings
+        const checkInDateTime = parseDateTime(booking.checkInHour);
+        const checkOutDateTime = parseDateTime(booking.checkOutHour);
+        
+        if (!checkInDateTime || !checkOutDateTime) {
+          return (
+            <div className={styles.timeInfo}>
+              {booking.checkInHour || "N/A"} - {booking.checkOutHour || "N/A"}
+            </div>
+          );
+        }
+        
         return (
           <div className={styles.timeInfo}>
-            {booking.checkInHour || "N/A"} - {booking.checkOutHour || "N/A"}
+            <div>{checkInDateTime.format('DD/MM/YYYY')}</div>
+            <div>{checkInDateTime.format('HH:mm')} - {checkOutDateTime.format('HH:mm')}</div>
           </div>
         );
       },
@@ -458,8 +529,11 @@ export default function ListBooking({
           >
             <Button icon={<FilterOutlined />} className={styles.filterButton}>
               Lọc
-              {Object.values(selectedValues).flat().length > 0 && (
-                <span className={styles.filterBadge}>{Object.values(selectedValues).flat().length}</span>
+              {(Object.values(selectedValues).flat().length > 0 || selectedValues.dateFilter) && (
+                <span className={styles.filterBadge}>
+                  {Object.values(selectedValues).flat().filter(val => val !== undefined && val !== null).length + 
+                   (selectedValues.dateFilter ? 1 : 0)}
+                </span>
               )}
             </Button>
           </Dropdown>
