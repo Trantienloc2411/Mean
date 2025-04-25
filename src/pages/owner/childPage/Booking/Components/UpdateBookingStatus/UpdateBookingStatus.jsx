@@ -23,7 +23,8 @@ const UpdateBookingStatus = ({
       [bookingStatusCodes.NEEDCHECKOUT]: "Need Check-out",
       [bookingStatusCodes.CHECKEDOUT]: "Checked Out",
       [bookingStatusCodes.CANCELLED]: "Cancelled",
-      [bookingStatusCodes.COMPLETED]: "Completed"
+      [bookingStatusCodes.COMPLETED]: "Completed",
+      [bookingStatusCodes.REFUND]: "Hoàn tiền" 
     };
     return statusMap[statusCode] || "Unknown Status";
   };

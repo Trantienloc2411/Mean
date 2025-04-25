@@ -21,6 +21,7 @@ const BOOKING_STATUS = Object.freeze({
   CANCELLED: 6,
   COMPLETED: 7,
   PENDING: 8,
+  REFUND: 9
 });
 
 const PAYMENT_STATUS = Object.freeze({
@@ -45,6 +46,7 @@ const getBookingStatusDisplay = (statusCode) => {
     [BOOKING_STATUS.CHECKEDOUT]: "Checked Out",
     [BOOKING_STATUS.CANCELLED]: "Cancelled",
     [BOOKING_STATUS.COMPLETED]: "Completed",
+    [BOOKING_STATUS.REFUND]: "Refund"
   };
   return statusMap[statusCode] || "Unknown Status";
 };

@@ -41,6 +41,7 @@ const BookingDetail = ({ bookingId, visible, onClose, bookingData, isLoading, is
       [bookingStatusCodes.CHECKEDOUT]: { text: "Đã check-out", color: "geekblue" },
       [bookingStatusCodes.CANCELLED]: { text: "Đã huỷ", color: "red" },
       [bookingStatusCodes.COMPLETED]: { text: "Hoàn tất", color: "green" },
+      [bookingStatusCodes.REFUND]: { text: "Hoàn tiền", color: "volcano" } 
     }
 
     return <Tag color={statusMap[status]?.color || "default"}>{statusMap[status]?.text || "Unknown"}</Tag>

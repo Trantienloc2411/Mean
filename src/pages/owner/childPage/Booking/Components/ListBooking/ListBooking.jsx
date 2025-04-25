@@ -1,36 +1,39 @@
-import { useState, useEffect } from "react"
-import { Dropdown, Input, Button, Menu, message } from "antd"
-import { FilterOutlined, SearchOutlined } from "@ant-design/icons"
-import { CreditCardOutlined, DollarOutlined, BankOutlined, WalletOutlined } from "@ant-design/icons"
-import debounce from "lodash/debounce"
-import TableModify from "../../../../../dashboard/components/Table"
-import Filter from "../../../../../../components/Filter/Filter"
-import UpdateBookingStatus from "../UpdateBookingStatus/UpdateBookingStatus"
-import BookingDetail from "../BookingDetail/BookingDetail"
-import styles from "./ListBooking.module.scss"
-import { useGetBookingByIdQuery } from "../../../../../../redux/services/bookingApi"
+import { useState, useEffect } from "react";
+import { Dropdown, Input, Button, Menu, message, Table } from "antd";
+import { FilterOutlined, SearchOutlined, MoreOutlined, WalletOutlined } from "@ant-design/icons";
+import debounce from "lodash/debounce";
+import Filter from "../../../../../../components/Filter/Filter";
+import UpdateBookingStatus from "../UpdateBookingStatus/UpdateBookingStatus";
+import BookingDetail from "../BookingDetail/BookingDetail";
+import styles from "./ListBooking.module.scss";
+import { useGetBookingByIdQuery } from "../../../../../../redux/services/bookingApi";
 import momoIcon from '../../../../../../../src/assets/momo.png';
 
 export default function ListBooking({
-  bookings,
-  bookingStatusCodes,
-  paymentStatusCodes,
-  paymentMethodCodes,
+  bookings = [],
+  bookingStatusCodes = {},
+  paymentStatusCodes = {},
+  paymentMethodCodes = {},
   onStatusChange,
   isUpdating,
   onSelectBookingDetail,
   generatePassword,
 }) {
-  const [searchTerm, setSearchTerm] = useState("")
-  const [filteredData, setFilteredData] = useState(bookings || [])
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filteredData, setFilteredData] = useState(bookings);
   const [selectedValues, setSelectedValues] = useState({
     status: [],
     payment: [],
-  })
-  const [selectedBooking, setSelectedBooking] = useState(null)
-  const [statusModalVisible, setStatusModalVisible] = useState(false)
-  const [selectedBookingId, setSelectedBookingId] = useState(null)
-  const [isBookingDetailVisible, setIsBookingDetailVisible] = useState(false)
+  });
+  const [selectedBooking, setSelectedBooking] = useState(null);
+  const [statusModalVisible, setStatusModalVisible] = useState(false);
+  const [selectedBookingId, setSelectedBookingId] = useState(null);
+  const [isBookingDetailVisible, setIsBookingDetailVisible] = useState(false);
+  const [pagination, setPagination] = useState({
+      current: 1,
+      pageSize: 7,
+      total: bookings.length,
+    });
 
   const {
     data: bookingDetailData,
@@ -38,11 +41,16 @@ export default function ListBooking({
     isError: isDetailError,
   } = useGetBookingByIdQuery(selectedBookingId, {
     skip: !selectedBookingId,
-  })
+  });
 
   useEffect(() => {
-    setFilteredData(bookings || [])
-  }, [bookings])
+    setFilteredData(bookings);
+    setPagination(prev => ({
+      ...prev,
+      total: bookings.length,
+    }));
+  }, [bookings]);
+
 
   const getBookingStatusDisplay = (statusCode) => {
     const statusMap = {
@@ -54,6 +62,7 @@ export default function ListBooking({
       [bookingStatusCodes.CHECKEDOUT]: "Đã check-out",
       [bookingStatusCodes.CANCELLED]: "Đã hủy",
       [bookingStatusCodes.COMPLETED]: "Hoàn tất",
+      [bookingStatusCodes.REFUND]: "Hoàn tiền"
     }
     return statusMap[statusCode] || "Trạng thái không xác định"
   }
@@ -79,14 +88,14 @@ export default function ListBooking({
   const statusOptions = Object.entries(bookingStatusCodes).map(([key, value]) => ({
     label: <span className={`${styles.statusTag} ${styles[key.toLowerCase()]}`}>{getBookingStatusDisplay(value)}</span>,
     value: getBookingStatusDisplay(value),
-  }))
-
+  }));
+  
   const paymentOptions = Object.entries(paymentStatusCodes).map(([key, value]) => ({
     label: (
       <span className={`${styles.paymentTag} ${styles[key.toLowerCase()]}`}>{getPaymentStatusDisplay(value)}</span>
     ),
     value: getPaymentStatusDisplay(value),
-  }))
+  }));
 
   const filterGroups = [
     {
@@ -102,54 +111,84 @@ export default function ListBooking({
   ]
 
   const applyFilters = (filters) => {
-    let filtered = [...bookings]
-
+    if (!bookings || bookings.length === 0) {
+      setFilteredData([]);
+      return;
+    }
+  
+    let filtered = [...bookings];
+  
     if (filters.status && filters.status.length > 0) {
-      filtered = filtered.filter((item) => filters.status.includes(item.Status))
-    }
-
-    if (filters.payment && filters.payment.length > 0) {
-      filtered = filtered.filter((item) => filters.payment.includes(item.Payment))
-    }
-
-    if (searchTerm) {
       filtered = filtered.filter((item) => {
-        const customerName = item._originalBooking.customerId?.userId?.fullName || ""
-        return customerName.toLowerCase().includes(searchTerm.toLowerCase())
-      })
+        if (!item || !item._originalBooking) return false;
+        const statusCode = item._originalBooking.status;
+        const statusText = getBookingStatusDisplay(statusCode);
+        return filters.status.includes(statusText);
+      });
     }
-
-    setFilteredData(filtered)
+  
+    // Apply payment filter
+    if (filters.payment && filters.payment.length > 0) {
+      filtered = filtered.filter((item) => {
+        if (!item || !item._originalBooking) return false;
+        const paymentCode = item._originalBooking.paymentStatus;
+        const paymentText = getPaymentStatusDisplay(paymentCode);
+        return filters.payment.includes(paymentText);
+      });
+    }
+  
+    const search = filters.searchTerm || searchTerm;
+    if (search) {
+      filtered = filtered.filter((item) => {
+        if (!item || !item._originalBooking || !item._originalBooking.customerId) return false;
+        const customerName = item._originalBooking.customerId.userId?.fullName || "";
+        return customerName.toLowerCase().includes(search.toLowerCase());
+      });
+    }
+  
+    setFilteredData(filtered);
+    setPagination(prev => ({
+      ...prev, 
+      current: 1, 
+      total: filtered.length,
+    }));
   }
 
   const handleFilterChange = (filterName, newValues) => {
+    if (filterName === "reset") {
+      setSelectedValues(newValues);
+      setSearchTerm("");
+      setFilteredData(bookings);
+      return;
+    }
+  
     const updatedFilters = {
       ...selectedValues,
       [filterName]: newValues,
-    }
-
-    setSelectedValues(updatedFilters)
-    applyFilters(updatedFilters)
-  }
+    };
+  
+    setSelectedValues(updatedFilters);
+    applyFilters(updatedFilters);
+  };
 
   const debouncedSearch = debounce((value) => {
-    setSearchTerm(value)
+    setSearchTerm(value);
     applyFilters({
       ...selectedValues,
       searchTerm: value,
-    })
-  }, 500)
+    });
+  }, 500);
 
   const handleSearch = (e) => {
-    const value = e.target.value
-    debouncedSearch(value)
+    const value = e.target.value;
+    debouncedSearch(value);
   }
 
   useEffect(() => {
     return () => {
-      debouncedSearch.cancel()
+      debouncedSearch.cancel();
     }
-  }, [])
+  }, [debouncedSearch]);
 
   const getStatusClass = (status) => {
     const statusMap = {
@@ -161,6 +200,7 @@ export default function ListBooking({
       "Đã check-out": "checkedout",
       "Đã hủy": "canceled",
       "Hoàn tất": "complete",
+      "Hoàn tiền": "refund"
     }
 
     return statusMap[status] || "pending"
@@ -191,60 +231,74 @@ export default function ListBooking({
     return iconMap[method] || <WalletOutlined />;
   };
 
-  const tableColumn = [
+  const columns = [
     {
-      title: <span className={styles.tableHeader}>No.</span>,
-      dataIndex: "no",
+      title: "No.",
       key: "no",
-      render: (_, record, index) => <span className={styles.bookingId}>{index + 1}</span>,
+      render: (_, __, index) =>
+        (pagination.current - 1) * pagination.pageSize + index + 1,
     },
     {
       title: <span className={styles.tableHeader}>Khách Hàng</span>,
-      dataIndex: "customerName",
       key: "customerName",
-      render: (_, record) => record._originalBooking.customerId?.userId?.fullName || "Không xác định",
+      render: (_, record) => {
+        if (!record || !record._originalBooking || !record._originalBooking.customerId) {
+          return "Không xác định";
+        }
+        return record._originalBooking.customerId.userId?.fullName || "Không xác định";
+      }
     },
     {
       title: <span className={styles.tableHeader}>Loại Phòng</span>,
-      dataIndex: "roomType",
       key: "roomType",
-      render: (_, record) => record._originalBooking.accommodationId?.accommodationTypeId?.name || "Không xác định",
+      render: (_, record) => {
+        if (!record || !record._originalBooking || !record._originalBooking.accommodationId) {
+          return "Không xác định";
+        }
+        return record._originalBooking.accommodationId.accommodationTypeId?.name || "Không xác định";
+      }
     },
     {
       title: <span className={styles.tableHeader}>Check-in / Check-out</span>,
-      dataIndex: "bookingTime",
       key: "bookingTime",
       render: (_, record) => {
-        const booking = record._originalBooking
+        if (!record || !record._originalBooking) {
+          return "N/A";
+        }
+        const booking = record._originalBooking;
         return (
           <div className={styles.timeInfo}>
-            {booking.checkInHour} - {booking.checkOutHour}
+            {booking.checkInHour || "N/A"} - {booking.checkOutHour || "N/A"}
           </div>
-        )
+        );
       },
     },
     {
       title: <span className={styles.tableHeader}>Số Người</span>,
-      dataIndex: "peopleCount",
       key: "peopleCount",
       render: (_, record) => {
-        const booking = record._originalBooking
+        if (!record || !record._originalBooking) {
+          return "N/A";
+        }
+        const booking = record._originalBooking;
         return (
           <div className={styles.peopleInfo}>
-            <span>NL: {booking.adultNumber}</span>
-            <span>TE: {booking.childNumber}</span>
+            <span>NL: {booking.adultNumber || 0}</span>
+            <span>TE: {booking.childNumber || 0}</span>
           </div>
-        )
+        );
       },
     },
     {
       title: <span className={styles.tableHeader}>Thanh Toán</span>,
-      dataIndex: "paymentMethod",
       key: "paymentMethod",
       render: (_, record) => {
-        const booking = record._originalBooking
-        const paymentStatus = getPaymentStatusDisplay(booking.paymentStatus)
-        const paymentMethod = booking.paymentMethod
+        if (!record || !record._originalBooking) {
+          return "N/A";
+        }
+        const booking = record._originalBooking;
+        const paymentStatus = getPaymentStatusDisplay(booking.paymentStatus);
+        const paymentMethod = booking.paymentMethod;
     
         return (
           <div className={styles.paymentInfo}>
@@ -260,87 +314,121 @@ export default function ListBooking({
               </span>
             </div>
           </div>
-        )
+        );
       },
     },
     {
       title: <span className={styles.tableHeader}>Trạng Thái</span>,
-      dataIndex: "status",
       key: "status",
       render: (_, record) => {
-        const statusCode = record._originalBooking.status
-        const statusText = getBookingStatusDisplay(statusCode)
+        if (!record || !record._originalBooking) {
+          return "N/A";
+        }
+        const statusCode = record._originalBooking.status;
+        const statusText = getBookingStatusDisplay(statusCode);
 
-        return <span className={`${styles.statusTag} ${styles[getStatusClass(statusText)]}`}>{statusText}</span>
+        return <span className={`${styles.statusTag} ${styles[getStatusClass(statusText)]}`}>{statusText}</span>;
       },
     },
     {
-      title: <span className={styles.tableHeader}>Thao Tác</span>,
+      title: "",
       key: "operation",
       render: (_, record) => (
-        <Dropdown overlay={<Menu items={getActionMenuItems(record)} />} trigger={["click"]}>
-          <Button type="text" className={styles.actionButton}>
-            <span className={styles.horizontalEllipsis}>⋯</span>
-          </Button>
+        <Dropdown
+          trigger={["click"]}
+          menu={{
+            items: menuItems(record).map((item) => ({
+              ...item,
+              onClick: () => item.onClick(record),
+            })),
+          }}
+        >
+          <MoreOutlined 
+            onClick={(e) => e.preventDefault()}
+            style={{ fontSize: 18, cursor: "pointer" }}
+          />
         </Dropdown>
       ),
     },
-  ]
+  ];
 
-  const getActionMenuItems = (booking) => {
-    const currentStatus = booking._originalBooking.status;
+  const menuItems = (record) => {
+    if (!record || !record._originalBooking) {
+      return [
+        {
+          key: "1",
+          label: "Xem Chi Tiết",
+          onClick: () => {},
+          disabled: true
+        }
+      ];
+    }
+
+    const currentStatus = record._originalBooking.status;
     const allowedStatuses = [bookingStatusCodes.CONFIRMED, bookingStatusCodes.PENDING];
+    
     const items = [
       {
         key: "1",
         label: "Xem Chi Tiết",
-        onClick: () => handleViewDetails(booking),
-      },
+        onClick: handleViewDetails,
+      }
     ];
-  
+
     if (allowedStatuses.includes(currentStatus)) {
       items.push({
-        key: "9",
+        key: "2",
         label: "Cập Nhật Trạng Thái",
-        onClick: () => handleStatusUpdate(booking),
+        onClick: handleStatusUpdate,
       });
     }
-  
+
     return items;
   };
 
   const handleViewDetails = (booking) => {
-    const bookingId = booking._originalBooking._id || booking._originalBooking.id
-    setSelectedBookingId(bookingId)
-    setIsBookingDetailVisible(true)
+    if (!booking || !booking._originalBooking) return;
+    
+    const bookingId = booking._originalBooking._id || booking._originalBooking.id;
+    if (!bookingId) return;
+
+    setSelectedBookingId(bookingId);
+    setIsBookingDetailVisible(true);
 
     if (onSelectBookingDetail) {
-      onSelectBookingDetail(bookingId)
+      onSelectBookingDetail(bookingId);
     }
   }
 
   const handleCloseBookingDetail = () => {
-    setIsBookingDetailVisible(false)
-    setSelectedBookingId(null)
+    setIsBookingDetailVisible(false);
+    setSelectedBookingId(null);
   }
 
   const handleStatusUpdate = (booking) => {
-    setSelectedBooking(booking)
-    setStatusModalVisible(true)
+    if (!booking) return;
+    setSelectedBooking(booking);
+    setStatusModalVisible(true);
   }
 
   const handleCloseStatusModal = () => {
-    setStatusModalVisible(false)
-    setSelectedBooking(null)
+    setStatusModalVisible(false);
+    setSelectedBooking(null);
   }
 
   const handleCustomStatusChange = async (bookingId, newStatusDisplay, cancelReason) => {
+    if (!onStatusChange) return;
+    
     try {
       await onStatusChange(bookingId, newStatusDisplay, cancelReason);
       handleCloseStatusModal();
     } catch (error) {
       message.error("Cập nhật trạng thái thất bại");
     }
+  };
+
+  const handleTableChange = (pagination) => {
+    setPagination(pagination);
   };
 
   return (
@@ -377,7 +465,50 @@ export default function ListBooking({
           </Dropdown>
         </div>
         <div className={styles.tableContainer}>
-          <TableModify tableColumn={tableColumn} tableData={filteredData} isPagination={true} loading={isUpdating} />
+          <Table
+            columns={columns}
+            dataSource={filteredData}
+            rowKey={(record) => 
+              (record && record._originalBooking) ? 
+                (record._originalBooking._id || record._originalBooking.id || `row-${Math.random()}`) : 
+                `row-${Math.random()}`
+            }
+            loading={isUpdating}
+            pagination={{
+              ...pagination,
+              total: filteredData.length,
+              pageSize: pagination.pageSize,
+              showSizeChanger: false,
+              className: styles.customPagination,
+              itemRender: (page, type, originalElement) => {
+                const totalPages = Math.ceil(filteredData.length / pagination.pageSize);
+                if (type === "prev") {
+                  return (
+                    <button
+                      className={styles.paginationButton}
+                      disabled={page === 0}
+                    >
+                      « Trước
+                    </button>
+                  );
+                }
+                if (type === "next") {
+                  return (
+                    <button
+                      className={styles.paginationButton}
+                      disabled={page >= totalPages}
+                    >
+                      Tiếp »
+                    </button>
+                  );
+                }
+                return originalElement;
+              },
+            }}
+            onChange={handleTableChange}
+            className={styles.bookingTable}
+            scroll={{ x: "max-content" }}
+          />
         </div>
       </div>
 
@@ -408,5 +539,5 @@ export default function ListBooking({
         paymentMethodCodes={paymentMethodCodes}
       />
     </div>
-  )
+  );
 }

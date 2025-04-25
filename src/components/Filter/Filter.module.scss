@@ -142,65 +142,89 @@
 }
 
 .statusBadge {
-  padding: 4px 10px;
+  padding: 6px 12px;
   border-radius: 16px;
-  font-size: 13px;
+  font-size: 0.75rem;
   font-weight: 500;
   display: inline-block;
+  white-space: nowrap;
   
+  // Booking Status
   &.confirmed {
-    background-color: #dcfce7;
-    color: #166534;
+    background: #fff8e6;
+    color: #d97706;
   }
   
   &.pending {
-    background-color: #fff7ed;
-    color: #9a3412;
+    background: #f3f4f6;
+    color: #4b5563;
   }
   
-  &.needcheckin, &.needcheckout {
-    background-color: #e0f2fe;
+  &.needcheckin {
+    background: #f0f9ff;
     color: #0369a1;
   }
   
   &.checkedin {
-    background-color: #d1fae5;
-    color: #065f46;
+    background: #e6fffa;
+    color: #0d9488;
+  }
+  
+  &.needcheckout {
+    background: #f5f3ff;
+    color: #7c3aed;
   }
   
   &.checkedout {
-    background-color: #e0e7ff;
-    color: #4338ca;
+    background: #e0f2fe;
+    color: #0284c7;
   }
   
   &.cancelled {
-    background-color: #fee2e2;
-    color: #b91c1c;
+    background: #fee2e2;
+    color: #dc2626;
   }
   
   &.completed {
-    background-color: #ecfdf5;
-    color: #047857;
+    background: #e0f2fe;
+    color: #0284c7;
   }
   
-  &.booking {
-    background-color: #e0f2fe;
-    color: #0369a1;
+  &.inprogress {
+    background: #e6fffa;
+    color: #0d9488;
   }
   
+  // Payment Status
   &.paid {
-    background-color: #d1fae5;
-    color: #065f46;
+    background: #e6fffa;
+    color: #0d9488;
+  }
+  
+  &.booked {
+    background: #fff8e6;
+    color: #d97706;
   }
   
   &.refund {
-    background-color: #fee2e2;
-    color: #b91c1c;
+    background: #fff2e8;
+    color: #fa541c;
   }
   
   &.failed {
-    background-color: #fee2e2;
-    color: #b91c1c;
+    background: #fee2e2;
+    color: #dc2626;
+  }
+  
+  // Trạng thái mở rộng
+  &.inactive {
+    background: #f3f4f6;
+    color: #6b7280;
+  }
+  
+  &.complete {
+    background: #e0f2fe;
+    color: #0284c7;
   }
 }
 
