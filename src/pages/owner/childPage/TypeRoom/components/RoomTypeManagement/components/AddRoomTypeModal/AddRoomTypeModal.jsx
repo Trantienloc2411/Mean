@@ -4,9 +4,12 @@ import { useGetAllRentalLocationsQuery } from '../../../../../../../../redux/ser
 import styles from './AddRoomTypeModal.module.scss';
 import { useState } from "react";
 import { supabase } from "../../../../../../../../redux/services/supabase";
-import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
+import { InboxOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { useGetOwnerDetailByUserIdQuery } from '../../../../../../../../redux/services/ownerApi';
 import { useParams } from "react-router-dom";
+import AddAmenityModal from '../../../RoomAmenitiesManagement/components/AddAmenityModal/AddAmenityModal';
+import { useCreateAmenityMutation } from '../../../../../../../../redux/services/serviceApi';
+import { useEffect } from "react";
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -14,21 +17,39 @@ const { Dragger } = Upload;
 
 const MAX_IMAGES = 10;
 
-const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
+const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm,rentalLocationId  }) => {
   const { id } = useParams();
   const [form] = Form.useForm();
-
+  const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false);
+  const [createAmenity, { isLoading: isCreatingService }] = useCreateAmenityMutation();
 
   const { data: ownerDetailData, isLoading: isOwnerDetailLoading } = useGetOwnerDetailByUserIdQuery(id);
   const ownerId = ownerDetailData?.id;
 
-  const { data: rentalLocations, isLoading: isLoadingRentalLocations, error: rentalLocationsError } = useGetAllRentalLocationsQuery(ownerId, {
+  const { data: rentalLocations, isLoading: isLoadingRentalLocations } = useGetAllRentalLocationsQuery(ownerId, {
     skip: !ownerId
   });
-  const { data: services, isLoading: isServicesLoading, error: servicesError } = useGetAllAmenitiesQuery(
-    { ownerId },
-    { skip: !ownerId }
+
+  useEffect(() => {
+    if (rentalLocationId) {
+      form.setFieldsValue({ rentalLocationId });
+    }
+  }, [rentalLocationId, form]);
+  
+  const { 
+    data: services, 
+    isLoading: isServicesLoading, 
+    refetch: refetchServices 
+  } = useGetAllAmenitiesQuery(
+    { 
+      ownerId,
+      rentalLocationId 
+    }, 
+    { 
+      skip: !ownerId && !rentalLocationId
+    }
   );
+
   const [fileList, setFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
 
@@ -39,13 +60,8 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
           ...values,
           numberOfPasswordRoom: values.numberOfPasswordRoom || 0,
           image: fileList.map(file => file.url),
-          serviceIds: values.serviceIds ? values.serviceIds :
-            values.serviceId ? [values.serviceId] : []
+          serviceIds: values.serviceIds || []
         };
-
-        if (formattedValues.serviceIds && formattedValues.serviceId) {
-          delete formattedValues.serviceId;
-        }
 
         console.log('Sending to API:', formattedValues);
         onConfirm(formattedValues);
@@ -132,28 +148,45 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
     }
   };
 
-  const getServicesOptions = () => {
-    if (!services) return [];
-    const servicesList = Array.isArray(services.data) ? services.data :
-      Array.isArray(services) ? services : [];
+  const handleAddService = async (values) => {
+    try {
+      const newService = await createAmenity({
+        ...values,
+        ownerId,
+        status: values.status === "Active",
+        isDelete: false
+      }).unwrap();
 
+      await refetchServices();
+      
+      const currentServices = form.getFieldValue('serviceIds') || [];
+      form.setFieldsValue({
+        serviceIds: [...currentServices, newService._id]
+      });
+      
+      message.success("Thêm dịch vụ thành công!");
+      setIsAddServiceModalOpen(false);
+    } catch (error) {
+      message.error(`Lỗi khi thêm dịch vụ: ${error.message}`);
+    }
+  };
+
+  const getServicesOptions = () => {
+    const servicesList = services?.data || services || [];
     return servicesList
-      .filter(service => service.status === true)
+      .filter(service => service.status)
       .map(service => ({
         label: service.name,
-        value: service._id || service.id
+        value: service._id
       }));
   };
 
   const getLocationsOptions = () => {
     if (!rentalLocations) return [];
-
-    const locationsList = Array.isArray(rentalLocations.data) ? rentalLocations.data :
-      Array.isArray(rentalLocations) ? rentalLocations : [];
-
+    const locationsList = rentalLocations.data || rentalLocations;
     return locationsList.map(location => ({
       label: location.name,
-      value: location._id || location.id
+      value: location._id
     }));
   };
 
@@ -201,10 +234,25 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
           rules={[{ required: true, message: 'Vui lòng chọn dịch vụ' }]}
         >
           <Select
+            mode="multiple"
             placeholder="Chọn dịch vụ"
             loading={isServicesLoading}
-            mode="multiple"
             options={getServicesOptions()}
+            dropdownRender={(menu) => (
+              <>
+                {menu}
+                <div
+                  style={{
+                    padding: '8px',
+                    cursor: 'pointer',
+                    borderTop: '1px solid #e8e8e8'
+                  }}
+                  onClick={() => setIsAddServiceModalOpen(true)}
+                >
+                  <PlusOutlined /> Thêm dịch vụ mới
+                </div>
+              </>
+            )}
           />
         </Form.Item>
 
@@ -326,6 +374,13 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
           </div>
         </Form.Item>
       </Form>
+
+      <AddAmenityModal
+        isOpen={isAddServiceModalOpen}
+        onCancel={() => setIsAddServiceModalOpen(false)}
+        onConfirm={handleAddService}
+        isLoading={isCreatingService}
+      />
     </Modal>
   );
 };
