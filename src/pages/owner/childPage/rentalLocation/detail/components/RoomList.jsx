@@ -4,13 +4,14 @@ import { IoMdAdd } from "react-icons/io";
 import { useParams } from "react-router-dom";
 import SearchAndFilter from "./SearchAndFilter";
 import RoomTableColumns from "./RoomTable";
-import { 
+import {
   useGetAccommodationsByRentalLocationQuery,
-  useGetAccommodationByIdQuery 
+  useGetAccommodationByIdQuery
 } from "../../../../../../redux/services/accommodationApi";
 import AccommodationCreate from "../../../accomodation/childPage/AccomodationCreate/AccomodationCreate";
 import AccomodationEdit from "../../../accomodation/childPage/AccomodationEdit/AccomodationEdit";
 import AccommodationDetail from "../../../accomodation/childPage/AccomodationDetail/AccomodationDetail";
+import styles from "./RoomList.module.scss"; 
 
 export default function RoomList() {
   const { id: rentalLocationId } = useParams();
@@ -22,14 +23,14 @@ export default function RoomList() {
   const [selectedAccommodationId, setSelectedAccommodationId] = useState(null);
   const [accommodationData, setAccommodationData] = useState(null);
 
-  const { 
-    data: accommodations, 
-    isLoading, 
-    isError, 
-    refetch 
+  const {
+    data: accommodations,
+    isLoading,
+    isError,
+    refetch
   } = useGetAccommodationsByRentalLocationQuery(rentalLocationId);
 
-  const { 
+  const {
     data: accommodationDetailResponse,
     isLoading: isLoadingDetail,
     refetch: refetchDetail
@@ -94,6 +95,12 @@ export default function RoomList() {
     return matchesSearch && matchesFilter;
   }) || [];
 
+  const sortedData = [...filteredData].sort((a, b) => {
+    const roomA = a.roomNo.replace(/\D/g, '');
+    const roomB = b.roomNo.replace(/\D/g, '');
+    return parseInt(roomA) - parseInt(roomB);
+  });
+
   return (
     <div>
       <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 16 }}>
@@ -115,9 +122,40 @@ export default function RoomList() {
           onDetailClick: handleDetailClick,
           onEditClick: handleEditClick
         })}
-        dataSource={filteredData}
+        dataSource={sortedData}
         rowKey="id"
         loading={isLoading}
+        pagination={{
+          total: sortedData.length,
+          pageSize: 7,
+          showSizeChanger: false,
+          className: styles.customPagination,
+          itemRender: (page, type, originalElement) => {
+            const totalPages = Math.ceil(sortedData.length / 7);
+            if (type === "prev") {
+              return (
+                <button
+                  className={styles.paginationButton}
+                  disabled={page === 0}
+                >
+                  « Trước
+                </button>
+              );
+            }
+            if (type === "next") {
+              return (
+                <button
+                  className={styles.paginationButton}
+                  disabled={page >= totalPages}
+                >
+                  Tiếp »
+                </button>
+              );
+            }
+            return originalElement;
+          },
+        }}
+        className={styles.reportTable}
       />
 
       <AccommodationCreate

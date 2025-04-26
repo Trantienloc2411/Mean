@@ -7,9 +7,13 @@ import {
   message,
   Typography,
   Divider,
-  Input
+  Input,
+  Radio,
+  Space,
+  InputNumber,
+  Tooltip
 } from "antd";
-import { SaveOutlined, InfoCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { SaveOutlined, InfoCircleOutlined, PlusOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import { useLocation } from "react-router-dom";
 import ImageUpload from "../../../rentalLocation/create/ImageUpload";
@@ -27,6 +31,8 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess }) {
   const [fileList, setFileList] = useState([]);
   const [isAddTypeModalOpen, setIsAddTypeModalOpen] = useState(false);
   const [selectOpen, setSelectOpen] = useState(false);
+  const [createMode, setCreateMode] = useState("single");
+  const [isCreating, setIsCreating] = useState(false);
 
   const location = useLocation();
   const pathnameParts = location.pathname.split("/");
@@ -34,40 +40,80 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess }) {
 
   const [createAccommodation, { isLoading }] = useCreateAccommodationMutation();
   const [createAccommodationType] = useCreateAccommodationTypeMutation();
-  const { data: accommodationTypes, refetch: accommodationTypesRefetch } = useGetAllAccommodationTypesQuery(rentalLocationId); 
+  const { data: accommodationTypes, refetch: accommodationTypesRefetch } = useGetAllAccommodationTypesQuery(rentalLocationId);
 
   useEffect(() => {
     if (visible) {
       form.resetFields();
       setFileList([]);
+      setCreateMode("single");
     }
   }, [visible, form]);
 
-  const handleSaveAction = async (values) => {
-    try {
-      const accommodationData = {
-        rentalLocationId: rentalLocationId,
-        accommodationTypeId: values.accommodationTypeId,
-        roomNo: values.roomNo,
-        description: values.description || "",
-        image: fileList.length > 0 ? fileList[0].url : "",
-        status: 1
-      };
+  const padRoomNumber = (num, length = 3) => {
+    return String(num).padStart(length, '0');
+  };
 
-      await createAccommodation(accommodationData).unwrap();
-      message.success({
-        content: "Tạo phòng thành công!",
-        style: { marginTop: '20px' },
-      });
+  const handleSaveAction = async (values) => {
+    setIsCreating(true);
+    try {
+      if (createMode === "single") {
+        const accommodationData = {
+          rentalLocationId: rentalLocationId,
+          accommodationTypeId: values.accommodationTypeId,
+          roomNo: values.roomNo,
+          description: values.description || "",
+          image: fileList.length > 0 ? fileList[0].url : "",
+          status: 1
+        };
+
+        await createAccommodation(accommodationData).unwrap();
+        message.success({
+          content: "Tạo phòng thành công!",
+          style: { marginTop: '20px' },
+        });
+      } else {
+        const { startRoom, endRoom } = values;
+        
+        if (parseInt(startRoom) > parseInt(endRoom)) {
+          message.error("Số phòng bắt đầu phải nhỏ hơn hoặc bằng số phòng kết thúc!");
+          setIsCreating(false);
+          return;
+        }
+
+        const roomLength = Math.max(startRoom.length, endRoom.length);
+        
+        const accommodations = [];
+        for (let i = parseInt(startRoom); i <= parseInt(endRoom); i++) {
+          accommodations.push({
+            rentalLocationId: rentalLocationId,
+            accommodationTypeId: values.accommodationTypeId,
+            roomNo: padRoomNumber(i, roomLength),
+            description: values.description || "",
+            image: fileList.length > 0 ? fileList[0].url : "",
+            status: 1
+          });
+        }
+
+        await createAccommodation(accommodations).unwrap();
+        message.success({
+          content: `Đã tạo thành công ${accommodations.length} phòng!`,
+          style: { marginTop: '20px' },
+        });
+      }
+
       onSuccess();
       form.resetFields();
       setFileList([]);
+      setCreateMode("single");
     } catch (error) {
       console.error("Error creating accommodation:", error);
       message.error({
         content: "Có lỗi xảy ra khi tạo phòng!",
         style: { marginTop: '20px' },
       });
+    } finally {
+      setIsCreating(false);
     }
   };
 
@@ -84,7 +130,6 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess }) {
       setIsAddTypeModalOpen(false); 
       
       await accommodationTypesRefetch(); 
-  
     } catch (error) {
       message.error("Thêm loại phòng thất bại!");
     }
@@ -110,11 +155,33 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess }) {
         <Form
           form={form}
           onFinish={handleSaveAction}
-          initialValues={{ status: true }}
+          initialValues={{ status: true, createMode: "single" }}
           layout="vertical"
           className={styles.formContainer}
         >
-           <div className={styles.formSection}>
+          <div className={styles.createModeSelector}>
+            <Form.Item
+              name="createMode"
+              label={
+                <Space>
+                  <Text strong>Chế độ tạo phòng</Text>
+                  <Tooltip title="Chọn 'Tạo nhiều phòng' để tạo một loạt các phòng có cùng tính năng với số phòng liên tiếp">
+                    <QuestionCircleOutlined />
+                  </Tooltip>
+                </Space>
+              }
+            >
+              <Radio.Group 
+                onChange={(e) => setCreateMode(e.target.value)} 
+                value={createMode}
+              >
+                <Radio value="single">Tạo một phòng</Radio>
+                <Radio value="batch">Tạo nhiều phòng</Radio>
+              </Radio.Group>
+            </Form.Item>
+          </div>
+
+          <div className={styles.formSection}>
             <Form.Item
               name="accommodationTypeId"
               label={<Text strong>Loại phòng</Text>}
@@ -175,42 +242,53 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess }) {
                     </div>
                   </Option>
                 ))}
-
-<Option 
-                  key="add-new-type" 
-                  disabled
-                  style={{ 
-                    cursor: 'default',
-                    pointerEvents: 'auto',
-                    backgroundColor: 'transparent !important'
-                  }}
-                >
-                  <div 
-                    className={styles.addNewOption}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      setSelectOpen(false); 
-                      setIsAddTypeModalOpen(true); 
-                    }}
-                  >
-                    <PlusOutlined /> Thêm loại phòng mới
-                  </div>
-                </Option>
               </Select>
             </Form.Item>
 
-
-            <Form.Item
-              name="roomNo"
-              label={<Text strong>Số phòng</Text>}
-              rules={[{ required: true, message: "Vui lòng nhập số phòng!" }]}
-            >
-              <Input
-                placeholder="Nhập số phòng (vd: 001)"
-                size="large"
-                className={styles.inputField}
-              />
-            </Form.Item>
+            {createMode === "single" ? (
+              <Form.Item
+                name="roomNo"
+                label={<Text strong>Số phòng</Text>}
+                rules={[{ required: true, message: "Vui lòng nhập số phòng!" }]}
+              >
+                <Input
+                  placeholder="Nhập số phòng (vd: 001)"
+                  size="large"
+                  className={styles.inputField}
+                />
+              </Form.Item>
+            ) : (
+              <div className={styles.batchRoomNumbers}>
+                <Form.Item
+                  name="startRoom"
+                  label={<Text strong>Từ số phòng</Text>}
+                  rules={[{ required: true, message: "Vui lòng nhập số phòng bắt đầu!" }]}
+                  style={{ display: 'inline-block', width: 'calc(50% - 12px)', marginRight: '24px' }}
+                >
+                  <Input
+                    placeholder="Vd: 001"
+                    size="large"
+                  />
+                </Form.Item>
+                <Form.Item
+                  name="endRoom"
+                  label={<Text strong>Đến số phòng</Text>}
+                  rules={[{ required: true, message: "Vui lòng nhập số phòng kết thúc!" }]}
+                  style={{ display: 'inline-block', width: 'calc(50% - 12px)' }}
+                >
+                  <Input
+                    placeholder="Vd: 010"
+                    size="large"
+                  />
+                </Form.Item>
+                <div className={styles.batchHint}>
+                  <InfoCircleOutlined />
+                  <Text type="secondary">
+                    Hệ thống sẽ tạo tất cả các phòng trong khoảng từ 001 đến 010 (001, 002, 003, ... 010)
+                  </Text>
+                </div>
+              </div>
+            )}
 
             <Form.Item
               name="description"
@@ -233,7 +311,11 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess }) {
               <ImageUpload fileList={fileList} setFileList={setFileList} />
               <div className={styles.imageHint}>
                 <InfoCircleOutlined />
-                <Text type="secondary">Ảnh đầu tiên sẽ được sử dụng làm ảnh chính</Text>
+                <Text type="secondary">
+                  {createMode === "single" 
+                    ? "Ảnh đầu tiên sẽ được sử dụng làm ảnh chính" 
+                    : "Tất cả các phòng sẽ sử dụng cùng một hình ảnh"}
+                </Text>
               </div>
             </Form.Item>
           </div>
@@ -243,17 +325,18 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess }) {
               onClick={onCancel}
               size="large"
               className={styles.cancelButton}
+              disabled={isCreating}
             >
               Huỷ
             </Button>
             <Button
               icon={<SaveOutlined />}
               htmlType="submit"
-              loading={isLoading}
+              loading={isLoading || isCreating}
               className={styles.saveButton}
               size="large"
             >
-              Lưu lại
+              {createMode === "single" ? "Lưu lại" : "Tạo phòng hàng loạt"}
             </Button>
           </div>
         </Form>
