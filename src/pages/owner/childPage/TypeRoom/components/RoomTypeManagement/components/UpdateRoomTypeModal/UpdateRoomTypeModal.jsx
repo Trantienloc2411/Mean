@@ -1,14 +1,15 @@
 import { Modal, Form, Input, InputNumber, Select, Button, Spin, Image, Upload, message } from 'antd';
 import { useEffect } from 'react';
-import { useGetAllAmenitiesQuery } from '../../../../../../../../redux/services/serviceApi';
+import { useGetAllAmenitiesQuery, useCreateAmenityMutation } from '../../../../../../../../redux/services/serviceApi';
 import { useGetAllRentalLocationsQuery } from '../../../../../../../../redux/services/rentalLocationApi';
 import styles from './UpdateRoomTypeModal.module.scss';
 import { useState } from "react";
 import { supabase } from "../../../../../../../../redux/services/supabase";
-import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
+import { InboxOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { useGetOwnerDetailByUserIdQuery } from '../../../../../../../../redux/services/ownerApi';
 import { useParams } from "react-router-dom";
 import { useGetAccommodationTypeByIdQuery } from '../../../../../../../../redux/services/accommodationTypeApi';
+import AddAmenityModal from '../../../RoomAmenitiesManagement/components/AddAmenityModal/AddAmenityModal';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -19,6 +20,8 @@ const MAX_IMAGES = 10;
 const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => {
   const { id } = useParams();
   const [form] = Form.useForm();
+  const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false);
+  const [createAmenity, { isLoading: isCreatingService }] = useCreateAmenityMutation();
 
   const roomTypeId = initialValues?._id;
 
@@ -37,7 +40,11 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
     skip: !ownerId
   });
 
-  const { data: services, isLoading: isServicesLoading } = useGetAllAmenitiesQuery(
+  const { 
+    data: services, 
+    isLoading: isServicesLoading,
+    refetch: refetchServices 
+  } = useGetAllAmenitiesQuery(
     { ownerId },
     { skip: !ownerId }
   );
@@ -172,6 +179,29 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
       setUploading(false);
     }
   };
+  
+  const handleAddService = async (values) => {
+    try {
+      const newService = await createAmenity({
+        ...values,
+        ownerId,
+        status: values.status === "Active",
+        isDelete: false
+      }).unwrap();
+
+      await refetchServices();
+      
+      const currentServices = form.getFieldValue('serviceIds') || [];
+      form.setFieldsValue({
+        serviceIds: [...currentServices, newService._id]
+      });
+      
+      message.success("Thêm dịch vụ thành công!");
+      setIsAddServiceModalOpen(false);
+    } catch (error) {
+      message.error(`Lỗi khi thêm dịch vụ: ${error.message}`);
+    }
+  };
 
   const getServicesOptions = () => {
     if (!services) return [];
@@ -185,6 +215,7 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
         value: service._id 
       }));
   };
+  
   const getLocationsOptions = () => {
     if (!rentalLocations) return [];
 
@@ -246,6 +277,21 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
             mode="multiple"
             optionFilterProp="label"
             options={getServicesOptions()}
+            dropdownRender={(menu) => (
+              <>
+                {menu}
+                <div
+                  style={{
+                    padding: '8px',
+                    cursor: 'pointer',
+                    borderTop: '1px solid #e8e8e8'
+                  }}
+                  onClick={() => setIsAddServiceModalOpen(true)}
+                >
+                  <PlusOutlined /> Thêm dịch vụ mới
+                </div>
+              </>
+            )}
           />
         </Form.Item>
 
@@ -367,6 +413,13 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
           </div>
         </Form.Item>
       </Form>
+
+      <AddAmenityModal
+        isOpen={isAddServiceModalOpen}
+        onCancel={() => setIsAddServiceModalOpen(false)}
+        onConfirm={handleAddService}
+        isLoading={isCreatingService}
+      />
     </Modal>
   );
 };
