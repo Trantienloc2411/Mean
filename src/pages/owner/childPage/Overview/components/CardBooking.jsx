@@ -10,22 +10,37 @@ export default function CardBooking({ item, stageLevel }) {
     </span>
   );
 
-  // Format date for display (DD/MM/YYYY)
-  const formatDate = (dateTimeStr) => {
-    const date = new Date(dateTimeStr);
-    const day = date.getDate();
-    const month = date.getMonth() + 1;
-    const year = date.getFullYear();
-    return `${day}/${month}/${year}`;
-  };
-
   // Format time for display (HH:MM)
   const formatTime = (dateTimeStr) => {
-    const date = new Date(dateTimeStr);
-    return date.toLocaleTimeString("vi-VN", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
+    if (!dateTimeStr) return "";
+
+    // Try to split time manually
+    const timePart =
+      dateTimeStr.split("T")[1] || dateTimeStr.split(" ")[1] || dateTimeStr;
+
+    if (!timePart) return "";
+
+    const [hour, minute] = timePart.split(":");
+
+    if (hour === undefined || minute === undefined) return "";
+
+    // Return as HH:MM
+    return `${hour.padStart(2, "0")}:${minute.padStart(2, "0")}`;
+  };
+
+  // Format date for display (DD/MM/YYYY)
+  const formatDate = (dateTimeStr) => {
+    if (!dateTimeStr) return "";
+
+    const datePart = dateTimeStr.split("T")[0] || dateTimeStr.split(" ")[0];
+    if (!datePart) return "";
+
+    const [year, month, day] = datePart.split("-"); // Assuming format is YYYY-MM-DD
+
+    if (year && month && day) {
+      return `${day}/${month}/${year}`;
+    }
+    return datePart; // fallback if format unexpected
   };
 
   // Get status label and class
@@ -66,19 +81,17 @@ export default function CardBooking({ item, stageLevel }) {
           <div className={styles.row}>
             <div className={styles.column}>
               <div className={styles.label}>Check-in</div>
-              <div className={styles.value}>{formatDate(item.checkIn)}</div>
-              <div className={styles.time}>{formatTime(item.checkIn)}</div>
+              <div className={styles.value}>{formatTime(item.checkIn)}</div>
             </div>
 
             <div className={styles.column}>
               <div className={styles.label}>Check-out</div>
-              <div className={styles.value}>{formatDate(item.checkOut)}</div>
-              <div className={styles.time}>{formatTime(item.checkOut)}</div>
+              <div className={styles.value}>{formatTime(item.checkOut)}</div>
             </div>
           </div>
 
           <div className={styles.hotelInfo}>
-            <HomeOutlined /> {item.placeName} 
+            <HomeOutlined /> {item.placeName}
           </div>
         </div>
       </div>
