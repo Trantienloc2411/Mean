@@ -135,7 +135,7 @@ export default function Report() {
       width: 120,
     },
     {
-      title: "Content",
+      title: "Mô tả",
       dataIndex: "content",
       key: "content",
       width: 300,

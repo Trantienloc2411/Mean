@@ -20,10 +20,10 @@ export default function BankAccount(props) {
         .validateFields()
         .then((values) => {
           setFormData(values);
-          message.success('Bank account information updated successfully!');
+          message.success('Cập nhật thông tin tài khoản ngân hàng thành công!');
         })
         .catch(() => {
-          message.error('Failed to update bank account information. Please check the form.');
+          message.error('Cập nhật thất bại. Vui lòng kiểm tra lại thông tin.');
         });
     };
   
@@ -42,7 +42,7 @@ export default function BankAccount(props) {
           <Form.Item
             label="Số tài khoản"
             name="accountNumber"
-            rules={[{ required: true, message: 'Please input your account number!' }]}
+            rules={[{ required: true, message: 'Vui lòng nhập số tài khoản!' }]}
           >
             <Input />
           </Form.Item>
