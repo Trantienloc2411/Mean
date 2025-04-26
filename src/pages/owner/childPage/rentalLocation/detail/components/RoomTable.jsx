@@ -1,6 +1,6 @@
 import React from "react";
 import { Tag, Dropdown, Menu, Button, Tooltip } from "antd";
-import { EllipsisOutlined, TagsOutlined } from "@ant-design/icons";
+import { MoreOutlined } from "@ant-design/icons";
 
 // Enum
 const STATUS_MAP = {
@@ -22,12 +22,22 @@ export default function RoomTableColumns({ onDetailClick, onEditClick }) {
     }
   };
 
-  const actionMenu = (record) => (
-    <Menu onClick={({ key }) => handleMenuClick(key, record)}>
-      <Menu.Item key="detail">Xem chi tiết</Menu.Item>
-      <Menu.Item key="edit">Sửa</Menu.Item>
-    </Menu>
-  );
+  const menuItems = [
+    {
+      key: "detail",
+      label: "Xem chi tiết",
+      onClick: (record) => {
+        onDetailClick?.(record);
+      },
+    },
+    {
+      key: "edit",
+      label: "Sửa",
+      onClick: (record) => {
+        onEditClick?.(record);
+      },
+    },
+  ];
 
   return [
     {
@@ -90,11 +100,19 @@ export default function RoomTableColumns({ onDetailClick, onEditClick }) {
       },
     },
     {
-      title: "Thao tác",
-      key: "action",
+      title: "",
+      key: "operation",
       render: (_, record) => (
-        <Dropdown overlay={() => actionMenu(record)} trigger={["click"]}>
-          <Button icon={<EllipsisOutlined />} />
+        <Dropdown
+          trigger={["click"]}
+          menu={{
+            items: menuItems.map((item) => ({
+              ...item,
+              onClick: () => item.onClick(record),
+            })),
+          }}
+        >
+          <MoreOutlined onClick={(e) => e.preventDefault()} />
         </Dropdown>
       ),
     },

@@ -91,3 +91,33 @@
 .textArea {
   resize: none;
 }
+
+.optionContent {
+  padding: 8px 0;
+  
+  .optionHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 4px;
+    
+    .typeName {
+      font-weight: 500;
+      font-size: 14px;
+    }
+    
+    .prices {
+      font-size: 13px;
+      color: #666;
+      white-space: nowrap;
+      margin-left: 15px;
+    }
+  }
+
+  .services {
+    font-size: 12px;
+    color: #888;
+    line-height: 1.4;
+    white-space: normal;
+  }
+}

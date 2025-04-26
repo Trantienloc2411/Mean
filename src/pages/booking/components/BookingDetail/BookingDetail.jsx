@@ -25,7 +25,7 @@ const BookingDetail = ({ bookingId, visible, onClose, bookingData, isLoading, is
   }, [bookingData])
 
   if (isError) {
-    message.error("Failed to load booking details")
+    message.error("Lỗi khi tải chi tiết của booking")
     return null
   }
 

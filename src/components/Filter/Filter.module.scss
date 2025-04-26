@@ -1,9 +1,9 @@
 .filterContainer {
   background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  padding: 20px;
-  width: 350px;
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  padding: 16px;
+  width: 300px;
   max-height: 80vh;
   overflow-y: auto;
 }
@@ -12,11 +12,15 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  position: sticky;
+  top: 0;
+  background: white;
+  z-index: 1;
+  padding: 8px 0;
 
   h3 {
     margin: 0;
-    font-size: 18px;
+    font-size: 16px;
     font-weight: 600;
     color: #111827;
   }
@@ -35,7 +39,7 @@
 }
 
 .divider {
-  margin: 16px 0;
+  margin: 12px 0;
   border-color: #f3f4f6;
 }
 
@@ -142,65 +146,86 @@
 }
 
 .statusBadge {
-  padding: 4px 10px;
+  padding: 6px 12px;
   border-radius: 16px;
-  font-size: 13px;
+  font-size: 0.75rem;
   font-weight: 500;
   display: inline-block;
+  white-space: nowrap;
   
   &.confirmed {
-    background-color: #dcfce7;
-    color: #166534;
+    background: #fff8e6;
+    color: #d97706;
   }
   
   &.pending {
-    background-color: #fff7ed;
-    color: #9a3412;
+    background: #f3f4f6;
+    color: #4b5563;
   }
   
-  &.needcheckin, &.needcheckout {
-    background-color: #e0f2fe;
+  &.needcheckin {
+    background: #f0f9ff;
     color: #0369a1;
   }
   
   &.checkedin {
-    background-color: #d1fae5;
-    color: #065f46;
+    background: #e6fffa;
+    color: #0d9488;
+  }
+  
+  &.needcheckout {
+    background: #f5f3ff;
+    color: #7c3aed;
   }
   
   &.checkedout {
-    background-color: #e0e7ff;
-    color: #4338ca;
+    background: #e0f2fe;
+    color: #0284c7;
   }
   
   &.cancelled {
-    background-color: #fee2e2;
-    color: #b91c1c;
+    background: #fee2e2;
+    color: #dc2626;
   }
   
   &.completed {
-    background-color: #ecfdf5;
-    color: #047857;
+    background: #e0f2fe;
+    color: #0284c7;
   }
   
-  &.booking {
-    background-color: #e0f2fe;
-    color: #0369a1;
+  &.inprogress {
+    background: #e6fffa;
+    color: #0d9488;
   }
   
   &.paid {
-    background-color: #d1fae5;
-    color: #065f46;
+    background: #e6fffa;
+    color: #0d9488;
+  }
+  
+  &.booked {
+    background: #fff8e6;
+    color: #d97706;
   }
   
   &.refund {
-    background-color: #fee2e2;
-    color: #b91c1c;
+    background: #f5f3ff;
+    color: #7c3aed;
   }
   
   &.failed {
-    background-color: #fee2e2;
-    color: #b91c1c;
+    background: #fee2e2;
+    color: #dc2626;
+  }
+  
+  &.inactive {
+    background: #f3f4f6;
+    color: #6b7280;
+  }
+  
+  &.complete {
+    background: #e0f2fe;
+    color: #0284c7;
   }
 }
 
@@ -244,3 +269,30 @@
     }
   }
 }
+
+.datePickerWrapper,
+.timePickerWrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.filterLabel {
+  font-size: 14px;
+  color: #4b5563;
+  margin-bottom: 2px;
+}
+
+.datePicker,
+.timePicker {
+  width: 100%;
+}
+
+.dateTimeTag {
+  background-color: #e5e7eb;
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #374151;
+}
+

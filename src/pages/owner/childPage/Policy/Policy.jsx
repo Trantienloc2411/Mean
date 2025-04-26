@@ -10,6 +10,7 @@ import DetailPolicyModal from "./components/DetailPolicyModal/DetailPolicyModal.
 import dayjs from "dayjs";
 import {
   useGetPolicyOwnerByOwnerIdQuery,
+  useGetPolicyOwnerByIdQuery,
   useCreatePolicyOwnerMutation,
   useUpdatePolicyOwnerMutation,
   useDeletePolicyOwnerMutation,
@@ -31,6 +32,9 @@ export default function Policy() {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [effectiveOwnerId, setEffectiveOwnerId] = useState(null);
+  const [selectedPolicyId, setSelectedPolicyId] = useState(null);
+  const [policyDetailForUpdate, setPolicyDetailForUpdate] = useState(null);
+
 
   // const userId = localStorage.getItem("user_id");
   const { id } = useParams();
@@ -41,6 +45,22 @@ export default function Policy() {
     error: ownerError,
   } = useGetOwnerDetailByUserIdQuery(id, {
     skip: !id,
+  });
+
+  const {
+    data: selectedPolicyDetail,
+    isLoading: isLoadingPolicyDetail,
+    error: policyDetailError
+  } = useGetPolicyOwnerByIdQuery(selectedPolicyId, {
+    skip: !selectedPolicyId || !isDetailModalOpen
+  });
+
+  const {
+    data: updatePolicyDetail,
+    isLoading: isLoadingUpdateDetail,
+    error: updateDetailError,
+  } = useGetPolicyOwnerByIdQuery(selectedPolicyId, {
+    skip: !selectedPolicyId || !isUpdateModalOpen,
   });
 
   useEffect(() => {
@@ -223,6 +243,7 @@ export default function Policy() {
       label: "Chi tiết",
       onClick: (record) => {
         setSelectedPolicy(record);
+        setSelectedPolicyId(record._id || record.id);
         setIsDetailModalOpen(true);
       },
     },
@@ -230,9 +251,7 @@ export default function Policy() {
       key: "2",
       label: "Chỉnh sửa",
       onClick: (record) => {
-        console.log("Selected policy for update:", record);
-        console.log("Original policy data:", record._original);
-        setSelectedPolicy(record);
+        setSelectedPolicyId(record._id || record.id);
         setIsUpdateModalOpen(true);
       },
     },
@@ -394,7 +413,7 @@ export default function Policy() {
       console.error("Error updating policy:", error);
       message.error(
         "Cập nhật chính sách thất bại: " +
-          (error.data?.message || "Đã xảy ra lỗi")
+        (error.data?.message || "Đã xảy ra lỗi")
       );
     } finally {
       setIsUpdateModalOpen(false);
@@ -445,6 +464,12 @@ export default function Policy() {
     setFilteredData(filtered);
   }, [searchTerm, selectedValues, baseData]);
 
+  useEffect(() => {
+    if (updatePolicyDetail) {
+      setPolicyDetailForUpdate(updatePolicyDetail);
+    }
+  }, [updatePolicyDetail]);
+
   const columns = [
     { title: "No.", dataIndex: "No", key: "No" },
     { title: "Tên chính sách", dataIndex: "Name", key: "Name" },
@@ -476,8 +501,8 @@ export default function Policy() {
             {status === 2
               ? "Đã duyệt"
               : status === 1
-              ? "Đang chờ"
-              : "Bị từ chối"}
+                ? "Đang chờ"
+                : "Bị từ chối"}
           </span>
         );
       },
@@ -602,18 +627,24 @@ export default function Policy() {
           isOpen={isUpdateModalOpen}
           onCancel={() => {
             setIsUpdateModalOpen(false);
-            setSelectedPolicy(null);
+            setSelectedPolicyId(null);
+            setPolicyDetailForUpdate(null);
           }}
           onConfirm={handleUpdatePolicy}
-          initialValues={selectedPolicy}
+          initialValues={policyDetailForUpdate}
+          isLoading={isLoadingUpdateDetail}
         />
 
         <DetailPolicyModal
           isOpen={isDetailModalOpen}
           policy={selectedPolicy}
+          policyDetailData={selectedPolicyDetail}
+          isLoadingPolicyDetail={isLoadingPolicyDetail}
+          policyDetailError={policyDetailError}
           onCancel={() => {
             setIsDetailModalOpen(false);
             setSelectedPolicy(null);
+            setSelectedPolicyId(null);
           }}
         />
 

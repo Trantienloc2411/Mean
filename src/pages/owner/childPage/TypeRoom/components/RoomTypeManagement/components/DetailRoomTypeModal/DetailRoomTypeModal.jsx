@@ -1,21 +1,26 @@
-import { Modal, Descriptions, Tag, Tooltip, Image, Row, Col } from 'antd';
+import { Modal, Descriptions, Tooltip, Image, Row, Col, Spin } from 'antd';
 import { useEffect, useState } from 'react';
 import styles from './DetailRoomTypeModal.module.scss';
+import { useGetAccommodationTypeByIdQuery } from '../../../../../../../../redux/services/accommodationTypeApi';
 
-const DetailRoomTypeModal = ({ isOpen, onCancel, roomType, service }) => {
-  const [formattedServices, setFormattedServices] = useState([]);
+const DetailRoomTypeModal = ({ isOpen, onCancel, roomType: initialRoomType }) => {
+  const { data: response, isLoading } = useGetAccommodationTypeByIdQuery(
+    initialRoomType?._id,
+    { skip: !initialRoomType?._id || !isOpen }
+  );
+  
+  const roomTypeDetails = response?.data;
+  
+  const roomType = roomTypeDetails || initialRoomType;
+
   const [images, setImages] = useState([]);
 
   useEffect(() => {
-    if (roomType?.serviceIds && Array.isArray(roomType.serviceIds)) {
-      setFormattedServices(roomType.serviceIds);
-    }
+    if (!roomType) return;
 
-    // Ưu tiên sử dụng trường images nếu có, nếu không thì dùng image
     if (roomType?.images && Array.isArray(roomType.images)) {
       setImages(roomType.images);
     } else if (roomType?.image) {
-      // Xử lý cả trường hợp image là mảng hoặc string
       setImages(Array.isArray(roomType.image) ? roomType.image : [roomType.image]);
     } else {
       setImages([]);
@@ -67,10 +72,10 @@ const DetailRoomTypeModal = ({ isOpen, onCancel, roomType, service }) => {
   };
 
   const renderServiceInfo = () => {
-    if (formattedServices.length > 0) {
+    if (roomType.serviceIds && Array.isArray(roomType.serviceIds) && roomType.serviceIds.length > 0) {
       return (
         <div>
-          {formattedServices.map((serviceItem) => (
+          {roomType.serviceIds.map((serviceItem) => (
             <div 
               style={customTagStyle} 
               key={serviceItem._id || serviceItem.id || serviceItem}
@@ -81,16 +86,11 @@ const DetailRoomTypeModal = ({ isOpen, onCancel, roomType, service }) => {
         </div>
       );
     }
-    if (roomType.serviceId && service) {
-      return (
-        <div style={customTagStyle}>
-          {typeof service === 'object' ? service.name : service}
-        </div>
-      );
-    }
+    
     if (roomType.serviceId) {
       return <div style={customTagStyle}>{roomType.serviceId}</div>;
     }
+    
     return 'Không có dịch vụ';
   };
 
@@ -129,33 +129,43 @@ const DetailRoomTypeModal = ({ isOpen, onCancel, roomType, service }) => {
       footer={null}
       width={800}
     >
-      <Descriptions bordered column={1} className={styles.modalDescriptions}>
-        <Descriptions.Item label={`Hình ảnh (${images.length})`}>
-          {renderImages()}
-        </Descriptions.Item>
-        <Descriptions.Item label="ID">{roomType._id || 'N/A'}</Descriptions.Item>
-        <Descriptions.Item label="Tên loại phòng">{roomType.name || 'N/A'}</Descriptions.Item>
-        <Descriptions.Item label="Mô tả">
-          <Tooltip placement="topLeft" title={roomType.description || 'Không có mô tả'}>
-            {roomType.description || 'Không có mô tả'}
-          </Tooltip>
-        </Descriptions.Item>
-        <Descriptions.Item label="Số người tối đa">{roomType.maxPeopleNumber || 0} người</Descriptions.Item>
-        <Descriptions.Item label="Giá cơ bản">{(roomType.basePrice || 0).toLocaleString()}đ</Descriptions.Item>
-        <Descriptions.Item label="Giá theo giờ (phụ trội)">{(roomType.overtimeHourlyPrice || 0).toLocaleString()}đ/giờ</Descriptions.Item>
-        <Descriptions.Item label="Địa điểm">
-          <Tooltip placement="topLeft" title={getLocationName()}>
-            {getLocationName()}
-          </Tooltip>
-        </Descriptions.Item>
-        
-        <Descriptions.Item label="Dịch vụ">
-          {renderServiceInfo()}
-        </Descriptions.Item>
-        
-        <Descriptions.Item label="Ngày tạo">{formatDateTime(roomType.createdAt)}</Descriptions.Item>
-        <Descriptions.Item label="Ngày cập nhật">{formatDateTime(roomType.updatedAt)}</Descriptions.Item>
-      </Descriptions>
+      {isLoading ? (
+        <div style={{ textAlign: 'center', padding: '30px' }}>
+          <Spin size="large" />
+        </div>
+      ) : (
+        <Descriptions bordered column={1} className={styles.modalDescriptions}>
+          <Descriptions.Item label={`Hình ảnh (${images.length})`}>
+            {renderImages()}
+          </Descriptions.Item>
+          <Descriptions.Item label="ID">{roomType._id || roomType.id || 'N/A'}</Descriptions.Item>
+          <Descriptions.Item label="Tên loại phòng">{roomType.name || 'N/A'}</Descriptions.Item>
+          <Descriptions.Item label="Mô tả">
+            <Tooltip placement="topLeft" title={roomType.description || 'Không có mô tả'}>
+              {roomType.description || 'Không có mô tả'}
+            </Tooltip>
+          </Descriptions.Item>
+          <Descriptions.Item label="Số người tối đa">{roomType.maxPeopleNumber || 0} người</Descriptions.Item>
+          <Descriptions.Item label="Giá cơ bản">{(roomType.basePrice || 0).toLocaleString()}đ</Descriptions.Item>
+          <Descriptions.Item label="Giá theo giờ (phụ trội)">{(roomType.overtimeHourlyPrice || 0).toLocaleString()}đ/giờ</Descriptions.Item>
+          <Descriptions.Item label="Địa điểm">
+            <Tooltip placement="topLeft" title={getLocationName()}>
+              {getLocationName()}
+            </Tooltip>
+          </Descriptions.Item>
+          
+          <Descriptions.Item label="Độ dài mật khẩu phòng">
+            {roomType.numberOfPasswordRoom || 0}
+          </Descriptions.Item>
+          
+          <Descriptions.Item label="Dịch vụ">
+            {renderServiceInfo()}
+          </Descriptions.Item>
+          
+          <Descriptions.Item label="Ngày tạo">{formatDateTime(roomType.createdAt)}</Descriptions.Item>
+          <Descriptions.Item label="Ngày cập nhật">{formatDateTime(roomType.updatedAt)}</Descriptions.Item>
+        </Descriptions>
+      )}
     </Modal>
   );
 };

@@ -1,66 +1,114 @@
-import { useState } from "react"
-import { Checkbox, DatePicker, TimePicker, Button, Divider, Typography } from "antd"
-import { CalendarOutlined, ClockCircleOutlined, CloseOutlined } from "@ant-design/icons"
-import styles from "./Filter.module.scss"
+import { useState } from "react";
+import { Checkbox, Button, Divider, Typography, DatePicker, TimePicker } from "antd";
+import { CloseOutlined } from "@ant-design/icons";
+import styles from "./Filter.module.scss";
+import dayjs from 'dayjs';
 
-const { RangePicker: TimeRangePicker } = TimePicker
-const { Text } = Typography
+const { Text } = Typography;
+const { RangePicker } = TimePicker;
 
 export default function Filter({
   filterGroups,
   selectedValues,
   onFilterChange,
   bookingStatusCodes,
-  paymentStatusCodes,
+  paymentStatusCodes
 }) {
-  const [selectedDate, setSelectedDate] = useState(null)
-  const [timeRange, setTimeRange] = useState(null)
+  const [dateTime, setDateTime] = useState({
+    date: null,
+    timeRange: null
+  });
 
   const handleResetFilters = () => {
     const emptyFilters = Object.keys(selectedValues).reduce((acc, key) => {
-      acc[key] = []
-      return acc
-    }, {})
+      acc[key] = [];
+      return acc;
+    }, {});
 
-    setSelectedDate(null)
-    setTimeRange(null)
-    onFilterChange("reset", emptyFilters)
-  }
+    setDateTime({
+      date: null,
+      timeRange: null
+    });
 
-  const handleDateChange = (date) => {
-    setSelectedDate(date)
-    onFilterChange("date", date)
-  }
-
-  const handleTimeRangeChange = (times) => {
-    setTimeRange(times)
-    onFilterChange("timeRange", times)
-  }
+    onFilterChange("reset", {
+      ...emptyFilters,
+      dateFilter: null
+    });
+  };
 
   const getStatusClass = (status) => {
     const statusMap = {
-      Confirmed: "confirmed",
-      Pending: "pending",
-      "Need Check-in": "needcheckin",
-      "Checked In": "checkedin",
-      "Need Check-out": "needcheckout",
-      "Checked Out": "checkedout",
-      Cancelled: "cancelled",
-      Completed: "completed",
-    }
-    return statusMap[status] || "pending"
-  }
+      "Đã xác nhận": "confirmed",
+      "Chờ xác nhận": "pending",
+      "Cần check-in": "needcheckin",
+      "Đã check-in": "inprogress",
+      "Cần check-out": "needcheckout",
+      "Đã check-out": "checkedout",
+      "Đã hủy": "cancelled", 
+      "Hoàn tất": "complete",
+      "Hoàn tiền": "refund"
+    };
+
+    return statusMap[status] || "pending";
+  };
 
   const getPaymentClass = (payment) => {
     const paymentMap = {
-      Booking: "booking",
-      Pending: "pending",
-      Paid: "paid",
-      Refund: "refund",
-      Failed: "failed",
+      "Đã đặt": "booked",
+      "Chờ thanh toán": "pending",
+      "Đã thanh toán": "paid",
+      "Đã hoàn tiền": "refund",
+      "Thanh toán thất bại": "failed", 
+    };
+
+    return paymentMap[payment] || "pending";
+  };
+
+  const handleDateChange = (date) => {
+    setDateTime(prev => ({
+      ...prev,
+      date
+    }));
+    
+    if (!date && !dateTime.timeRange) {
+      onFilterChange("dateFilter", null);
+      return;
     }
-    return paymentMap[payment] || "pending"
-  }
+    
+    onFilterChange("dateFilter", {
+      date: date,
+      timeRange: dateTime.timeRange
+    });
+  };
+
+  const handleTimeRangeChange = (times) => {
+    setDateTime(prev => ({
+      ...prev,
+      timeRange: times
+    }));
+    
+    if (!times && !dateTime.date) {
+      onFilterChange("dateFilter", null);
+      return;
+    }
+    
+    onFilterChange("dateFilter", {
+      date: dateTime.date,
+      timeRange: times
+    });
+  };
+
+  const isDateTimeFilterActive = dateTime.date || dateTime.timeRange;
+
+  const hasActiveFilters = () => {
+    const hasRegularFilters = Object.entries(selectedValues).some(([key, values]) => 
+      key !== 'dateFilter' && Array.isArray(values) && values.length > 0
+    );
+    
+    const hasDateFilter = !!selectedValues.dateFilter;
+    
+    return hasRegularFilters || hasDateFilter || isDateTimeFilterActive;
+  };
 
   return (
     <div className={styles.filterContainer}>
@@ -73,33 +121,32 @@ export default function Filter({
 
       <Divider className={styles.divider} />
 
-      {/* <div className={styles.dateSection}>
-        <h4>Ngày đặt phòng</h4>
-        <DatePicker
-          className={styles.datePicker}
-          value={selectedDate}
-          onChange={handleDateChange}
-          format="DD/MM/YYYY"
-          placeholder="Chọn ngày"
-          suffixIcon={<CalendarOutlined />}
-        />
-      </div> */}
-
-      {/* <div className={styles.timeSection}>
-        <h4>Khung giờ</h4>
-        <TimeRangePicker
-          className={styles.timePicker}
-          value={timeRange}
-          onChange={handleTimeRangeChange}
-          format="HH:mm"
-          placeholder={["Từ giờ", "Đến giờ"]}
-          suffixIcon={<ClockCircleOutlined />}
-        />
-        <Text type="secondary" className={styles.timeHint}>
-          Lọc theo khung giờ check-in/check-out
-        </Text>
-      </div> */}
-
+      <div className={styles.filterGroup}>
+        <h4>Ngày và Giờ</h4>
+        <div className={styles.dateTimeContainer}>
+          <div className={styles.datePickerWrapper}>
+            <div className={styles.filterLabel}>Ngày:</div>
+            <DatePicker
+              placeholder="Chọn ngày"
+              format="DD/MM/YYYY"
+              value={dateTime.date}
+              onChange={handleDateChange}
+              className={styles.datePicker}
+            />
+          </div>
+          
+          <div className={styles.timePickerWrapper}>
+            <div className={styles.filterLabel}>Thời gian:</div>
+            <RangePicker
+              format="HH:mm"
+              value={dateTime.timeRange}
+              onChange={handleTimeRangeChange}
+              className={styles.timePicker}
+              placeholder={['Giờ check-in', 'Giờ check-out']}
+            />
+          </div>
+        </div>
+      </div>
 
       <Divider className={styles.divider} />
 
@@ -108,26 +155,35 @@ export default function Filter({
           <h4>{group.title}</h4>
           <div className={styles.optionsContainer}>
             {group.options.map((option) => {
-              const isSelected = selectedValues[group.name]?.includes(option.value)
-              const statusClass = group.name === "status" ? getStatusClass(option.value) : getPaymentClass(option.value)
-
+              const isSelected = Array.isArray(selectedValues[group.name]) && 
+                selectedValues[group.name].includes(option.value);
+              
               return (
                 <div
                   key={option.value}
                   className={`${styles.filterOption} ${isSelected ? styles.selected : ""}`}
                   onClick={() => {
-                    const currentValues = [...(selectedValues[group.name] || [])]
+                    const currentValues = Array.isArray(selectedValues[group.name]) ? 
+                      [...selectedValues[group.name]] : [];
                     const newValues = isSelected
                       ? currentValues.filter((val) => val !== option.value)
-                      : [...currentValues, option.value]
+                      : [...currentValues, option.value];
 
-                    onFilterChange(group.name, newValues)
+                    onFilterChange(group.name, newValues);
                   }}
                 >
                   <Checkbox checked={isSelected} />
-                  <span className={`${styles.statusBadge} ${styles[statusClass]}`}>{option.value}</span>
+                  {group.name === "status" ? (
+                    <span className={`${styles.statusBadge} ${styles[getStatusClass(option.value)]}`}>
+                      {option.value}
+                    </span>
+                  ) : (
+                    <span className={`${styles.statusBadge} ${styles[getPaymentClass(option.value)]}`}>
+                      {option.value}
+                    </span>
+                  )}
                 </div>
-              )
+              );
             })}
           </div>
         </div>
@@ -135,37 +191,56 @@ export default function Filter({
 
       <Divider className={styles.divider} />
 
-      <div className={styles.activeFilters}>
-        <h4>Bộ lọc đang áp dụng</h4>
-        <div className={styles.filterTags}>
-          {Object.entries(selectedValues).map(([key, values]) =>
-            values.map((value) => (
-              <div key={`${key}-${value}`} className={styles.filterTag}>
-                {value}
+      {hasActiveFilters() && (
+        <div className={styles.activeFilters}>
+          <h4>Bộ lọc đang áp dụng</h4>
+          <div className={styles.filterTags}>
+            {Object.entries(selectedValues).map(([key, values]) =>
+              key !== "dateFilter" && Array.isArray(values) && values.length > 0 && values.map((value) => (
+                <div key={`${key}-${value}`} className={styles.filterTag}>
+                  {key === "status" ? (
+                    <span className={`${styles.statusBadge} ${styles[getStatusClass(value)]}`}>
+                      {value}
+                    </span>
+                  ) : (
+                    <span className={`${styles.statusBadge} ${styles[getPaymentClass(value)]}`}>
+                      {value}
+                    </span>
+                  )}
+                  <CloseOutlined
+                    className={styles.removeTag}
+                    onClick={() => {
+                      const newValues = selectedValues[key].filter((v) => v !== value);
+                      onFilterChange(key, newValues);
+                    }}
+                  />
+                </div>
+              ))
+            )}
+            
+            {isDateTimeFilterActive && (
+              <div className={styles.filterTag}>
+                <span className={styles.dateTimeTag}>
+                  {dateTime.date ? dateTime.date.format('DD/MM/YYYY') : 'Mọi ngày'}{' '}
+                  {dateTime.timeRange ? 
+                    `(${dateTime.timeRange[0].format('HH:mm')} - ${dateTime.timeRange[1].format('HH:mm')})` : 
+                    '(Mọi giờ)'}
+                </span>
                 <CloseOutlined
                   className={styles.removeTag}
                   onClick={() => {
-                    const newValues = selectedValues[key].filter((v) => v !== value)
-                    onFilterChange(key, newValues)
+                    setDateTime({
+                      date: null,
+                      timeRange: null
+                    });
+                    onFilterChange("dateFilter", null);
                   }}
                 />
               </div>
-            )),
-          )}
-          {selectedDate && (
-            <div className={styles.filterTag}>
-              {`Ngày: ${selectedDate.format("DD/MM/YYYY")}`}
-              <CloseOutlined className={styles.removeTag} onClick={() => handleDateChange(null)} />
-            </div>
-          )}
-          {timeRange && timeRange[0] && timeRange[1] && (
-            <div className={styles.filterTag}>
-              {`Giờ: ${timeRange[0].format("HH:mm")} - ${timeRange[1].format("HH:mm")}`}
-              <CloseOutlined className={styles.removeTag} onClick={() => handleTimeRangeChange(null)} />
-            </div>
-          )}
+            )}
+          </div>
         </div>
-      </div>
+      )}
     </div>
-  )
+  );
 }

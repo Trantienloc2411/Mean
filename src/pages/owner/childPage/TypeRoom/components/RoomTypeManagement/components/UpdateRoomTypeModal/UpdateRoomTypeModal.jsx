@@ -1,11 +1,15 @@
 import { Modal, Form, Input, InputNumber, Select, Button, Spin, Image, Upload, message } from 'antd';
 import { useEffect } from 'react';
-import { useGetAllAmenitiesQuery } from '../../../../../../../../redux/services/serviceApi';
+import { useGetAllAmenitiesQuery, useCreateAmenityMutation } from '../../../../../../../../redux/services/serviceApi';
 import { useGetAllRentalLocationsQuery } from '../../../../../../../../redux/services/rentalLocationApi';
 import styles from './UpdateRoomTypeModal.module.scss';
 import { useState } from "react";
 import { supabase } from "../../../../../../../../redux/services/supabase";
-import { InboxOutlined, DeleteOutlined } from "@ant-design/icons";
+import { InboxOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
+import { useGetOwnerDetailByUserIdQuery } from '../../../../../../../../redux/services/ownerApi';
+import { useParams } from "react-router-dom";
+import { useGetAccommodationTypeByIdQuery } from '../../../../../../../../redux/services/accommodationTypeApi';
+import AddAmenityModal from '../../../RoomAmenitiesManagement/components/AddAmenityModal/AddAmenityModal';
 
 const { TextArea } = Input;
 const { Option } = Select;
@@ -14,66 +18,86 @@ const { Dragger } = Upload;
 const MAX_IMAGES = 10;
 
 const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => {
+  const { id } = useParams();
   const [form] = Form.useForm();
-  const { data: services, isLoading, error } = useGetAllAmenitiesQuery();
-  const { data: rentalLocations, isLoading: isLoadingRentalLocations } = useGetAllRentalLocationsQuery();
+  const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false);
+  const [createAmenity, { isLoading: isCreatingService }] = useCreateAmenityMutation();
+
+  const roomTypeId = initialValues?._id;
+
+  const {
+    data: accommodationTypeData,
+    isLoading: isAccommodationLoading,
+    isError
+  } = useGetAccommodationTypeByIdQuery(roomTypeId, {
+    skip: !roomTypeId || !isOpen 
+  });
+
+  const { data: ownerDetailData, isLoading: isOwnerDetailLoading } = useGetOwnerDetailByUserIdQuery(id);
+  const ownerId = ownerDetailData?.id;
+
+  const { data: rentalLocations, isLoading: isLoadingRentalLocations } = useGetAllRentalLocationsQuery(ownerId, {
+    skip: !ownerId
+  });
+
+  const { 
+    data: services, 
+    isLoading: isServicesLoading,
+    refetch: refetchServices 
+  } = useGetAllAmenitiesQuery(
+    { ownerId },
+    { skip: !ownerId }
+  );
+
   const [fileList, setFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    if (initialValues) {
-      const formValues = {
-        ...initialValues,
-      };
+    if (accommodationTypeData) {
+      const { data } = accommodationTypeData;
 
-      if (formValues.rentalLocationId && typeof formValues.rentalLocationId === 'object') {
-        formValues.rentalLocationId = formValues.rentalLocationId._id || formValues.rentalLocationId.id;
+      const serviceIds = data.serviceIds?.map(service =>
+        typeof service === 'object' ? service._id : service
+      ) || [];
+
+      const rentalLocationId = data.rentalLocationId?._id
+        || data.rentalLocationId;
+
+      form.setFieldsValue({
+        ...data,
+        serviceIds,
+        rentalLocationId,
+        numberOfPasswordRoom: data.numberOfPasswordRoom || 0
+      });
+
+      if (data.image) {
+        const images = Array.isArray(data.image)
+          ? data.image
+          : [data.image];
+
+        setFileList(images.map((img, index) => ({
+          uid: `existing-${index}`,
+          url: img,
+          name: `image-${index}`,
+          status: 'done',
+          isExisting: true
+        })));
       }
-
-      if (formValues.serviceIds && Array.isArray(formValues.serviceIds) && formValues.serviceIds.length > 0) {
-        formValues.serviceIds = formValues.serviceIds.map(service => 
-          typeof service === 'object' ? service._id || service.id : service
-        );
-      } else if (formValues.serviceId) {
-        formValues.serviceIds = [formValues.serviceId];
-      }
-
-      // Handle image field (can be array or single string)
-      if (initialValues.image) {
-        if (Array.isArray(initialValues.image)) {
-          setFileList(initialValues.image.map((img, index) => ({
-            uid: `existing-${index}`,
-            url: img,
-            name: `image-${index}`,
-            status: 'done'
-          })));
-        } else {
-          setFileList([{
-            uid: 'existing-0',
-            url: initialValues.image,
-            name: 'image-0',
-            status: 'done'
-          }]);
-        }
-      } else {
-        setFileList([]);
-      }
-
-      form.setFieldsValue(formValues);
     }
-  }, [initialValues, form]);
+  }, [accommodationTypeData, form]);
 
   const handleSubmit = () => {
     form.validateFields()
       .then((values) => {
-        const submittedValues = {
+        const formattedValues = {
           ...values,
-          // Always send image as array
-          image: fileList.map(file => file.url)
+          _id: roomTypeId, 
+          image: fileList.map(file => file.url),
+          serviceIds: values.serviceIds || [],
+          numberOfPasswordRoom: values.numberOfPasswordRoom || 0
         };
 
-        console.log("Dữ liệu được cập nhật:", submittedValues);
-        onConfirm(submittedValues);
+        onConfirm(formattedValues);
       })
       .catch((info) => {
         console.log('Validate Failed:', info);
@@ -141,8 +165,7 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
   const handleRemove = async (file) => {
     setUploading(true);
     try {
-      // Only delete from storage if it's a newly uploaded image
-      if (!file.uid.startsWith('existing-')) {
+      if (!file.isExisting) {
         const filePath = file.path || file.name;
         const { error } = await supabase.storage.from("image").remove([filePath]);
         if (error) throw error;
@@ -156,27 +179,49 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
       setUploading(false);
     }
   };
+  
+  const handleAddService = async (values) => {
+    try {
+      const newService = await createAmenity({
+        ...values,
+        ownerId,
+        status: values.status === "Active",
+        isDelete: false
+      }).unwrap();
+
+      await refetchServices();
+      
+      const currentServices = form.getFieldValue('serviceIds') || [];
+      form.setFieldsValue({
+        serviceIds: [...currentServices, newService._id]
+      });
+      
+      message.success("Thêm dịch vụ thành công!");
+      setIsAddServiceModalOpen(false);
+    } catch (error) {
+      message.error(`Lỗi khi thêm dịch vụ: ${error.message}`);
+    }
+  };
 
   const getServicesOptions = () => {
     if (!services) return [];
-    
-    const servicesList = Array.isArray(services.data) ? services.data : 
-                          Array.isArray(services) ? services : [];
-    
+
+    const servicesList = services.data || services;
+
     return servicesList
       .filter(service => service.status === true)
       .map(service => ({
         label: service.name,
-        value: service._id || service.id
+        value: service._id 
       }));
   };
-
+  
   const getLocationsOptions = () => {
     if (!rentalLocations) return [];
-    
+
     const locationsList = Array.isArray(rentalLocations.data) ? rentalLocations.data :
-                           Array.isArray(rentalLocations) ? rentalLocations : [];
-    
+      Array.isArray(rentalLocations) ? rentalLocations : [];
+
     return locationsList.map(location => ({
       label: location.name,
       value: location._id || location.id
@@ -192,7 +237,12 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
         <Button key="cancel" onClick={onCancel}>
           Huỷ
         </Button>,
-        <Button key="submit" type="primary" onClick={handleSubmit}>
+        <Button
+          key="submit"
+          type="primary"
+          onClick={handleSubmit}
+          loading={uploading || isAccommodationLoading}
+        >
           Cập nhật
         </Button>
       ]}
@@ -211,7 +261,7 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
         >
           <Select
             placeholder="Chọn địa điểm thuê"
-            loading={isLoadingRentalLocations}
+            loading={isLoadingRentalLocations || isOwnerDetailLoading}
             options={getLocationsOptions()}
           />
         </Form.Item>
@@ -223,9 +273,25 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
         >
           <Select
             placeholder="Chọn dịch vụ"
-            loading={isLoading}
+            loading={isServicesLoading}
             mode="multiple"
+            optionFilterProp="label"
             options={getServicesOptions()}
+            dropdownRender={(menu) => (
+              <>
+                {menu}
+                <div
+                  style={{
+                    padding: '8px',
+                    cursor: 'pointer',
+                    borderTop: '1px solid #e8e8e8'
+                  }}
+                  onClick={() => setIsAddServiceModalOpen(true)}
+                >
+                  <PlusOutlined /> Thêm dịch vụ mới
+                </div>
+              </>
+            )}
           />
         </Form.Item>
 
@@ -284,6 +350,26 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
           />
         </Form.Item>
 
+        <Form.Item
+          name="numberOfPasswordRoom"
+          label="Mật khẩu loại phòng gồm mấy số?"
+          rules={[{
+            required: true,
+            message: 'Vui lòng chọn độ dài mật khẩu'
+          }]}
+        >
+          <Select
+            placeholder="Chọn độ dài mật khẩu"
+            style={{ width: '100%' }}
+          >
+            <Option value={0}>0 số (Không có mật khẩu)</Option>
+            <Option value={1}>2 số</Option>
+            <Option value={2}>4 số</Option>
+            <Option value={3}>6 số</Option>
+            <Option value={4}>8 số</Option>
+          </Select>
+        </Form.Item>
+
         <Form.Item label={`Hình ảnh loại phòng (${fileList.length}/${MAX_IMAGES})`}>
           <Spin spinning={uploading} tip="Đang xử lý...">
             <Dragger {...uploadProps} showUploadList={false}>
@@ -327,6 +413,13 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
           </div>
         </Form.Item>
       </Form>
+
+      <AddAmenityModal
+        isOpen={isAddServiceModalOpen}
+        onCancel={() => setIsAddServiceModalOpen(false)}
+        onConfirm={handleAddService}
+        isLoading={isCreatingService}
+      />
     </Modal>
   );
 };
