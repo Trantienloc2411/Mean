@@ -295,7 +295,7 @@ const AddPolicyModal = ({ isOpen, onCancel }) => {
             label={
               <Space>
                 <span>Tên chính sách</span>
-                <Tooltip title="Nhập tên chính sách ngắn gọn và d dễ hiểu">
+                <Tooltip title="Nhập tên chính sách ngắn gọn và dễ hiểu">
                   <InfoCircleOutlined style={{ color: "#1890ff" }} />
                 </Tooltip>
               </Space>
