@@ -9,6 +9,7 @@ import UpdateBookingStatus from "../UpdateBookingStatus/UpdateBookingStatus"
 import BookingDetail from "../BookingDetail/BookingDetail"
 import styles from "./ListBooking.module.scss"
 import { useGetBookingByIdQuery } from "../../../../redux/services/bookingApi"
+import momoIcon from '../../../../../src/assets/momo.png';
 
 const HorizontalEllipsisIcon = () => (
   <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -18,7 +19,7 @@ const HorizontalEllipsisIcon = () => (
   </svg>
 )
 
-export default function ListBooking({ bookings, bookingStatusCodes, paymentStatusCodes, onStatusChange, isUpdating }) {
+export default function ListBooking({ bookings, bookingStatusCodes, paymentStatusCodes, paymentMethodCodes, onStatusChange, isUpdating }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [filteredData, setFilteredData] = useState(bookings || [])
   const [selectedValues, setSelectedValues] = useState({
@@ -46,27 +47,28 @@ export default function ListBooking({ bookings, bookingStatusCodes, paymentStatu
 
   const getBookingStatusDisplay = (statusCode) => {
     const statusMap = {
-      [bookingStatusCodes.CONFIRMED]: "Confirmed",
-      [bookingStatusCodes.PENDING]: "Pending",
-      [bookingStatusCodes.NEEDCHECKIN]: "Need Check-in",
-      [bookingStatusCodes.CHECKEDIN]: "Checked In",
-      [bookingStatusCodes.NEEDCHECKOUT]: "Need Check-out",
-      [bookingStatusCodes.CHECKEDOUT]: "Checked Out",
-      [bookingStatusCodes.CANCELLED]: "Cancelled",
-      [bookingStatusCodes.COMPLETED]: "Completed",
+      [bookingStatusCodes.CONFIRMED]: "Đã xác nhận",
+      [bookingStatusCodes.PENDING]: "Chờ xác nhận",
+      [bookingStatusCodes.NEEDCHECKIN]: "Cần check-in",
+      [bookingStatusCodes.CHECKEDIN]: "Đã check-in",
+      [bookingStatusCodes.NEEDCHECKOUT]: "Cần check-out",
+      [bookingStatusCodes.CHECKEDOUT]: "Đã check-out",
+      [bookingStatusCodes.CANCELLED]: "Đã huỷ",
+      [bookingStatusCodes.COMPLETED]: "Hoàn tất",
+      [bookingStatusCodes.REFUND]: "Đã hoàn tiền"
     }
-    return statusMap[statusCode] || "Unknown Status"
+    return statusMap[statusCode] || "Trạng thái không xác định"
   }
 
   const getPaymentStatusDisplay = (statusCode) => {
     const statusMap = {
-      [paymentStatusCodes.BOOKING]: "Booking",
-      [paymentStatusCodes.PENDING]: "Pending",
-      [paymentStatusCodes.PAID]: "Paid",
-      [paymentStatusCodes.REFUND]: "Refund",
-      [paymentStatusCodes.FAILED]: "Failed",
+      [paymentStatusCodes.BOOKING]: "Đã đặt",
+      [paymentStatusCodes.PENDING]: "Chờ thanh toán",
+      [paymentStatusCodes.PAID]: "Đã thanh toán",
+      [paymentStatusCodes.REFUND]: "Đã hoàn tiền",
+      [paymentStatusCodes.FAILED]: "Thanh toán thất bại",
     }
-    return statusMap[statusCode] || "Unpaid"
+    return statusMap[statusCode] || "Chưa thanh toán"
   }
 
   const statusOptions = Object.entries(bookingStatusCodes).map(([key, value]) => ({
@@ -95,17 +97,14 @@ export default function ListBooking({ bookings, bookingStatusCodes, paymentStatu
   const applyFilters = () => {
     let filtered = [...bookings]
 
-    // Filter by status
     if (selectedValues.status && selectedValues.status.length > 0) {
       filtered = filtered.filter((item) => selectedValues.status.includes(item.Status))
     }
 
-    // Filter by payment status
     if (selectedValues.payment && selectedValues.payment.length > 0) {
       filtered = filtered.filter((item) => selectedValues.payment.includes(item.Payment))
     }
 
-    // Filter by search term (customer name)
     if (searchTerm) {
       filtered = filtered.filter((item) => {
         const customerName = item._originalBooking.customerId?.userId?.fullName || ""
@@ -113,7 +112,6 @@ export default function ListBooking({ bookings, bookingStatusCodes, paymentStatu
       })
     }
 
-    // Filter by date range
     if (dateRange && dateRange[0] && dateRange[1]) {
       const startDate = dateRange[0].startOf("day")
       const endDate = dateRange[1].endOf("day")
@@ -127,7 +125,6 @@ export default function ListBooking({ bookings, bookingStatusCodes, paymentStatu
     setFilteredData(filtered)
   }
 
-  // Apply filters whenever filter criteria change
   useEffect(() => {
     applyFilters()
   }, [selectedValues, searchTerm, dateRange, bookings])
@@ -173,14 +170,15 @@ export default function ListBooking({ bookings, bookingStatusCodes, paymentStatu
 
   const getStatusClass = (status) => {
     const statusMap = {
-      Confirmed: "confirmed",
-      Pending: "pending",
-      "Need Check-in": "pending",
-      "Checked In": "inprogress",
-      "Need Check-out": "pending",
-      "Checked Out": "checkedout",
-      Cancelled: "canceled",
-      Completed: "complete",
+      "Đã xác nhận": "confirmed",
+      "Chờ xác nhận": "pending",
+      "Cần check-in": "pending",
+      "Đã check-in": "inprogress",
+      "Cần check-out": "pending",
+      "Đã check-out": "checkedout",
+      "Đã huỷ": "canceled",
+      "Hoàn tất": "complete",
+      "Đã hoàn tiền": "refund"
     }
 
     return statusMap[status] || "pending"
@@ -188,28 +186,32 @@ export default function ListBooking({ bookings, bookingStatusCodes, paymentStatu
 
   const getPaymentClass = (payment) => {
     const paymentMap = {
-      Booking: "confirmed",
-      Pending: "pending",
-      Paid: "complete",
-      Refund: "canceled",
-      Failed: "canceled",
-      Unpaid: "pending",
+      "Đã đặt": "confirmed",
+      "Chờ thanh toán": "pending",
+      "Đã thanh toán": "complete",
+      "Đã hoàn tiền": "refund",
+      "Thanh toán thất bại": "canceled",
+      "Chưa thanh toán": "pending",
     }
 
     return paymentMap[payment] || "pending"
   }
-
   const getPaymentIcon = (method) => {
-    const methodStr = String(method || "").toLowerCase()
-
-    if (methodStr.includes("visa") || methodStr.includes("card")) {
-      return <CreditCardOutlined />
-    } else if (methodStr.includes("cash")) {
-      return <DollarOutlined />
-    } else if (methodStr.includes("bank") || methodStr.includes("transfer")) {
-      return <BankOutlined />
+    if (method == paymentMethodCodes.MOMO) {
+      return <img src={momoIcon} alt="MoMo" style={{ width: '16px', height: '16px' }} />;
+    } else if (typeof method === 'string') {
+      const methodStr = method.toLowerCase();
+      if (methodStr.includes("visa") || methodStr.includes("card")) {
+        return <CreditCardOutlined />;
+      } else if (methodStr.includes("cash")) {
+        return <DollarOutlined />;
+      } else if (methodStr.includes("bank") || methodStr.includes("transfer")) {
+        return <BankOutlined />;
+      } else {
+        return <WalletOutlined />;
+      }
     } else {
-      return <WalletOutlined />
+      return <WalletOutlined />;
     }
   }
 
@@ -264,21 +266,27 @@ export default function ListBooking({ bookings, bookingStatusCodes, paymentStatu
       dataIndex: "paymentMethod",
       key: "paymentMethod",
       render: (_, record) => {
-        const booking = record._originalBooking
-        const paymentStatus = getPaymentStatusDisplay(booking.paymentStatus)
-        const paymentMethod = booking.paymentMethod ? String(booking.paymentMethod) : "Chưa xác định"
+        const booking = record._originalBooking;
+        const paymentStatus = getPaymentStatusDisplay(booking.paymentStatus);
+        const paymentMethodValue = booking.paymentMethod;
+
+        const paymentMethodText = paymentMethodValue === paymentMethodCodes.MOMO
+          ? "MoMo"
+          : (paymentMethodValue ? String(paymentMethodValue) : "Chưa xác định");
 
         return (
           <div className={styles.paymentInfo}>
             <div className={styles.method}>
-              <span className={styles.paymentMethodIcon}>{getPaymentIcon(paymentMethod)}</span>
-              {paymentMethod}
+              <span className={styles.paymentMethodIcon}>
+                {getPaymentIcon(paymentMethodValue)}
+              </span>
+              {paymentMethodText}
             </div>
             <div>
               <span className={`${styles.paymentTag} ${styles[getPaymentClass(paymentStatus)]}`}>{paymentStatus}</span>
             </div>
           </div>
-        )
+        );
       },
     },
     {
@@ -306,13 +314,13 @@ export default function ListBooking({ bookings, bookingStatusCodes, paymentStatu
 
         if (
           record._originalBooking.status === bookingStatusCodes.CANCELLED &&
-          record._originalBooking.paymentStatus !== paymentStatusCodes.REFUND
+          record._originalBooking.paymentStatus === paymentStatusCodes.REFUND 
         ) {
           menuItems.push({
             key: "2",
             label: "Hoàn Tiền",
             onClick: () => handleStatusUpdate(record),
-          })
+          });
         }
 
         return (
@@ -349,23 +357,17 @@ export default function ListBooking({ bookings, bookingStatusCodes, paymentStatu
 
   const handleCustomStatusChange = async (booking) => {
     try {
-      if (booking._originalBooking.status !== bookingStatusCodes.CANCELLED) {
-        message.warning("Chỉ có thể hoàn tiền cho booking đã hủy")
-        return
-      }
-
       await onStatusChange(booking._originalBooking._id, {
-        paymentStatus: paymentStatusCodes.REFUND,
-      })
+        status: bookingStatusCodes.REFUND
+      });
 
-      message.success("Hoàn tiền thành công")
-      handleCloseStatusModal()
+      message.success("Cập nhật trạng thái hoàn tiền thành công");
+      handleCloseStatusModal();
     } catch (error) {
-      message.error(error?.message || "Hoàn tiền thất bại")
+      message.error(error?.message || "Thao tác thất bại");
     }
-  }
+  };
 
-  // Count active filters
   const activeFilterCount =
     selectedValues.status.length + selectedValues.payment.length + (dateRange && dateRange[0] && dateRange[1] ? 1 : 0)
 
@@ -408,7 +410,6 @@ export default function ListBooking({ bookings, bookingStatusCodes, paymentStatu
           </Dropdown>
         </div>
 
-        {/* Active filter tags */}
         {activeFilterCount > 0 && (
           <div className={styles.activeTags}>
             {selectedValues.status.map((status) => (
@@ -486,6 +487,7 @@ export default function ListBooking({ bookings, bookingStatusCodes, paymentStatu
           onClose={handleCloseStatusModal}
           bookingStatusCodes={bookingStatusCodes}
           paymentStatusCodes={paymentStatusCodes}
+          paymentMethodCodes={paymentMethodCodes}
           onStatusChange={() => handleCustomStatusChange(selectedBooking)}
           isLoading={isUpdating}
         />

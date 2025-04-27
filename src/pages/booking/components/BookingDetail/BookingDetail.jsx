@@ -15,7 +15,11 @@ const ACCOMMODATION_STATUS = Object.freeze({
     INUSE: 7
 });
 
-const BookingDetail = ({ bookingId, visible, onClose, bookingData, isLoading, isError }) => {
+const DEFAULT_PAYMENT_METHOD = Object.freeze({
+  MOMO: 1,
+});
+
+const BookingDetail = ({ bookingId, visible, onClose, bookingData, isLoading, isError, bookingStatusCodes, paymentStatusCodes, paymentMethodCodes = DEFAULT_PAYMENT_METHOD }) => {
   const [booking, setBooking] = useState(null)
 
   useEffect(() => {
@@ -25,22 +29,23 @@ const BookingDetail = ({ bookingId, visible, onClose, bookingData, isLoading, is
   }, [bookingData])
 
   if (isError) {
-    message.error("Lỗi khi tải chi tiết của booking")
+    message.error("Failed to load booking details")
     return null
   }
 
   const getStatusTag = (status) => {
     const statusMap = {
-      1: { text: "Đã xác nhận", color: "blue" },
-      2: { text: "Chờ xác nhận", color: "orange" },
-      3: { text: "Cần check-in", color: "cyan" },
-      4: { text: "Đã check-in", color: "green" },
-      5: { text: "Cần check-out", color: "purple" },
-      6: { text: "Đã check-out", color: "geekblue" },
-      7: { text: "Đã huỷ", color: "red" },
-      8: { text: "Hoàn tất", color: "green" },
+      1: { text: "Đã xác nhận", color: "blue" },      
+      2: { text: "Cần check-in", color: "cyan" },       
+      3: { text: "Đã check-in", color: "green" },      
+      4: { text: "Cần check-out", color: "purple" },     
+      5: { text: "Đã check-out", color: "geekblue" },  
+      6: { text: "Đã huỷ", color: "red" },             
+      7: { text: "Hoàn tất", color: "green" },           
+      8: { text: "Chờ xác nhận", color: "orange" },      
+      9: { text: "Đã hoàn tiền", color: "volcano" },     
     }
-
+  
     return <Tag color={statusMap[status]?.color || "default"}>{statusMap[status]?.text || "Unknown"}</Tag>
   }
 
@@ -55,16 +60,16 @@ const BookingDetail = ({ bookingId, visible, onClose, bookingData, isLoading, is
 
     return <Tag color={paymentStatusMap[status]?.color || "default"}>{paymentStatusMap[status]?.text || "Unknown"}</Tag>
   }
-
+  
   const getPaymentMethod = (method) => {
+    if (!method) return "Không xác định";
+    
     const methods = {
-      "1": "Tiền mặt",
-      "2": "Chuyển khoản",
-      "3": "Thẻ tín dụng",
-      "4": "Ví điện tử",
-    }
-    return methods[method] || "Không xác định"
-  }
+      [paymentMethodCodes.MOMO]: "Ví MoMo",
+      "1": "Ví MoMo",
+    };
+    return methods[method] || "Không xác định";
+  };
 
   const getAccommodationStatusTag = (status) => {
     const statusMap = {

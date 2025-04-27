@@ -6,7 +6,15 @@ export const transactionApi = apiSlice.injectEndpoints({
       query: () => "/transaction/all-transactions",
       providesTags: ["User"],
     }),
+    createTransaction: builder.mutation({
+      query: (transactionData) => ({
+        url: "/transaction/create-transaction",
+        method: "POST",
+        body: transactionData,
+      }),
+      invalidatesTags: ["Transaction"],
+    }),
   }),
 });
 
-export const { useGetAllTransactionQuery } = transactionApi;
+export const { useGetAllTransactionQuery, useCreateTransactionMutation } = transactionApi;

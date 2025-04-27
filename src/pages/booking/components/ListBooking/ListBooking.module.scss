@@ -1,297 +1,528 @@
 .contentContainer {
-    padding: 24px;
-    background-color: #f8f9fa;
-    border-radius: 12px;
-  
-    h1 {
-      font-weight: 600;
-      padding-bottom: 8px;
-      color: #2d3748;
-      font-size: 1.5rem;
-    }
-  
-    h2 {
-      padding-top: 10px;
-      font-weight: 600;
-      color: #2d3748;
-      font-size: 1.25rem;
-      margin-bottom: 16px;
-    }
-  }
-  
-  .listBooking {
-    background-color: white;
-    padding: 24px;
-    border-radius: 16px;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
-    border: 1px solid #edf2f7;
-  }
-  
-  .filterContainer {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 12px;
-    margin-bottom: 20px;
-    align-items: center;
-  }
-  
-  .searchInput {
-    max-width: 280px;
-    
-    &:focus {
-      border-color: #4299e1;
-      box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
-    }
-  }
-  
-  .filterButton {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    
-    &:hover {
-      background-color: #f7fafc;
-    }
-  }
-  
-  .filterBadge {
-    display: inline-block;
-    padding: 2px 6px;
-    font-size: 0.75rem;
-    background-color: #ebf5ff;
-    color: #3182ce;
-    border-radius: 9999px;
-    margin-left: 4px;
-  }
-  
-  .tableContainer {
-    overflow: hidden;
-    border-radius: 8px;
-    border: 1px solid #e2e8f0;
-  }
-  
-  .tableHeader {
-    font-weight: 500;
-    color: #4a5568;
-    font-size: 0.875rem;
-  }
-  
-  .bookingId {
-    font-weight: 500;
+  flex: 1;
+  background-color: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  border: 1px solid #edf2f7;
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
     color: #2d3748;
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f1f5f9;
   }
+}
+
+.listBooking {
+  background-color: white;
+  border-radius: 8px;
+}
+
+.paymentIcon {
+  width: 20px;
+  height: 20px;
+  margin-right: 8px;
+  vertical-align: middle;
+}
+
+.filterContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-bottom: 20px;
+  align-items: center;
+}
+
+.searchInput {
+  max-width: 280px;
   
-  .timeInfo {
-    white-space: nowrap;
+  &:focus {
+    border-color: #4299e1;
+    box-shadow: 0 0 0 2px rgba(66, 153, 225, 0.2);
   }
+}
+
+.filterButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   
-  .peopleInfo {
-    white-space: nowrap;
-    
-    span {
-      margin-right: 8px;
-      
-      &:last-child {
-        margin-right: 0;
-      }
-    }
+  &:hover {
+    background-color: #f7fafc;
   }
+}
+
+.filterBadge {
+  display: inline-block;
+  padding: 2px 6px;
+  font-size: 0.75rem;
+  background-color: #ebf5ff;
+  color: #3182ce;
+  border-radius: 9999px;
+  margin-left: 4px;
+}
+
+.tableContainer {
+  overflow: hidden;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+}
+
+.tableHeader {
+  font-weight: 500;
+  color: #4a5568;
+  font-size: 0.875rem;
+}
+
+.bookingId {
+  font-weight: 500;
+  color: #2d3748;
+}
+
+.timeInfo {
+  white-space: nowrap;
+  font-size: 0.875rem;
+  color: #4a5568;
+  background-color: #f8fafc;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+}
+
+.peopleInfo {
+  white-space: nowrap;
   
-  .paymentInfo {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    
-    .method {
-      font-size: 0.875rem;
-      color: #4a5568;
-      display: flex;
-      align-items: center;
-      
-      &::before {
-        content: "";
-        display: inline-block;
-        width: 8px;
-        height: 8px;
-        border-radius: 50%;
-        background-color: #a0aec0;
-        margin-right: 8px;
-      }
-    }
-  }
-  
-  .statusTag {
-    padding: 6px 12px;
-    border-radius: 16px;
-    font-size: 0.75rem;
+  span {
+    margin-right: 8px;
+    font-size: 0.875rem;
+    background-color: #f8fafc;
+    padding: 2px 6px;
+    border-radius: 4px;
     display: inline-block;
-    font-weight: 500;
     
-    &.inprogress {
-      background: #e6fffa;
-      color: #0d9488;
-    }
-    
-    &.confirmed {
-      background: #fff8e6;
-      color: #d97706;
-    }
-    
-    &.canceled {
-      background: #fee2e2;
-      color: #dc2626;
-    }
-    
-    &.complete {
-      background: #e0f2fe;
-      color: #0284c7;
-    }
-    
-    &.inactive {
-      background: #f3f4f6;
-      color: #6b7280;
-    }
-    
-    &.pending {
-      background: #f3f4f6;
-      color: #4b5563;
-    }
-    
-    &.checkedout {
-      background: #e0f2fe;
-      color: #0284c7;
+    &:last-child {
+      margin-right: 0;
     }
   }
+}
+
+.paymentInfo {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
   
-  .paymentTag {
-    padding: 6px 12px;
-    border-radius: 16px;
-    font-size: 0.75rem;
-    display: inline-flex;
+  .method {
+    font-size: 0.875rem;
+    color: #4a5568;
+    display: flex;
     align-items: center;
-    font-weight: 500;
-    letter-spacing: 0.025em;
+  }
+}
+
+.paymentMethodIcon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  border-radius: 4px;
+  background-color: #f7fafc;
+  margin-right: 8px;
+  
+  svg {
+    width: 16px;
+    height: 16px;
+    color: #4a5568;
+  }
+}
+
+.statusTag {
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  display: inline-block;
+  font-weight: 500;
+  
+  &.inprogress {
+    background: #e6fffa;
+    color: #0d9488;
+  }
+  
+  &.confirmed {
+    background: #fff8e6;
+    color: #d97706;
+  }
+  
+  &.canceled {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+  
+  &.complete {
+    background: #e0f2fe;
+    color: #0284c7;
+  }
+  
+  &.inactive {
+    background: #f3f4f6;
+    color: #6b7280;
+  }
+  
+  &.pending {
+    background: #f3f4f6;
+    color: #4b5563;
+  }
+  
+  &.checkedout {
+    background: #e0f2fe;
+    color: #0284c7;
+  }
+  
+  &.needcheckin {
+    background: #f0f9ff;
+    color: #0369a1;
+  }
+  
+  &.needcheckout {
+    background: #f5f3ff;
+    color: #7c3aed;
+  }
+  &.refund {
+    background-color: #fff2e8;
+    border-color: #ffbb96;
+    color: #fa541c;
+  }
+}
+
+.paymentTag {
+  padding: 6px 12px;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  display: inline-flex;
+  align-items: center;
+  font-weight: 500;
+  letter-spacing: 0.025em;
+  
+  &::before {
+    content: "";
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    margin-right: 6px;
+  }
+  
+  &.paid {
+    background: #e6fffa;
+    color: #0d9488;
     
     &::before {
-      content: "";
-      display: inline-block;
-      width: 6px;
-      height: 6px;
-      border-radius: 50%;
-      margin-right: 6px;
-    }
-    
-    &.inprogress {
-      background: #e6fffa;
-      color: #0d9488;
-      
-      &::before {
-        background-color: #0d9488;
-      }
-    }
-    
-    &.confirmed {
-      background: #fff8e6;
-      color: #d97706;
-      
-      &::before {
-        background-color: #d97706;
-      }
-    }
-    
-    &.canceled {
-      background: #fee2e2;
-      color: #dc2626;
-      
-      &::before {
-        background-color: #dc2626;
-      }
-    }
-    
-    &.complete {
-      background: #e0f2fe;
-      color: #0284c7;
-      
-      &::before {
-        background-color: #0284c7;
-      }
-    }
-    
-    &.inactive {
-      background: #f3f4f6;
-      color: #6b7280;
-      
-      &::before {
-        background-color: #6b7280;
-      }
-    }
-    
-    &.pending {
-      background: #f3f4f6;
-      color: #4b5563;
-      
-      &::before {
-        background-color: #4b5563;
-      }
+      background-color: #0d9488;
     }
   }
   
-  .actionButton {
+  &.booked {
+    background: #fff8e6;
+    color: #d97706;
+    
+    &::before {
+      background-color: #d97706;
+    }
+  }
+  
+  &.cancelled {
+    background: #fee2e2;
+    color: #dc2626;
+    
+    &::before {
+      background-color: #dc2626;
+    }
+  }
+
+  &.refund {
+    background: #fff2e8;
+    color: #fa541c;
+    
+    &::before {
+      background-color: #fa541c;
+    }
+  }
+  
+  &.complete {
+    background: #e0f2fe;
+    color: #0284c7;
+    
+    &::before {
+      background-color: #0284c7;
+    }
+  }
+  
+  &.inactive {
+    background: #f3f4f6;
+    color: #6b7280;
+    
+    &::before {
+      background-color: #6b7280;
+    }
+  }
+  
+  &.pending {
+    background: #f3f4f6;
+    color: #4b5563;
+    
+    &::before {
+      background-color: #4b5563;
+    }
+  }
+
+}
+
+.actionButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 4px;
+  
+  &:hover {
+    color: #3182ce;
+    background-color: #ebf8ff;
+  }
+}
+
+.horizontalEllipsis {
+  font-size: 20px;
+  line-height: 1;
+  font-weight: bold;
+  letter-spacing: 1px;
+}
+
+.modalContainer {
+  .modalHeader {
+    font-weight: 600;
+    color: #2d3748;
+    margin-bottom: 16px;
+  }
+  
+  .modalContent {
+    padding: 16px 0;
+  }
+  
+  .modalFooter {
+    display: flex;
+    justify-content: flex-end;
+    gap: 12px;
+    padding-top: 16px;
+    border-top: 1px solid #e2e8f0;
+  }
+}
+
+.bookingTable {
+  :global {
+    .ant-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+
+      .ant-pagination-prev,
+      .ant-pagination-next {
+        height: 32px;
+        margin: 0;
+
+        .ant-pagination-item-link {
+          border: 1px solid #d9d9d9;
+          border-radius: 6px;
+          padding: 4px 15px;
+          color: rgba(0, 0, 0, 0.88);
+          font-size: 14px;
+          background: white;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          transition: all 0.2s;
+
+          &:hover {
+            border-color: #1677ff;
+            color: #1677ff;
+          }
+        }
+
+        &.ant-pagination-disabled {
+          .ant-pagination-item-link {
+            border-color: #d9d9d9;
+            color: rgba(0, 0, 0, 0.25);
+            cursor: not-allowed;
+            background: #f5f5f5;
+
+            &:hover {
+              border-color: #d9d9d9;
+              color: rgba(0, 0, 0, 0.25);
+            }
+          }
+        }
+      }
+
+      .ant-pagination-item {
+        min-width: 32px;
+        height: 32px;
+        line-height: 32px;
+        border: none;
+        margin: 0;
+        border-radius: 6px;
+
+        a {
+          color: rgba(0, 0, 0, 0.88);
+          padding: 0 4px;
+          transition: all 0.2s;
+        }
+
+        &:hover {
+          background: transparent;
+
+          a {
+            color: #1677ff;
+          }
+        }
+
+        &-active {
+          background: #F7F9FC;
+
+          a {
+            color: #1677ff;
+            font-weight: 500;
+          }
+
+          &:hover {
+            background: #e6f4ff;
+          }
+        }
+      }
+    }
+  }
+}
+
+.paginationButton {
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  padding: 4px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #667085;
+    color: #667085;
+  }
+
+  &:disabled {
+    background: #f5f5f5;
+    color: rgba(0, 0, 0, 0.25);
+    border-color: #d9d9d9;
+    cursor: not-allowed;
+  }
+}
+
+:global {
+  .ant-modal-title {
+    font-weight: 600;
+  }
+
+  .ant-modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+  }
+
+  .ant-form-item-label {
+    font-weight: 500;
+  }
+
+  .ant-input,
+  .ant-select-selector {
+    border-radius: 6px;
+  }
+
+  .ant-btn {
+    border-radius: 6px;
     display: flex;
     align-items: center;
-    justify-content: center;
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    
-    &:hover {
-      color: #3182ce;
-      background-color: #ebf8ff;
+    gap: 4px;
+
+    &.ant-btn-primary {
+      background: #1890ff;
+
+      &:hover {
+        background: #40a9ff;
+      }
+    }
+
+    &.ant-btn-default {
+      &:hover {
+        color: #1890ff;
+        border-color: #1890ff;
+      }
     }
   }
-  
-  .horizontalEllipsis {
-    font-size: 20px;
-    line-height: 1;
-    font-weight: bold;
-    letter-spacing: 1px;
+
+  .ant-table {
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   }
-  
-  .modalContainer {
-    .modalHeader {
-      font-weight: 600;
-      color: #2d3748;
-      margin-bottom: 16px;
+
+  .ant-input-search {
+    .ant-input {
+
+      &:hover,
+      &:focus {
+        border-color: #1890ff;
+      }
     }
-    
-    .modalContent {
-      padding: 16px 0;
-    }
-    
-    .modalFooter {
-      display: flex;
-      justify-content: flex-end;
-      gap: 12px;
-      padding-top: 16px;
-      border-top: 1px solid #e2e8f0;
+
+    .ant-input-group-addon {
+      .ant-btn {
+        border-radius: 0 6px 6px 0;
+      }
     }
   }
-  
-  .paymentMethodIcon {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 24px;
-    height: 24px;
-    border-radius: 4px;
-    background-color: #f7fafc;
-    margin-right: 8px;
-    
-    svg {
-      width: 16px;
-      height: 16px;
-      color: #4a5568;
+
+  .ant-select {
+
+    &:hover,
+    &.ant-select-focused {
+      .ant-select-selector {
+        border-color: #1890ff !important;
+      }
     }
   }
-  
-  
+
+  .ant-dropdown-menu {
+    border-radius: 6px;
+    padding: 4px;
+
+    .ant-dropdown-menu-item {
+      border-radius: 4px;
+      padding: 8px 12px;
+
+      &:hover {
+        background: #f5f5f5;
+      }
+
+      &-danger {
+        color: #ff4d4f;
+
+        &:hover {
+          background: #fff1f0;
+        }
+      }
+    }
+  }
+}
