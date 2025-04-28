@@ -2,7 +2,7 @@ import { Modal, Image, Spin, Divider } from 'antd';
 import { useEffect, useState } from 'react';
 import styles from './ReportDetail.module.scss';
 
-export default function ReportDetail({ isOpen, onClose, report, isLoading }) {
+export default function ReportDetail({ isOpen, onClose, report, isLoading, onReportViewed }) {
   const [staffName, setStaffName] = useState(null);
 
   useEffect(() => {
@@ -12,6 +12,12 @@ export default function ReportDetail({ isOpen, onClose, report, isLoading }) {
       setStaffName(report.originalData.replyBy.userId.fullName);
     }
   }, [report]);
+
+  useEffect(() => {
+    if (isOpen && report && !report.isReviewed) {
+      onReportViewed(report.id);
+    }
+  }, [isOpen, report, onReportViewed]);
 
   if (!report && !isLoading) return null;
 

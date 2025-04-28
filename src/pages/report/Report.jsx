@@ -82,8 +82,21 @@ export default function Report() {
         originalData: reportDetail
       };
       setSelectedReport(updatedReport);
+      
+      updateLocalReportData(updatedReport);
     }
   }, [reportDetail]);
+
+  const updateLocalReportData = (updatedReport) => {
+    if (!updatedReport) return;
+    
+    const updateInArray = (array) => array.map(item => 
+      item.id === updatedReport.id ? { ...item, ...updatedReport } : item
+    );
+    
+    setAllReports(prev => updateInArray(prev));
+    setFilteredData(prev => updateInArray(prev));
+  };
 
   const getMenuItems = (record) => {
     const items = [
@@ -111,6 +124,27 @@ export default function Report() {
       setIsDetailModalOpen(true);
     } else if (key === "2") {
       setIsReplyModalOpen(true);
+    }
+  };
+
+  // Handle marking a report as viewed
+  const handleReportViewed = async (reportId) => {
+    try {
+      const reportToUpdate = allReports.find(report => report.id === reportId);
+      if (reportToUpdate && !reportToUpdate.isReviewed) {
+        const updateData = {
+          id: reportId,
+          isReviewed: true
+        };
+        
+        await updateReport(updateData);
+        
+        // Update local state to show the change immediately
+        const updatedReport = { ...reportToUpdate, isReviewed: true };
+        updateLocalReportData(updatedReport);
+      }
+    } catch (err) {
+      console.error("Error updating report viewed status:", err);
     }
   };
 
@@ -170,13 +204,13 @@ export default function Report() {
       width: 50,
       render: (_, record) => (
         <Dropdown
-        trigger={["click"]} 
+          trigger={["click"]} 
           menu={{
             items: getMenuItems(record),
             onClick: ({ key }) => handleMenuClick(key, record),
           }}
         >
-          <MoreOutlined onClick={(e) => e.preventDefault()}  className={styles.actionIcon} />
+          <MoreOutlined onClick={(e) => e.preventDefault()} className={styles.actionIcon} />
         </Dropdown>
       ),
     },
@@ -239,6 +273,10 @@ export default function Report() {
       message.error("Không thể trả lời báo cáo, vui lòng thử lại");
       console.error("Error submitting reply:", err);
     }
+  };
+
+  const handleDetailModalClose = () => {
+    setIsDetailModalOpen(false);
   };
 
   if (isLoading) return <div>Đang tải dữ liệu...</div>;
@@ -315,9 +353,10 @@ export default function Report() {
 
       <ReportDetail
         isOpen={isDetailModalOpen}
-        onClose={() => setIsDetailModalOpen(false)}
+        onClose={handleDetailModalClose}
         report={selectedReport}
         isLoading={isDetailLoading}
+        onReportViewed={handleReportViewed}
       />
 
       <ReplyReport
