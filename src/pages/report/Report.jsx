@@ -8,10 +8,10 @@ import ReplyReport from "./components/ReplyReport/ReplyReport";
 import debounce from "lodash/debounce";
 import dayjs from "dayjs";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import { 
-  useGetAllReportsQuery, 
-  useGetReportByIdQuery, 
-  useUpdateReportMutation 
+import {
+  useGetAllReportsQuery,
+  useGetReportByIdQuery,
+  useUpdateReportMutation
 } from "../../redux/services/reportApi";
 
 dayjs.extend(customParseFormat);
@@ -29,18 +29,18 @@ export default function Report() {
   const [selectedReport, setSelectedReport] = useState(null);
   const [selectedReportId, setSelectedReportId] = useState(null);
 
-  const { 
-    data: reports, 
-    isLoading, 
-    error, 
-    refetch: refetchReports 
+  const {
+    data: reports,
+    isLoading,
+    error,
+    refetch: refetchReports
   } = useGetAllReportsQuery();
 
-  const { 
-    data: reportDetail, 
-    isLoading: isDetailLoading 
-  } = useGetReportByIdQuery(selectedReportId, { 
-    skip: !selectedReportId 
+  const {
+    data: reportDetail,
+    isLoading: isDetailLoading
+  } = useGetReportByIdQuery(selectedReportId, {
+    skip: !selectedReportId
   });
 
   const [updateReport, { isLoading: isUpdating }] = useUpdateReportMutation();
@@ -49,8 +49,8 @@ export default function Report() {
     if (reports) {
       const transformedData = reports.map((report) => ({
         id: report.id || report._id,
-        customerName: report.bookingId?._id || "N/A", 
-        bookingInfo: report.bookingId,
+        bookingId: report.bookingId?._id || "N/A",
+        customerName: report.bookingId?.customerId?.userId?.fullName || "N/A",
         content: report.content,
         createdAt: report.createdAt,
         isReviewed: report.isReviewed,
@@ -60,7 +60,7 @@ export default function Report() {
         contentReply: report.contentReply,
         replyBy: report.replyBy,
         updatedAt: report.updatedAt,
-        originalData: report 
+        originalData: report
       }));
       setAllReports(transformedData);
       setFilteredData(transformedData);
@@ -82,18 +82,18 @@ export default function Report() {
         originalData: reportDetail
       };
       setSelectedReport(updatedReport);
-      
+
       updateLocalReportData(updatedReport);
     }
   }, [reportDetail]);
 
   const updateLocalReportData = (updatedReport) => {
     if (!updatedReport) return;
-    
-    const updateInArray = (array) => array.map(item => 
+
+    const updateInArray = (array) => array.map(item =>
       item.id === updatedReport.id ? { ...item, ...updatedReport } : item
     );
-    
+
     setAllReports(prev => updateInArray(prev));
     setFilteredData(prev => updateInArray(prev));
   };
@@ -112,14 +112,14 @@ export default function Report() {
         label: "Trả lời",
       });
     }
-    
+
     return items;
   };
 
   const handleMenuClick = (key, record) => {
     setSelectedReport(record);
     setSelectedReportId(record.id);
-    
+
     if (key === "1") {
       setIsDetailModalOpen(true);
     } else if (key === "2") {
@@ -127,7 +127,6 @@ export default function Report() {
     }
   };
 
-  // Handle marking a report as viewed
   const handleReportViewed = async (reportId) => {
     try {
       const reportToUpdate = allReports.find(report => report.id === reportId);
@@ -136,10 +135,9 @@ export default function Report() {
           id: reportId,
           isReviewed: true
         };
-        
+
         await updateReport(updateData);
-        
-        // Update local state to show the change immediately
+
         const updatedReport = { ...reportToUpdate, isReviewed: true };
         updateLocalReportData(updatedReport);
       }
@@ -154,11 +152,11 @@ export default function Report() {
       dataIndex: "id",
       key: "id",
       width: 70,
-      render: (text, record, index) => index + 1, 
+      render: (text, record, index) => index + 1,
     },
     {
       title: "Booking ID",
-      dataIndex: "customerName",
+      dataIndex: "bookingId",
       key: "customerName",
       width: 150,
     },
@@ -204,7 +202,7 @@ export default function Report() {
       width: 50,
       render: (_, record) => (
         <Dropdown
-          trigger={["click"]} 
+          trigger={["click"]}
           menu={{
             items: getMenuItems(record),
             onClick: ({ key }) => handleMenuClick(key, record),
@@ -229,28 +227,32 @@ export default function Report() {
 
   useEffect(() => {
     if (!allReports.length) return;
-    
+
     let filtered = [...allReports];
+
     if (searchTerm) {
-      filtered = filtered.filter(
-        (item) =>
-          (item.customerName && item.customerName.toLowerCase().includes(searchTerm.toLowerCase())) ||
-          (item.reason && item.reason.toLowerCase().includes(searchTerm.toLowerCase()))
+      const lowerSearch = searchTerm.toLowerCase();
+      filtered = filtered.filter(item =>
+        (item.bookingId?.toLowerCase().includes(lowerSearch)) ||
+        (item.reason?.toLowerCase().includes(lowerSearch))
       );
     }
 
     if (selectedValues.status?.length > 0) {
-      filtered = filtered.filter((item) =>
-        selectedValues.status.includes(item.status)
-      );
-    }
-    
-    if (selectedValues.date) {
-      const selectedDate = dayjs(selectedValues.date).format("DD/MM/YYYY");
       filtered = filtered.filter((item) => {
-        if (!item.createdAt) return false;
-        const itemDate = item.createdAt.split(" ")[0];
-        return itemDate === selectedDate;
+        return selectedValues.status.some(status => {
+          if (status === 'reviewed') return item.isReviewed === true;
+          if (status === 'pending') return item.isReviewed === false;
+          return false;
+        });
+      });
+    }
+
+    if (selectedValues.date) {
+      const selectedDate = dayjs(selectedValues.date).startOf('day');
+      filtered = filtered.filter((item) => {
+        const itemDate = dayjs(item.createdAt, 'DD/MM/YYYY HH:mm:ss').startOf('day');
+        return itemDate.isSame(selectedDate);
       });
     }
 
@@ -266,7 +268,7 @@ export default function Report() {
       if (replyData) {
         await updateReport(replyData);
         message.success("Báo cáo đã được trả lời thành công");
-        refetchReports(); 
+        refetchReports();
         setIsReplyModalOpen(false);
       }
     } catch (err) {
@@ -292,7 +294,7 @@ export default function Report() {
             prefix={<SearchOutlined />}
             placeholder="Tìm kiếm theo booking ID hoặc lý do"
             onChange={(e) => handleSearch(e.target.value)}
-            style={{ width: 250, marginBottom: 20, marginRight: 20 }}
+            style={{ width: 250, marginRight: 20 }}
           />
 
           <Dropdown
@@ -312,7 +314,7 @@ export default function Report() {
         </div>
       </div>
 
-      <Table 
+      <Table
         columns={columns}
         dataSource={filteredData}
         rowKey="id"

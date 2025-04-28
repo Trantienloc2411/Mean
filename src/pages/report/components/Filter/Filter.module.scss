@@ -8,11 +8,11 @@
 
 .filterGroup {
   margin-bottom: 16px;
-  
+
   &:last-child {
     margin-bottom: 0;
   }
-  
+
   h4 {
     margin-bottom: 12px;
     font-weight: 500;
@@ -34,12 +34,12 @@
   border-radius: 16px;
   font-size: 14px;
   display: inline-block;
-  
+
   &.reviewed {
-    background: #e6f4ff;
-    color: #1677ff;
+    background-color: #D1FAE5;
+    color: #059669;
   }
-  
+
   &.pending {
     background: #fff7e6;
     color: #fa8c16;
