@@ -314,7 +314,7 @@ export default function ListBooking({ bookings, bookingStatusCodes, paymentStatu
 
         if (
           record._originalBooking.status === bookingStatusCodes.CANCELLED &&
-          record._originalBooking.paymentStatus === paymentStatusCodes.REFUND 
+          record._originalBooking.paymentStatus === paymentStatusCodes.REFUND
         ) {
           menuItems.push({
             key: "2",
@@ -476,7 +476,42 @@ export default function ListBooking({ bookings, bookingStatusCodes, paymentStatu
         )}
 
         <div className={styles.tableContainer}>
-          <TableModify tableColumn={tableColumn} tableData={filteredData} isPagination={true} loading={isUpdating} />
+          <TableModify
+            tableColumn={tableColumn}
+            tableData={filteredData}
+            isPagination={{
+              total: filteredData.length,
+              pageSize: 7,
+              showSizeChanger: false,
+              itemRender: (page, type, originalElement) => {
+                const totalPages = Math.ceil(filteredData.length / 7);
+
+                if (type === "prev") {
+                  return (
+                    <button
+                      className={styles.paginationButton}
+                      disabled={page === 0}
+                    >
+                      « Trước
+                    </button>
+                  );
+                }
+                if (type === "next") {
+                  return (
+                    <button
+                      className={styles.paginationButton}
+                      disabled={page >= totalPages}
+                    >
+                      Tiếp »
+                    </button>
+                  );
+                }
+                return originalElement;
+              },
+            }}
+            loading={isUpdating}
+            className={styles.bookingTable}
+          />
         </div>
       </div>
 

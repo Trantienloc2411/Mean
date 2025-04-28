@@ -43,7 +43,6 @@ export default function PolicyApp() {
     }
   );
 
-  // Fetch policy data
   const { data: policyData, isLoading } = useGetAllPolicySystemsQuery(undefined, {
     onSuccess: (data) => {
       console.log('Received policy data:', data);
@@ -53,7 +52,6 @@ export default function PolicyApp() {
     }
   });
 
-  // Fetch policy categories for filter
   const { data: categoryData } = useGetAllPolicySystemCategoriesQuery();
 
   const [createPolicy] = useCreatePolicySystemMutation();
@@ -89,7 +87,7 @@ export default function PolicyApp() {
       options: categoryData?.data?.map(category => ({
         key: category._id,
         label: category.categoryName,
-        value: category._id // Using _id as value for filtering
+        value: category._id 
       })) || []
     }
   ];
@@ -221,7 +219,6 @@ export default function PolicyApp() {
 
     if (selectedValues.unit?.length > 0) {
       filtered = filtered.filter((item) => {
-        // Check if any value in the values array has a matching unit
         return item.values?.some(val => selectedValues.unit.includes(val.unit));
       });
     }
