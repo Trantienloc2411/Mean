@@ -1,6 +1,5 @@
 import { Modal, Form, Input, InputNumber, Select, Button, Spin, Image, Upload, message } from "antd";
 import { useGetAllAmenitiesQuery } from '../../../../../../../../redux/services/serviceApi';
-import { useGetAllRentalLocationsQuery } from '../../../../../../../../redux/services/rentalLocationApi';
 import styles from './AddRoomTypeModal.module.scss';
 import { useState } from "react";
 import { supabase } from "../../../../../../../../redux/services/supabase";
@@ -17,37 +16,22 @@ const { Dragger } = Upload;
 
 const MAX_IMAGES = 10;
 
-const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm,rentalLocationId  }) => {
+const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
   const { id } = useParams();
   const [form] = Form.useForm();
   const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false);
   const [createAmenity, { isLoading: isCreatingService }] = useCreateAmenityMutation();
 
-  const { data: ownerDetailData, isLoading: isOwnerDetailLoading } = useGetOwnerDetailByUserIdQuery(id);
+  const { data: ownerDetailData } = useGetOwnerDetailByUserIdQuery(id);
   const ownerId = ownerDetailData?.id;
 
-  const { data: rentalLocations, isLoading: isLoadingRentalLocations } = useGetAllRentalLocationsQuery(ownerId, {
-    skip: !ownerId
-  });
-
-  useEffect(() => {
-    if (rentalLocationId) {
-      form.setFieldsValue({ rentalLocationId });
-    }
-  }, [rentalLocationId, form]);
-  
-  const { 
-    data: services, 
-    isLoading: isServicesLoading, 
-    refetch: refetchServices 
+  const {
+    data: services,
+    isLoading: isServicesLoading,
+    refetch: refetchServices
   } = useGetAllAmenitiesQuery(
-    { 
-      ownerId,
-      rentalLocationId 
-    }, 
-    { 
-      skip: !ownerId && !rentalLocationId
-    }
+    { ownerId }, 
+    { skip: !ownerId }
   );
 
   const [fileList, setFileList] = useState([]);
@@ -56,14 +40,19 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm,rentalLocationId  }) => 
   const handleSubmit = () => {
     form.validateFields()
       .then((values) => {
+        if (!ownerId) {
+          message.error("Không tìm thấy thông tin chủ nhà!");
+          return;
+        }
+
         const formattedValues = {
           ...values,
+          ownerId,
           numberOfPasswordRoom: values.numberOfPasswordRoom || 0,
           image: fileList.map(file => file.url),
           serviceIds: values.serviceIds || []
         };
 
-        console.log('Sending to API:', formattedValues);
         onConfirm(formattedValues);
         form.resetFields();
         setFileList([]);
@@ -72,7 +61,6 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm,rentalLocationId  }) => 
         console.log('Validate Failed:', info);
       });
   };
-
   const uploadProps = {
     name: "file",
     multiple: true,
@@ -152,18 +140,18 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm,rentalLocationId  }) => 
     try {
       const newService = await createAmenity({
         ...values,
-        ownerId,
+        ownerId, 
         status: values.status === "Active",
         isDelete: false
       }).unwrap();
 
       await refetchServices();
-      
+
       const currentServices = form.getFieldValue('serviceIds') || [];
       form.setFieldsValue({
         serviceIds: [...currentServices, newService._id]
       });
-      
+
       message.success("Thêm dịch vụ thành công!");
       setIsAddServiceModalOpen(false);
     } catch (error) {
@@ -179,15 +167,6 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm,rentalLocationId  }) => 
         label: service.name,
         value: service._id
       }));
-  };
-
-  const getLocationsOptions = () => {
-    if (!rentalLocations) return [];
-    const locationsList = rentalLocations.data || rentalLocations;
-    return locationsList.map(location => ({
-      label: location.name,
-      value: location._id
-    }));
   };
 
   return (
@@ -216,17 +195,6 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm,rentalLocationId  }) => 
         name="addRoomTypeForm"
         className={styles.modalForm}
       >
-        <Form.Item
-          name="rentalLocationId"
-          label="Địa điểm thuê"
-          rules={[{ required: true, message: 'Vui lòng chọn địa điểm thuê' }]}
-        >
-          <Select
-            placeholder="Chọn địa điểm thuê"
-            loading={isLoadingRentalLocations || isOwnerDetailLoading}
-            options={getLocationsOptions()}
-          />
-        </Form.Item>
 
         <Form.Item
           name="serviceIds"
