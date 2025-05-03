@@ -2,9 +2,9 @@
     padding: 40px;
     background-color: #F9FAFB;
     min-height: 100vh;
-    margin: 16px; 
+    margin: 16px;
     border-radius: 16px;
-  
+
 
     h1 {
         font-size: 24px;
@@ -32,20 +32,27 @@
     }
 
     .addRoomButton {
-        background-color: #fff;
-        color: #667085;
-        border-radius: 8px;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        padding: 10px 16px;
-        font-weight: 500;
-        border: 1px solid #667085;
+        &:global(.ant-btn-default) {
+            background-color: #fff !important;
+            color: #667085 !important;
+            border-radius: 8px;
+            padding: 10px 16px;
+            font-weight: 500;
+            border: 1px solid #667085 !important;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            transition: all 0.3s;
 
-        &:hover {
-            background-color: #e4e6ea !important;
-            border-color: #525c70 !important;
-            color: black !important;
+            &:hover {
+                background-color: #e4e6ea !important;
+                border-color: #525c70 !important;
+                color: #000 !important;
+            }
+
+            &:active {
+                background-color: #d0d3d9 !important;
+            }
         }
     }
 }

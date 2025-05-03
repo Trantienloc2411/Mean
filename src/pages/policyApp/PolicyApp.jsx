@@ -87,7 +87,7 @@ export default function PolicyApp() {
       options: categoryData?.data?.map(category => ({
         key: category._id,
         label: category.categoryName,
-        value: category._id 
+        value: category._id
       })) || []
     }
   ];
@@ -160,27 +160,37 @@ export default function PolicyApp() {
 
   const handleUpdatePolicy = async (values) => {
     try {
-      const updatedPolicy = {
-        _id: selectedPolicy._id,
-        policySystemCategoryId: values.policySystemCategoryId,
-        name: values.name,
-        description: values.description || "",
-        values: values.values || [],
-        startDate: dayjs(values.startDate).format('DD/MM/YYYY HH:mm:ss'),
-        endDate: dayjs(values.endDate).format('DD/MM/YYYY HH:mm:ss'),
-        isActive: values.isActive === 'active'
+      console.log('[Debug] Submitting values:', values);
+      
+      if (!selectedPolicy?._id) {
+        message.error('Không tìm thấy ID chính sách');
+        return;
+      }
+  
+      const formattedValues = {
+        ...values,
+        _id: selectedPolicy._id, // Đảm bảo có _id
+        startDate: values.startDate ? 
+          dayjs(values.startDate).format('DD-MM-YYYY HH:mm:ss') : 
+          null,
+        endDate: values.endDate ? 
+          dayjs(values.endDate).format('DD-MM-YYYY HH:mm:ss') : 
+          null,
       };
-
-      await updatePolicy(updatedPolicy).unwrap();
+  
+      console.log('[Debug] Formatted payload:', formattedValues);
+  
+      // Thêm log để kiểm tra API call
+      const result = await updatePolicy(formattedValues).unwrap();
+      console.log('[Debug] API Response:', result);
+      
+      message.success('Cập nhật thành công!');
       setIsUpdateModalOpen(false);
-      setSelectedPolicy(null);
-      message.success('Cập nhật chính sách thành công');
     } catch (error) {
-      console.error('Error in handleUpdatePolicy:', error);
-      message.error('Có lỗi xảy ra khi cập nhật chính sách');
+      console.error('[Debug] Update Error:', error);
+      message.error(`Lỗi: ${error.data?.message || error.message}`);
     }
   };
-
   const handleFilterChange = (filterName, newValues) => {
     setSelectedValues(prev => ({
       ...prev,
@@ -304,7 +314,7 @@ export default function PolicyApp() {
       key: "operation",
       render: (_, record) => (
         <Dropdown
-        trigger={["click"]} 
+          trigger={["click"]}
           menu={{
             items: menuItems.map((item) => ({
               ...item,
@@ -356,10 +366,15 @@ export default function PolicyApp() {
           </div>
 
           <Button
-            type="primary"
+            type="default" 
             onClick={() => setIsAddModalOpen(true)}
             icon={<PlusOutlined />}
             className={styles.addRoomButton}
+            style={{
+              backgroundColor: '#fff',
+              borderColor: '#667085',
+              color: '#667085',
+            }}
           >
             Tạo chính sách mới
           </Button>
@@ -435,7 +450,7 @@ export default function PolicyApp() {
             setSelectedPolicy(null);
           }}
         />
-        
+
         <DeletePolicyModal
           isOpen={isDeleteModalOpen}
           onCancel={() => {

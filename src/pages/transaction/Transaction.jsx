@@ -129,7 +129,7 @@ export default function Transaction() {
             />
             <Button onClick={openFilterModal}>
               <FilterOutlined />
-              Bộ lọc
+              Lọc
             </Button>
           </Flex>
           <TransactionTable data={filteredData} />

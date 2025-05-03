@@ -60,8 +60,8 @@ export default function AccountTable({ data, loading }) {
           {role === "Admin"
             ? "Nhân viên"
             : role === "Owner"
-            ? "Chủ hộ"
-            : "Khách hàng"}
+              ? "Chủ hộ"
+              : "Khách hàng"}
         </span>
       ),
     },
@@ -261,10 +261,35 @@ export default function AccountTable({ data, loading }) {
         columns={columns}
         rowKey="_id"
         pagination={{
-          ...pagination,
+          current: pagination.current,
+          pageSize: 7,
+          total: data.length,
           showSizeChanger: false,
-          onChange: (page) =>
-            setPagination((prev) => ({ ...prev, current: page })),
+          onChange: (page) => setPagination((prev) => ({ ...prev, current: page })),
+          itemRender: (page, type, originalElement) => {
+            const totalPages = Math.ceil(data.length / 7);
+            if (type === "prev") {
+              return (
+                <button
+                  className={styles.paginationButton}
+                  disabled={pagination.current === 1}
+                >
+                  « Trước
+                </button>
+              );
+            }
+            if (type === "next") {
+              return (
+                <button
+                  className={styles.paginationButton}
+                  disabled={pagination.current >= totalPages}
+                >
+                  Tiếp »
+                </button>
+              );
+            }
+            return originalElement;
+          },
         }}
         className={styles.accountTable}
       />

@@ -26,7 +26,6 @@ import {
 } from "@ant-design/icons"
 import styles from "./UpdatePolicyModal.module.scss"
 import { useGetAllPolicySystemCategoriesQuery } from "../../../../redux/services/policySystemCategoryApi"
-import { useUpdatePolicySystemMutation } from "../../../../redux/services/policySystemApi"
 import { useGetStaffByIdQuery } from "../../../../redux/services/staffApi"
 import dayjs from "dayjs"
 import customParseFormat from "dayjs/plugin/customParseFormat"
@@ -35,12 +34,12 @@ dayjs.extend(customParseFormat)
 
 const { Title, Text } = Typography
 
-const UpdatePolicyModal = ({ isOpen, onCancel, initialValues }) => {
+const UpdatePolicyModal = ({ isOpen, onCancel, onConfirm, initialValues }) => {
   const [form] = Form.useForm()
-  const [updatePolicy, { isLoading: isUpdating }] = useUpdatePolicySystemMutation()
-  const [submitError, setSubmitError] = useState(null)
-  const [staffData, setStaffData] = useState(null)
-  const [unitChanges, setUnitChanges] = useState({})
+  const [submitError, setSubmitError] = useState(null);
+  const [staffData, setStaffData] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [unitChanges, setUnitChanges] = useState({});
 
   const getToken = () => localStorage.getItem("access_token")
 
@@ -70,6 +69,7 @@ const UpdatePolicyModal = ({ isOpen, onCancel, initialValues }) => {
   } = useGetStaffByIdQuery(currentUser?.id, {
     skip: !currentUser?.id,
   })
+  
 
   useEffect(() => {
     if (staffResponse && !isLoadingStaff) {
@@ -80,14 +80,23 @@ const UpdatePolicyModal = ({ isOpen, onCancel, initialValues }) => {
   const { data: categoriesResponse, isLoading: isLoadingCategories } = useGetAllPolicySystemCategoriesQuery()
 
   const parseDateString = (dateStr) => {
-    if (!dateStr) return null
-    const formats = ["DD-MM-YYYY HH:mm:ss", "YYYY-MM-DD HH:mm:ss", "MM-DD-YYYY HH:mm:ss"]
+    if (!dateStr) return null;
+    
+    // Thêm hỗ trợ cả định dạng có dấu /
+    const formats = [
+      "DD-MM-YYYY HH:mm:ss", 
+      "DD/MM/YYYY HH:mm:ss",
+      "YYYY-MM-DD HH:mm:ss",
+      "MM-DD-YYYY HH:mm:ss",
+      "YYYY-MM-DDTHH:mm:ss.SSSZ" // ISO format
+    ];
+  
     for (const format of formats) {
-      const parsed = dayjs(dateStr, format)
-      if (parsed.isValid()) return parsed
+      const parsed = dayjs(dateStr, format);
+      if (parsed.isValid()) return parsed;
     }
-    return null
-  }
+    return null;
+  };
 
   const extractCategoryId = (initialValue) => {
     if (!initialValue) return null
@@ -101,38 +110,25 @@ const UpdatePolicyModal = ({ isOpen, onCancel, initialValues }) => {
     return null
   }
 
-  // Thêm xử lý để chuyển đổi chuỗi thành mảng khi hiển thị dữ liệu
   useEffect(() => {
     if (isOpen && initialValues && categoriesResponse) {
-      const categoryId = extractCategoryId(initialValues)
-
-      // Xử lý các giá trị
-      const processedValues = Array.isArray(initialValues.values)
-        ? [...initialValues.values]
-        : initialValues.value
-          ? [
-              {
-                val1: initialValues.value,
-                unit: initialValues.unit,
-                description: initialValues.description,
-              },
-            ]
-          : []
-
-      // Không cần chuyển đổi hashTag từ chuỗi thành mảng vì giờ đây nó sẽ là chuỗi đơn
-
+      const categoryId = initialValues.policySystemCategoryId?._id || initialValues.policySystemCategoryId;
+      
       const formattedValues = {
         ...initialValues,
         policySystemCategoryId: categoryId,
         startDate: parseDateString(initialValues.startDate),
         endDate: parseDateString(initialValues.endDate),
         isActive: initialValues.isActive ? "active" : "inactive",
-        values: processedValues,
-      }
-
-      form.setFieldsValue(formattedValues)
+        values: initialValues.values?.map(val => ({
+          ...val,
+          _id: val._id || undefined // Giữ nguyên ID nếu có
+        })) || []
+      };
+  
+      form.setFieldsValue(formattedValues);
     }
-  }, [isOpen, initialValues, categoriesResponse, form])
+  }, [isOpen, initialValues, categoriesResponse, form]);
 
   const categoryOptions = (() => {
     if (!categoriesResponse) return []
@@ -147,69 +143,53 @@ const UpdatePolicyModal = ({ isOpen, onCancel, initialValues }) => {
   })()
 
   const handleSubmit = async () => {
-    setSubmitError(null)
+    setSubmitError(null);
+    setIsSubmitting(true);
 
     try {
-      const token = getToken()
-      if (!token) {
-        message.error("Vui lòng đăng nhập để thực hiện thao tác này")
-        return
-      }
-
-      if (!staffData) {
-        message.error("Không thể xác định thông tin nhân viên")
-        return
-      }
-
-      const values = await form.validateFields()
+      const values = await form.validateFields();
 
       if (!values.startDate || !values.endDate) {
-        throw new Error("Vui lòng chọn ngày bắt đầu và kết thúc hợp lệ")
+        throw new Error("Vui lòng chọn ngày bắt đầu và kết thúc hợp lệ");
       }
 
-      const startDateISO = values.startDate ? values.startDate.toISOString() : null
-      const endDateISO = values.endDate ? values.endDate.toISOString() : null
+      // Format dates properly
+      const startDate = values.startDate ? values.startDate.format('DD/MM/YYYY HH:mm:ss') : null;
+      const endDate = values.endDate ? values.endDate.format('DD/MM/YYYY HH:mm:ss') : null;
 
-      const valuesArray = values.values || []
-
-      // Không cần chuyển đổi hashTag từ mảng thành chuỗi vì giờ đây nó đã là chuỗi
+      // Format values array correctly
+      const valuesArray = values.values || [];
 
       const formattedValues = {
-        id: initialValues.id,
-        staffId: initialValues.staffId,
-        updateBy: staffData.id,
+        _id: initialValues._id, 
+        adminId: staffData?.id,   
+        updateBy: staffData?.id,
         policySystemCategoryId: values.policySystemCategoryId,
         name: values.name,
         description: values.description || "",
         values: valuesArray,
-        startDate: startDateISO,
-        endDate: endDateISO,
+        startDate: startDate,
+        endDate: endDate,
         isActive: values.isActive === "active",
+      };
+
+      console.log("Sending to parent component:", formattedValues);
+
+      // Gọi callback từ component cha
+      if (typeof onConfirm === 'function') {
+        await onConfirm(formattedValues);
       }
-
-      console.log("Final update payload:", formattedValues)
-
-      const response = await updatePolicy(formattedValues).unwrap()
-      console.log("API response:", response)
-
-      message.success("Cập nhật chính sách thành công")
-      form.resetFields()
-      onCancel()
+      
+      form.resetFields();
+      onCancel();
     } catch (error) {
-      console.error("Submit error:", error)
-
-      if (error.status === 401 || error.message?.includes("token")) {
-        setSubmitError("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.")
-        message.error("Phiên đăng nhập đã hết hạn. Vui lòng đăng nhập lại.")
-      } else if (!error.status && error.name === "ValidationError") {
-        setSubmitError("Vui lòng kiểm tra lại thông tin nhập vào")
-        message.error("Vui lòng kiểm tra lại thông tin nhập vào")
-      } else {
-        setSubmitError(error.message || "Đã xảy ra lỗi khi cập nhật chính sách")
-        message.error(error.message || "Đã xảy ra lỗi khi cập nhật chính sách")
-      }
+      console.error("Submit error:", error);
+      setSubmitError(error.message || "Đã xảy ra lỗi khi cập nhật chính sách");
+      message.error(error.message || "Đã xảy ra lỗi khi cập nhật chính sách");
+    } finally {
+      setIsSubmitting(false);
     }
-  }
+  };
 
   const renderValueInput = (fieldName, placeholder, unit) => {
     // Determine input type based on unit
@@ -292,11 +272,23 @@ const UpdatePolicyModal = ({ isOpen, onCancel, initialValues }) => {
       open={isOpen}
       onCancel={onCancel}
       footer={[
-        <Button key="cancel" onClick={onCancel}>
-          Huỷ
+        <Button key="back" onClick={onCancel}>
+          Hủy
         </Button>,
-        <Button key="submit" type="primary" onClick={handleSubmit} loading={isUpdating}>
-          Cập nhật chính sách
+        <Button 
+          key="submit" 
+          type="primary" 
+          loading={isSubmitting}
+          onClick={() => {
+            form
+              .validateFields()
+              .then(values => handleSubmit(values))
+              .catch(info => {
+                console.log('[Debug] Validate Failed:', info);
+              });
+          }}
+        >
+          Cập nhật
         </Button>,
       ]}
       width={800}
@@ -432,8 +424,7 @@ const UpdatePolicyModal = ({ isOpen, onCancel, initialValues }) => {
             {(fields, { add, remove }) => (
               <>
                 {fields.map(({ key, name, ...restField }) => (
-                  <Card
-                    key={key}
+                  <Card key={key}
                     style={{
                       marginBottom: 16,
                       borderColor: "#d9d9d9",
@@ -466,129 +457,79 @@ const UpdatePolicyModal = ({ isOpen, onCancel, initialValues }) => {
                       />
                     </div>
 
-                    <div style={{ display: "flex", gap: "16px", marginBottom: "16px" }}>
-                      <Form.Item
-                        {...restField}
-                        name={[name, "val1"]}
-                        label={
-                          <Space>
-                            <NumberOutlined />
-                            <span>Giá trị bắt đầu</span>
-                            <Tooltip title="Nhập giá trị bắt đầu (ví dụ: thời gian mở cửa, mức phụ thu tối thiểu)">
-                              <InfoCircleOutlined style={{ color: "#1890ff" }} />
-                            </Tooltip>
-                          </Space>
-                        }
-                        style={{ flex: 1, marginBottom: 8 }}
-                        dependencies={[[name, "unit"]]}
-                        rules={[
-                          { required: true, message: "Vui lòng nhập giá trị bắt đầu" },
-                          ({ getFieldValue }) => ({
-                            validator(_, value) {
-                              if (!value) return Promise.resolve()
+                    <Form.Item
+                      {...restField}
+                      name={[name, "val"]}
+                      label={
+                        <Space>
+                          <NumberOutlined />
+                          <span>Giá trị</span>
+                          <Tooltip title="Nhập giá trị cho chính sách">
+                            <InfoCircleOutlined style={{ color: "#1890ff" }} />
+                          </Tooltip>
+                        </Space>
+                      }
+                      style={{ marginBottom: 8 }}
+                      dependencies={[["values", name, "unit"]]}
+                      rules={[
+                        { required: true, message: "Vui lòng nhập giá trị" },
+                        ({ getFieldValue }) => ({
+                          validator(_, value) {
+                            if (!value) return Promise.resolve();
+                            const unit = getFieldValue(["values", name, "unit"]);
+                            let numValue;
 
-                              const unit = getFieldValue(["values", name, "unit"])
+                            try {
+                              const cleanValue = value.toString().replace(/[^\d.-]/g, "");
+                              numValue = Number.parseFloat(cleanValue);
+                            } catch (error) {
+                              return Promise.reject(new Error("Vui lòng nhập số hợp lệ"));
+                            }
 
-                              // Convert input to appropriate type based on unit
-                              let numValue
-                              try {
-                                // Remove non-numeric characters for proper parsing
-                                const cleanValue = value.toString().replace(/[^\d.-]/g, "")
-                                numValue = Number.parseFloat(cleanValue)
-                              } catch (error) {
-                                return Promise.reject(new Error("Vui lòng nhập số hợp lệ"))
-                              }
+                            if (isNaN(numValue)) {
+                              return Promise.reject(new Error("Vui lòng nhập số hợp lệ"));
+                            }
 
-                              if (isNaN(numValue)) {
-                                return Promise.reject(new Error("Vui lòng nhập số hợp lệ"))
-                              }
+                            if (unit === "percent" && numValue < 0) {
+                              return Promise.reject(new Error("Phần trăm không được nhỏ hơn 0%"));
+                            }
+                            if (unit === "hour" && numValue < 0) {
+                              return Promise.reject(new Error("Giờ không được nhỏ hơn 0"));
+                            }
+                            if (unit === "day" && numValue < 1) {
+                              return Promise.reject(new Error("Ngày không được nhỏ hơn 1"));
+                            }
+                            if (unit === "vnd" && numValue < 0) {
+                              return Promise.reject(new Error("Số tiền không được âm"));
+                            }
+                            if (unit === "min" && numValue < 0) {
+                              return Promise.reject(new Error("Phút không được nhỏ hơn 0"));
+                            }
 
-                              // Validate based on unit type
-                              if (unit === "percent" && numValue > 100) {
-                                return Promise.reject(new Error("Phần trăm không được vượt quá 100%"))
-                              }
+                            if (unit === "percent" && numValue > 100) {
+                              return Promise.reject(new Error("Phần trăm không được vượt quá 100%"));
+                            }
+                            if (unit === "hour" && numValue > 24) {
+                              return Promise.reject(new Error("Giờ không được vượt quá 24"));
+                            }
+                            if (unit === "day" && numValue > 31) {
+                              return Promise.reject(new Error("Ngày không được vượt quá 31"));
+                            }
+                            if (unit === "min" && numValue > 1440) {
+                              return Promise.reject(new Error("Phút không được vượt quá 1440"));
+                            }
+                            return Promise.resolve();
+                          },
+                        }),
+                      ]}
+                    >
+                      {renderValueInput(
+                        [name, "val"],
+                        "Ví dụ: 50.000đ, 5%, 10 điểm",
+                        form.getFieldValue(["values", name, "unit"])
+                      )}
+                    </Form.Item>
 
-                              if (unit === "hour" && numValue > 24) {
-                                return Promise.reject(new Error("Giờ không được vượt quá 24"))
-                              }
-
-                              if (unit === "day" && numValue > 31) {
-                                return Promise.reject(new Error("Ngày không được vượt quá 31"))
-                              }
-
-                              return Promise.resolve()
-                            },
-                          }),
-                        ]}
-                      >
-                        {renderValueInput(
-                          [name, "val1"],
-                          "Ví dụ: 08:00, 50.000đ, 5%",
-                          form.getFieldValue(["values", name, "unit"]),
-                        )}
-                      </Form.Item>
-
-                      <Form.Item
-                        {...restField}
-                        name={[name, "val2"]}
-                        label={
-                          <Space>
-                            <NumberOutlined />
-                            <span>Giá trị kết thúc</span>
-                            <Tooltip title="Nhập giá trị kết thúc (ví dụ: thời gian đóng cửa, mức phụ thu tối đa)">
-                              <InfoCircleOutlined style={{ color: "#1890ff" }} />
-                            </Tooltip>
-                          </Space>
-                        }
-                        style={{ flex: 1, marginBottom: 8 }}
-                        dependencies={[[name, "unit"]]}
-                        rules={[
-                          { required: true, message: "Vui lòng nhập giá trị kết thúc" },
-                          ({ getFieldValue }) => ({
-                            validator(_, value) {
-                              if (!value) return Promise.resolve()
-
-                              const unit = getFieldValue(["values", name, "unit"])
-
-                              // Convert input to appropriate type based on unit
-                              let numValue
-                              try {
-                                // Remove non-numeric characters for proper parsing
-                                const cleanValue = value.toString().replace(/[^\d.-]/g, "")
-                                numValue = Number.parseFloat(cleanValue)
-                              } catch (error) {
-                                return Promise.reject(new Error("Vui lòng nhập số hợp lệ"))
-                              }
-
-                              if (isNaN(numValue)) {
-                                return Promise.reject(new Error("Vui lòng nhập số hợp lệ"))
-                              }
-
-                              // Validate based on unit type
-                              if (unit === "percent" && numValue > 100) {
-                                return Promise.reject(new Error("Phần trăm không được vượt quá 100%"))
-                              }
-
-                              if (unit === "hour" && numValue > 24) {
-                                return Promise.reject(new Error("Giờ không được vượt quá 24"))
-                              }
-
-                              if (unit === "day" && numValue > 31) {
-                                return Promise.reject(new Error("Ngày không được vượt quá 31"))
-                              }
-
-                              return Promise.resolve()
-                            },
-                          }),
-                        ]}
-                      >
-                        {renderValueInput(
-                          [name, "val2"],
-                          "Ví dụ: 22:00, 200.000đ, 15%",
-                          form.getFieldValue(["values", name, "unit"]),
-                        )}
-                      </Form.Item>
-                    </div>
 
                     <Form.Item
                       {...restField}
