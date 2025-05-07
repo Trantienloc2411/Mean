@@ -15,6 +15,9 @@ import { useUpdateRentalLocationMutation } from "../../../redux/services/rentalL
 import { Space } from "antd";
 import { useEffect } from "react";
 import { Input } from "antd";
+import { useGetRentalLogsByRentalIdQuery } from "../../../redux/services/RentalLogApi";
+import { useMemo } from "react";
+import dayjs from "dayjs";
 
 const { Link } = Typography;
 const { Option } = Select;
@@ -74,6 +77,11 @@ export default function ModalViewDetailRental({
 
   const [selectedStatus, setSelectedStatus] = useState(data.status);
   const [note, setNote] = useState("");
+  const { data: rentalLogs, refetch: refetchRentalLogs } =
+    useGetRentalLogsByRentalIdQuery(data?.id, {
+      skip: !data?.id,
+    });
+  console.log(rentalLogs);
 
   useEffect(() => {
     setSelectedStatus(data.status);
@@ -103,10 +111,10 @@ export default function ModalViewDetailRental({
       return;
     }
 
-    if (selectedStatus !== data.status && !note.trim()) {
-      message.warning("Vui lòng nhập ghi chú cập nhật!");
-      return;
-    }
+    // if (selectedStatus !== data.status && !note.trim()) {
+    //   message.warning("Vui lòng nhập ghi chú cập nhật!");
+    //   return;
+    // }
 
     try {
       await updateStatus({
@@ -118,11 +126,25 @@ export default function ModalViewDetailRental({
       message.success("Cập nhật trạng thái thành công!");
       onReload?.();
       onClose();
+      setNote("");
+      refetchRentalLogs();
     } catch (error) {
       console.error(error);
       message.error("Cập nhật trạng thái thất bại!");
     }
   };
+
+  const formattedLogs = useMemo(() => {
+    if (!rentalLogs || !Array.isArray(rentalLogs)) return [];
+
+    return rentalLogs.map((log) => ({
+      date: dayjs(log.createdAt, "DD/MM/YYYY HH:mm:ss").format(
+        "DD/MM/YYYY HH:mm"
+      ),
+      status: log.newStatus,
+      updatedBy: log.updatedBy?.fullName || "Hệ thống",
+    }));
+  }, [rentalLogs]);
 
   const tabItems = [
     {
@@ -279,9 +301,9 @@ export default function ModalViewDetailRental({
               key: "updatedBy",
             },
           ]}
-          dataSource={data.statusHistory || []}
+          dataSource={formattedLogs}
           pagination={false}
-          rowKey={(record, index) => index}
+          rowKey={(record, index) => `rental-log-${index}`}
         />
       ),
     },
