@@ -104,12 +104,10 @@ const AddPolicyModal = ({ isOpen, onCancel }) => {
 
       const valuesArray = values.values || []
 
-      // Process the values array
       const processedValuesArray = valuesArray.map((item) => {
-        // hashTag is now a single value, not an array
         return {
           ...item,
-          hashTag: item.hashTag || "",
+          hashTag: Array.isArray(item.hashTag) ? item.hashTag.join(",") : item.hashTag || "",
         }
       })
 
