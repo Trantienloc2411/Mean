@@ -104,12 +104,21 @@ const AddPolicyModal = ({ isOpen, onCancel }) => {
 
       const valuesArray = values.values || []
 
+      // Process the values array
+      const processedValuesArray = valuesArray.map((item) => {
+        // hashTag is now a single value, not an array
+        return {
+          ...item,
+          hashTag: item.hashTag || "",
+        }
+      })
+
       const formattedValues = {
         staffId: staffData.id,
         policySystemCategoryId: values.policySystemCategoryId,
         name: values.name,
         description: values.description || "",
-        values: valuesArray,
+        values: processedValuesArray,
         startDate: startDateISO,
         endDate: endDateISO,
         isActive: true,
@@ -153,37 +162,19 @@ const AddPolicyModal = ({ isOpen, onCancel }) => {
 
   const renderValueInput = (fieldName, placeholder, unit) => {
     if (unit === "percent") {
-      return (
-        <Input
-          placeholder={placeholder}
-          suffix="%"
-          type="number"
-          min={0}
-          max={100}
-          step={0.01}
-        />
-      );
+      return <Input placeholder={placeholder} suffix="%" type="number" min={0} max={100} step={0.01} />
     } else if (unit === "hour") {
-      return <Input placeholder={placeholder} suffix="h" type="number" min={0} max={24} step={0.5} />;
+      return <Input placeholder={placeholder} suffix="h" type="number" min={0} max={24} step={0.5} />
     } else if (unit === "day") {
-      return <Input placeholder={placeholder} suffix="ngày" type="number" min={1} max={31} step={1} />;
+      return <Input placeholder={placeholder} suffix="ngày" type="number" min={1} max={31} step={1} />
     } else if (unit === "vnd") {
-      return <Input placeholder={placeholder} suffix="đ" type="number" min={0} step={1000} />;
+      return <Input placeholder={placeholder} suffix="đ" type="number" min={0} step={1000} />
     } else if (unit === "min") {
-      return (
-        <Input
-          placeholder={placeholder}
-          suffix="phút"
-          type="number"
-          min={0}
-          max={1440}
-          step={1}
-        />
-      );
+      return <Input placeholder={placeholder} suffix="phút" type="number" min={0} max={1440} step={1} />
     } else {
-      return <Input placeholder={placeholder} />;
+      return <Input placeholder={placeholder} />
     }
-  };
+  }
   const handleFormValuesChange = (changedValues, allValues) => {
     if (changedValues.values) {
       const changedIndex = Object.keys(changedValues.values).find(
@@ -333,7 +324,8 @@ const AddPolicyModal = ({ isOpen, onCancel }) => {
             {(fields, { add, remove }) => (
               <>
                 {fields.map(({ key, name, ...restField }) => (
-                  <Card key={key}
+                  <Card
+                    key={key}
                     style={{
                       marginBottom: 16,
                       borderColor: "#d9d9d9",
@@ -384,49 +376,49 @@ const AddPolicyModal = ({ isOpen, onCancel }) => {
                         { required: true, message: "Vui lòng nhập giá trị" },
                         ({ getFieldValue }) => ({
                           validator(_, value) {
-                            if (!value) return Promise.resolve();
-                            const unit = getFieldValue(["values", name, "unit"]);
-                            let numValue;
+                            if (!value) return Promise.resolve()
+                            const unit = getFieldValue(["values", name, "unit"])
+                            let numValue
 
                             try {
-                              const cleanValue = value.toString().replace(/[^\d.-]/g, "");
-                              numValue = Number.parseFloat(cleanValue);
+                              const cleanValue = value.toString().replace(/[^\d.-]/g, "")
+                              numValue = Number.parseFloat(cleanValue)
                             } catch (error) {
-                              return Promise.reject(new Error("Vui lòng nhập số hợp lệ"));
+                              return Promise.reject(new Error("Vui lòng nhập số hợp lệ"))
                             }
 
                             if (isNaN(numValue)) {
-                              return Promise.reject(new Error("Vui lòng nhập số hợp lệ"));
+                              return Promise.reject(new Error("Vui lòng nhập số hợp lệ"))
                             }
                             if (unit === "percent" && numValue < 0) {
-                              return Promise.reject(new Error("Phần trăm không được nhỏ hơn 0%"));
+                              return Promise.reject(new Error("Phần trăm không được nhỏ hơn 0%"))
                             }
                             if (unit === "hour" && numValue < 0) {
-                              return Promise.reject(new Error("Giờ không được nhỏ hơn 0"));
+                              return Promise.reject(new Error("Giờ không được nhỏ hơn 0"))
                             }
                             if (unit === "day" && numValue < 1) {
-                              return Promise.reject(new Error("Ngày không được nhỏ hơn 1"));
+                              return Promise.reject(new Error("Ngày không được nhỏ hơn 1"))
                             }
                             if (unit === "vnd" && numValue < 0) {
-                              return Promise.reject(new Error("Số tiền không được âm"));
+                              return Promise.reject(new Error("Số tiền không được âm"))
                             }
                             if (unit === "min" && numValue < 0) {
-                              return Promise.reject(new Error("Phút không được nhỏ hơn 0"));
+                              return Promise.reject(new Error("Phút không được nhỏ hơn 0"))
                             }
 
                             if (unit === "percent" && numValue > 100) {
-                              return Promise.reject(new Error("Phần trăm không được vượt quá 100%"));
+                              return Promise.reject(new Error("Phần trăm không được vượt quá 100%"))
                             }
                             if (unit === "hour" && numValue > 24) {
-                              return Promise.reject(new Error("Giờ không được vượt quá 24"));
+                              return Promise.reject(new Error("Giờ không được vượt quá 24"))
                             }
                             if (unit === "day" && numValue > 31) {
-                              return Promise.reject(new Error("Ngày không được vượt quá 31"));
+                              return Promise.reject(new Error("Ngày không được vượt quá 31"))
                             }
                             if (unit === "min" && numValue > 1440) {
-                              return Promise.reject(new Error("Phút không được vượt quá 1440"));
+                              return Promise.reject(new Error("Phút không được vượt quá 1440"))
                             }
-                            return Promise.resolve();
+                            return Promise.resolve()
                           },
                         }),
                       ]}
@@ -434,7 +426,7 @@ const AddPolicyModal = ({ isOpen, onCancel }) => {
                       {renderValueInput(
                         [name, "val"],
                         "Ví dụ: 50.000đ, 5%, 10 điểm",
-                        form.getFieldValue(["values", name, "unit"])
+                        form.getFieldValue(["values", name, "unit"]),
                       )}
                     </Form.Item>
 
@@ -519,8 +511,17 @@ const AddPolicyModal = ({ isOpen, onCancel }) => {
                           placeholder="Chọn hoặc nhập hashtag"
                           allowClear
                           showSearch
-                          allowCustomValue={true}
+                          mode="tags"
+                          maxTagCount={1}
+                          tokenSeparators={[","]}
                           style={{ width: "100%" }}
+                          onChange={(value) => {
+                            // Only keep the last value entered/selected
+                            if (Array.isArray(value) && value.length > 1) {
+                              const lastValue = value[value.length - 1]
+                              form.setFieldValue(["values", name, "hashTag"], [lastValue])
+                            }
+                          }}
                           options={[
                             { value: "thoigianmocua", label: "#thoigianmocua" },
                             { value: "thoigiandongcua", label: "#thoigiandongcua" },
@@ -677,4 +678,3 @@ const AddPolicyModal = ({ isOpen, onCancel }) => {
 }
 
 export default AddPolicyModal
-
