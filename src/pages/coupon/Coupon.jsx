@@ -39,7 +39,7 @@ export default function Coupon() {
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 7,
-    total: 0
+    total: 0,
   });
 
   // Filter configuration
@@ -105,15 +105,15 @@ export default function Coupon() {
         maxDiscount: values.maxDiscount ? Number(values.maxDiscount) : null,
         startDate: values.startDate,
         endDate: values.endDate,
-        isActive: values.isActive
+        isActive: values.isActive,
       };
 
       await updateCoupon(formattedValues).unwrap();
 
-      message.success({
-        content: 'Cập nhật mã giảm giá thành công',
-        className: 'custom-message',
 
+      message.success({
+        content: "Cập nhật mã giảm giá thành công",
+        className: "custom-message",
       });
 
       setIsUpdateModalOpen(false);
@@ -121,10 +121,11 @@ export default function Coupon() {
       refetch(); // Refresh the coupons list
     } catch (error) {
       message.error({
-        content: error.data?.message || 'Có lỗi xảy ra khi cập nhật mã giảm giá',
-        className: 'custom-message',
+        content:
+          error.data?.message || "Có lỗi xảy ra khi cập nhật mã giảm giá",
+        className: "custom-message",
         style: {
-          marginTop: '20vh',
+          marginTop: "20vh",
         },
       });
     }
@@ -146,15 +147,16 @@ export default function Coupon() {
 
     try {
       await deleteCoupon(selectedCoupon.id).unwrap();
+      await deleteCoupon(selectedCoupon.id).unwrap();
       setIsDeleteModalOpen(false);
       setSelectedCoupon(null);
       refetch(); // Refresh the coupons list
     } catch (error) {
       message.error({
-        content: error.data?.message || 'Có lỗi xảy ra khi xóa mã giảm giá',
-        className: 'custom-message',
+        content: error.data?.message || "Có lỗi xảy ra khi xóa mã giảm giá",
+        className: "custom-message",
         style: {
-          marginTop: '20vh',
+          marginTop: "20vh",
         },
       });
     };
@@ -284,12 +286,15 @@ export default function Coupon() {
     {
       title: "No.",
       dataIndex: "index",
+    {
+      title: "No.",
+      dataIndex: "index",
       key: "index",
       render: (_, __, index) => {
         const { current, pageSize } = pagination;
         return (current - 1) * pageSize + index + 1;
       },
-      width: '5%'
+      width: "5%",
     },
     { title: "Mã giảm giá", dataIndex: "couponCode", key: "couponCode" },
     {
@@ -303,7 +308,7 @@ export default function Coupon() {
       dataIndex: "amount",
       key: "amount",
       render: (value, record) => {
-        if (!value && value !== 0) return '-';
+        if (!value && value !== 0) return "-";
         return record.discountBasedOn === "Percentage"
           ? `${value}%`
           : `${value.toLocaleString()}đ`;
@@ -314,7 +319,7 @@ export default function Coupon() {
       dataIndex: "maxDiscount",
       key: "maxDiscount",
       render: (value) => {
-        if (!value && value !== 0) return 'Không giới hạn';
+        if (!value && value !== 0) return "Không giới hạn";
         return `${value.toLocaleString()}đ`;
       },
     },
@@ -339,7 +344,7 @@ export default function Coupon() {
     {
       title: "",
       key: "operation",
-      width: '5%',
+      width: "5%",
       render: (_, record) => (
         <Dropdown
           menu={{
@@ -350,7 +355,7 @@ export default function Coupon() {
                 onClick: () => {
                   setSelectedCoupon(record);
                   setIsViewModalOpen(true);
-                }
+                },
               },
               {
                 key: "2",
@@ -358,7 +363,7 @@ export default function Coupon() {
                 onClick: () => {
                   setSelectedCoupon(record);
                   setIsUpdateModalOpen(true);
-                }
+                },
               },
               {
                 key: "3",
@@ -367,13 +372,13 @@ export default function Coupon() {
                 onClick: () => {
                   setSelectedCoupon(record);
                   setIsDeleteModalOpen(true);
-                }
-              }
-            ]
+                },
+              },
+            ],
           }}
-          trigger={['click']}
+          trigger={["click"]}
         >
-          <MoreOutlined style={{ cursor: 'pointer' }} />
+          <MoreOutlined style={{ cursor: "pointer" }} />
         </Dropdown>
       ),
     },
@@ -466,6 +471,7 @@ export default function Coupon() {
             isLoading={isCreating}
           />
           <UpdateCouponModal
+          <UpdateCouponModal
             isOpen={isUpdateModalOpen}
             onCancel={() => {
               setIsUpdateModalOpen(false);
@@ -498,9 +504,9 @@ export default function Coupon() {
             showSizeChanger: false,
             className: styles.customPagination,
             onChange: (page) => {
-              setPagination(prev => ({
+              setPagination((prev) => ({
                 ...prev,
-                current: page
+                current: page,
               }));
             },
             itemRender: (page, type, originalElement) => {

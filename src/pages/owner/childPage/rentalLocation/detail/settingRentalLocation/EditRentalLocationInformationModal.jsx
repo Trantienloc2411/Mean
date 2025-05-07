@@ -116,22 +116,22 @@ export default function EditRentalLocationModal({
               <Switch />
             </Form.Item>
           </Col>
-          <Col span={12}>
-            <Form.Item
-              name="status"
-              label="Trạng thái"
-              rules={[{ required: true, message: "Vui lòng chọn trạng thái" }]}
-            >
-              <Select placeholder="Chọn trạng thái">
-                <Select.Option value={1}>Chờ duyệt</Select.Option>
-                <Select.Option value={2}>Không hoạt động</Select.Option>
-                <Select.Option value={3}>Hoạt động</Select.Option>
-                <Select.Option value={4}>Tạm dừng</Select.Option>
-                <Select.Option value={5}>Đã xóa</Select.Option>
-                <Select.Option value={6}>Cần cập nhật</Select.Option>
-              </Select>
-            </Form.Item>
-          </Col>
+          {[3, 4].includes(rentalData.status) && (
+            <Col span={12}>
+              <Form.Item
+                name="status"
+                label="Trạng thái"
+                rules={[
+                  { required: true, message: "Vui lòng chọn trạng thái" },
+                ]}
+              >
+                <Select placeholder="Chọn trạng thái">
+                  <Select.Option value={3}>Hoạt động</Select.Option>
+                  <Select.Option value={4}>Tạm dừng</Select.Option>
+                </Select>
+              </Form.Item>
+            </Col>
+          )}
         </Row>
 
         <Form.Item>
