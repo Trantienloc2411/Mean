@@ -64,12 +64,12 @@ export default function TransactionDetailModal({
           <Col span={12}>
             <Text strong>Trạng thái:</Text>
             <br />
-            <Tag color="blue">{transaction.status || "N/A"}</Tag>
+            <Tag color="blue">{transaction.status.vi || "N/A"}</Tag>
           </Col>
           <Col span={12}>
             <Text strong>Loại giao dịch:</Text>
             <br />
-            <Tag color="green">{transaction.typeTransaction || "N/A"}</Tag>
+            <Tag color="green">{transaction.typeTransaction.vi || "N/A"}</Tag>
           </Col>
         </Row>
 

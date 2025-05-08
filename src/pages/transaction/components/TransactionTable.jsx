@@ -54,22 +54,22 @@ export default function TransactionTable({ data, loading }) {
       align: "center",
       key: "status",
       render: (status) => {
-        return status == "PENDING" ? (
-          <Tag style={{ background: "gray", color: "#fff", borderRadius: 10 }}>
-            PENDING
-          </Tag>
-        ) : status == "COMPLETED" ? (
-          <Tag style={{ background: "green", color: "#fff", borderRadius: 10 }}>
-            COMPLETED
-          </Tag>
-        ) : status == "FAILED" ? (
-          <Tag style={{ background: "red", color: "#fff", borderRadius: 10 }}>
-            FAILED
-          </Tag>
+        return status.en == "PENDING" ? (
+          <span style={{ background: "#fff7e6", color: "#fa8c16", borderRadius: 20, padding: "4px 12px" }}>
+            {status.vi}
+          </span>
+        ) : status.en == "COMPLETED" ? (
+          <span style={{ background: "#d1fae5", color: "#059669", borderRadius: 20, padding: "4px 12px" }}>
+            {status.vi}
+          </span>
+        ) : status.en == "FAILED" ? (
+          <span style={{ background: "red", color: "#fff", borderRadius: 20, padding: "4px 12px" }}>
+            {status.vi}
+          </span>
         ) : (
-          <Tag style={{ background: "#333", color: "#fff", borderRadius: 10 }}>
-            Unknow
-          </Tag>
+          <span style={{ background: "#333", color: "#fff", borderRadius: 20, padding: "4px 12px" }}>
+            {status.vi}
+          </span>
         );
       },
     },
@@ -79,16 +79,16 @@ export default function TransactionTable({ data, loading }) {
       align: "center",
       key: "typeTransaction",
       render: (typeTransaction) => {
-        return typeTransaction == "MOMO_PAYMENT" ? (
-          <Tag
-            style={{ background: "#a21d65", color: "#fff", borderRadius: 10 }}
+        return typeTransaction.en == "MOMO_PAYMENT" ? (
+          <span
+            style={{ background: "#a21d65", color: "#fff", borderRadius: 20, padding: "4px 12px" }}
           >
-            MOMO
-          </Tag>
+            {typeTransaction.vi}
+          </span>
         ) : (
-          <Tag style={{ background: "#333", color: "#fff", borderRadius: 10 }}>
-            Unknow
-          </Tag>
+          <span style={{ background: "#333", color: "#fff", borderRadius: 20, padding: "4px 12px" }}>
+            {typeTransaction.vi}
+          </span>
         );
       },
     },

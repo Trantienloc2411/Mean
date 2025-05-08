@@ -33,22 +33,22 @@ export default function Transaction() {
   const convertStatus = (statusCode) => {
     switch (statusCode) {
       case 1:
-        return "PENDING";
+        return { en: "PENDING", vi: "Đang xử lý" };
       case 2:
-        return "COMPLETED";
+        return { en: "COMPLETED", vi: "Hoàn thành" };
       case 3:
-        return "FAILED";
+        return { en: "FAILED", vi: "Thất bại" };
       default:
-        return "unknown";
+        return { en: "unknown", vi: "Không xác định" };
     }
   };
 
   const convertType = (typeCode) => {
     switch (typeCode) {
       case 1:
-        return "MOMO_PAYMENT";
+        return { en: "MOMO_PAYMENT", vi: "Thanh toán MoMo" };
       default:
-        return "unknown";
+        return { en: "unknown", vi: "Không xác định" };
     }
   };
   console.log(transactionData);
@@ -61,16 +61,22 @@ export default function Transaction() {
   const closeFilterModal = () => setIsFilterModalVisible(false);
 
   // Dữ liệu mock cho trạng thái và loại giao dịch (tiếng Anh)
-  const statuses = ["PENDING", "COMPLETED", "FAILED"];
-  const transactionTypes = ["MOMO_PAYMENT"];
+  const statuses = [
+    { en: "PENDING", vi: "Đang xử lý" },
+    { en: "COMPLETED", vi: "Hoàn thành" },
+    { en: "FAILED", vi: "Thất bại" }
+  ];
+  const transactionTypes = [
+    { en: "MOMO_PAYMENT", vi: "Thanh toán MoMo" }
+  ];
 
   // Hàm lọc dữ liệu
   const filteredData = transformedData.filter((item) => {
     const isStatusMatch =
-      filters.statuses.length === 0 || filters.statuses.includes(item.status);
+      filters.statuses.length === 0 || filters.statuses.includes(item.status.en);
     const isTypeMatch =
       filters.transactionTypes.length === 0 ||
-      filters.transactionTypes.includes(item.typeTransaction);
+      filters.transactionTypes.includes(item.typeTransaction.en);
     const isSearchMatch =
       item.transactionCode.toLowerCase().includes(searchValue.toLowerCase()) ||
       item.bookingCode.toLowerCase().includes(searchValue.toLowerCase());
@@ -96,15 +102,15 @@ export default function Transaction() {
 
   const transactionOverviewData = {
     totalTransaction: transformedData.length,
-    pendingCount: transformedData.filter((item) => item.status === "PENDING")
+    pendingCount: transformedData.filter((item) => item.status.en === "PENDING")
       .length,
     completedCount: transformedData.filter(
-      (item) => item.status === "COMPLETED"
+      (item) => item.status.en === "COMPLETED"
     ).length,
-    failedCount: transformedData.filter((item) => item.status === "FAILED")
+    failedCount: transformedData.filter((item) => item.status.en === "FAILED")
       .length,
     momoPaymentCount: transformedData.filter(
-      (item) => item.typeTransaction === "MOMO_PAYMENT"
+      (item) => item.typeTransaction.en === "MOMO_PAYMENT"
     ).length,
   };
 
