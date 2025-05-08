@@ -1,39 +1,40 @@
 .modalForm {
-    :global {
-      .ant-form-item-label {
-        font-weight: 500;
-      }
+  :global {
+    .ant-form-item-label {
+      font-weight: 500;
+    }
+    
+    .ant-card {
+      transition: all 0.3s;
       
-      .ant-card {
-        transition: all 0.3s;
-        
-        &:hover {
-          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-        }
+      &:hover {
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
       }
+    }
+    
+    .ant-form-item-required::before {
+      display: none !important;
+    }
+    
+    .ant-form-item-required::after {
+      display: inline-block;
+      margin-left: 4px;
+      color: #ff4d4f;
+      font-size: 14px;
+      font-family: SimSun, sans-serif;
+      line-height: 1;
+      content: '*';
+    }
+    
+    .ant-btn-dashed {
+      border-color: #1890ff;
+      color: #1890ff;
       
-      .ant-form-item-required::before {
-        display: none !important;
-      }
-      
-      .ant-form-item-required::after {
-        display: inline-block;
-        margin-left: 4px;
-        color: #ff4d4f;
-        font-size: 14px;
-        font-family: SimSun, sans-serif;
-        line-height: 1;
-        content: '*';
-      }
-      
-      .ant-btn-dashed {
-        border-color: #1890ff;
-        color: #1890ff;
-        
-        &:hover {
-          border-color: #40a9ff;
-          color: #40a9ff;
-        }
+      &:hover {
+        border-color: #40a9ff;
+        color: #40a9ff;
       }
     }
   }
+}
+

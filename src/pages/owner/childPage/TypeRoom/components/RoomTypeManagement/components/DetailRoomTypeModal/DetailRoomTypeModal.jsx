@@ -148,12 +148,6 @@ const DetailRoomTypeModal = ({ isOpen, onCancel, roomType: initialRoomType }) =>
           <Descriptions.Item label="Số người tối đa">{roomType.maxPeopleNumber || 0} người</Descriptions.Item>
           <Descriptions.Item label="Giá cơ bản">{(roomType.basePrice || 0).toLocaleString()}đ</Descriptions.Item>
           <Descriptions.Item label="Giá theo giờ (phụ trội)">{(roomType.overtimeHourlyPrice || 0).toLocaleString()}đ/giờ</Descriptions.Item>
-          <Descriptions.Item label="Địa điểm">
-            <Tooltip placement="topLeft" title={getLocationName()}>
-              {getLocationName()}
-            </Tooltip>
-          </Descriptions.Item>
-          
           <Descriptions.Item label="Độ dài mật khẩu phòng">
             {roomType.numberOfPasswordRoom || 0}
           </Descriptions.Item>

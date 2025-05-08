@@ -1,84 +1,83 @@
 .bookingDetailModal {
-    :global(.ant-modal-content) {
-      border-radius: 8px;
-      overflow: hidden;
-    }
-  
-    :global(.ant-modal-header) {
-      padding: 16px 24px;
-      border-bottom: 1px solid #f0f0f0;
-    }
-  
-    :global(.ant-modal-body) {
-      padding: 24px;
-      max-height: 70vh;
-      overflow-y: auto;
-    }
+  :global(.ant-modal-content) {
+    border-radius: 8px;
+    overflow: hidden;
   }
-  
-  .bookingDetailContent {
-    .bookingCard,
-    .customerCard,
-    .accommodationCard,
-    .bookingDetailsCard,
-    .paymentCard {
+
+  :global(.ant-modal-header) {
+    padding: 16px 24px;
+    border-bottom: 1px solid #f0f0f0;
+  }
+
+  :global(.ant-modal-body) {
+    padding: 24px;
+    max-height: 70vh;
+    overflow-y: auto;
+  }
+}
+
+.bookingDetailContent {
+  .bookingCard,
+  .customerCard,
+  .accommodationCard,
+  .bookingDetailsCard,
+  .paymentCard {
+    margin-bottom: 16px;
+    border-radius: 8px;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+
+    :global(.ant-card-body) {
+      padding: 16px;
+    }
+
+    h5 {
       margin-bottom: 16px;
-      border-radius: 8px;
-      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
-  
-      :global(.ant-card-body) {
-        padding: 16px;
-      }
-  
-      h5 {
-        margin-bottom: 16px;
-        font-weight: 600;
-        color: #1f2937;
-        border-bottom: 1px solid #f0f0f0;
-        padding-bottom: 8px;
-      }
+      font-weight: 600;
+      color: #1f2937;
+      border-bottom: 1px solid #f0f0f0;
+      padding-bottom: 8px;
     }
-  
-    .descriptions {
-      width: 100%;
-  
-      :global(.ant-descriptions-item-label) {
-        width: 30%;
-        background-color: #f9fafb;
-        font-weight: 500;
-      }
-  
-      :global(.ant-descriptions-item-content) {
-        width: 70%;
-      }
+  }
+
+  .descriptions {
+    width: 100%;
+
+    :global(.ant-descriptions-item-label) {
+      width: 30%;
+      background-color: #f9fafb;
+      font-weight: 500;
     }
-  
-    .imageSection {
-      margin-top: 16px;
+
+    :global(.ant-descriptions-item-content) {
+      width: 70%;
+    }
+  }
+
+  .imageSection {
+    margin-top: 16px;
+    
+    .imageTitle {
+      margin-bottom: 12px;
+      font-size: 16px;
+    }
+    
+    .imageGrid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
       
-      .imageTitle {
-        margin-bottom: 12px;
-        font-size: 16px;
-      }
-      
-      .imageGrid {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        
-        .roomImage {
-          border-radius: 4px;
-          object-fit: cover;
-        }
+      .roomImage {
+        border-radius: 4px;
+        object-fit: cover;
       }
     }
   }
-  
-  .loadingContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 300px;
-  }
-  
-  
+}
+
+.loadingContainer {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 300px;
+}
+

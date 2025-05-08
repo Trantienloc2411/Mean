@@ -1,6 +1,6 @@
 import { useState, useMemo } from "react";
 import { Dropdown, Button, Checkbox, Divider, Space } from "antd";
-import { DownOutlined } from "@ant-design/icons";
+import { DownOutlined, FilterOutlined } from "@ant-design/icons";
 
 export default function FilterAccount({
   roles,
@@ -41,7 +41,7 @@ export default function FilterAccount({
               key={role}
               checked={filters.roles.includes(role)}
               onChange={() => handleRoleChange(role)}
-              // style={{ display: "block", marginLeft: 8 }}
+            // style={{ display: "block", marginLeft: 8 }}
             >
               {role}
             </Checkbox>
@@ -128,8 +128,8 @@ export default function FilterAccount({
       open={open}
       onOpenChange={setOpen}
     >
-      <Button>
-        Bộ lọc <DownOutlined />
+      <Button icon={<FilterOutlined />}>
+        Lọc
       </Button>
     </Dropdown>
   );

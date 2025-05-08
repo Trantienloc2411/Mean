@@ -1,6 +1,7 @@
 import { Tabs } from "antd";
 import SettingInformation from "./SettingInformation";
 import DocumentManagement from "../components/DocumentManagement";
+import RentalLogHistory from "./RentalLogHistory";
 
 export default function SettingRentalLocation({ rentalData }) {
   const items = [
@@ -13,6 +14,11 @@ export default function SettingRentalLocation({ rentalData }) {
       key: "2",
       label: "Danh sách giấy tờ",
       children: <DocumentManagement rentalData={rentalData} />,
+    },
+    {
+      key: "3",
+      label: "Lịch sử cập nhật",
+      children: <RentalLogHistory rentalData={rentalData} />, // Tab mới
     },
   ];
 

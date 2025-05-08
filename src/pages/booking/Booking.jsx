@@ -18,6 +18,7 @@ const BOOKING_STATUS = Object.freeze({
   CANCELLED: 6,
   COMPLETED: 7,
   PENDING: 8,
+  REFUND: 9
 })
 
 const PAYMENT_STATUS = Object.freeze({
@@ -28,30 +29,35 @@ const PAYMENT_STATUS = Object.freeze({
   FAILED: 5,
 })
 
+const PAYMENT_METHOD = Object.freeze({
+  MOMO: 1,
+});
+
 const getBookingStatusDisplay = (statusCode) => {
   const statusMap = {
     [BOOKING_STATUS.CONFIRMED]: "Đã xác nhận",
-    [BOOKING_STATUS.PENDING]: "Đang chờ",
+    [BOOKING_STATUS.PENDING]: "Chờ xác nhận", 
     [BOOKING_STATUS.NEEDCHECKIN]: "Cần check-in",
     [BOOKING_STATUS.CHECKEDIN]: "Đã check-in",
     [BOOKING_STATUS.NEEDCHECKOUT]: "Cần check-out",
     [BOOKING_STATUS.CHECKEDOUT]: "Đã check-out",
-    [BOOKING_STATUS.CANCELLED]: "Đã hủy",
-    [BOOKING_STATUS.COMPLETED]: "Đã hoàn tất",
-  }
-  return statusMap[statusCode] || "Không xác định"
-}
+    [BOOKING_STATUS.CANCELLED]: "Đã huỷ",
+    [BOOKING_STATUS.COMPLETED]: "Hoàn tất",
+    [BOOKING_STATUS.REFUND]: "Đã hoàn tiền"
+  };
+  return statusMap[statusCode] || "Trạng thái không xác định";
+};
 
 const getPaymentStatusDisplay = (statusCode) => {
   const statusMap = {
-    [PAYMENT_STATUS.BOOKING]: "Đặt phòng",
-    [PAYMENT_STATUS.PENDING]: "Đang chờ",
+    [PAYMENT_STATUS.BOOKING]: "Đã đặt", 
+    [PAYMENT_STATUS.PENDING]: "Chờ thanh toán",
     [PAYMENT_STATUS.PAID]: "Đã thanh toán",
     [PAYMENT_STATUS.REFUND]: "Đã hoàn tiền",
-    [PAYMENT_STATUS.FAILED]: "Thất bại",
-  }
-  return statusMap[statusCode] || "Không xác định"
-}
+    [PAYMENT_STATUS.FAILED]: "Thanh toán thất bại",
+  };
+  return statusMap[statusCode] || "Chưa thanh toán";
+};
 
 export default function Booking() {
   const [bookings, setBookings] = useState([])
@@ -72,14 +78,12 @@ export default function Booking() {
   useEffect(() => {
     if (bookingsData && bookingsData.length > 0) {
       const sortedBookings = [...bookingsData].sort((a, b) => {
-        // Priority for cancelled bookings that need refund
         const aNeedsRefund = a.status === BOOKING_STATUS.CANCELLED && a.paymentStatus !== PAYMENT_STATUS.REFUND
         const bNeedsRefund = b.status === BOOKING_STATUS.CANCELLED && b.paymentStatus !== PAYMENT_STATUS.REFUND
 
         if (aNeedsRefund && !bNeedsRefund) return -1
         if (!aNeedsRefund && bNeedsRefund) return 1
 
-        // Then sort by creation date (newest first)
         return new Date(b.createdAt) - new Date(a.createdAt)
       })
 
@@ -88,7 +92,6 @@ export default function Booking() {
           _originalBooking: booking,
           Status: getBookingStatusDisplay(booking.status),
           Payment: getPaymentStatusDisplay(booking.paymentStatus),
-          // Add formatted dates for easier filtering
           createdDate: new Date(booking.createdAt),
           checkInHour: dayjs(booking.checkInHour).format('DD/MM/YYYY HH:mm:ss'),
           checkOutHour: dayjs(booking.checkOutHour).format('DD/MM/YYYY HH:mm:ss')
@@ -130,6 +133,7 @@ export default function Booking() {
         bookings={bookings}
         bookingStatusCodes={BOOKING_STATUS}
         paymentStatusCodes={PAYMENT_STATUS}
+        paymentMethodCodes={PAYMENT_METHOD} 
         onStatusChange={handleStatusChange}
         isUpdating={isUpdating}
         bookingDetailData={bookingDetailData}

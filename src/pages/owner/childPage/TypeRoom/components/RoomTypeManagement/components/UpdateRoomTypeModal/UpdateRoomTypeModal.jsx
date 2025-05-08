@@ -1,9 +1,7 @@
 import { Modal, Form, Input, InputNumber, Select, Button, Spin, Image, Upload, message } from 'antd';
-import { useEffect } from 'react';
 import { useGetAllAmenitiesQuery, useCreateAmenityMutation } from '../../../../../../../../redux/services/serviceApi';
-import { useGetAllRentalLocationsQuery } from '../../../../../../../../redux/services/rentalLocationApi';
 import styles from './UpdateRoomTypeModal.module.scss';
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { supabase } from "../../../../../../../../redux/services/supabase";
 import { InboxOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
 import { useGetOwnerDetailByUserIdQuery } from '../../../../../../../../redux/services/ownerApi';
@@ -33,12 +31,8 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
     skip: !roomTypeId || !isOpen 
   });
 
-  const { data: ownerDetailData, isLoading: isOwnerDetailLoading } = useGetOwnerDetailByUserIdQuery(id);
+  const { data: ownerDetailData } = useGetOwnerDetailByUserIdQuery(id);
   const ownerId = ownerDetailData?.id;
-
-  const { data: rentalLocations, isLoading: isLoadingRentalLocations } = useGetAllRentalLocationsQuery(ownerId, {
-    skip: !ownerId
-  });
 
   const { 
     data: services, 
@@ -60,13 +54,9 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
         typeof service === 'object' ? service._id : service
       ) || [];
 
-      const rentalLocationId = data.rentalLocationId?._id
-        || data.rentalLocationId;
-
       form.setFieldsValue({
         ...data,
         serviceIds,
-        rentalLocationId,
         numberOfPasswordRoom: data.numberOfPasswordRoom || 0
       });
 
@@ -89,9 +79,15 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
   const handleSubmit = () => {
     form.validateFields()
       .then((values) => {
+        if (!ownerId) {
+          message.error("Không tìm thấy thông tin chủ nhà!");
+          return;
+        }
+
         const formattedValues = {
           ...values,
           _id: roomTypeId, 
+          ownerId,
           image: fileList.map(file => file.url),
           serviceIds: values.serviceIds || [],
           numberOfPasswordRoom: values.numberOfPasswordRoom || 0
@@ -204,28 +200,13 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
   };
 
   const getServicesOptions = () => {
-    if (!services) return [];
-
-    const servicesList = services.data || services;
-
+    const servicesList = services?.data || services || [];
     return servicesList
-      .filter(service => service.status === true)
+      .filter(service => service.status)
       .map(service => ({
         label: service.name,
-        value: service._id 
+        value: service._id
       }));
-  };
-  
-  const getLocationsOptions = () => {
-    if (!rentalLocations) return [];
-
-    const locationsList = Array.isArray(rentalLocations.data) ? rentalLocations.data :
-      Array.isArray(rentalLocations) ? rentalLocations : [];
-
-    return locationsList.map(location => ({
-      label: location.name,
-      value: location._id || location.id
-    }));
   };
 
   return (
@@ -255,27 +236,14 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
         className={styles.modalForm}
       >
         <Form.Item
-          name="rentalLocationId"
-          label="Địa điểm thuê"
-          rules={[{ required: true, message: 'Vui lòng chọn địa điểm thuê' }]}
-        >
-          <Select
-            placeholder="Chọn địa điểm thuê"
-            loading={isLoadingRentalLocations || isOwnerDetailLoading}
-            options={getLocationsOptions()}
-          />
-        </Form.Item>
-
-        <Form.Item
           name="serviceIds"
           label="Dịch vụ"
           rules={[{ required: true, message: 'Vui lòng chọn dịch vụ' }]}
         >
           <Select
+            mode="multiple"
             placeholder="Chọn dịch vụ"
             loading={isServicesLoading}
-            mode="multiple"
-            optionFilterProp="label"
             options={getServicesOptions()}
             dropdownRender={(menu) => (
               <>
