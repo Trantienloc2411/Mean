@@ -1,5 +1,5 @@
 import { Dropdown, Menu, Button, Checkbox, Flex } from "antd";
-import { DownOutlined } from "@ant-design/icons";
+import { DownOutlined, FilterOutlined } from "@ant-design/icons";
 
 // Đồng bộ với RENTALLOCATION_STATUS
 const statusOptions = [
@@ -53,8 +53,8 @@ export default function FilterRentalLocation({
 
   return (
     <Dropdown overlay={menu} trigger={["click"]}>
-      <Button>
-        Bộ lọc <DownOutlined />
+      <Button icon={<FilterOutlined />}>
+        Lọc
       </Button>
     </Dropdown>
   );

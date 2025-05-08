@@ -34,8 +34,12 @@ const DetailPolicyModal = ({ isOpen, onCancel, policy, isLoading }) => {
   const values = policy?.values || [];
 
   const valuesColumns = [
-    { title: 'Giá trị 1', dataIndex: 'val1', key: 'val1' },
-    { title: 'Giá trị 2', dataIndex: 'val2', key: 'val2' },
+    { 
+      title: 'Giá trị', 
+      dataIndex: 'val',
+      key: 'val',
+      render: (text) => text || 'Không có'
+    },
     { title: 'Mô tả', dataIndex: 'description', key: 'description' },
     { title: 'Đơn vị', dataIndex: 'unit', key: 'unit', render: formatUnit },
     { title: 'Loại giá trị', dataIndex: 'valueType', key: 'valueType' },

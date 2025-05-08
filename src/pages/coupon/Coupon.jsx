@@ -110,6 +110,7 @@ export default function Coupon() {
 
       await updateCoupon(formattedValues).unwrap();
 
+
       message.success({
         content: "Cập nhật mã giảm giá thành công",
         className: "custom-message",
@@ -143,7 +144,9 @@ export default function Coupon() {
   };
 
   const handleDeleteConfirm = async () => {
+
     try {
+      await deleteCoupon(selectedCoupon.id).unwrap();
       await deleteCoupon(selectedCoupon.id).unwrap();
       setIsDeleteModalOpen(false);
       setSelectedCoupon(null);
@@ -156,7 +159,7 @@ export default function Coupon() {
           marginTop: "20vh",
         },
       });
-    }
+    };
   };
   const handleDeleteCancel = () => {
     setIsDeleteModalOpen(false);
@@ -283,6 +286,9 @@ export default function Coupon() {
     {
       title: "No.",
       dataIndex: "index",
+    {
+      title: "No.",
+      dataIndex: "index",
       key: "index",
       render: (_, __, index) => {
         const { current, pageSize } = pagination;
@@ -327,9 +333,8 @@ export default function Coupon() {
       render: (isActive) => {
         return (
           <span
-            className={`${styles.status} ${
-              styles[isActive ? "active" : "inactive"]
-            }`}
+            className={`${styles.status} ${styles[isActive ? "active" : "inactive"]
+              }`}
           >
             {isActive ? "Đang hoạt động" : "Hết hạn"}
           </span>
@@ -435,24 +440,29 @@ export default function Coupon() {
               value={
                 selectedValues.dateRange?.length === 2
                   ? [
-                      dayjs(selectedValues.dateRange[0], "DD/MM/YYYY"),
-                      dayjs(selectedValues.dateRange[1], "DD/MM/YYYY"),
-                    ]
+                    dayjs(selectedValues.dateRange[0], "DD/MM/YYYY"),
+                    dayjs(selectedValues.dateRange[1], "DD/MM/YYYY"),
+                  ]
                   : null
               }
             />
           </div>
 
           <Button
-            color="default"
-            variant="outlined"
-            type="primary"
+            type="default"
             className={styles.createButton}
             onClick={() => setIsAddModalOpen(true)}
             icon={<PlusOutlined />}
+            style={{
+              backgroundColor: '#fff',
+              borderColor: '#667085',
+              color: '#667085',
+            }}
           >
             Tạo mã giảm giá
           </Button>
+
+
 
           <AddCouponModal
             isOpen={isAddModalOpen}
@@ -460,6 +470,7 @@ export default function Coupon() {
             onConfirm={handleAddCoupon}
             isLoading={isCreating}
           />
+          <UpdateCouponModal
           <UpdateCouponModal
             isOpen={isUpdateModalOpen}
             onCancel={() => {

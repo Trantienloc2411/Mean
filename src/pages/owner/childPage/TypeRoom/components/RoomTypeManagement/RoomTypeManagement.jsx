@@ -333,24 +333,6 @@ const RoomTypeManagement = ({ isOwner }) => {
       render: (price) => (price ? `${price.toLocaleString()}đ/giờ` : "N/A"),
     },
     {
-      title: "Địa điểm",
-      dataIndex: "rentalLocationId",
-      key: "rentalLocationId",
-      align: "left",
-      width: 120,
-      ellipsis: true,
-      render: (location) => {
-        if (!location) return "N/A";
-        const locationName =
-          typeof location === "object" ? location.name : location;
-        return (
-          <Tooltip placement="topLeft" title={locationName}>
-            {locationName}
-          </Tooltip>
-        );
-      },
-    },
-    {
       title: "Dịch vụ",
       dataIndex: "serviceIds",
       key: "serviceIds",

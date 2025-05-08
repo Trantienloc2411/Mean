@@ -4,9 +4,9 @@ import dayjs from 'dayjs';
 
 export default function Filter({ selectedValues, onFilterChange }) {
   const statusOptions = [
-    { label: 'Đã xem', value: 'Reviewed' },
-    { label: 'Chưa xem', value: 'Pending' }
-  ];
+    { label: 'Đã xem', value: 'reviewed' },
+    { label: 'Chưa xem', value: 'pending' }
+  ]
 
   return (
     <div className={styles.filterContainer}>
@@ -24,14 +24,14 @@ export default function Filter({ selectedValues, onFilterChange }) {
                 onFilterChange('status', newValues);
               }}
             >
-              <span className={`${styles.status} ${styles[option.value.toLowerCase()]}`}>
+              <span className={`${styles.status} ${option.value === 'reviewed' ? styles.reviewed : styles.pending}`}>
                 {option.label}
               </span>
             </Checkbox>
           ))}
         </div>
       </div>
-      
+
       <div className={styles.filterGroup}>
         <h4>Ngày tạo</h4>
         <DatePicker
@@ -39,6 +39,7 @@ export default function Filter({ selectedValues, onFilterChange }) {
           onChange={(date) => onFilterChange('date', date)}
           format="DD/MM/YYYY"
           placeholder="Chọn ngày"
+          allowClear
         />
       </div>
     </div>

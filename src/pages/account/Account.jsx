@@ -139,9 +139,14 @@ export default function Account() {
             </div>
             <Button
               icon={<IoCreate />}
-              type="primary"
+              type="default"
               className={styles.createButton}
               onClick={() => setOpenCreateUser(true)}
+              style={{
+                backgroundColor: '#fff',
+                borderColor: '#667085',
+                color: '#667085',
+              }}
             >
               Tạo tài khoản
             </Button>

@@ -16,17 +16,17 @@ const UpdateBookingStatus = ({
 
   const getBookingStatusDisplay = (statusCode) => {
     const statusMap = {
-      [bookingStatusCodes.CONFIRMED]: "Confirmed",
-      [bookingStatusCodes.PENDING]: "Pending",
-      [bookingStatusCodes.NEEDCHECKIN]: "Need Check-in",
-      [bookingStatusCodes.CHECKEDIN]: "Checked In",
-      [bookingStatusCodes.NEEDCHECKOUT]: "Need Check-out",
-      [bookingStatusCodes.CHECKEDOUT]: "Checked Out",
-      [bookingStatusCodes.CANCELLED]: "Cancelled",
-      [bookingStatusCodes.COMPLETED]: "Completed",
-      [bookingStatusCodes.REFUND]: "Hoàn tiền" 
+      [bookingStatusCodes.CONFIRMED]: "Đã xác nhận",
+      [bookingStatusCodes.PENDING]: "Đang chờ",
+      [bookingStatusCodes.NEEDCHECKIN]: "Cần check-in",
+      [bookingStatusCodes.CHECKEDIN]: "Đã check-in",
+      [bookingStatusCodes.NEEDCHECKOUT]: "Cần check-out",
+      [bookingStatusCodes.CHECKEDOUT]: "Đã check-out",
+      [bookingStatusCodes.CANCELLED]: "Đã hủy",
+      [bookingStatusCodes.COMPLETED]: "Hoàn thành",
+      [bookingStatusCodes.REFUND]: "Đã hoàn tiền" 
     };
-    return statusMap[statusCode] || "Unknown Status";
+    return statusMap[statusCode] || "Không xác định";
   };
 
   const getAvailableNextStatuses = (currentStatus) => {
