@@ -46,27 +46,27 @@ export default function ListBooking({ bookings, bookingStatusCodes, paymentStatu
 
   const getBookingStatusDisplay = (statusCode) => {
     const statusMap = {
-      [bookingStatusCodes.CONFIRMED]: "Confirmed",
-      [bookingStatusCodes.PENDING]: "Pending",
-      [bookingStatusCodes.NEEDCHECKIN]: "Need Check-in",
-      [bookingStatusCodes.CHECKEDIN]: "Checked In",
-      [bookingStatusCodes.NEEDCHECKOUT]: "Need Check-out",
-      [bookingStatusCodes.CHECKEDOUT]: "Checked Out",
-      [bookingStatusCodes.CANCELLED]: "Cancelled",
-      [bookingStatusCodes.COMPLETED]: "Completed",
+      [bookingStatusCodes.CONFIRMED]: "Đã xác nhận",
+      [bookingStatusCodes.PENDING]: "Đang chờ",
+      [bookingStatusCodes.NEEDCHECKIN]: "Cần check-in",
+      [bookingStatusCodes.CHECKEDIN]: "Đã check-in",
+      [bookingStatusCodes.NEEDCHECKOUT]: "Cần check-out",
+      [bookingStatusCodes.CHECKEDOUT]: "Đã check-out",
+      [bookingStatusCodes.CANCELLED]: "Đã hủy",
+      [bookingStatusCodes.COMPLETED]: "Đã hoàn tất",
     }
-    return statusMap[statusCode] || "Unknown Status"
+    return statusMap[statusCode] || "Không xác định"
   }
 
   const getPaymentStatusDisplay = (statusCode) => {
     const statusMap = {
-      [paymentStatusCodes.BOOKING]: "Booking",
-      [paymentStatusCodes.PENDING]: "Pending",
-      [paymentStatusCodes.PAID]: "Paid",
-      [paymentStatusCodes.REFUND]: "Refund",
-      [paymentStatusCodes.FAILED]: "Failed",
+      [paymentStatusCodes.BOOKING]: "Đặt phòng",
+      [paymentStatusCodes.PENDING]: "Đang chờ",
+      [paymentStatusCodes.PAID]: "Đã thanh toán",
+      [paymentStatusCodes.REFUND]: "Đã hoàn tiền",
+      [paymentStatusCodes.FAILED]: "Thất bại",
     }
-    return statusMap[statusCode] || "Unpaid"
+    return statusMap[statusCode] || "Không xác định"
   }
 
   const statusOptions = Object.entries(bookingStatusCodes).map(([key, value]) => ({
@@ -173,14 +173,14 @@ export default function ListBooking({ bookings, bookingStatusCodes, paymentStatu
 
   const getStatusClass = (status) => {
     const statusMap = {
-      Confirmed: "confirmed",
-      Pending: "pending",
-      "Need Check-in": "pending",
-      "Checked In": "inprogress",
-      "Need Check-out": "pending",
-      "Checked Out": "checkedout",
-      Cancelled: "canceled",
-      Completed: "complete",
+      "Đã xác nhận": "confirmed",
+      "Đang chờ": "pending",
+      "Cần check-in": "pending",
+      "Đã check-in": "inprogress",
+      "Cần check-out": "pending",
+      "Đã check-out": "checkedout",
+      "Đã hủy": "canceled",
+      "Đã hoàn tất": "complete"
     }
 
     return statusMap[status] || "pending"
@@ -188,12 +188,12 @@ export default function ListBooking({ bookings, bookingStatusCodes, paymentStatu
 
   const getPaymentClass = (payment) => {
     const paymentMap = {
-      Booking: "confirmed",
-      Pending: "pending",
-      Paid: "complete",
-      Refund: "canceled",
-      Failed: "canceled",
-      Unpaid: "pending",
+      "Đặt phòng": "confirmed",
+      "Đang chờ": "pending",
+      "Đã thanh toán": "complete",
+      "Đã hoàn tiền": "canceled",
+      "Thất bại": "canceled",
+      "Chưa thanh toán": "pending"
     }
 
     return paymentMap[payment] || "pending"

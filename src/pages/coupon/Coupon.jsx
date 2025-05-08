@@ -87,17 +87,30 @@ export default function Coupon() {
   const handleAddCoupon = async (values) => {
     try {
       await createCoupon(values).unwrap();
+      message.success({
+        content: 'Thêm mã giảm giá thành công',
+        className: 'custom-message',
+        style: {
+          marginTop: '20vh',
+        },
+      });
       setIsAddModalOpen(false);
       refetch(); // Refresh the coupons list
     } catch (error) {
-      console.error("Failed to create coupon:", error);
+      message.error({
+        content: error.data?.message || 'Có lỗi xảy ra khi thêm mã giảm giá',
+        className: 'custom-message',
+        style: {
+          marginTop: '20vh',
+        },
+      });
     }
   };
 
   const handleUpdateCoupon = async (values) => {
     try {
       const formattedValues = {
-        id: selectedCoupon.id, // Make sure to include the coupon ID
+        id: selectedCoupon.id,
         name: values.name,
         couponCode: values.couponCode,
         discountBasedOn: values.discountBasedOn,
@@ -113,7 +126,9 @@ export default function Coupon() {
       message.success({
         content: 'Cập nhật mã giảm giá thành công',
         className: 'custom-message',
-
+        style: {
+          marginTop: '20vh',
+        },
       });
       
       setIsUpdateModalOpen(false);
@@ -124,7 +139,7 @@ export default function Coupon() {
         content: error.data?.message || 'Có lỗi xảy ra khi cập nhật mã giảm giá',
         className: 'custom-message',
         style: {
-          marginTop: '20vh',
+          marginTop: '10vh',
         },
       });
     }
@@ -143,9 +158,15 @@ export default function Coupon() {
   };
 
   const handleDeleteConfirm = async() => {
-    
     try {
-      await deleteCoupon(selectedCoupon.id).unwrap(); 
+      await deleteCoupon(selectedCoupon.id).unwrap();
+      message.success({
+        content: 'Xóa mã giảm giá thành công',
+        className: 'custom-message',
+        style: {
+          marginTop: '10vh',
+        },
+      });
       setIsDeleteModalOpen(false);
       setSelectedCoupon(null);
       refetch(); // Refresh the coupons list
@@ -154,11 +175,11 @@ export default function Coupon() {
         content: error.data?.message || 'Có lỗi xảy ra khi xóa mã giảm giá',
         className: 'custom-message',
         style: {
-          marginTop: '20vh',
-        },
-      });
+          marginTop: '10vh',
+        },      });
+    }
   };
-};
+
   const handleDeleteCancel = () => {
     setIsDeleteModalOpen(false);
     setSelectedCoupon(null);

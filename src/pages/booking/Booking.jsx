@@ -30,27 +30,27 @@ const PAYMENT_STATUS = Object.freeze({
 
 const getBookingStatusDisplay = (statusCode) => {
   const statusMap = {
-    [BOOKING_STATUS.CONFIRMED]: "Confirmed",
-    [BOOKING_STATUS.PENDING]: "Pending",
-    [BOOKING_STATUS.NEEDCHECKIN]: "Need Check-in",
-    [BOOKING_STATUS.CHECKEDIN]: "Checked In",
-    [BOOKING_STATUS.NEEDCHECKOUT]: "Need Check-out",
-    [BOOKING_STATUS.CHECKEDOUT]: "Checked Out",
-    [BOOKING_STATUS.CANCELLED]: "Cancelled",
-    [BOOKING_STATUS.COMPLETED]: "Completed",
+    [BOOKING_STATUS.CONFIRMED]: "Đã xác nhận",
+    [BOOKING_STATUS.PENDING]: "Đang chờ",
+    [BOOKING_STATUS.NEEDCHECKIN]: "Cần check-in",
+    [BOOKING_STATUS.CHECKEDIN]: "Đã check-in",
+    [BOOKING_STATUS.NEEDCHECKOUT]: "Cần check-out",
+    [BOOKING_STATUS.CHECKEDOUT]: "Đã check-out",
+    [BOOKING_STATUS.CANCELLED]: "Đã hủy",
+    [BOOKING_STATUS.COMPLETED]: "Đã hoàn tất",
   }
-  return statusMap[statusCode] || "Unknown Status"
+  return statusMap[statusCode] || "Không xác định"
 }
 
 const getPaymentStatusDisplay = (statusCode) => {
   const statusMap = {
-    [PAYMENT_STATUS.BOOKING]: "Booking",
-    [PAYMENT_STATUS.PENDING]: "Pending",
-    [PAYMENT_STATUS.PAID]: "Paid",
-    [PAYMENT_STATUS.REFUND]: "Refund",
-    [PAYMENT_STATUS.FAILED]: "Failed",
+    [PAYMENT_STATUS.BOOKING]: "Đặt phòng",
+    [PAYMENT_STATUS.PENDING]: "Đang chờ",
+    [PAYMENT_STATUS.PAID]: "Đã thanh toán",
+    [PAYMENT_STATUS.REFUND]: "Đã hoàn tiền",
+    [PAYMENT_STATUS.FAILED]: "Thất bại",
   }
-  return statusMap[statusCode] || "Unpaid"
+  return statusMap[statusCode] || "Không xác định"
 }
 
 export default function Booking() {
