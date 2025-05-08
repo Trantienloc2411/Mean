@@ -123,12 +123,9 @@ export default function Coupon() {
 
       await updateCoupon(formattedValues).unwrap();
 
-
       message.success({
         content: "Cập nhật mã giảm giá thành công",
         className: "custom-message",
-        content: 'Cập nhật mã giảm giá thành công',
-        className: 'custom-message',
         style: {
           marginTop: '20vh',
         },
@@ -162,8 +159,6 @@ export default function Coupon() {
   };
 
   const handleDeleteConfirm = async () => {
-
-  const handleDeleteConfirm = async() => {
     try {
       await deleteCoupon(selectedCoupon.id).unwrap();
       await deleteCoupon(selectedCoupon.id).unwrap();
@@ -184,7 +179,8 @@ export default function Coupon() {
         className: "custom-message",
         style: {
           marginTop: '10vh',
-        },      });
+        },
+      });
     }
   };
 
@@ -254,8 +250,6 @@ export default function Coupon() {
   };
 
   // Filter data based on selected filters and search term
-
-  // Filter data based on selected filters and search term
   useEffect(() => {
     if (!coupons) {
       setFilteredData([]);
@@ -310,9 +304,6 @@ export default function Coupon() {
   }, [searchTerm, selectedValues, coupons]);
 
   const tableColumn = [
-    {
-      title: "No.",
-      dataIndex: "index",
     {
       title: "No.",
       dataIndex: "index",
@@ -489,15 +480,12 @@ export default function Coupon() {
             Tạo mã giảm giá
           </Button>
 
-
-
           <AddCouponModal
             isOpen={isAddModalOpen}
             onCancel={handleAddCancel}
             onConfirm={handleAddCoupon}
             isLoading={isCreating}
           />
-          <UpdateCouponModal
           <UpdateCouponModal
             isOpen={isUpdateModalOpen}
             onCancel={() => {
@@ -520,7 +508,6 @@ export default function Coupon() {
         </div>
 
         {/* Table */}
-
         <Table
           columns={tableColumn}
           dataSource={filteredData || []}

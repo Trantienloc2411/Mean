@@ -1,11 +1,11 @@
 .status {
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 12px;
-    display: inline-block;
-    background-color: #f0f0f0;
-    color: #999;
-  &.active {    
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  display: inline-block;
+  background-color: #f0f0f0;
+  color: #999;
+  &.active {
     background-color: #e6f7ff;
     color: #1890ff;
   }
@@ -18,138 +18,137 @@
     color: #999;
   }
   &.refund {
-    background-color: #f0f0f0;  
+    background-color: #f0f0f0;
     color: #999;
   }
   &.finalPayment {
     background-color: #f0f0f0;
     color: #999;
-  } 
+  }
   &.undefined {
     background-color: #f0f0f0;
     color: #999;
   }
-  
 }
 
 .typeTransaction {
-    padding: 4px 12px;
-    border-radius: 16px;
-    font-size: 12px;
-    display: inline-block;
-    &.paymentcomplete {
-      background-color: #e6f7ff;
-      color: #1890ff;
-    }
-    &.refund {
-      background-color: #fffbe6;
-      color: #faad14;
-    }
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  display: inline-block;
+  &.paymentcomplete {
+    background-color: #e6f7ff;
+    color: #1890ff;
+  }
+  &.refund {
+    background-color: #fffbe6;
+    color: #faad14;
+  }
 }
 .transactionTable {
-    :global {
-      .ant-pagination {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 8px;
-  
-        .ant-pagination-prev,
-        .ant-pagination-next {
-          height: 32px;
-          margin: 0;
-  
-          .ant-pagination-item-link {
-            border: 1px solid #d9d9d9;
-            border-radius: 6px;
-            padding: 4px 15px;
-            color: rgba(0, 0, 0, 0.88);
-            font-size: 14px;
-            background: white;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            transition: all 0.2s;
-  
-            &:hover {
-              border-color: #1677ff;
-              color: #1677ff;
-            }
+  :global {
+    .ant-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+
+      .ant-pagination-prev,
+      .ant-pagination-next {
+        height: 32px;
+        margin: 0;
+
+        .ant-pagination-item-link {
+          border: 1px solid #d9d9d9;
+          border-radius: 6px;
+          padding: 4px 15px;
+          color: rgba(0, 0, 0, 0.88);
+          font-size: 14px;
+          background: white;
+          height: 100%;
+          display: flex;
+          align-items: center;
+          transition: all 0.2s;
+
+          &:hover {
+            border-color: #1677ff;
+            color: #1677ff;
           }
-  
-          &.ant-pagination-disabled {
-            .ant-pagination-item-link {
+        }
+
+        &.ant-pagination-disabled {
+          .ant-pagination-item-link {
+            border-color: #d9d9d9;
+            color: rgba(0, 0, 0, 0.25);
+            cursor: not-allowed;
+            background: #f5f5f5;
+
+            &:hover {
               border-color: #d9d9d9;
               color: rgba(0, 0, 0, 0.25);
-              cursor: not-allowed;
-              background: #f5f5f5;
-  
-              &:hover {
-                border-color: #d9d9d9;
-                color: rgba(0, 0, 0, 0.25);
-              }
             }
           }
         }
-  
-        .ant-pagination-item {
-          min-width: 32px;
-          height: 32px;
-          line-height: 32px;
-          border: none;
-          margin: 0;
-          border-radius: 6px;
-  
+      }
+
+      .ant-pagination-item {
+        min-width: 32px;
+        height: 32px;
+        line-height: 32px;
+        border: none;
+        margin: 0;
+        border-radius: 6px;
+
+        a {
+          color: rgba(0, 0, 0, 0.88);
+          padding: 0 4px;
+          transition: all 0.2s;
+        }
+
+        &:hover {
+          background: transparent;
+
           a {
-            color: rgba(0, 0, 0, 0.88);
-            padding: 0 4px;
-            transition: all 0.2s;
+            color: #1677ff;
           }
-  
+        }
+
+        &-active {
+          background: #f7f9fc;
+
+          a {
+            color: #1677ff;
+            font-weight: 500;
+          }
+
           &:hover {
-            background: transparent;
-  
-            a {
-              color: #1677ff;
-            }
-          }
-  
-          &-active {
-            background: #F7F9FC;
-  
-            a {
-              color: #1677ff;
-              font-weight: 500;
-            }
-  
-            &:hover {
-              background: #e6f4ff;
-            }
+            background: #e6f4ff;
           }
         }
       }
     }
   }
-  .paginationButton {
-    display: inline-flex;
-    align-items: center;
-    height: 100%;
-    background: white;
-    border: 1px solid #d9d9d9;
-    border-radius: 6px;
-    padding: 4px 20px;
-    cursor: pointer;
-    transition: all 0.2s;
-  
-    &:hover {
-      border-color: #667085;
-      color: #667085;
-    }
-  
-    &:disabled {
-      background: #f5f5f5;
-      color: rgba(0, 0, 0, 0.25);
-      border-color: #d9d9d9;
-      cursor: not-allowed;
-    }
+}
+.paginationButton {
+  display: inline-flex;
+  align-items: center;
+  height: 100%;
+  background: white;
+  border: 1px solid #d9d9d9;
+  border-radius: 6px;
+  padding: 4px 20px;
+  cursor: pointer;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #667085;
+    color: #667085;
   }
+
+  &:disabled {
+    background: #f5f5f5;
+    color: rgba(0, 0, 0, 0.25);
+    border-color: #d9d9d9;
+    cursor: not-allowed;
+  }
+}

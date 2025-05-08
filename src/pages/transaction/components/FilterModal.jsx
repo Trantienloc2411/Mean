@@ -19,16 +19,16 @@ export default function FilterModal({
             border: "1px solid #999",
             fontWeight: 600,
           }}
-          key={item}
-          checked={filters[key].includes(item)}
+          key={item.en}
+          checked={filters[key].includes(item.en)}
           onChange={(checked) => {
             const updatedValues = checked
-              ? [...filters[key], item]
-              : filters[key].filter((value) => value !== item);
+              ? [...filters[key], item.en]
+              : filters[key].filter((value) => value !== item.en);
             onFilterChange(key, updatedValues);
           }}
         >
-          {item}
+          {item.vi}
         </CheckableTag>
       ))}
     </div>
