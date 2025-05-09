@@ -156,7 +156,7 @@ const UpdateBookingStatus = ({
         <h3>Thông Tin Chi Tiết</h3>
         <div className={styles.infoGrid}>
           <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Mã Booking:</span>
+            <span className={styles.infoLabel}>Đơn Đặt Phòng:</span>
             <span className={styles.infoValue}>{booking?._originalBooking?._id}</span>
           </div>
 
@@ -168,7 +168,7 @@ const UpdateBookingStatus = ({
           </div>
 
           <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Trạng thái booking:</span>
+            <span className={styles.infoLabel}>Trạng thái đặt phòng:</span>
             <span className={`${styles.statusValue} ${styles[getBookingStatusDisplay(booking?._originalBooking?.status).toLowerCase()]}`}>
               {getBookingStatusDisplay(booking?._originalBooking?.status)}
             </span>
@@ -204,7 +204,7 @@ const UpdateBookingStatus = ({
       {isCancelled && isPaymentRefund && (
         <div className={styles.refundSection}>
           <div className={styles.refundWarning}>
-            <p>⚠️ Thao tác này sẽ chuyển trạng thái booking sang <strong>"Đã hoàn tiền"</strong></p>
+            <p>⚠️ Thao tác này sẽ chuyển trạng thái đặt phòng sang <strong>"Đã hoàn tiền"</strong></p>
             <ul className={styles.refundDetails}>
               <li>
                 Phương thức hoàn tiền:
