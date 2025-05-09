@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
 import {
   Modal,
   Form,
@@ -9,7 +9,9 @@ import {
   Select,
   Row,
   Col,
+  TimePicker,
 } from "antd";
+import dayjs from "dayjs";
 import { useUpdateRentalLocationMutation } from "../../../../../../redux/services/rentalApi";
 
 const { TextArea } = Input;
@@ -29,14 +31,18 @@ export default function EditRentalLocationModal({
       form.setFieldsValue({
         name: rentalData.name,
         description: rentalData.description,
-        openHour: rentalData.openHour,
-        closeHour: rentalData.closeHour,
+        openHour: rentalData.openHour
+          ? dayjs(rentalData.openHour, "HH:mm")
+          : null,
+        closeHour: rentalData.closeHour
+          ? dayjs(rentalData.closeHour, "HH:mm")
+          : null,
         isOverNight: rentalData.isOverNight,
         status: rentalData.status,
+        note: "Cập nhật trạng thái",
       });
     }
   }, [visible, rentalData, form]);
-  console.log(rentalData.id);
 
   const handleFinish = async (values) => {
     try {
@@ -49,16 +55,16 @@ export default function EditRentalLocationModal({
       const updatedData = {
         name: values.name,
         description: values.description,
-        openHour: values.openHour,
-        closeHour: values.closeHour,
+        openHour: values.openHour.format("HH:mm"),
+        closeHour: values.closeHour.format("HH:mm"),
         isOverNight: values.isOverNight,
         status: values.status,
+        note: "Cập nhật trạng thái",
       };
 
-      const result = await updateRentalLocation({ id, updatedData }).unwrap();
-
+      await updateRentalLocation({ id, updatedData }).unwrap();
       message.success("Cập nhật thành công!");
-      onUpdate(result);
+      onUpdate((prev) => ({ ...prev, ...updatedData, id }));
       onClose();
     } catch (error) {
       message.error("Cập nhật thất bại, vui lòng thử lại!");
@@ -94,7 +100,11 @@ export default function EditRentalLocationModal({
               label="Giờ mở cửa"
               rules={[{ required: true, message: "Vui lòng nhập giờ mở cửa" }]}
             >
-              <Input placeholder="Ví dụ: 08:00" />
+              <TimePicker
+                format="HH:mm"
+                placeholder="08:00"
+                style={{ width: "100%" }}
+              />
             </Form.Item>
           </Col>
           <Col span={12}>
@@ -105,14 +115,22 @@ export default function EditRentalLocationModal({
                 { required: true, message: "Vui lòng nhập giờ đóng cửa" },
               ]}
             >
-              <Input placeholder="Ví dụ: 22:00" />
+              <TimePicker
+                format="HH:mm"
+                placeholder="22:00"
+                style={{ width: "100%" }}
+              />
             </Form.Item>
           </Col>
         </Row>
 
         <Row gutter={16}>
           <Col span={12}>
-            <Form.Item name="isOverNight" label="Cho phép qua đêm">
+            <Form.Item
+              name="isOverNight"
+              label="Cho phép qua đêm"
+              valuePropName="checked"
+            >
               <Switch />
             </Form.Item>
           </Col>

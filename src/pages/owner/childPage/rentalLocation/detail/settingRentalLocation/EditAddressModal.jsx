@@ -192,7 +192,8 @@ export default function EditAddressModal({
         const result = await updateRentalLocation({ id, updatedData }).unwrap();
 
         message.success("Cập nhật thành công!");
-        onUpdate(result);
+        onUpdate((prev) => ({ ...prev, ...updatedData, id })); 
+
         onClose();
       } catch (error) {
         message.error("Cập nhật thất bại, vui lòng thử lại!");

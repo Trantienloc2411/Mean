@@ -24,6 +24,10 @@ import { Dropdown } from "antd";
 import { getUserId } from "../../../../../../utils/storage";
 
 export default function DocumentManagement({ rentalData }) {
+  const userRole = localStorage.getItem("user_role")?.toLowerCase();
+  const canEdit = userRole === `"owner"`;
+  const canApprove = userRole === `"admin"`;
+
   const idRental = rentalData?.id;
   const { data: fileData, isLoading } = useGetLandUsesRightQuery(idRental);
   const [isApproveModalOpen, setIsApproveModalOpen] = useState(false);
@@ -35,17 +39,18 @@ export default function DocumentManagement({ rentalData }) {
   const [fileUrl, setFileUrl] = useState(null);
   const userId = getUserId();
   const idDocument = fileData?.id || null;
+  // eslint-disable-next-line react-hooks/rules-of-hooks
+  useEffect(() => {
+    if (isEditModalOpen && fileData) {
+      form.setFieldsValue({
+        documentName: fileData.documentName || "",
+        note: fileData.note || "",
+      });
+    }
+  }, [isEditModalOpen, fileData, form]);
+
   if (isLoading) return <p>Đang tải dữ liệu...</p>;
   if (!fileData) return <RentalNone idRental={idRental} />;
-
-  if (isEditModalOpen) {
-    useEffect(() => {
-      form.setFieldsValue({
-        documentName: fileData?.documentName || "",
-        note: fileData?.note || "",
-      });
-    }, [fileData]);
-  }
 
   const handleMenuClick = ({ key }) => {
     if (key === "approve") {
@@ -58,13 +63,20 @@ export default function DocumentManagement({ rentalData }) {
   };
 
   const handleBeforeUpload = async (file) => {
-    const fileUrl = await handleUploadFile(file);
-    if (fileUrl) {
-      setFileUrl(fileUrl); // Ghi đè file cũ
+    const isPDF = file.type === "application/pdf";
+    if (!isPDF) {
+      message.error("Chỉ chấp nhận file PDF!");
+      return Upload.LIST_IGNORE;
     }
-    return false; // Ngăn chặn Upload tự động
+
+    const uploadedUrl = await handleUploadFile(file);
+    if (uploadedUrl) {
+      setFileUrl(uploadedUrl);
+    }
+    return false;
   };
-  const handleApprove = () => {
+
+  const handleApprove = async () => {
     const formUpdate = {
       staffId: userId,
       documentStatus: true,
@@ -73,7 +85,10 @@ export default function DocumentManagement({ rentalData }) {
       note: "Đã chấp nhận giấy tờ",
     };
     try {
-      updateDocument({ id: idDocument, updatedLandUsesRight: formUpdate });
+      await updateDocument({
+        id: idDocument,
+        updatedLandUsesRight: formUpdate,
+      }).unwrap();
       setIsApproveModalOpen(false);
     } catch (error) {
       console.error("❌ Lỗi khi gửi API:", error);
@@ -120,9 +135,9 @@ export default function DocumentManagement({ rentalData }) {
   };
   const menu = (
     <Menu onClick={handleMenuClick}>
-      <Menu.Item key="approve">Chấp nhận</Menu.Item>
-      <Menu.Item key="deny">Từ chối</Menu.Item>
-      <Menu.Item key="edit">Chỉnh sửa</Menu.Item>
+      {canApprove && <Menu.Item key="approve">Chấp nhận</Menu.Item>}
+      {canApprove && <Menu.Item key="deny">Từ chối</Menu.Item>}
+      {canEdit && <Menu.Item key="edit">Chỉnh sửa</Menu.Item>}
     </Menu>
   );
 

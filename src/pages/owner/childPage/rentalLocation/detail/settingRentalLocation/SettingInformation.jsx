@@ -1,12 +1,12 @@
 import { useState } from "react";
-import { Button, message, Tag, Typography, Row, Col, Divider } from "antd";
+import { Button, message, Tag, Typography, Col, Divider } from "antd";
 import { EditOutlined, EnvironmentOutlined } from "@ant-design/icons";
 import EditRentalLocationInformationModal from "./EditRentalLocationInformationModal";
 import EditAddressModal from "./EditAddressModal";
 import { Card } from "antd";
 import LocationMap from "../components/LocationMap";
 
-const { Title, Text } = Typography;
+const { Text } = Typography;
 
 const RENTALLOCATION_STATUS = {
   PENDING: 1,
