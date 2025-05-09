@@ -1,6 +1,5 @@
-import React from "react";
-import { Tag, Dropdown, Menu, Button, Tooltip } from "antd";
-import { MoreOutlined } from "@ant-design/icons";
+import { Tag, Dropdown } from "antd"
+import { MoreOutlined } from "@ant-design/icons"
 
 // Enum
 const STATUS_MAP = {
@@ -10,41 +9,41 @@ const STATUS_MAP = {
   4: { label: "Đang chuẩn bị", color: "purple" },
   5: { label: "Bảo trì", color: "red" },
   6: { label: "Đóng", color: "gray" },
-  7: { label: "Đang sử dụng", color: "cyan" }
-};
+  7: { label: "Đang sử dụng", color: "cyan" },
+}
 
 export default function RoomTableColumns({ onDetailClick, onEditClick }) {
   const handleMenuClick = (key, record) => {
     if (key === "detail") {
-      onDetailClick?.(record);
+      onDetailClick?.(record)
     } else if (key === "edit") {
-      onEditClick?.(record);
+      onEditClick?.(record)
     }
-  };
+  }
 
   const menuItems = [
     {
       key: "detail",
       label: "Xem chi tiết",
       onClick: (record) => {
-        onDetailClick?.(record);
+        onDetailClick?.(record)
       },
     },
     {
       key: "edit",
       label: "Sửa",
       onClick: (record) => {
-        onEditClick?.(record);
+        onEditClick?.(record)
       },
     },
-  ];
+  ]
 
   return [
     {
-      title: 'Số phòng',
-      dataIndex: 'roomNo',
-      key: 'roomNo',
-      render: (text) => text || 'N/A',
+      title: "Số phòng",
+      dataIndex: "roomNo",
+      key: "roomNo",
+      render: (text) => text || "N/A",
     },
     {
       title: "Loại phòng",
@@ -73,30 +72,28 @@ export default function RoomTableColumns({ onDetailClick, onEditClick }) {
       dataIndex: ["accommodationTypeId", "serviceIds"],
       key: "serviceCount",
       render: (serviceIds) => {
-        const count = serviceIds?.length || 0;
+        const count = serviceIds?.length || 0
         return (
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'flex-start', 
-              gap: '5px', 
-              justifyContent: 'flex-start' 
-            }}>
-              {count} tiện ích
-            </div>
-        );
-      }
+          <div
+            style={{
+              display: "flex",
+              alignItems: "flex-start",
+              gap: "5px",
+              justifyContent: "flex-start",
+            }}
+          >
+            {count} tiện ích
+          </div>
+        )
+      },
     },
     {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
       render: (status) => {
-        const statusInfo = STATUS_MAP[status] || { label: "Không xác định", color: "default" };
-        return (
-          <Tag color={statusInfo.color}>
-            {statusInfo.label}
-          </Tag>
-        );
+        const statusInfo = STATUS_MAP[status] || { label: "Không xác định", color: "default" }
+        return <Tag color={statusInfo.color}>{statusInfo.label}</Tag>
       },
     },
     {
@@ -116,5 +113,5 @@ export default function RoomTableColumns({ onDetailClick, onEditClick }) {
         </Dropdown>
       ),
     },
-  ];
+  ]
 }

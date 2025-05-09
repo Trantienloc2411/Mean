@@ -1,0 +1,189 @@
+.roomTypeContainer {
+    width: 30%;
+    background-color: white;
+    border-radius: 16px;
+    padding: 0;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    border: 1px solid #edf2f7;
+    height: fit-content;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+  
+  .header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 24px;
+    background: linear-gradient(to right, #f8fafc, #f1f5f9);
+    border-bottom: 1px solid #edf2f7;
+  }
+  
+  .title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #2d3748;
+    margin: 0;
+    background: linear-gradient(90deg, #2563eb, #3b82f6);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    letter-spacing: 0.5px;
+  }
+  
+  .roomTypeCount {
+    :global(.ant-badge-count) {
+      background-color: #3b82f6;
+      box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.1);
+    }
+  }
+  
+  .roomTypeList {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 20px 16px;
+    max-height: 600px;
+    overflow-y: auto;
+    
+    &::-webkit-scrollbar {
+      width: 6px;
+    }
+    
+    &::-webkit-scrollbar-track {
+      background: #f1f5f9;
+      border-radius: 10px;
+    }
+    
+    &::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 10px;
+      
+      &:hover {
+        background: #94a3b8;
+      }
+    }
+  }
+  
+  .roomTypeButton {
+    width: 100%;
+    justify-content: flex-start;
+    text-align: left;
+    padding: 14px 16px;
+    border-radius: 12px;
+    transition: all 0.25s ease;
+    font-weight: 500;
+    border: 1px solid #e2e8f0;
+    height: auto;
+    background-color: white;
+    color: #334155;
+    
+    &:hover {
+      background-color: #f8fafc;
+      border-color: #bfdbfe;
+      transform: translateX(4px);
+    }
+    
+    &.activeButton {
+      background: linear-gradient(to right, #93c5fd, #bfdbfe);
+      border-color: #93c5fd;
+      color: #1e40af;
+      box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+      
+      .roomTypeIcon {
+        color: #1e40af;
+      }
+      
+      .roomTypeDetails {
+        color: #3b82f6;
+      }
+    }
+    
+    // Override Ant Design's button styles
+    &:global(.ant-btn) {
+      &:focus {
+        border-color: #e2e8f0;
+        color: #334155;
+      }
+      
+      &:hover {
+        border-color: #bfdbfe;
+        color: #334155;
+      }
+      
+      &:active {
+        border-color: #bfdbfe;
+        color: #334155;
+      }
+      
+      &.activeButton {
+        border-color: #93c5fd;
+        color: #1e40af;
+        
+        &:focus, &:hover, &:active {
+          border-color: #93c5fd;
+          color: #1e40af;
+        }
+      }
+    }
+  }
+  
+  .roomTypeContent {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+  }
+  
+  .roomTypeIcon {
+    margin-right: 10px;
+    color: #64748b;
+    font-size: 16px;
+    transition: all 0.2s ease;
+  }
+  
+  .roomTypeName {
+    font-weight: 700;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    color: inherit;
+    letter-spacing: 0.01em;
+  }
+  
+  .roomTypeDetails {
+    font-size: 0.75rem;
+    color: #64748b;
+    line-height: 1.4;
+    opacity: 0.9;
+  }
+  
+  .detailLine {
+    margin-bottom: 2px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
+  }
+  
+  .noRoomTypes {
+    padding: 24px 16px;
+    text-align: center;
+    color: #94a3b8;
+    background-color: #f8fafc;
+    border-radius: 12px;
+    font-size: 0.875rem;
+    border: 1px dashed #cbd5e1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    
+    p {
+      margin: 0;
+    }
+  }
+  
+  .emptyIcon {
+    font-size: 32px;
+    color: #cbd5e1;
+    opacity: 0.7;
+  }
+  
