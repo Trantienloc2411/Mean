@@ -31,7 +31,7 @@ export default function RentalLocationDetail() {
     );
   if (error) return <p>Failed to load rental location.</p>;
   const rentalData = rental.data;
-  const ownerId = rental?.data?.ownerId?._id;
+  const ownerId = rentalData?.ownerId?._id || rentalData?.ownerId; 
   // console.log(rentalData);
 
   const items = [
@@ -59,7 +59,7 @@ export default function RentalLocationDetail() {
     {
       key: "4",
       label: "Loại Phòng",
-      children: <RoomTypeManagement ownerId={ownerId} isOwner={true}/>,
+      children: <RoomTypeManagement ownerId={ownerId} isOwner={true} rentalLocationId={id} />,
     },
     {
       key: "5",

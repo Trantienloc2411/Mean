@@ -4,8 +4,6 @@ import styles from './UpdateRoomTypeModal.module.scss';
 import { useState, useEffect } from "react";
 import { supabase } from "../../../../../../../../../redux/services/supabase";
 import { InboxOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import { useGetOwnerDetailByUserIdQuery } from '../../../../../../../../../redux/services/ownerApi';
-import { useParams } from "react-router-dom";
 import { useGetAccommodationTypeByIdQuery } from '../../../../../../../../../redux/services/accommodationTypeApi';
 import AddAmenityModal from '../../../../../../TypeRoom/components/RoomAmenitiesManagement/components/AddAmenityModal/AddAmenityModal';
 
@@ -15,8 +13,14 @@ const { Dragger } = Upload;
 
 const MAX_IMAGES = 10;
 
-const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => {
-  const { id } = useParams();
+const UpdateRoomTypeModal = ({ 
+  isOpen, 
+  onCancel, 
+  onConfirm, 
+  initialValues, 
+  ownerId,  
+  services  
+}) => {
   const [form] = Form.useForm();
   const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false);
   const [createAmenity, { isLoading: isCreatingService }] = useCreateAmenityMutation();
@@ -30,18 +34,6 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
   } = useGetAccommodationTypeByIdQuery(roomTypeId, {
     skip: !roomTypeId || !isOpen 
   });
-
-  const { data: ownerDetailData } = useGetOwnerDetailByUserIdQuery(id);
-  const ownerId = ownerDetailData?.id;
-
-  const { 
-    data: services, 
-    isLoading: isServicesLoading,
-    refetch: refetchServices 
-  } = useGetAllAmenitiesQuery(
-    { ownerId },
-    { skip: !ownerId }
-  );
 
   const [fileList, setFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
@@ -79,7 +71,7 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
   const handleSubmit = () => {
     form.validateFields()
       .then((values) => {
-        if (!ownerId) {
+        if (!ownerId) { 
           message.error("Không tìm thấy thông tin chủ nhà!");
           return;
         }
@@ -185,8 +177,6 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
         isDelete: false
       }).unwrap();
 
-      await refetchServices();
-      
       const currentServices = form.getFieldValue('serviceIds') || [];
       form.setFieldsValue({
         serviceIds: [...currentServices, newService._id]
@@ -200,7 +190,7 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
   };
 
   const getServicesOptions = () => {
-    const servicesList = services?.data || services || [];
+    const servicesList = services || [];
     return servicesList
       .filter(service => service.status)
       .map(service => ({
@@ -243,7 +233,6 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
           <Select
             mode="multiple"
             placeholder="Chọn dịch vụ"
-            loading={isServicesLoading}
             options={getServicesOptions()}
             dropdownRender={(menu) => (
               <>
