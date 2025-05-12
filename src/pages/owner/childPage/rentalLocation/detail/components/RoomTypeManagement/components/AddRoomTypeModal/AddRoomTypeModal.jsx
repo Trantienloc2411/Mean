@@ -1,9 +1,9 @@
-"use client"
+"use client";
 
-import { useState, useEffect } from "react"
-import { Modal, Form, Select, Button, Spin, message, Alert } from "antd"
-import { useGetAccommodationTypesByOwnerQuery } from "../../../../../../../../../redux/services/accommodationTypeApi"
-import { useUpdateRentalLocationMutation } from "../../../../../../../../../redux/services/rentalLocationApi"
+import { useState, useEffect } from "react";
+import { Modal, Form, Select, Button, Spin, message, Alert } from "antd";
+import { useGetAccommodationTypesByOwnerQuery } from "../../../../../../../../../redux/services/accommodationTypeApi";
+import { useUpdateRentalLocationMutation } from "../../../../../../../../../redux/services/rentalApi";
 
 const AddRoomTypeModal = ({
   isOpen,
@@ -13,9 +13,9 @@ const AddRoomTypeModal = ({
   rentalLocationId,
   isSubmitting: externalSubmitting,
 }) => {
-  const [form] = Form.useForm()
-  const [localSubmitting, setLocalSubmitting] = useState(false)
-  const [errorMessage, setErrorMessage] = useState("")
+  const [form] = Form.useForm();
+  const [localSubmitting, setLocalSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const {
     data: accommodationTypes,
@@ -23,82 +23,88 @@ const AddRoomTypeModal = ({
     error: typesError,
   } = useGetAccommodationTypesByOwnerQuery(ownerId, {
     skip: !ownerId || !isOpen,
-  })
+  });
 
-  const [updateRentalLocation, { isLoading: isUpdating, error: updateError }] = useUpdateRentalLocationMutation()
+  const [updateRentalLocation, { isLoading: isUpdating, error: updateError }] =
+    useUpdateRentalLocationMutation();
 
   useEffect(() => {
     if (isOpen) {
-      form.resetFields()
-      setErrorMessage("")
+      form.resetFields();
+      setErrorMessage("");
     }
-  }, [isOpen, form])
+  }, [isOpen, form]);
 
   useEffect(() => {
     if (typesError) {
-      setErrorMessage("Không thể tải danh sách loại phòng. Vui lòng thử lại sau.")
+      setErrorMessage(
+        "Không thể tải danh sách loại phòng. Vui lòng thử lại sau."
+      );
     }
-  }, [typesError])
+  }, [typesError]);
 
   const handleSubmit = async () => {
     try {
-      setErrorMessage("")
-      setLocalSubmitting(true)
-      const values = await form.validateFields()
+      setErrorMessage("");
+      setLocalSubmitting(true);
+      const values = await form.validateFields();
 
-      if (!Array.isArray(values.accommodationTypeIds) || values.accommodationTypeIds.length === 0) {
-        throw new Error("Vui lòng chọn ít nhất một loại phòng")
+      if (
+        !Array.isArray(values.accommodationTypeIds) ||
+        values.accommodationTypeIds.length === 0
+      ) {
+        throw new Error("Vui lòng chọn ít nhất một loại phòng");
       }
 
       if (!rentalLocationId) {
-        throw new Error("Không tìm thấy ID chỗ ở")
+        throw new Error("Không tìm thấy ID chỗ ở");
       }
 
       // Make sure rentalLocationId is a valid string
-      const cleanId = String(rentalLocationId).trim()
-
+      const cleanId = String(rentalLocationId).trim();
       // Create the payload with the correct structure
-      const payload = {
-        id: cleanId,
+      const dataUpdate = {
         accommodationTypeIds: values.accommodationTypeIds,
-      }
+      };
+      const result = await updateRentalLocation({
+        id: cleanId,
+        updatedData: dataUpdate,
+      }).unwrap();
+      console.log("API response:", result);
 
-      console.log("Sending payload to API:", payload)
-
-      const result = await updateRentalLocation(payload).unwrap()
-      console.log("API response:", result)
-
-      message.success("Thêm loại phòng thành công")
+      message.success("Thêm loại phòng thành công");
 
       if (onConfirm) {
         // Pass the selected IDs to the parent component
-        await onConfirm(values.accommodationTypeIds)
+        await onConfirm(values.accommodationTypeIds);
       }
 
-      onCancel()
+      onCancel();
     } catch (error) {
-      console.error("Error updating rental location:", error)
+      console.error("Error updating rental location:", error);
 
       if (error.errorFields) {
-        message.error("Vui lòng kiểm tra lại thông tin nhập")
+        message.error("Vui lòng kiểm tra lại thông tin nhập");
       } else if (error.data?.message) {
-        setErrorMessage(error.data.message)
-        message.error(error.data.message)
+        setErrorMessage(error.data.message);
+        message.error(error.data.message);
       } else if (error.message) {
-        setErrorMessage(error.message)
-        message.error(error.message)
+        setErrorMessage(error.message);
+        message.error(error.message);
       } else {
-        setErrorMessage("Đã xảy ra lỗi khi thêm loại phòng")
-        message.error("Đã xảy ra lỗi khi thêm loại phòng")
+        setErrorMessage("Đã xảy ra lỗi khi thêm loại phòng");
+        message.error("Đã xảy ra lỗi khi thêm loại phòng");
       }
     } finally {
-      setLocalSubmitting(false)
+      setLocalSubmitting(false);
     }
-  }
+  };
 
-  const isDisabled = externalSubmitting || localSubmitting || isUpdating || isLoadingTypes
+  const isDisabled =
+    externalSubmitting || localSubmitting || isUpdating || isLoadingTypes;
 
-  const isLoading = isLoadingTypes || isUpdating || localSubmitting || externalSubmitting
+  const isLoading =
+    isLoadingTypes || isUpdating || localSubmitting || externalSubmitting;
 
   return (
     <Modal
@@ -109,7 +115,13 @@ const AddRoomTypeModal = ({
         <Button key="cancel" onClick={onCancel} disabled={isDisabled}>
           Huỷ
         </Button>,
-        <Button key="submit" type="primary" onClick={handleSubmit} loading={isLoading} disabled={isDisabled}>
+        <Button
+          key="submit"
+          type="primary"
+          onClick={handleSubmit}
+          loading={isLoading}
+          disabled={isDisabled}
+        >
           Xác nhận
         </Button>,
       ]}
@@ -156,8 +168,12 @@ const AddRoomTypeModal = ({
               }))}
               showSearch
               optionFilterProp="label"
-              filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
-              notFoundContent={typesError ? "Lỗi tải dữ liệu" : "Không tìm thấy loại phòng"}
+              filterOption={(input, option) =>
+                option.label.toLowerCase().includes(input.toLowerCase())
+              }
+              notFoundContent={
+                typesError ? "Lỗi tải dữ liệu" : "Không tìm thấy loại phòng"
+              }
             />
           </Form.Item>
         </Form>
@@ -169,7 +185,7 @@ const AddRoomTypeModal = ({
         </div>
       )}
     </Modal>
-  )
-}
+  );
+};
 
-export default AddRoomTypeModal
+export default AddRoomTypeModal;
