@@ -1,14 +1,14 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { Modal, Form, Select, Button, Spin, message, Alert } from "antd";
-import { useGetAccommodationTypesByOwnerQuery } from "../../../../../../../../../redux/services/accommodationTypeApi";
+import { 
+  useGetAccommodationTypesByOwnerQuery, 
+  useGetAllAccommodationTypesQuery 
+} from "../../../../../../../../../redux/services/accommodationTypeApi";
 import { useUpdateRentalLocationMutation } from "../../../../../../../../../redux/services/rentalApi";
 
 const AddRoomTypeModal = ({
   isOpen,
   onCancel,
-  onConfirm,
   ownerId,
   rentalLocationId,
   isSubmitting: externalSubmitting,
@@ -24,6 +24,12 @@ const AddRoomTypeModal = ({
     error: typesError,
   } = useGetAccommodationTypesByOwnerQuery(ownerId, {
     skip: !ownerId || !isOpen,
+  });
+
+  const {
+    refetch: refetchAccommodationTypes
+  } = useGetAllAccommodationTypesQuery(rentalLocationId, {
+    skip: !rentalLocationId,
   });
 
   const [updateRentalLocation, { isLoading: isUpdating, error: updateError }] =
@@ -61,25 +67,27 @@ const AddRoomTypeModal = ({
         throw new Error("Không tìm thấy ID chỗ ở");
       }
 
-      // Make sure rentalLocationId is a valid string
+      const currentIds = existingRoomTypeIds || [];
+      const newIds = values.accommodationTypeIds.filter(
+        (id) => !currentIds.includes(id)
+      );
+      const mergedIds = [...currentIds, ...newIds];
+
       const cleanId = String(rentalLocationId).trim();
-      // Create the payload with the correct structure
       const dataUpdate = {
-        accommodationTypeIds: values.accommodationTypeIds,
+        accommodationTypeIds: mergedIds,
       };
-      const result = await updateRentalLocation({
+      
+      await updateRentalLocation({
         id: cleanId,
         updatedData: dataUpdate,
       }).unwrap();
-      console.log("API response:", result);
+
+      await refetchAccommodationTypes();
 
       message.success("Thêm loại phòng thành công");
 
-      if (onConfirm) {
-        // Pass the selected IDs to the parent component
-        await onConfirm(values.accommodationTypeIds);
-      }
-
+      // Close the modal
       onCancel();
     } catch (error) {
       console.error("Error updating rental location:", error);
