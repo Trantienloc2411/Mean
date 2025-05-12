@@ -4,25 +4,22 @@ import styles from "./AccomodationDetail.module.scss";
 import Tag from "../../components/Tag";
 
 export default function AccommodationDetail(props) {
-  const { 
-    visible, 
-    onCancel,
-    loading,
-    accommodationData,
-    onEdit
-  } = props;
-  
-  console.log("AccommodationDetail received data:", accommodationData);
-  
+  const { visible, onCancel, loading, accommodationData, onEdit } = props;
+
+  // console.log("AccommodationDetail received data:", accommodationData);
+
   if (!accommodationData && !loading) {
-    console.log("No data and not loading, returning null");
+    // console.log("No data and not loading, returning null");
     return null;
   }
 
-  const data = accommodationData?.data?.[0] || accommodationData?.data || accommodationData;
-  
+  const data =
+    accommodationData?.data?.[0] ||
+    accommodationData?.data ||
+    accommodationData;
+
   console.log("Normalized data for display:", data);
-  
+
   const roomName = data?.accommodationTypeId?.name || "";
   const roomNo = data?.roomNo || "";
   const status = data?.status || 0;
@@ -30,14 +27,16 @@ export default function AccommodationDetail(props) {
   const maxPeople = data?.accommodationTypeId?.maxPeopleNumber || 0;
   const typeRoom = data?.accommodationTypeId?.name || "";
   const price = data?.accommodationTypeId?.basePrice?.toLocaleString() || "0";
-  const overPrice = data?.accommodationTypeId?.overtimeHourlyPrice?.toLocaleString() || "0";
+  const overPrice =
+    data?.accommodationTypeId?.overtimeHourlyPrice?.toLocaleString() || "0";
   const locationName = data?.rentalLocationId?.name || "";
   const locationAddress = data?.rentalLocationId?.address || "";
   const locationDescription = data?.rentalLocationId?.description || "";
-  
-  const amenities = data?.accommodationTypeId?.serviceIds?.map(service => service.name) || [];
-  
-  const images = data?.image?.filter(img => img && img.trim() !== "") || [];
+
+  const amenities =
+    data?.accommodationTypeId?.serviceIds?.map((service) => service.name) || [];
+
+  const images = data?.image?.filter((img) => img && img.trim() !== "") || [];
   const displayImages = images.length > 0 ? images : Array(1).fill("");
 
   const handleEditNavigate = () => {
@@ -48,14 +47,22 @@ export default function AccommodationDetail(props) {
 
   const getStatusDisplay = (statusCode) => {
     switch (statusCode) {
-      case 1: return { text: "Có sẵn", color: "#52c41a", bgColor: "#f6ffed" };
-      case 2: return { text: "Đã đặt", color: "#1890ff", bgColor: "#e6f7ff" };
-      case 3: return { text: "Đang dọn dẹp", color: "#faad14", bgColor: "#fffbe6" };
-      case 4: return { text: "Đang chuẩn bị", color: "#722ed1", bgColor: "#f9f0ff" };
-      case 5: return { text: "Bảo trì", color: "#ff4d4f", bgColor: "#fff1f0" };
-      case 6: return { text: "Đóng cửa", color: "#595959", bgColor: "#fafafa" };
-      case 7: return { text: "Đang sử dụng", color: "#13c2c2", bgColor: "#e6fffb" };
-      default: return { text: "Không xác định", color: "#d9d9d9", bgColor: "#fafafa" };
+      case 1:
+        return { text: "Có sẵn", color: "#52c41a", bgColor: "#f6ffed" };
+      case 2:
+        return { text: "Đã đặt", color: "#1890ff", bgColor: "#e6f7ff" };
+      case 3:
+        return { text: "Đang dọn dẹp", color: "#faad14", bgColor: "#fffbe6" };
+      case 4:
+        return { text: "Đang chuẩn bị", color: "#722ed1", bgColor: "#f9f0ff" };
+      case 5:
+        return { text: "Bảo trì", color: "#ff4d4f", bgColor: "#fff1f0" };
+      case 6:
+        return { text: "Đóng cửa", color: "#595959", bgColor: "#fafafa" };
+      case 7:
+        return { text: "Đang sử dụng", color: "#13c2c2", bgColor: "#e6fffb" };
+      default:
+        return { text: "Không xác định", color: "#d9d9d9", bgColor: "#fafafa" };
     }
   };
 
@@ -64,7 +71,14 @@ export default function AccommodationDetail(props) {
   const modalContent = (
     <div className={styles.content}>
       {loading ? (
-        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '200px' }}>
+        <div
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            height: "200px",
+          }}
+        >
           <Spin size="large" />
         </div>
       ) : (
@@ -82,47 +96,61 @@ export default function AccommodationDetail(props) {
           <div className={styles.body}>
             <div className={styles.description}>
               <p>{description}</p>
-              
+
               {locationName && (
                 <div style={{ display: "flex", marginBottom: "8px" }}>
-                  <h4 style={{ marginRight: "8px", minWidth: "150px" }}>Địa điểm: </h4>
+                  <h4 style={{ marginRight: "8px", minWidth: "150px" }}>
+                    Địa điểm:{" "}
+                  </h4>
                   <span>{locationName}</span>
                 </div>
               )}
-              
+
               {locationAddress && (
                 <div style={{ display: "flex", marginBottom: "8px" }}>
-                  <h4 style={{ marginRight: "8px", minWidth: "150px" }}>Địa chỉ: </h4>
+                  <h4 style={{ marginRight: "8px", minWidth: "150px" }}>
+                    Địa chỉ:{" "}
+                  </h4>
                   <span>{locationAddress}</span>
                 </div>
               )}
-              
+
               <div style={{ display: "flex", marginBottom: "8px" }}>
-                <h4 style={{ marginRight: "8px", minWidth: "150px" }}>Số phòng: </h4>
+                <h4 style={{ marginRight: "8px", minWidth: "150px" }}>
+                  Số phòng:{" "}
+                </h4>
                 <span>{roomNo}</span>
               </div>
-              
+
               <div style={{ display: "flex", marginBottom: "8px" }}>
-                <h4 style={{ marginRight: "8px", minWidth: "150px" }}>Số người ở tối đa: </h4>
+                <h4 style={{ marginRight: "8px", minWidth: "150px" }}>
+                  Số người ở tối đa:{" "}
+                </h4>
                 <span>{maxPeople} người</span>
               </div>
 
               <div style={{ display: "flex", marginBottom: "8px" }}>
-                <h4 style={{ marginRight: "8px", minWidth: "150px" }}>Loại phòng: </h4>
+                <h4 style={{ marginRight: "8px", minWidth: "150px" }}>
+                  Loại phòng:{" "}
+                </h4>
                 <span>{typeRoom}</span>
               </div>
-              
+
               <div style={{ display: "flex", marginBottom: "8px" }}>
-                <h4 style={{ marginRight: "8px", minWidth: "150px" }}>Giá tiền: </h4>
+                <h4 style={{ marginRight: "8px", minWidth: "150px" }}>
+                  Giá tiền:{" "}
+                </h4>
                 <span>{price} VND / 1 giờ</span>
               </div>
-              
+
               <div style={{ display: "flex", marginBottom: "8px" }}>
-                <h4 style={{ marginRight: "8px", minWidth: "150px" }}>Giá quá hạn: </h4>
+                <h4 style={{ marginRight: "8px", minWidth: "150px" }}>
+                  Giá quá hạn:{" "}
+                </h4>
                 <span>{overPrice} VND / 1 giờ</span>
               </div>
             </div>
-            
+
             <div className={styles.contentAmenity}>
               <h3 style={{ marginBottom: 10 }}>Tiện nghi, dịch vụ nổi bật: </h3>
               <div className={styles.amenities}>
@@ -140,7 +168,7 @@ export default function AccommodationDetail(props) {
                 )}
               </div>
             </div>
-            
+
             {locationDescription && (
               <div className={styles.locationDescription}>
                 <h3 style={{ marginBottom: 10 }}>Mô tả địa điểm: </h3>
@@ -155,8 +183,10 @@ export default function AccommodationDetail(props) {
               <Image.PreviewGroup>
                 {displayImages.slice(0, 5).map((image, index) => (
                   <div key={index} className={styles.imageContainer}>
-                    <Image 
-                      src={image || "https://via.placeholder.com/150?text=No+Image"} 
+                    <Image
+                      src={
+                        image || "https://via.placeholder.com/150?text=No+Image"
+                      }
                       alt={`Room view ${index + 1}`}
                       fallback="https://via.placeholder.com/150?text=Error"
                     />
@@ -173,7 +203,10 @@ export default function AccommodationDetail(props) {
                     {displayImages.slice(5).map((image, index) => (
                       <Image
                         key={`hidden-${index}`}
-                        src={image || "https://via.placeholder.com/150?text=No+Image"}
+                        src={
+                          image ||
+                          "https://via.placeholder.com/150?text=No+Image"
+                        }
                         alt={`Room view ${index + 6}`}
                         fallback="https://via.placeholder.com/150?text=Error"
                       />

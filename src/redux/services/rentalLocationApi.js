@@ -1,14 +1,14 @@
-import { apiSlice } from "./apiSlice"
+import { apiSlice } from "./apiSlice";
 
 export const rentalLocationApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAllRentalLocations: builder.query({
       query: (ownerId) => {
-        let url = "/rental-location/all-rental-location"
+        let url = "/rental-location/all-rental-location";
         if (ownerId) {
-          url += `?ownerId=${ownerId}`
+          url += `?ownerId=${ownerId}`;
         }
-        return url
+        return url;
       },
       providesTags: ["RentalLocation"],
     }),
@@ -28,15 +28,18 @@ export const rentalLocationApi = apiSlice.injectEndpoints({
     }),
 
     updateRentalLocation: builder.mutation({
-      query: ({ id, ...data }) => {
-        console.log("updateRentalLocation mutation called with:", { id, data })
+      query: ({ id, updatedData }) => {
+        console.log("updateRentalLocation mutation called with:", { id, data });
         return {
           url: `/rental-location/${id}`,
           method: "PUT",
-          body: data, // Send data directly without nesting
-        }
+          body: updatedData, // Send data directly without nesting
+        };
       },
-      invalidatesTags: (result, error, { id }) => [{ type: "RentalLocation", id }, "RentalLocation"],
+      invalidatesTags: (result, error, { id }) => [
+        { type: "RentalLocation", id },
+        "RentalLocation",
+      ],
     }),
 
     deleteRentalLocation: builder.mutation({
@@ -47,7 +50,7 @@ export const rentalLocationApi = apiSlice.injectEndpoints({
       invalidatesTags: ["RentalLocation"],
     }),
   }),
-})
+});
 
 export const {
   useGetAllRentalLocationsQuery,
@@ -55,4 +58,4 @@ export const {
   useCreateRentalLocationMutation,
   useUpdateRentalLocationMutation,
   useDeleteRentalLocationMutation,
-} = rentalLocationApi
+} = rentalLocationApi;
