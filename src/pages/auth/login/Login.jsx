@@ -41,7 +41,6 @@ const Login = () => {
     "https://www.chudu24.com/wp-content/uploads/2017/03/khach-san-sapa-capsule-28.jpg",
   ];
 
-
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
