@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Table, Button, Input, Dropdown, message, Tooltip, Tag } from "antd";
-import { MoreOutlined, PlusOutlined, FilterOutlined } from "@ant-design/icons";
+import { MoreOutlined, PlusOutlined, FilterOutlined, CloseOutlined  } from "@ant-design/icons";
 import styles from "./RoomTypeManagement.module.scss";
 import DeleteRoomTypeModal from "./components/DeleteRoomTypeModal/DeleteRoomTypeModal";
 import AddRoomTypeModal from "./components/AddRoomTypeModal/AddRoomTypeModal";
@@ -81,53 +81,6 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
     if (services.length > 0) processServiceNames();
   }, [services]);
 
-  const handleAddRoomTypesToRentalLocation = async (
-    selectedAccommodationTypeIds
-  ) => {
-    if (!locationId) {
-      message.error("Không tìm thấy ID chỗ ở");
-      return;
-    }
-
-    if (
-      !Array.isArray(selectedAccommodationTypeIds) ||
-      selectedAccommodationTypeIds.length === 0
-    ) {
-      message.error("Vui lòng chọn ít nhất một loại phòng");
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-
-      const cleanId = String(locationId).trim();
-
-      const payload = {
-        id: cleanId,
-        accommodationTypeIds: selectedAccommodationTypeIds,
-      };
-
-      const result = await updateRentalLocation(payload).unwrap();
-      message.success("Thêm loại phòng thành công");
-
-      await Promise.all([refetchRentalLocation(), refetchRoomTypes()]);
-
-      setIsAddModalOpen(false);
-    } catch (error) {
-      console.error("Update error:", error);
-
-      if (error.data?.message) {
-        message.error(error.data.message);
-      } else if (error.message) {
-        message.error(error.message);
-      } else {
-        message.error("Thêm loại phòng thất bại");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const handleUpdateRoomType = async (values) => {
     try {
       setIsSubmitting(true);
@@ -149,6 +102,42 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
       setIsSubmitting(false);
     }
   };
+
+  const handleRemoveRoomType = async (roomTypeId) => {
+    try {
+      setIsSubmitting(true);
+      
+      if (!rentalLocationData?.data?.accommodationTypeIds) {
+        throw new Error("Không tìm thấy dữ liệu chỗ ở");
+      }
+  
+      const currentIds = [...rentalLocationData.data.accommodationTypeIds];
+      
+      const updatedIds = currentIds.filter(id => id !== roomTypeId);
+  
+      if (updatedIds.length === currentIds.length) {
+        throw new Error("Loại phòng này không tồn tại trong chỗ ở");
+      }
+  
+      await updateRentalLocation({
+        id: locationId,
+        updatedData: { accommodationTypeIds: updatedIds }
+      }).unwrap();
+  
+      message.success("Xóa loại phòng khỏi chỗ ở thành công");
+      await refetchRentalLocation(); 
+      refetchRoomTypes(); 
+    } catch (error) {
+      console.error("Lỗi khi xóa:", error);
+      message.error(
+        error.message || 
+        error.data?.message || 
+        "Xóa loại phòng thất bại"
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  }; 
 
   const menuItems = [
     {
@@ -355,6 +344,23 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
         </Dropdown>
       ),
     },
+    {
+      title: "",
+      key: "remove",
+      align: "center",
+      width: 60,
+      fixed: "right",
+      render: (_, record) => (
+        <Button
+          danger
+          type="link"
+          onClick={() => handleRemoveRoomType(record._id)}
+          disabled={!isOwner || isSubmitting}
+          icon={<CloseOutlined />}
+          loading={isSubmitting}
+        />
+      ),
+    },
   ];
 
   return (
@@ -415,7 +421,7 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
         <AddRoomTypeModal
           ownerId={ownerId}
           rentalLocationId={locationId}
-          existingRoomTypeIds={roomTypes.map((rt) => rt._id)} 
+          existingRoomTypeIds={roomTypes.map((rt) => rt._id)}
           isOpen={isAddModalOpen}
           onCancel={() => setIsAddModalOpen(false)}
           isSubmitting={isSubmitting || isUpdating}
