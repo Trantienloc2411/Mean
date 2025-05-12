@@ -1,5 +1,3 @@
-"use client";
-
 import { useState, useEffect } from "react";
 import { Table, Button, Input, Dropdown, message, Tooltip, Tag } from "antd";
 import { MoreOutlined, PlusOutlined, FilterOutlined } from "@ant-design/icons";
@@ -24,7 +22,6 @@ import { useParams } from "react-router-dom";
 
 const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
   const { id } = useParams();
-  // Use the passed rentalLocationId or the one from URL params
   const locationId = rentalLocationId || id;
 
   const [selectedValues, setSelectedValues] = useState({
@@ -42,7 +39,6 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
   const [serviceNames, setServiceNames] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // API Calls
   const {
     data: roomTypesData,
     isLoading: isRoomTypesLoading,
@@ -61,18 +57,17 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
   const [updateAccommodationType] = useUpdateAccommodationTypeMutation();
   const [deleteAccommodationType] = useDeleteAccommodationTypeMutation();
 
-  // Data processing
   const roomTypes = Array.isArray(roomTypesData?.data)
     ? roomTypesData.data
     : Array.isArray(roomTypesData)
-    ? roomTypesData
-    : [];
+      ? roomTypesData
+      : [];
 
   const services = Array.isArray(servicesData?.data)
     ? servicesData.data
     : Array.isArray(servicesData)
-    ? servicesData
-    : [];
+      ? servicesData
+      : [];
 
   useEffect(() => {
     const processServiceNames = () => {
@@ -105,63 +100,28 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
     try {
       setIsSubmitting(true);
 
-      // Make sure locationId is a valid string
       const cleanId = String(locationId).trim();
 
-      // Create the payload with the correct structure
       const payload = {
         id: cleanId,
         accommodationTypeIds: selectedAccommodationTypeIds,
       };
 
-      // console.log("Sending payload from parent component:", payload)
-
-      // Call the Redux mutation with the correct parameters
       const result = await updateRentalLocation(payload).unwrap();
-
-      // console.log("API response in parent:",   result)
-
-      // If the API call was successful (didn't throw an error), consider it a success
       message.success("Thêm loại phòng thành công");
 
-      // Force refetch both the rental location and room types data
       await Promise.all([refetchRentalLocation(), refetchRoomTypes()]);
 
       setIsAddModalOpen(false);
     } catch (error) {
       console.error("Update error:", error);
 
-      // Handle different types of errors
       if (error.data?.message) {
         message.error(error.data.message);
       } else if (error.message) {
         message.error(error.message);
       } else {
         message.error("Thêm loại phòng thất bại");
-      }
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleDeleteConfirm = async () => {
-    if (!selectedRoomType?._id) {
-      message.error("Không tìm thấy ID loại phòng");
-      return;
-    }
-
-    try {
-      setIsSubmitting(true);
-      await deleteAccommodationType(selectedRoomType._id).unwrap();
-      message.success("Xóa loại phòng thành công");
-      refetchRoomTypes();
-      setIsDeleteModalOpen(false);
-      setSelectedRoomType(null);
-    } catch (error) {
-      if (error.data?.message) {
-        message.error(error.data.message);
-      } else {
-        message.error("Xóa loại phòng thất bại");
       }
     } finally {
       setIsSubmitting(false);
@@ -205,15 +165,6 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
       onClick: (record) => {
         setSelectedRoomType(record);
         setIsUpdateModalOpen(true);
-      },
-    },
-    {
-      key: "3",
-      label: "Xoá",
-      danger: true,
-      onClick: (record) => {
-        setSelectedRoomType(record);
-        setIsDeleteModalOpen(true);
       },
     },
   ];
@@ -464,13 +415,14 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
         <AddRoomTypeModal
           ownerId={ownerId}
           rentalLocationId={locationId}
+          existingRoomTypeIds={roomTypes.map((rt) => rt._id)} 
           isOpen={isAddModalOpen}
           onCancel={() => setIsAddModalOpen(false)}
           isSubmitting={isSubmitting || isUpdating}
         />
 
         <UpdateRoomTypeModal
-          ownerId={ownerId} 
+          ownerId={ownerId}
           isOpen={isUpdateModalOpen}
           onCancel={() => {
             setIsUpdateModalOpen(false);
@@ -494,17 +446,6 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
             setIsDetailModalOpen(false);
             setSelectedRoomType(null);
           }}
-        />
-
-        <DeleteRoomTypeModal
-          isOpen={isDeleteModalOpen}
-          onCancel={() => {
-            setIsDeleteModalOpen(false)
-            setSelectedRoomType(null)
-          }}
-          onConfirm={handleDeleteConfirm}
-          roomTypeName={selectedRoomType?.name}
-          isSubmitting={isSubmitting}
         />
       </div>
     </div>

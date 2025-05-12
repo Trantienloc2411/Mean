@@ -12,6 +12,7 @@ const AddRoomTypeModal = ({
   ownerId,
   rentalLocationId,
   isSubmitting: externalSubmitting,
+  existingRoomTypeIds = [],
 }) => {
   const [form] = Form.useForm();
   const [localSubmitting, setLocalSubmitting] = useState(false);
@@ -161,11 +162,14 @@ const AddRoomTypeModal = ({
               mode="multiple"
               placeholder="Chọn loại phòng"
               loading={isLoadingTypes}
-              options={(accommodationTypes?.data || []).map((type) => ({
-                label: type.name,
-                value: type._id,
-                disabled: type.isDisabled,
-              }))}
+              options={(accommodationTypes?.data || []).map((type) => {
+                const isExisting = existingRoomTypeIds.includes(type._id);
+                return {
+                  label: `${type.name}${isExisting ? " (Đã thêm)" : ""}`,
+                  value: type._id,
+                  disabled: isExisting, 
+                };
+              })}
               showSearch
               optionFilterProp="label"
               filterOption={(input, option) =>
