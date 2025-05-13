@@ -7,6 +7,7 @@ import RecentReviews from "./components/RecentReviews";
 import RoomList from "./components/RoomList";
 import SettingRentalLocation from "./settingRentalLocation/SettingRentalLocation";
 import { LeftOutlined } from "@ant-design/icons";
+import RoomTypeManagement from "./components/RoomTypeManagement/RoomTypeManagement";
 
 export default function RentalLocationDetail() {
   const { id } = useParams(); // Get ID from URL
@@ -28,8 +29,8 @@ export default function RentalLocationDetail() {
     );
   if (error) return <p>Failed to load rental location.</p>;
   const rentalData = rental.data;
-
-  console.log(rentalData?.data);
+  const ownerId = rentalData?.ownerId?._id || rentalData?.ownerId; 
+  // console.log(rentalData);
 
   const items = [
     {
@@ -55,11 +56,16 @@ export default function RentalLocationDetail() {
     },
     {
       key: "4",
+      label: "Loại Phòng",
+      children: <RoomTypeManagement ownerId={ownerId} isOwner={true} rentalLocationId={id} />,
+    },
+    {
+      key: "5",
       label: "Đánh giá",
       children: <RecentReviews />,
     },
     {
-      key: "5",
+      key: "6",
       label: "Cài đặt",
       children: <SettingRentalLocation rentalData={rentalData} />,
     },

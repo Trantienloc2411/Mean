@@ -6,7 +6,12 @@ export const accommodationTypeApi = apiSlice.injectEndpoints({
             query: (rentalLocationId) => {
                 let url = "/accommodation-type/all-accommodation-types";
                 if (rentalLocationId) {
-                    url += `?rentalLocationId=${rentalLocationId}`;
+                    if (typeof rentalLocationId === 'object') {
+                        const id = rentalLocationId.rentalLocationId || '';
+                        url += `?rentalLocationId=${id}`;
+                    } else {
+                        url += `?rentalLocationId=${rentalLocationId}`;
+                    }
                 }
                 return url;
             },

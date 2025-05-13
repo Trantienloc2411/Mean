@@ -15,7 +15,7 @@ export const rentalLocationApi = apiSlice.injectEndpoints({
 
     getRentalLocationById: builder.query({
       query: (id) => `/rental-location/${id}`,
-      providesTags: ["RentalLocation"],
+      providesTags: (result, error, id) => [{ type: "RentalLocation", id }],
     }),
 
     createRentalLocation: builder.mutation({
@@ -28,12 +28,18 @@ export const rentalLocationApi = apiSlice.injectEndpoints({
     }),
 
     updateRentalLocation: builder.mutation({
-      query: ({ id, ...data }) => ({
-        url: `/rental-location/${id}`,
-        method: "PUT",
-        body: data,
-      }),
-      invalidatesTags: ["RentalLocation"],
+      query: ({ id, updatedData }) => {
+        console.log("updateRentalLocation mutation called with:", { id, data });
+        return {
+          url: `/rental-location/${id}`,
+          method: "PUT",
+          body: updatedData, // Send data directly without nesting
+        };
+      },
+      invalidatesTags: (result, error, { id }) => [
+        { type: "RentalLocation", id },
+        "RentalLocation",
+      ],
     }),
 
     deleteRentalLocation: builder.mutation({
