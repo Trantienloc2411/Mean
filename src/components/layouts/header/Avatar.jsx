@@ -44,11 +44,11 @@ export default function Avatar({ userData }) {
     //   label: "Ví Mean",
     //   icon: <WalletOutlined />,
     // },
-    {
-      key: "3",
-      label: "Cài đặt",
-      icon: <SettingOutlined />,
-    },
+    // {
+    //   key: "3",
+    //   label: "Cài đặt",
+    //   icon: <SettingOutlined />,
+    // },
     // {
     // type: "divider",
     // },
