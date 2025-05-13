@@ -21,8 +21,18 @@ export default function ChangePassword() {
         return;
       }
 
-      if (newPassword.length < 6) {
-        message.error("Mật khẩu mới phải có ít nhất 6 ký tự!");
+      if (newPassword === currentPassword) {
+        message.error("Mật khẩu mới không được trùng với mật khẩu hiện tại!");
+        return;
+      }
+
+      const passwordRegex =
+        /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&^#()_\-+=])[A-Za-z\d@$!%*?&^#()_\-+=]{8,}$/;
+
+      if (!passwordRegex.test(newPassword)) {
+        message.error(
+          "Mật khẩu mới phải có ít nhất 8 ký tự, gồm chữ hoa, chữ thường, số và ký tự đặc biệt!"
+        );
         return;
       }
 
@@ -31,12 +41,10 @@ export default function ChangePassword() {
         return;
       }
 
-      // Gọi API cập nhật mật khẩu
       const response = await updatePassword({
         currentPassword,
         newPassword,
       }).unwrap();
-      console.log(response); 
 
       if (response.success) {
         message.success("Cập nhật mật khẩu thành công!");
@@ -46,8 +54,7 @@ export default function ChangePassword() {
       }
     } catch (error) {
       console.log(error);
-      
-      message.error(error.data.message || "Có lỗi xảy ra, vui lòng thử lại!");
+      message.error(error.data?.message || "Có lỗi xảy ra, vui lòng thử lại!");
     }
   };
 

@@ -77,6 +77,9 @@ const SettingOwner = lazy(() =>
 const CustomerInformation = lazy(() =>
   import("../pages/customer/information/Customer.jsx")
 );
+const ChangePassAdmin = lazy(() =>
+  import("../pages/auth/changePasswordAdmin/ChangePassAdmin.jsx")
+);
 
 const CustomerBookingHistory = lazy(() =>
   import("../pages/customer/historyBooking/Booking.jsx")
@@ -175,6 +178,7 @@ export const routes = [
       { path: "coupon", element: <Coupon /> },
       { path: "booking", element: <Booking /> },
       { path: "transaction", element: <Transaction /> },
+      { path: "change-password", element: <ChangePassAdmin /> },
       { path: "rental", element: <RentalLocation /> },
       { path: "policy", element: <PolicyApp /> },
       { path: "report", element: <Report /> },

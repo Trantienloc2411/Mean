@@ -35,6 +35,7 @@ export default function RentalLogHistory({ rentalData }) {
       note: log.note || "",
     }));
   }, [rentalLogs]);
+  console.log(rentalLogs);
 
   const handleRequestReview = async () => {
     try {
@@ -89,11 +90,11 @@ export default function RentalLogHistory({ rentalData }) {
               );
             },
           },
-          {
-            title: "Người thay đổi",
-            dataIndex: "updatedBy",
-            key: "updatedBy",
-          },
+          // {
+          //   title: "Người thay đổi",
+          //   dataIndex: "updatedBy",
+          //   key: "updatedBy",
+          // },
           {
             title: "Ghi chú",
             dataIndex: "note",

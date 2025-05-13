@@ -6,6 +6,7 @@ import {
   HomeOutlined,
   InfoCircleOutlined,
   LeftOutlined,
+  LockOutlined,
   RightOutlined,
   SettingOutlined,
   TagOutlined,
@@ -33,6 +34,7 @@ const menuItems = [
   },
   { key: "/admin/report", icon: <InfoCircleOutlined />, label: "Báo cáo" },
   { key: "/admin/policy", icon: <SettingOutlined />, label: "Chính sách" },
+  { key: "/admin/change-password", icon: <LockOutlined />, label: "Đổi mật khẩu" },
 ];
 
 const AdminLayout = () => {
