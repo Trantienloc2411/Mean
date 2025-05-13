@@ -43,7 +43,7 @@ export default function RoomTypeFilter({ roomTypes = [], onSelectRoomType, selec
                     <div className={styles.detailLine}>Số người tối đa: {maxPeople}</div>
                     <div className={styles.detailLine}>Giá cơ bản: {basePrice.toLocaleString()} VND</div>
                     <div className={styles.detailLine}>Giá theo giờ: {hourlyPrice.toLocaleString()} VND/giờ</div>
-                    <div className={styles.detailLine}>{serviceCount} tiện ích</div>
+                    <div className={styles.detailLine}>{serviceCount} dịch vụ</div>
                   </div>
                 </div>
               </Button>
