@@ -24,16 +24,21 @@ const { Option } = Select;
 
 const RENTALLOCATION_STATUS = {
   PENDING: 1,
+  NEEDS_UPDATE: 6,
   INACTIVE: 2,
   ACTIVE: 3,
   PAUSE: 4,
   DELETED: 5,
-  NEEDS_UPDATE: 6,
 };
 
 const STATUS_LABELS = {
   [RENTALLOCATION_STATUS.PENDING]: {
     label: "Chờ duyệt",
+    bgColor: "#FFF3CD",
+    color: "#856404",
+  },
+  [RENTALLOCATION_STATUS.NEEDS_UPDATE]: {
+    label: "Cần cập nhật",
     bgColor: "#FFF3CD",
     color: "#856404",
   },
@@ -53,14 +58,9 @@ const STATUS_LABELS = {
     color: "#0C5460",
   },
   [RENTALLOCATION_STATUS.DELETED]: {
-    label: "Đã xoá",
+    label: "Xoá bỏ",
     bgColor: "#E2E3E5",
     color: "#6C757D",
-  },
-  [RENTALLOCATION_STATUS.NEEDS_UPDATE]: {
-    label: "Cần cập nhật",
-    bgColor: "#FFF3CD",
-    color: "#856404",
   },
 };
 
@@ -143,6 +143,7 @@ export default function ModalViewDetailRental({
       ),
       status: log.newStatus,
       updatedBy: log.updatedBy?.fullName || "Hệ thống",
+      note: log.note,
     }));
   }, [rentalLogs]);
 
@@ -172,43 +173,52 @@ export default function ModalViewDetailRental({
             </Tag>
           </div>
 
-          <div className={styles.row}>
-            <span className={styles.label}>Cập nhật trạng thái:</span>
-            <Space>
-              <Select
-                placeholder="Chọn trạng thái"
-                style={{ width: 180 }}
-                value={selectedStatus}
-                onChange={setSelectedStatus}
-                disabled={isLoading}
-              >
-                {Object.entries(RENTALLOCATION_STATUS).map(([key, value]) => (
-                  <Option key={value} value={value}>
-                    {STATUS_LABELS[value].label}
-                  </Option>
-                ))}
-              </Select>
-              {selectedStatus !== data.status && (
-                <div className={styles.row}>
-                  <span className={styles.label}>Ghi chú cập nhật:</span>
-                  <Input.TextArea
-                    value={note}
-                    onChange={(e) => setNote(e.target.value)}
-                    rows={3}
-                    placeholder="Nhập lý do cập nhật trạng thái..."
-                  />
-                </div>
-              )}
+          {data.status !== RENTALLOCATION_STATUS.DELETED && (
+            <div className={styles.row}>
+              <span className={styles.label}>Cập nhật trạng thái:</span>
+              <Space>
+                <Select
+                  placeholder="Chọn trạng thái"
+                  style={{ width: 180 }}
+                  value={selectedStatus}
+                  onChange={setSelectedStatus}
+                  disabled={isLoading}
+                >
+                  {Object.entries(RENTALLOCATION_STATUS)
+                    .filter(
+                      ([, value]) => value !== RENTALLOCATION_STATUS.PENDING
+                      // value !== RENTALLOCATION_STATUS.DELETED // cũng ẩn luôn "Xoá"
+                    )
+                    .map(([key, value]) => (
+                      <Option key={value} value={value}>
+                        {STATUS_LABELS[value].label}
+                      </Option>
+                    ))}
+                </Select>
 
-              <Button
-                type="primary"
-                onClick={handleUpdateStatus}
-                loading={isLoading}
-              >
-                Cập nhật
-              </Button>
-            </Space>
-          </div>
+                {selectedStatus !== data.status && (
+                  <div className={styles.row}>
+                    <span className={styles.label}>Ghi chú cập nhật:</span>
+                    <Input.TextArea
+                      value={note}
+                      onChange={(e) => setNote(e.target.value)}
+                      rows={3}
+                      placeholder="Nhập lý do cập nhật trạng thái..."
+                    />
+                  </div>
+                )}
+
+                <Button
+                  type="primary"
+                  onClick={handleUpdateStatus}
+                  loading={isLoading}
+                >
+                  Cập nhật
+                </Button>
+              </Space>
+            </div>
+          )}
+
           <div className={styles.row}>
             <span className={styles.label}>Ghi chú từ người kiểm duyệt:</span>
             <span>{data.note || "Không có ghi chú"}</span>
@@ -295,10 +305,15 @@ export default function ModalViewDetailRental({
                 );
               },
             },
+            // {
+            //   title: "Người thay đổi",
+            //   dataIndex: "updatedBy",
+            //   key: "updatedBy",
+            // },
             {
-              title: "Người thay đổi",
-              dataIndex: "updatedBy",
-              key: "updatedBy",
+              title: "Ghi chú",
+              dataIndex: "note",
+              key: "note",
             },
           ]}
           dataSource={formattedLogs}
