@@ -115,12 +115,15 @@ export default function ModalViewDetailRental({
     //   message.warning("Vui lòng nhập ghi chú cập nhật!");
     //   return;
     // }
+    const updatedData = {
+      status: selectedStatus,
+      note: note.trim(),
+    };
 
     try {
       await updateStatus({
         id: data.id,
-        status: selectedStatus,
-        note: note.trim(),
+        updatedData: updatedData,
       }).unwrap();
 
       message.success("Cập nhật trạng thái thành công!");
