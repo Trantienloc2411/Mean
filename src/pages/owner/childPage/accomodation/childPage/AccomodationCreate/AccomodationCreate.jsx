@@ -22,6 +22,8 @@ import { useGetAllAccommodationTypesQuery } from "../../../../../../redux/servic
 import styles from "./AccomodationCreate.module.scss";
 import AddRoomTypeModal from "../../../TypeRoom/components/RoomTypeManagement/components/AddRoomTypeModal/AddRoomTypeModal";
 import { useCreateAccommodationTypeMutation } from "../../../../../../redux/services/accommodationTypeApi";
+import { useGetOwnerDetailByUserIdQuery } from "../../../../../../redux/services/ownerApi";
+import { useParams } from "react-router-dom";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -33,6 +35,7 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess }) {
   const [selectOpen, setSelectOpen] = useState(false);
   const [createMode, setCreateMode] = useState("single");
   const [isCreating, setIsCreating] = useState(false);
+  const { id } = useParams();
 
   const location = useLocation();
   const pathnameParts = location.pathname.split("/");
@@ -41,6 +44,9 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess }) {
   const [createAccommodation, { isLoading }] = useCreateAccommodationMutation();
   const [createAccommodationType] = useCreateAccommodationTypeMutation();
   const { data: accommodationTypes, refetch: accommodationTypesRefetch } = useGetAllAccommodationTypesQuery(rentalLocationId);
+
+  const { data: ownerDetailData } = useGetOwnerDetailByUserIdQuery(id);
+  const ownerId = ownerDetailData?.id;
 
   useEffect(() => {
     if (visible) {
@@ -347,7 +353,8 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess }) {
         onCancel={() => setIsAddTypeModalOpen(false)}
         onConfirm={handleAddRoomType}
         rentalLocationId={rentalLocationId}
-        forceRender 
+        ownerId={ownerId}
+        forceRender
       />
     </>
   );

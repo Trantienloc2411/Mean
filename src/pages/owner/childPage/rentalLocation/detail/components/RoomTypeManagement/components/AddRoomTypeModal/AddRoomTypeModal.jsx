@@ -5,6 +5,8 @@ import {
   useGetAllAccommodationTypesQuery 
 } from "../../../../../../../../../redux/services/accommodationTypeApi";
 import { useUpdateRentalLocationMutation } from "../../../../../../../../../redux/services/rentalApi";
+import { PlusOutlined } from "@ant-design/icons";
+import AddNewRoomTypeModal from "../../../../../../TypeRoom/components/RoomTypeManagement/components/AddRoomTypeModal/AddRoomTypeModal";
 
 const AddRoomTypeModal = ({
   isOpen,
@@ -17,17 +19,19 @@ const AddRoomTypeModal = ({
   const [form] = Form.useForm();
   const [localSubmitting, setLocalSubmitting] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isAddNewRoomTypeModalOpen, setIsAddNewRoomTypeModalOpen] = useState(false);
 
   const {
     data: accommodationTypes,
     isLoading: isLoadingTypes,
     error: typesError,
+    refetch: refetchAccommodationTypes
   } = useGetAccommodationTypesByOwnerQuery(ownerId, {
     skip: !ownerId || !isOpen,
   });
 
   const {
-    refetch: refetchAccommodationTypes
+    refetch: refetchAllAccommodationTypes
   } = useGetAllAccommodationTypesQuery(rentalLocationId, {
     skip: !rentalLocationId,
   });
@@ -83,7 +87,7 @@ const AddRoomTypeModal = ({
         updatedData: dataUpdate,
       }).unwrap();
 
-      await refetchAccommodationTypes();
+      await refetchAllAccommodationTypes();
 
       message.success("Thêm loại phòng thành công");
 
@@ -109,6 +113,30 @@ const AddRoomTypeModal = ({
     }
   };
 
+  const handleAddNewRoomType = async (newRoomTypeData) => {
+    try {
+      // We're assuming the second modal will handle the actual API call to create the room type
+      // After successful creation, we'll refetch the accommodation types
+      await refetchAccommodationTypes();
+      
+      // And we can select the newly created room type
+      // This assumes the API response includes the ID of the new room type
+      // and that newRoomTypeData contains the created room type's ID
+      if (newRoomTypeData && newRoomTypeData._id) {
+        const currentSelectedIds = form.getFieldValue('accommodationTypeIds') || [];
+        form.setFieldsValue({
+          accommodationTypeIds: [...currentSelectedIds, newRoomTypeData._id]
+        });
+      }
+      
+      message.success("Tạo loại phòng mới thành công");
+      setIsAddNewRoomTypeModalOpen(false);
+    } catch (error) {
+      message.error("Đã xảy ra lỗi khi tạo loại phòng mới");
+      console.error("Error adding new room type:", error);
+    }
+  };
+
   const isDisabled =
     externalSubmitting || localSubmitting || isUpdating || isLoadingTypes;
 
@@ -116,87 +144,113 @@ const AddRoomTypeModal = ({
     isLoadingTypes || isUpdating || localSubmitting || externalSubmitting;
 
   return (
-    <Modal
-      title="Thêm loại phòng"
-      open={isOpen}
-      onCancel={onCancel}
-      footer={[
-        <Button key="cancel" onClick={onCancel} disabled={isDisabled}>
-          Huỷ
-        </Button>,
-        <Button
-          key="submit"
-          type="primary"
-          onClick={handleSubmit}
-          loading={isLoading}
-          disabled={isDisabled}
-        >
-          Xác nhận
-        </Button>,
-      ]}
-      width={500}
-      destroyOnClose
-    >
-      {errorMessage && (
-        <Alert
-          message="Lỗi"
-          description={errorMessage}
-          type="error"
-          showIcon
-          style={{ marginBottom: 16 }}
-          closable
-          onClose={() => setErrorMessage("")}
-        />
-      )}
-
-      {isLoadingTypes ? (
-        <div style={{ textAlign: "center", padding: "20px" }}>
-          <Spin tip="Đang tải dữ liệu..." />
-        </div>
-      ) : (
-        <Form form={form} layout="vertical" preserve={false}>
-          <Form.Item
-            name="accommodationTypeIds"
-            label="Loại phòng"
-            rules={[
-              {
-                required: true,
-                message: "Vui lòng chọn ít nhất một loại phòng",
-              },
-            ]}
-            help="Chọn các loại phòng bạn muốn thêm vào chỗ ở này"
+    <>
+      <Modal
+        title="Thêm loại phòng"
+        open={isOpen}
+        onCancel={onCancel}
+        footer={[
+          <Button key="cancel" onClick={onCancel} disabled={isDisabled}>
+            Huỷ
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            onClick={handleSubmit}
+            loading={isLoading}
+            disabled={isDisabled}
           >
-            <Select
-              mode="multiple"
-              placeholder="Chọn loại phòng"
-              loading={isLoadingTypes}
-              options={(accommodationTypes?.data || []).map((type) => {
-                const isExisting = existingRoomTypeIds.includes(type._id);
-                return {
-                  label: `${type.name}${isExisting ? " (Đã thêm)" : ""}`,
-                  value: type._id,
-                  disabled: isExisting, 
-                };
-              })}
-              showSearch
-              optionFilterProp="label"
-              filterOption={(input, option) =>
-                option.label.toLowerCase().includes(input.toLowerCase())
-              }
-              notFoundContent={
-                typesError ? "Lỗi tải dữ liệu" : "Không tìm thấy loại phòng"
-              }
-            />
-          </Form.Item>
-        </Form>
-      )}
+            Xác nhận
+          </Button>,
+        ]}
+        width={500}
+        destroyOnClose
+      >
+        {errorMessage && (
+          <Alert
+            message="Lỗi"
+            description={errorMessage}
+            type="error"
+            showIcon
+            style={{ marginBottom: 16 }}
+            closable
+            onClose={() => setErrorMessage("")}
+          />
+        )}
 
-      {isUpdating && (
-        <div style={{ textAlign: "center", padding: "10px" }}>
-          <Spin tip="Đang cập nhật..." />
-        </div>
-      )}
-    </Modal>
+        {isLoadingTypes ? (
+          <div style={{ textAlign: "center", padding: "20px" }}>
+            <Spin tip="Đang tải dữ liệu..." />
+          </div>
+        ) : (
+          <Form form={form} layout="vertical" preserve={false}>
+            <Form.Item
+              name="accommodationTypeIds"
+              label="Loại phòng"
+              rules={[
+                {
+                  required: true,
+                  message: "Vui lòng chọn ít nhất một loại phòng",
+                },
+              ]}
+              help="Chọn các loại phòng bạn muốn thêm vào chỗ ở này"
+            >
+              <Select
+                mode="multiple"
+                placeholder="Chọn loại phòng"
+                loading={isLoadingTypes}
+                options={(accommodationTypes?.data || []).map((type) => {
+                  const isExisting = existingRoomTypeIds.includes(type._id);
+                  return {
+                    label: `${type.name}${isExisting ? " (Đã thêm)" : ""}`,
+                    value: type._id,
+                    disabled: isExisting, 
+                  };
+                })}
+                showSearch
+                optionFilterProp="label"
+                filterOption={(input, option) =>
+                  option.label.toLowerCase().includes(input.toLowerCase())
+                }
+                notFoundContent={
+                  typesError ? "Lỗi tải dữ liệu" : "Không tìm thấy loại phòng"
+                }
+                dropdownRender={(menu) => (
+                  <>
+                    {menu}
+                    <div
+                      style={{
+                        padding: '8px',
+                        cursor: 'pointer',
+                        borderTop: '1px solid #e8e8e8',
+                        display: 'flex',
+                        alignItems: 'center',
+                      }}
+                      onClick={() => setIsAddNewRoomTypeModalOpen(true)}
+                    >
+                      <PlusOutlined style={{ marginRight: 8 }} /> Thêm loại phòng mới
+                    </div>
+                  </>
+                )}
+              />
+            </Form.Item>
+          </Form>
+        )}
+
+        {isUpdating && (
+          <div style={{ textAlign: "center", padding: "10px" }}>
+            <Spin tip="Đang cập nhật..." />
+          </div>
+        )}
+      </Modal>
+
+      <AddNewRoomTypeModal
+        isOpen={isAddNewRoomTypeModalOpen}
+        onCancel={() => setIsAddNewRoomTypeModalOpen(false)}
+        onConfirm={handleAddNewRoomType}
+        ownerId={ownerId}
+      />
+    </>
   );
 };
 

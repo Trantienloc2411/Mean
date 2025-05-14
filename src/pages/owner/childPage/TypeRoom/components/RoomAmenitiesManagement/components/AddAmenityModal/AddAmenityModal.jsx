@@ -19,7 +19,7 @@ const AddAmenityModal = ({ isOpen, onCancel, onConfirm, isLoading }) => {
 
     return (
         <Modal
-            title="Thêm tiện ích mới"
+            title="Thêm dịch vụ mới"
             open={isOpen}
             onCancel={onCancel}
             footer={[
@@ -27,7 +27,7 @@ const AddAmenityModal = ({ isOpen, onCancel, onConfirm, isLoading }) => {
                     Huỷ
                 </Button>,
                 <Button key="submit" type="primary" onClick={handleSubmit} loading={isLoading}>
-                    Thêm tiện ích
+                    Thêm dịch vụ
                 </Button>
             ]}
         >
@@ -39,18 +39,18 @@ const AddAmenityModal = ({ isOpen, onCancel, onConfirm, isLoading }) => {
                 >
                     <Form.Item
                         name="name"
-                        label="Tên tiện ích"
-                        rules={[{ required: true, message: 'Vui lòng nhập tên tiện ích' }]}
+                        label="Tên dịch vụ"
+                        rules={[{ required: true, message: 'Vui lòng nhập tên dịch vụ' }]}
                     >
-                        <Input placeholder="Nhập tên tiện ích" />
+                        <Input placeholder="Nhập tên dịch vụ" />
                     </Form.Item>
 
                     <Form.Item
                         name="description"
                         label="Mô tả"
-                        rules={[{ required: true, message: 'Vui lòng nhập mô tả tiện ích' }]}
+                        rules={[{ required: true, message: 'Vui lòng nhập mô tả dịch vụ' }]}
                     >
-                        <TextArea rows={4} placeholder="Nhập mô tả tiện ích" />
+                        <TextArea rows={4} placeholder="Nhập mô tả dịch vụ" />
                     </Form.Item>
 
                     <Form.Item

@@ -84,11 +84,11 @@ const RoomAmenitiesManagement = ({ isOwner }) => {
   const handleDeleteConfirm = async () => {
     try {
       await deleteAmenity(selectedAmenity.id).unwrap();
-      message.success(`Đã xoá tiện ích ${selectedAmenity.name} thành công`);
+      message.success(`Đã xoá dịch vụ ${selectedAmenity.name} thành công`);
       setIsDeleteModalOpen(false);
       setSelectedAmenity(null);
     } catch (error) {
-      message.error(`Xoá tiện ích thất bại: ${error.message}`);
+      message.error(`Xoá dịch vụ thất bại: ${error.message}`);
     }
   };
 
@@ -100,10 +100,10 @@ const RoomAmenitiesManagement = ({ isOwner }) => {
         status: values.status === "Active",
         isDelete: false,
       }).unwrap();
-      message.success("Thêm tiện ích thành công");
+      message.success("Thêm dịch vụ thành công");
       setIsAddModalOpen(false);
     } catch (error) {
-      message.error(`Thêm tiện ích thất bại: ${error.message}`);
+      message.error(`Thêm dịch vụ thất bại: ${error.message}`);
     }
   };
 
@@ -114,11 +114,11 @@ const RoomAmenitiesManagement = ({ isOwner }) => {
         ...values,
         status: values.status === "Active",
       }).unwrap();
-      message.success("Cập nhật tiện ích thành công");
+      message.success("Cập nhật dịch vụ thành công");
       setIsUpdateModalOpen(false);
       setSelectedAmenity(null);
     } catch (error) {
-      message.error(`Cập nhật tiện ích thất bại: ${error.message}`);
+      message.error(`Cập nhật dịch vụ thất bại: ${error.message}`);
     }
   };
 
@@ -194,7 +194,7 @@ const RoomAmenitiesManagement = ({ isOwner }) => {
       align: "center",
     },
     {
-      title: "Tên tiện ích",
+      title: "Tên dịch vụ",
       dataIndex: "name",
       key: "name",
       align: "left",
@@ -250,12 +250,12 @@ const RoomAmenitiesManagement = ({ isOwner }) => {
 
   return (
     <div className={styles.contentContainer}>
-      <h1>Tiện ích Phòng</h1>
+      <h1>Dịch Vụ Phòng</h1>
       <div className={styles.contentTable}>
         <div className={styles.tool}>
           <div className={styles.searchFilter}>
             <Input
-              placeholder="Tìm kiếm tên tiện ích"
+              placeholder="Tìm kiếm tên dịch vụ"
               onChange={(e) => debouncedSearch(e.target.value)}
               style={{ width: "250px" }}
             />
@@ -282,7 +282,7 @@ const RoomAmenitiesManagement = ({ isOwner }) => {
               icon={<PlusOutlined />}
               className={styles.addRoomButton}
             >
-              Thêm tiện ích
+              Thêm dịch vụ
             </Button>
           )}
         </div>

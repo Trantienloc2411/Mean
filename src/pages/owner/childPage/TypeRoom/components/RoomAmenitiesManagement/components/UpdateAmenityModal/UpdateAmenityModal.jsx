@@ -22,7 +22,7 @@ const UpdateAmenityModal = ({ isOpen, onCancel, onConfirm, initialValues, isLoad
 
   return (
     <Modal
-      title="Chỉnh sửa tiện ích"
+      title="Chỉnh sửa dịch vụ"
       open={isOpen}
       onCancel={() => {
         form.resetFields();
@@ -43,10 +43,10 @@ const UpdateAmenityModal = ({ isOpen, onCancel, onConfirm, initialValues, isLoad
         >
           <Form.Item
             name="name"
-            label="Tên tiện ích"
-            rules={[{ required: true, message: 'Vui lòng nhập tên tiện ích' }]}
+            label="Tên dịch vụ"
+            rules={[{ required: true, message: 'Vui lòng nhập tên dịch vụ' }]}
           >
-            <Input placeholder="Nhập tên tiện ích" />
+            <Input placeholder="Nhập tên dịch vụ" />
           </Form.Item>
 
           <Form.Item

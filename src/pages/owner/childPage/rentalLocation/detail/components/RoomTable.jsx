@@ -82,7 +82,7 @@ export default function RoomTableColumns({ onDetailClick, onEditClick }) {
               justifyContent: "flex-start",
             }}
           >
-            {count} tiện ích
+            {count} dịch vụ
           </div>
         )
       },

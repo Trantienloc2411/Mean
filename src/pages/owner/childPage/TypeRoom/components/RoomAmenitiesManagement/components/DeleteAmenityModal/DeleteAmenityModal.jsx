@@ -4,7 +4,7 @@ import styles from './DeleteAmenityModal.module.scss';
 const DeleteAmenityModal = ({ isOpen, onCancel, onConfirm, amenityName, isLoading }) => {
   return (
     <Modal
-      title="Xác nhận xoá tiện ích"
+      title="Xác nhận xoá dịch vụ"
       open={isOpen}
       onCancel={onCancel}
       footer={[
@@ -26,7 +26,7 @@ const DeleteAmenityModal = ({ isOpen, onCancel, onConfirm, amenityName, isLoadin
     >
       <Spin spinning={isLoading}>
         <p>
-          Bạn đang sắp xoá tiện ích "{amenityName}". Hành động này không thể hoàn tác.
+          Bạn đang sắp xoá dịch vụ "{amenityName}". Hành động này không thể hoàn tác.
         </p>
       </Spin>
     </Modal>

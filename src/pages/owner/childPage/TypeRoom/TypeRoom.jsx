@@ -27,7 +27,7 @@ export default function TypeRoom() {
     },
     {
       key: "2",
-      label: "Tiện ích",
+      label: "Dịch vụ",
       children: <RoomAmenitiesManagement isOwner={isOwner} />,
     },
   ];
