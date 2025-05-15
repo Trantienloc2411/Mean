@@ -60,8 +60,8 @@ export default function AccountTable({ data, loading }) {
           {role === "Admin"
             ? "Nhân viên"
             : role === "Owner"
-              ? "Chủ hộ"
-              : "Khách hàng"}
+            ? "Chủ hộ"
+            : "Khách hàng"}
         </span>
       ),
     },
@@ -265,7 +265,8 @@ export default function AccountTable({ data, loading }) {
           pageSize: 7,
           total: data.length,
           showSizeChanger: false,
-          onChange: (page) => setPagination((prev) => ({ ...prev, current: page })),
+          onChange: (page) =>
+            setPagination((prev) => ({ ...prev, current: page })),
           itemRender: (page, type, originalElement) => {
             const totalPages = Math.ceil(data.length / 7);
             if (type === "prev") {

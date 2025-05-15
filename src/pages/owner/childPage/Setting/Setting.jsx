@@ -12,6 +12,9 @@ import BusinessInformation from "./components/BusinessInformation/BusinessInform
 const { Content } = Layout;
 
 export default function Setting() {
+  const userRole = localStorage.getItem("user_role")?.toLowerCase();
+  const canEdit = userRole === `"owner"`;
+
   const { id } = useParams();
   const {
     data: ownerDetail,
@@ -55,7 +58,6 @@ export default function Setting() {
       taxID: ownerDetail?.businessInformationId?.taxID,
     };
   }, [ownerDetail]);
-  // console.log(ownerDetail);
 
   const bankInfo = useMemo(() => {
     if (!ownerDetail) return null;
@@ -92,16 +94,21 @@ export default function Setting() {
     //     <BusinessInformation refetch={refetch} businessData={businessInfo} />
     //   ),
     // },
-    {
-      key: "changePassword",
-      label: "Đổi mật khẩu",
-      children: <ChangePassword />,
-    },
+
     {
       key: "bankAccount",
       label: "Tài khoản ngân hàng",
       children: <BankAccount refetch={refetch} bankData={bankInfo} />,
     },
+    ...(canEdit
+      ? [
+          {
+            key: "changePassword",
+            label: "Đổi mật khẩu",
+            children: <ChangePassword />,
+          },
+        ]
+      : []),
     // {
     //   key: "meanWallet",
     //   label: "Ví",

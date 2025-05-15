@@ -33,7 +33,7 @@ const LOCATIONIQ_API_URL = "https://us1.locationiq.com/v1/search.php";
 const DEFAULT_OPEN_HOUR = "08:00";
 const DEFAULT_CLOSE_HOUR = "22:00";
 
-// Hàm tiện ích để sắp xếp các địa điểm theo alphabet Tiếng Việt
+// Hàm dịch vụ để sắp xếp các địa điểm theo alphabet Tiếng Việt
 const sortByVietnameseName = (items) => {
   return items.sort((a, b) =>
     a.name.localeCompare(b.name, "vi", { sensitivity: "base" })

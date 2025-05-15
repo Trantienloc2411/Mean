@@ -27,7 +27,7 @@ export default function CreateAccountForm({ open, onClose, roles }) {
 
   return (
     <Modal
-      title="Tạo tài khoản mới"
+      title="Tạo tài khoản nhân viên"
       open={open}
       onCancel={onClose}
       footer={null}

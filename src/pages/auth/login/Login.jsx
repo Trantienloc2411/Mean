@@ -36,9 +36,9 @@ const Login = () => {
   const [sendOTP, { isLoading: isLoadingSendOTP }] = useSendOtpEmailMutation();
   const [isLoading, setIsLoading] = useState(false);
   const images = [
-    "src/assets/images/beach.jpg",
-    "src/assets/images/lake.jpg",
-    "src/assets/images/mountain.jpg",
+    "https://cdn.vietnambiz.vn/2020/2/26/kcn-1582688444973524474363.jpg",
+    "https://kilala.vn/data/upload/article/3685/3.jpg",
+    "https://www.chudu24.com/wp-content/uploads/2017/03/khach-san-sapa-capsule-28.jpg",
   ];
 
   const togglePasswordVisibility = () => {

@@ -7,6 +7,7 @@ import ModalViewDetailRental from "./ModalViewDetailRental";
 import styles from "./RentalLocationTable.module.scss";
 import { FaEye } from "react-icons/fa";
 import _ from "lodash";
+import dayjs from "dayjs";
 export default function RentalLocationTable({ data, loading }) {
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [selectedRental, setSelectedRental] = useState(null);
@@ -66,7 +67,8 @@ export default function RentalLocationTable({ data, loading }) {
     setIsDetailModalVisible(true);
   };
   const handleViewRental = (record) => {
-    window.open(`/rental-location/${record.id}`, "_blank");
+    // window.open(`/rental-location/${record.id}`, "_blank");
+    navigate(`/rental-location/${record.id}`);
   };
   const columns = [
     {
@@ -148,6 +150,17 @@ export default function RentalLocationTable({ data, loading }) {
       },
     },
     {
+      title: "Ngày cập nhật",
+      align: "center",
+      sorter: (a, b) =>
+        dayjs(a.updatedAt, "DD/MM/YYYY HH:mm:ss").toDate() -
+        dayjs(b.updatedAt, "DD/MM/YYYY HH:mm:ss").toDate(),
+      render: (_, record) =>
+        dayjs(record.updatedAt, "DD/MM/YYYY HH:mm:ss").format(
+          "hh:mm:ss DD/MM/YYYY"
+        ),
+    },
+    {
       key: "view",
       align: "center",
       render: (_, record) => (
@@ -182,6 +195,9 @@ export default function RentalLocationTable({ data, loading }) {
     //   ),
     // },
   ];
+  // const sortedData = [...data].sort(
+  //   (a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)
+  // );
 
   return (
     <>

@@ -68,6 +68,7 @@ export default function RentalLocationTable({ data, loading }) {
     {
       title: "No.",
       dataIndex: "no",
+      width: 80,
       key: "no",
       render: (_, __, index) => {
         const { current, pageSize } = pagination;
@@ -132,6 +133,7 @@ export default function RentalLocationTable({ data, loading }) {
     {
       key: "view",
       align: "center",
+      width: 50,
       render: (_, record) => (
         <span
           className={styles.iconViewDetail}
@@ -144,25 +146,41 @@ export default function RentalLocationTable({ data, loading }) {
       ),
     },
     {
-      key: "action",
+      key: "viewDetail",
       align: "center",
       render: (_, record) => (
-        <Dropdown
-          menu={{
-            items: [
-              {
-                key: "1",
-                label: "Xem chi tiết",
-                onClick: () => navigate(`/rental-location/${record.id}`),
-              },
-            ],
+        <span
+          className={styles.iconViewDetail}
+          onClick={() => {
+            navigate(`/rental-location/${record.id}`);
+
+            // window.open(`/rental-location/${record.id}`, "_blank");
           }}
-          trigger={["click"]}
         >
-          <MoreOutlined style={{ cursor: "pointer", fontSize: "16px" }} />
-        </Dropdown>
+          Xem chi tiết
+        </span>
       ),
     },
+    // {
+    //   key: "action",
+    //   align: "center",
+    //   render: (_, record) => (
+    //     <Dropdown
+    //       menu={{
+    //         items: [
+    //           {
+    //             key: "1",
+    //             label: "Xem chi tiết",
+    //             onClick: () => navigate(`/rental-location/${record.id}`),
+    //           },
+    //         ],
+    //       }}
+    //       trigger={["click"]}
+    //     >
+    //       <MoreOutlined style={{ cursor: "pointer", fontSize: "16px" }} />
+    //     </Dropdown>
+    //   ),
+    // },
   ];
 
   return (
