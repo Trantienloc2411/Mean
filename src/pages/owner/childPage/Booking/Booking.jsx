@@ -32,31 +32,30 @@ const PAYMENT_STATUS = Object.freeze({
   FAILED: 5,
 });
 
-
 const getBookingStatusDisplay = (statusCode) => {
   const statusMap = {
-    [BOOKING_STATUS.CONFIRMED]: "Confirmed",
-    [BOOKING_STATUS.PENDING]: "Pending",
-    [BOOKING_STATUS.NEEDCHECKIN]: "Need Check-in",
-    [BOOKING_STATUS.CHECKEDIN]: "Checked In",
-    [BOOKING_STATUS.NEEDCHECKOUT]: "Need Check-out",
-    [BOOKING_STATUS.CHECKEDOUT]: "Checked Out",
-    [BOOKING_STATUS.CANCELLED]: "Cancelled",
-    [BOOKING_STATUS.COMPLETED]: "Completed",
-    [BOOKING_STATUS.REFUND]: "Refund"
+    [BOOKING_STATUS.CONFIRMED]: "Đã xác nhận",
+    [BOOKING_STATUS.PENDING]: "Chờ xác nhận",
+    [BOOKING_STATUS.NEEDCHECKIN]: "Cần check-in",
+    [BOOKING_STATUS.CHECKEDIN]: "Đã check-in",
+    [BOOKING_STATUS.NEEDCHECKOUT]: "Cần check-out",
+    [BOOKING_STATUS.CHECKEDOUT]: "Đã check-out",
+    [BOOKING_STATUS.CANCELLED]: "Đã huỷ",
+    [BOOKING_STATUS.COMPLETED]: "Hoàn tất",
+    [BOOKING_STATUS.REFUND]: "Đã hoàn tiền"
   };
-  return statusMap[statusCode] || "Unknown Status";
+  return statusMap[statusCode] || "Trạng thái không xác định";
 };
 
 const getPaymentStatusDisplay = (statusCode) => {
   const statusMap = {
-    [PAYMENT_STATUS.BOOKING]: "Booking",
-    [PAYMENT_STATUS.PENDING]: "Pending",
-    [PAYMENT_STATUS.PAID]: "Paid",
-    [PAYMENT_STATUS.REFUND]: "Refund",
-    [PAYMENT_STATUS.FAILED]: "Failed",
+    [PAYMENT_STATUS.BOOKING]: "Đã đặt",
+    [PAYMENT_STATUS.PENDING]: "Chờ thanh toán",
+    [PAYMENT_STATUS.PAID]: "Đã thanh toán",
+    [PAYMENT_STATUS.REFUND]: "Đã hoàn tiền",
+    [PAYMENT_STATUS.FAILED]: "Thanh toán thất bại",
   };
-  return statusMap[statusCode] || "Unpaid";
+  return statusMap[statusCode] || "Chưa thanh toán";
 };
 
 const PAYMENT_METHOD = Object.freeze({
@@ -194,6 +193,10 @@ export default function Booking() {
           })
         })
       };
+
+      console.log('====================================');
+      console.log(updateData);
+      console.log('====================================');
   
       await updateBooking(updateData).unwrap();
       refetchBookings();
