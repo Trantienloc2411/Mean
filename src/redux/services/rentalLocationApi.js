@@ -29,7 +29,7 @@ export const rentalLocationApi = apiSlice.injectEndpoints({
 
     updateRentalLocation: builder.mutation({
       query: ({ id, updatedData }) => {
-        console.log("updateRentalLocation mutation called with:", { id, data });
+        // console.log("updateRentalLocation mutation called with:", { id, data });
         return {
           url: `/rental-location/${id}`,
           method: "PUT",

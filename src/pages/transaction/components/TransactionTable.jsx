@@ -15,13 +15,18 @@ import { FaEye } from "react-icons/fa";
 export default function TransactionTable({ data, loading }) {
   const [isDetailModalVisible, setDetailModalVisible] = useState(false);
   const [selectedTransaction, setSelectedTransaction] = useState(null);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 7,
+  });
 
   const columns = [
     {
       title: "No.",
       dataIndex: "no",
       key: "no",
-      render: (_, __, index) => index + 1, // Tự động đánh số
+      render: (_, __, index) =>
+        (pagination.current - 1) * pagination.pageSize + index + 1,
     },
     {
       title: "Mã giao dịch",
@@ -55,19 +60,47 @@ export default function TransactionTable({ data, loading }) {
       key: "status",
       render: (status) => {
         return status.en == "PENDING" ? (
-          <span style={{ background: "#fff7e6", color: "#fa8c16", borderRadius: 20, padding: "4px 12px" }}>
+          <span
+            style={{
+              background: "#fff7e6",
+              color: "#fa8c16",
+              borderRadius: 20,
+              padding: "4px 12px",
+            }}
+          >
             {status.vi}
           </span>
         ) : status.en == "COMPLETED" ? (
-          <span style={{ background: "#d1fae5", color: "#059669", borderRadius: 20, padding: "4px 12px" }}>
+          <span
+            style={{
+              background: "#d1fae5",
+              color: "#059669",
+              borderRadius: 20,
+              padding: "4px 12px",
+            }}
+          >
             {status.vi}
           </span>
         ) : status.en == "FAILED" ? (
-          <span style={{ background: "red", color: "#fff", borderRadius: 20, padding: "4px 12px" }}>
+          <span
+            style={{
+              background: "red",
+              color: "#fff",
+              borderRadius: 20,
+              padding: "4px 12px",
+            }}
+          >
             {status.vi}
           </span>
         ) : (
-          <span style={{ background: "#333", color: "#fff", borderRadius: 20, padding: "4px 12px" }}>
+          <span
+            style={{
+              background: "#333",
+              color: "#fff",
+              borderRadius: 20,
+              padding: "4px 12px",
+            }}
+          >
             {status.vi}
           </span>
         );
@@ -81,12 +114,24 @@ export default function TransactionTable({ data, loading }) {
       render: (typeTransaction) => {
         return typeTransaction.en == "MOMO_PAYMENT" ? (
           <span
-            style={{ background: "#a21d65", color: "#fff", borderRadius: 20, padding: "4px 12px" }}
+            style={{
+              background: "#a21d65",
+              color: "#fff",
+              borderRadius: 20,
+              padding: "4px 12px",
+            }}
           >
             {typeTransaction.vi}
           </span>
         ) : (
-          <span style={{ background: "#333", color: "#fff", borderRadius: 20, padding: "4px 12px" }}>
+          <span
+            style={{
+              background: "#333",
+              color: "#fff",
+              borderRadius: 20,
+              padding: "4px 12px",
+            }}
+          >
             {typeTransaction.vi}
           </span>
         );
@@ -184,6 +229,7 @@ export default function TransactionTable({ data, loading }) {
             return originalElement;
           },
         }}
+        onChange={(pagination) => setPagination(pagination)}
         className={styles.transactionTable}
       />
       <TransactionDetailModal

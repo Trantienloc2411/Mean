@@ -152,9 +152,9 @@ export default function RentalLocationTable({ data, loading }) {
         <span
           className={styles.iconViewDetail}
           onClick={() => {
-            // navigate(`/rental-location/${record.id}`);
+            navigate(`/rental-location/${record.id}`);
 
-            window.open(`/rental-location/${record.id}`, "_blank");
+            // window.open(`/rental-location/${record.id}`, "_blank");
           }}
         >
           Xem chi tiết
