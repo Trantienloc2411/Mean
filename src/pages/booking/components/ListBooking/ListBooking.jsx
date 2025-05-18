@@ -91,14 +91,14 @@ export default function ListBooking({
     [bookingStatusCodes.CHECKEDOUT]: "Khách đã check-out thành công, đang chờ xác nhận hoàn tất",
     [bookingStatusCodes.CANCELLED]: "Đơn đặt phòng đã bị hủy bởi khách hoặc chủ phòng",
     [bookingStatusCodes.COMPLETED]: "Đơn đặt phòng đã được hoàn tất toàn bộ quy trình",
-    [bookingStatusCodes.REFUND]: "Đơn đặt phòng đang yêu cầu hoàn tiền",
+    [bookingStatusCodes.REFUND]: "Đơn hàng đã được hoàn tiền",
   }
 
   const statusPaymentDescriptions = {
     [paymentStatusCodes.BOOKING]: "Đơn hàng đã được đặt thành công và đang chờ thanh toán",
     [paymentStatusCodes.PENDING]: "Đơn hàng đang trong quá trình xử lý thanh toán",
     [paymentStatusCodes.PAID]: "Đơn hàng đã được thanh toán đầy đủ",
-    [paymentStatusCodes.REFUND]: "Đơn hàng đã được hoàn tiền",
+    [paymentStatusCodes.REFUND]: "Đơn đặt phòng đang yêu cầu hoàn tiền",
     [paymentStatusCodes.FAILED]: "Thanh toán không thành công, cần thử lại hoặc chọn phương thức khác",
   }
 
