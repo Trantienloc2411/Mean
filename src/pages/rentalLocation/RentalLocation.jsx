@@ -1,19 +1,20 @@
 import { useState, useEffect } from "react";
-import { Input, Card } from "antd";
+import { Input, Card, Button, message } from "antd";
 import { Flex } from "antd";
 import OverviewLocation from "./components/OverviewLocation";
-import { SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined, ReloadOutlined } from "@ant-design/icons";
 import RentalLocationTable from "./components/RentalLocationTable";
 import FilterRentalLocation from "./components/FilterRentalLocation";
 import { useGetAllRentalLocationQuery } from "../../redux/services/rentalApi";
 import styles from "./RentalLocation.module.scss";
 
 export default function RentalLocation() {
-  const { data, isLoading } = useGetAllRentalLocationQuery();
+  const { data, isLoading, refetch } = useGetAllRentalLocationQuery();
   const allLocations = data?.success ? data.data : [];
 
   const [searchValue, setSearchValue] = useState("");
   const [filteredLocations, setFilteredLocations] = useState([]);
+  const [isReloading, setIsReloading] = useState(false);
 
   const [filters, setFilters] = useState({ statuses: [] });
   useEffect(() => {
@@ -74,6 +75,18 @@ export default function RentalLocation() {
     setSearchValue("");
   };
 
+  const handleReload = async () => {
+    try {
+      setIsReloading(true);
+      await refetch();
+      message.success('Dữ liệu đã được làm mới');
+    } catch (error) {
+      message.error('Làm mới dữ liệu thất bại');
+    } finally {
+      setIsReloading(false);
+    }
+  };
+
   return (
     <div className={styles.contentContainer}>
       <h1 className={styles.sectionTitle}>Quản lý địa điểm</h1>
@@ -100,11 +113,22 @@ export default function RentalLocation() {
                 onReset={handleResetFilters}
                 onApplyFilters={() => applyFilters(searchValue, filters)}
               />
+              <Button
+                icon={<ReloadOutlined spin={isReloading} />}
+                onClick={handleReload}
+                loading={isReloading}
+                style={{ marginLeft: 10 }}
+              >
+                Làm mới
+              </Button>
             </div>
           </div>
 
           <div className={styles.tableContainer}>
-            <RentalLocationTable data={filteredLocations} loading={isLoading} />
+            <RentalLocationTable 
+              data={filteredLocations} 
+              loading={isLoading || isReloading} 
+            />
           </div>
         </Card>
       </div>

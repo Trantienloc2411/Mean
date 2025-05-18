@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Dropdown, Input, Button, message, Select } from "antd"
-import { FilterOutlined, SearchOutlined, MoreOutlined, ExclamationCircleFilled, SortAscendingOutlined, InfoCircleOutlined } from "@ant-design/icons"
+import { FilterOutlined, SearchOutlined, MoreOutlined, ExclamationCircleFilled, SortAscendingOutlined, InfoCircleOutlined, ReloadOutlined } from "@ant-design/icons"
 import { CreditCardOutlined, DollarOutlined, BankOutlined, WalletOutlined } from "@ant-design/icons"
 import debounce from "lodash/debounce"
 import TableModify from "../../../dashboard/components/Table"
@@ -28,6 +28,7 @@ export default function ListBooking({
   paymentMethodCodes,
   onStatusChange,
   isUpdating,
+  onReload
 }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [filteredData, setFilteredData] = useState(bookings || [])
@@ -43,6 +44,7 @@ export default function ListBooking({
   const [selectedBookingId, setSelectedBookingId] = useState(null)
   const [isBookingDetailVisible, setIsBookingDetailVisible] = useState(false)
   const [sortOption, setSortOption] = useState("newest")
+  const [isReloading, setIsReloading] = useState(false)
 
   const {
     data: bookingDetailData,
@@ -397,6 +399,20 @@ export default function ListBooking({
     }
   }
 
+  const handleReloadData = async () => {
+    if (onReload && typeof onReload === 'function') {
+      setIsReloading(true)
+      try {
+        await onReload()
+        message.success('Dữ liệu đã được làm mới')
+      } catch (error) {
+        message.error('Làm mới dữ liệu thất bại')
+      } finally {
+        setIsReloading(false)
+      }
+    }
+  }
+
   const menuItems = (record) => {
     const items = [
       {
@@ -613,6 +629,14 @@ export default function ListBooking({
               {activeFilterCount > 0 && <span className={styles.filterBadge}>{activeFilterCount}</span>}
             </Button>
           </Dropdown>
+          <Button
+            icon={<ReloadOutlined spin={isReloading} />}
+            onClick={handleReloadData}
+            loading={isReloading}
+            className={styles.reloadButton}
+          >
+            Làm mới
+          </Button>
 
           <div className={styles.statusDescriptionContainer}>
             <Dropdown
@@ -695,7 +719,7 @@ export default function ListBooking({
                 return originalElement
               },
             }}
-            loading={isUpdating}
+            loading={isUpdating || isReloading}
             className={styles.bookingTable}
           />
         </div>

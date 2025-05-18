@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react"
 import { Table, Button, message, Spin } from "antd"
 import { IoMdAdd } from "react-icons/io"
+import { ReloadOutlined } from "@ant-design/icons"
 import { useParams } from "react-router-dom"
 import RoomTableColumns from "./RoomTable"
 import RoomTypeFilter from "./RoomTypeFilter"
@@ -25,6 +26,7 @@ export default function RoomList() {
   const [selectedAccommodationId, setSelectedAccommodationId] = useState(null)
   const [accommodationData, setAccommodationData] = useState(null)
   const [roomTypes, setRoomTypes] = useState([])
+  const [isReloading, setIsReloading] = useState(false)
 
   const {
     data: accommodations,
@@ -107,6 +109,18 @@ export default function RoomList() {
     setSearchText(value)
   }
 
+  const handleReload = async () => {
+    try {
+      setIsReloading(true)
+      await refetch()
+      message.success("Dữ liệu đã được làm mới")
+    } catch (error) {
+      message.error("Làm mới dữ liệu thất bại")
+    } finally {
+      setIsReloading(false)
+    }
+  }
+
   if (isLoading)
     return (
       <div className={styles.loadingContainer}>
@@ -154,6 +168,13 @@ export default function RoomList() {
           <h2>Danh Sách Phòng</h2>
           <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
             <SearchAndFilter onSearch={handleSearch} onFilterChange={setFilterStatus} />
+            <Button
+              icon={<ReloadOutlined spin={isReloading} />}
+              onClick={handleReload}
+              loading={isReloading}
+            >
+              Làm mới
+            </Button>
             <Button type="primary" icon={<IoMdAdd />} onClick={() => setCreateModalVisible(true)}>
               Thêm phòng
             </Button>
@@ -168,7 +189,7 @@ export default function RoomList() {
             })}
             dataSource={sortedData}
             rowKey="id"
-            loading={isLoading}
+            loading={isLoading || isReloading}
             pagination={{
               total: sortedData.length,
               pageSize: 7,

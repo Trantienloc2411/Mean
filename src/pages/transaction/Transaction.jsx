@@ -1,20 +1,22 @@
 import { useState } from "react";
-import { Button, Input } from "antd";
-import { FilterOutlined, SearchOutlined } from "@ant-design/icons";
+import { Button, Input, message } from "antd";
+import { FilterOutlined, SearchOutlined, ReloadOutlined } from "@ant-design/icons";
 import { Flex } from "antd";
 import TransactionTable from "./components/TransactionTable";
 import FilterModal from "./components/FilterModal";
 import OverviewTransaction from "./components/OverviewTransaction";
 import styles from "./Transaction.module.scss";
 import { useGetAllTransactionQuery } from "../../redux/services/transactionApi";
+
 export default function Transaction() {
   const [searchValue, setSearchValue] = useState(""); // Tìm kiếm theo mã giao dịch hoặc mã đặt phòng
   const [filters, setFilters] = useState({
     statuses: [], // Lọc theo trạng thái
     transactionTypes: [], // Lọc theo loại giao dịch
   });
+  const [isReloading, setIsReloading] = useState(false);
 
-  const { data: transactionData } = useGetAllTransactionQuery();
+  const { data: transactionData, isLoading, refetch } = useGetAllTransactionQuery();
   const convertTransactionData = (data) => {
     return (
       data?.map((item) => ({
@@ -100,6 +102,18 @@ export default function Transaction() {
     });
   };
 
+  const handleReload = async () => {
+    try {
+      setIsReloading(true);
+      await refetch();
+      message.success('Dữ liệu đã được làm mới');
+    } catch (error) {
+      message.error('Làm mới dữ liệu thất bại');
+    } finally {
+      setIsReloading(false);
+    }
+  };
+
   const transactionOverviewData = {
     totalTransaction: transformedData.length,
     pendingCount: transformedData.filter((item) => item.status.en === "PENDING")
@@ -125,7 +139,7 @@ export default function Transaction() {
       <div className={styles.transactionSection}>
         <h1 className={styles.sectionTitle}>Lịch sử giao dịch</h1>
         <div className={styles.contentTable}>
-          <Flex gap={30}>
+          <Flex gap={15}>
             <Input
               prefix={<SearchOutlined />}
               placeholder="Tìm kiếm bằng mã giao dịch hoặc mã đặt phòng"
@@ -137,8 +151,15 @@ export default function Transaction() {
               <FilterOutlined />
               Lọc
             </Button>
+            <Button
+              icon={<ReloadOutlined spin={isReloading} />}
+              onClick={handleReload}
+              loading={isReloading}
+            >
+              Làm mới
+            </Button>
           </Flex>
-          <TransactionTable data={filteredData} />
+          <TransactionTable data={filteredData} loading={isLoading || isReloading} />
         </div>
       </div>
       {/* Modal lọc */}

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Input, Button, Dropdown, Table, message } from "antd";
-import { FilterOutlined, PlusOutlined, MoreOutlined } from "@ant-design/icons";
+import { FilterOutlined, PlusOutlined, MoreOutlined, ReloadOutlined } from "@ant-design/icons";
 import styles from "./Policy.module.scss";
 import Filter from "./components/Filter/Filter.jsx";
 import DeletePolicyModal from "./components/DeletePolicyModal/DeletePolicyModal.jsx";
@@ -34,6 +34,7 @@ export default function Policy() {
   const [effectiveOwnerId, setEffectiveOwnerId] = useState(null);
   const [selectedPolicyId, setSelectedPolicyId] = useState(null);
   const [policyDetailForUpdate, setPolicyDetailForUpdate] = useState(null);
+  const [isReloading, setIsReloading] = useState(false);
 
 
   // const userId = localStorage.getItem("user_id");
@@ -435,6 +436,18 @@ export default function Policy() {
     }));
   };
 
+  const handleReload = async () => {
+    try {
+      setIsReloading(true);
+      await refetch();
+      message.success('Dữ liệu đã được làm mới');
+    } catch (error) {
+      message.error('Làm mới dữ liệu thất bại');
+    } finally {
+      setIsReloading(false);
+    }
+  };
+
   useEffect(() => {
     if (!baseData || baseData.length === 0) return;
 
@@ -565,6 +578,14 @@ export default function Policy() {
                   `(${Object.values(selectedValues).flat().length})`}
               </Button>
             </Dropdown>
+            <Button
+              icon={<ReloadOutlined spin={isReloading} />}
+              onClick={handleReload}
+              loading={isReloading}
+              style={{ marginRight: 10 }}
+            >
+              Làm mới
+            </Button>
           </div>
 
           <Button
@@ -582,7 +603,7 @@ export default function Policy() {
         <Table
           columns={columns}
           dataSource={filteredData}
-          loading={isPoliciesLoading || isOwnerLoading}
+          loading={isPoliciesLoading || isOwnerLoading || isReloading}
           rowKey={(record) => record._id || record.id || record.No}
           pagination={{
             total: filteredData.length,

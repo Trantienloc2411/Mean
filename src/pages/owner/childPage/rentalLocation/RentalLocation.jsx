@@ -2,8 +2,8 @@ import { useState, useEffect } from "react";
 import { useNavigate, useParams } from "react-router-dom";
 import { useGetRentalLocationByOwnerIdQuery } from "../../../../redux/services/rentalApi";
 import { useGetOwnerDetailByUserIdQuery } from "../../../../redux/services/ownerApi";
-import { Button, Spin, Input, Flex } from "antd";
-import { LoadingOutlined } from "@ant-design/icons";
+import { Button, Spin, Input, Flex, message } from "antd";
+import { LoadingOutlined, ReloadOutlined  } from "@ant-design/icons";
 import { IoIosAdd } from "react-icons/io";
 import { Typography } from "antd";
 import RentalLocationTable from "./components/RentalLocationTable";
@@ -23,13 +23,15 @@ export default function RentalLocation() {
   const isAdmin = userRole === `"admin"` || userRole === `"staff"`;
   const isOwner = userRole === `"owner"`;
 
-  const { data: rentalData, isLoading: rentalIsLoading } =
+  const { data: rentalData, isLoading: rentalIsLoading, refetch } =
     useGetRentalLocationByOwnerIdQuery(ownerId, { skip: !ownerId });
 
   const [searchValue, setSearchValue] = useState("");
   const [filters, setFilters] = useState({ statuses: [] });
   const [filteredLocations, setFilteredLocations] = useState([]);
   console.log(ownerDetailData);
+
+  const [isReloading, setIsReloading] = useState(false);
 
   useEffect(() => {
     if (rentalData?.data) {
@@ -63,6 +65,18 @@ export default function RentalLocation() {
       <Spin indicator={<LoadingOutlined style={{ fontSize: 48 }} spin />} />
     );
   console.log(isAdmin);
+
+  const handleReload = async () => {
+    try {
+      setIsReloading(true);
+      await refetch();  
+      message.success("Dữ liệu đã được làm mới");
+    } catch (error) {
+      message.error("Làm mới dữ liệu thất bại");
+    } finally {
+      setIsReloading(false);
+    }
+  };
 
   return (
     <div style={{ padding: "10px 20px" }}>
@@ -100,12 +114,20 @@ export default function RentalLocation() {
                 applyFilters(searchValue, filters, rentalData?.data || [])
               }
             />
+
+            <Button
+              icon={<ReloadOutlined spin={isReloading} />}
+              onClick={handleReload}
+              loading={isReloading}
+            >
+              Làm mới
+            </Button>
           </Flex>
 
           {filteredLocations.length > 0 ? (
             <RentalLocationTable
               data={filteredLocations}
-              loading={rentalIsLoading}
+              loading={rentalIsLoading || isReloading}
             />
           ) : (
             <div
