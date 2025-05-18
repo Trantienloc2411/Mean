@@ -4,7 +4,11 @@ export const transactionApi = apiSlice.injectEndpoints({
   endpoints: (builder) => ({
     getAllTransaction: builder.query({
       query: () => "/transaction/all-transactions",
-      providesTags: ["User"],
+      providesTags: ["Transaction"],
+    }),
+    getAllTransactionByOwner: builder.query({
+      query: (ownerId) => `/transaction/all-transactions/${ownerId}`,
+      providesTags: ["Transaction"],
     }),
     createTransaction: builder.mutation({
       query: (transactionData) => ({
@@ -17,4 +21,8 @@ export const transactionApi = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useGetAllTransactionQuery, useCreateTransactionMutation } = transactionApi;
+export const {
+  useGetAllTransactionQuery,
+  useCreateTransactionMutation,
+  useGetAllTransactionByOwnerQuery,
+} = transactionApi;
