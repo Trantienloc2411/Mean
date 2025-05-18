@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Table, Button, Input, Dropdown, message, Tooltip, Tag } from "antd";
-import { MoreOutlined, PlusOutlined, FilterOutlined, CloseOutlined  } from "@ant-design/icons";
+import { MoreOutlined, PlusOutlined, FilterOutlined, CloseOutlined, ReloadOutlined  } from "@ant-design/icons";
 import styles from "./RoomTypeManagement.module.scss";
 import DeleteRoomTypeModal from "./components/DeleteRoomTypeModal/DeleteRoomTypeModal";
 import AddRoomTypeModal from "./components/AddRoomTypeModal/AddRoomTypeModal";
@@ -38,6 +38,7 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [serviceNames, setServiceNames] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isReloading, setIsReloading] = useState(false);
 
   const {
     data: roomTypesData,
@@ -138,6 +139,18 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
       setIsSubmitting(false);
     }
   }; 
+
+  const handleReload = async () => {
+    try {
+      setIsReloading(true);
+      await refetchRoomTypes();
+      message.success("Dữ liệu đã được làm mới");
+    } catch (error) {
+      message.error("Làm mới dữ liệu thất bại");
+    } finally {
+      setIsReloading(false);
+    }
+  };
 
   const menuItems = [
     {
@@ -389,6 +402,13 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
                 {getActiveFiltersCount() > 0 && ` (${getActiveFiltersCount()})`}
               </Button>
             </Dropdown>
+            <Button
+              icon={<ReloadOutlined spin={isReloading} />}
+              onClick={handleReload}
+              loading={isReloading}
+            >
+              Làm mới
+            </Button>
           </div>
           {isOwner && (
             <Button
@@ -404,7 +424,7 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
         </div>
 
         <Table
-          loading={isRoomTypesLoading || isServicesLoading || isUpdating}
+          loading={isRoomTypesLoading || isServicesLoading || isUpdating  || isReloading}
           columns={columns}
           dataSource={filteredData}
           rowKey="_id"

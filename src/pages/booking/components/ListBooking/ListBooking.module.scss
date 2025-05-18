@@ -34,7 +34,102 @@
   gap: 12px;
   margin-bottom: 20px;
   align-items: center;
+  justify-content: flex-start;
 }
+
+.statusDescriptionContainer {
+  margin-left: auto;
+}
+
+.infoButton {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  background-color: #f0f9ff;
+  color: #0369a1;
+  border-color: #bae6fd;
+  
+  &:hover {
+    background-color: #e0f2fe;
+    color: #0284c7;
+    border-color: #7dd3fc;
+  }
+}
+
+.statusDescriptionPopover {
+  width: 380px;
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 16px;
+  background-color: white;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.descriptionSection {
+  margin-bottom: 16px;
+  
+  h4 {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1f2937;
+    margin-bottom: 12px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #f3f4f6;
+  }
+  
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.descriptionItem {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 12px;
+  padding-bottom: 12px;
+  border-bottom: 1px dashed #f3f4f6;
+  
+  &:last-child {
+    margin-bottom: 0;
+    padding-bottom: 0;
+    border-bottom: none;
+  }
+}
+
+.statusDot {
+  flex-shrink: 0;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 6px;
+  
+  &.confirmed { background-color: #d97706; }
+  &.pending { background-color: #4b5563; }
+  &.needcheckin { background-color: #0369a1; }
+  &.inprogress { background-color: #0d9488; }
+  &.needcheckout { background-color: #7c3aed; }
+  &.checkedout { background-color: #0284c7; }
+  &.canceled { background-color: #dc2626; }
+  &.complete { background-color: #0284c7; }
+  &.refund { background-color: #fa541c; }
+  &.booked { background-color: #d97706; }
+  &.paid { background-color: #0d9488; }
+}
+
+.descriptionTitle {
+  font-size: 13px;
+  font-weight: 500;
+  color: #1f2937;
+  margin-bottom: 4px;
+}
+
+.descriptionText {
+  font-size: 12px;
+  color: #6b7280;
+  line-height: 1.5;
+}
+
 
 .searchInput {
   max-width: 280px;
@@ -555,3 +650,112 @@
   }
 }
 
+
+.urgentWarningRow {
+  background: linear-gradient(90deg, #fff7e6 0%, #ffe7ba 100%) !important;
+  border-left: 4px solid #fa8c16;
+  position: relative;
+  animation: alert-pulse 2s infinite;
+  
+  &:hover td {
+    background: #ffe7ba !important;
+  }
+  
+  &::after {
+    content: "❗ CẦN XÁC NHẬN HOÀN TIỀN";
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #fa541c;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(250, 84, 28, 0.2);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@keyframes alert-pulse {
+  0% { opacity: 0.95; }
+  50% { opacity: 1; }
+  100% { opacity: 0.95; }
+}
+
+.indexCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.urgentWarningIcon {
+  color: #fa541c;
+  font-size: 18px;
+  animation: icon-pulse 1s infinite;
+  cursor: pointer;
+  
+  &:hover {
+    color: #ff4d4f;
+  }
+}
+
+@keyframes icon-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.statusContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.statusAlertDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #ff4d4f;
+  border-radius: 50%;
+  margin-left: 8px;
+  box-shadow: 0 0 8px rgba(255, 77, 79, 0.4);
+  animation: dot-pulse 1.5s infinite;
+  cursor: help;
+}
+
+@keyframes dot-pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+.warningTooltip {
+  .ant-tooltip-inner {
+    background: #fa541c;
+    font-weight: 500;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(250, 84, 28, 0.3);
+  }
+  
+  .ant-tooltip-arrow {
+    &::before {
+      background: #fa541c;
+    }
+  }
+}
+
+.ant-table-row {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.005);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  &.urgentWarningRow:hover {
+    box-shadow: 0 4px 16px rgba(250, 84, 28, 0.3);
+  }
+}

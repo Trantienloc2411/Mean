@@ -11,7 +11,7 @@ export default function TransactionDetailModal({
   if (!transaction) return null;
 
   const formatDate = (date) =>
-    date ? dayjs(date).format("HH:mm DD/MM/YYYY") : "N/A";
+  date ? dayjs(date, 'DD/MM/YYYY HH:mm:ss').format('HH:mm DD/MM/YYYY') : "N/A";
 
   return (
     <Modal
