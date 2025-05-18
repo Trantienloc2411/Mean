@@ -243,6 +243,7 @@ export default function Booking() {
             isUpdating={isUpdating}
             bookingDetailData={bookingDetailData}
             onSelectBookingDetail={handleSelectBookingDetail}
+            onReload={refetchBookings}
           />
         </div>
       ) : (

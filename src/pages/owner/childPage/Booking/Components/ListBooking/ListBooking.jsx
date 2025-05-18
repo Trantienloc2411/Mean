@@ -7,6 +7,7 @@ import {
   WalletOutlined,
   SortAscendingOutlined,
   InfoCircleOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons"
 import debounce from "lodash/debounce"
 import Filter from "../../../../../../components/Filter/Filter"
@@ -26,6 +27,7 @@ export default function ListBooking({
   isUpdating,
   onSelectBookingDetail,
   generatePassword,
+  onReload,
 }) {
   const [searchTerm, setSearchTerm] = useState("")
   const [filteredData, setFilteredData] = useState([])
@@ -44,6 +46,7 @@ export default function ListBooking({
     pageSize: 7,
     total: bookings.length,
   })
+  const [isReloading, setIsReloading] = useState(false)
 
   const {
     data: bookingDetailData,
@@ -255,6 +258,20 @@ export default function ListBooking({
   const handleSortChange = (value) => setSortOption(value)
   const handleSearch = (e) => setSearchTerm(e.target.value)
 
+  const handleReloadData = async () => {
+    if (onReload && typeof onReload === 'function') {
+      setIsReloading(true)
+      try {
+        await onReload()
+        message.success('Dữ liệu đã được cập nhật')
+      } catch (error) {
+        message.error('Không thể tải lại dữ liệu. Vui lòng thử lại sau.')
+      } finally {
+        setIsReloading(false)
+      }
+    }
+  }
+
   const getStatusClass = (status) =>
     ({
       "Đã xác nhận": "confirmed",
@@ -450,6 +467,15 @@ export default function ListBooking({
             </Button>
           </Dropdown>
 
+          <Button 
+            icon={<ReloadOutlined spin={isReloading} />} 
+            onClick={handleReloadData} 
+            loading={isReloading}
+            className={styles.reloadButton}
+          >
+            Làm mới
+          </Button>
+
           <div className={styles.statusDescriptionContainer}>
             <Dropdown
               overlay={
@@ -501,7 +527,7 @@ export default function ListBooking({
             columns={columns}
             dataSource={filteredData}
             rowKey={(record) => record._originalBooking?._id || Math.random()}
-            loading={isUpdating}
+            loading={isUpdating || isReloading}
             pagination={{
               ...pagination,
               total: filteredData.length,
