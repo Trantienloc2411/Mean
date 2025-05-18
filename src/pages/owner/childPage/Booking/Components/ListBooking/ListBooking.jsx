@@ -74,7 +74,7 @@ export default function ListBooking({
       [paymentStatusCodes.BOOKING]: "Đã đặt",
       [paymentStatusCodes.PENDING]: "Chờ thanh toán",
       [paymentStatusCodes.PAID]: "Đã thanh toán",
-      [paymentStatusCodes.REFUND]: "Đã hoàn tiền",
+      [paymentStatusCodes.REFUND]: "Yêu cầu hoàn tiền",
       [paymentStatusCodes.FAILED]: "Thanh toán thất bại",
     }
     return statusMap[statusCode] || "Chưa thanh toán"
@@ -258,7 +258,7 @@ export default function ListBooking({
       "Đã đặt": "booked",
       "Chờ thanh toán": "pending",
       "Đã thanh toán": "paid",
-      "Đã hoàn tiền": "refund",
+      "Yêu cầu hoàn tiền": "refund",
       "Thanh toán thất bại": "cancelled",
     }
 

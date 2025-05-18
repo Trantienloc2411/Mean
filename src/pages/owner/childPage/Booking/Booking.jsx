@@ -52,7 +52,7 @@ const getPaymentStatusDisplay = (statusCode) => {
     [PAYMENT_STATUS.BOOKING]: "Đã đặt",
     [PAYMENT_STATUS.PENDING]: "Chờ thanh toán",
     [PAYMENT_STATUS.PAID]: "Đã thanh toán",
-    [PAYMENT_STATUS.REFUND]: "Đã hoàn tiền",
+    [PAYMENT_STATUS.REFUND]: "Yêu cầu hoàn tiền",
     [PAYMENT_STATUS.FAILED]: "Thanh toán thất bại",
   };
   return statusMap[statusCode] || "Chưa thanh toán";

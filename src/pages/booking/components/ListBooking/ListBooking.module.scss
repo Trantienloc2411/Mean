@@ -555,3 +555,112 @@
   }
 }
 
+
+.urgentWarningRow {
+  background: linear-gradient(90deg, #fff7e6 0%, #ffe7ba 100%) !important;
+  border-left: 4px solid #fa8c16;
+  position: relative;
+  animation: alert-pulse 2s infinite;
+  
+  &:hover td {
+    background: #ffe7ba !important;
+  }
+  
+  &::after {
+    content: "❗ CẦN XÁC NHẬN HOÀN TIỀN";
+    position: absolute;
+    right: 16px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: #fa541c;
+    color: white;
+    padding: 4px 12px;
+    border-radius: 20px;
+    font-size: 0.85rem;
+    font-weight: 600;
+    box-shadow: 0 2px 8px rgba(250, 84, 28, 0.2);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+  }
+}
+
+@keyframes alert-pulse {
+  0% { opacity: 0.95; }
+  50% { opacity: 1; }
+  100% { opacity: 0.95; }
+}
+
+.indexCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.urgentWarningIcon {
+  color: #fa541c;
+  font-size: 18px;
+  animation: icon-pulse 1s infinite;
+  cursor: pointer;
+  
+  &:hover {
+    color: #ff4d4f;
+  }
+}
+
+@keyframes icon-pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.2); }
+  100% { transform: scale(1); }
+}
+
+.statusContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.statusAlertDot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  background: #ff4d4f;
+  border-radius: 50%;
+  margin-left: 8px;
+  box-shadow: 0 0 8px rgba(255, 77, 79, 0.4);
+  animation: dot-pulse 1.5s infinite;
+  cursor: help;
+}
+
+@keyframes dot-pulse {
+  0% { opacity: 1; }
+  50% { opacity: 0.4; }
+  100% { opacity: 1; }
+}
+
+.warningTooltip {
+  .ant-tooltip-inner {
+    background: #fa541c;
+    font-weight: 500;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(250, 84, 28, 0.3);
+  }
+  
+  .ant-tooltip-arrow {
+    &::before {
+      background: #fa541c;
+    }
+  }
+}
+
+.ant-table-row {
+  transition: all 0.3s ease;
+  
+  &:hover {
+    transform: scale(1.005);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+  }
+  
+  &.urgentWarningRow:hover {
+    box-shadow: 0 4px 16px rgba(250, 84, 28, 0.3);
+  }
+}

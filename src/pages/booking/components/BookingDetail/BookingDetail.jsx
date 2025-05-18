@@ -54,7 +54,7 @@ const BookingDetail = ({ bookingId, visible, onClose, bookingData, isLoading, is
       1: { text: "Đã đặt", color: "green" },
       2: { text: "Chờ thanh toán", color: "orange" },
       3: { text: "Đã thanh toán", color: "blue" },
-      4: { text: "Đã hoàn tiền", color: "red" },
+      4: { text: "Yêu cầu hoàn tiền", color: "red" },
       5: { text: "Thanh toán thất bại", color: "red" },
     }
 

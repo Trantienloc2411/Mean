@@ -83,7 +83,7 @@ const UpdateBookingStatus = ({
       [paymentStatusCodes.BOOKING]: "Đặt cọc",
       [paymentStatusCodes.PENDING]: "Đang chờ",
       [paymentStatusCodes.PAID]: "Đã thanh toán",
-      [paymentStatusCodes.REFUND]: "Đã hoàn tiền",
+      [paymentStatusCodes.REFUND]: "Yêu cầu hoàn tiền",
       [paymentStatusCodes.FAILED]: "Thất bại",
     };
     return statusMap[statusCode] || "Chưa thanh toán";
@@ -101,11 +101,11 @@ const UpdateBookingStatus = ({
 
       const transactionData = {
         bookingId: booking._originalBooking._id,
-        paymentCode: `PAY${Date.now().toString().substring(0, 7)}`,
+        paymentCode: `REFUND${Date.now().toString().substring(0, 7)}`,
         transactionEndDate: new Date().toISOString(),
-        transactionStatus: true,
-        description: `Payment refund for booking ID ${booking._originalBooking._id}`,
-        type: 1,
+        transactionStatus: 2, 
+        description: `Hoàn tiền cho đơn đặt phòng ${booking._originalBooking._id}`,
+        typeTransaction: 1, 
         amount: booking._originalBooking.totalPrice,
       };
 
@@ -113,8 +113,8 @@ const UpdateBookingStatus = ({
       const notificationData = {
         userId: booking._originalBooking.customerId.userId._id,
         bookingId: booking._originalBooking._id,
-        title: "Hoàn tiền thành công",
-        content: `Đơn đặt phòng ${booking._originalBooking._id} đã được hoàn tiền thành công. Số tiền ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(booking._originalBooking.basePrice)} đã được chuyển về tài khoản của bạn.`,
+        title: "Xác nhận hoàn tiền thành công",
+        content: `Đơn đặt phòng ${booking._originalBooking._id} đã được hoàn tiền thành công. Số tiền ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(booking._originalBooking.totalPrice)} đã được chuyển về tài khoản của bạn.`,
         isRead: false,
         type: 1
       };
@@ -144,7 +144,7 @@ const UpdateBookingStatus = ({
             key="submit"
             loading={isLoading}
             onClick={handleRefund}
-            className={`ant-btn refundButton ${styles.refundButton}`} 
+            className={`ant-btn refundButton ${styles.refundButton}`}
           >
             Xác Nhận Hoàn Tiền
           </Button>
@@ -247,7 +247,7 @@ const UpdateBookingStatus = ({
 
       {isCancelled && !isPaymentRefund && (
         <div className={styles.alertMessage}>
-          <p>❗ Không thể hoàn tiền. Đơn hàng cần có trạng thái thanh toán là "Đã hoàn tiền" trước khi thực hiện.</p>
+          <p>❗ Không thể hoàn tiền. Đơn hàng cần có trạng thái thanh toán là "Yêu cầu hoàn tiền" trước khi thực hiện.</p>
         </div>
       )}
     </Modal>
