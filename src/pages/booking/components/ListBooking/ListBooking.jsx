@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
 import { Dropdown, Input, Button, message, Select } from "antd"
-import { FilterOutlined, SearchOutlined, MoreOutlined, ExclamationCircleFilled, SortAscendingOutlined } from "@ant-design/icons"
+import { FilterOutlined, SearchOutlined, MoreOutlined, ExclamationCircleFilled, SortAscendingOutlined, InfoCircleOutlined } from "@ant-design/icons"
 import { CreditCardOutlined, DollarOutlined, BankOutlined, WalletOutlined } from "@ant-design/icons"
 import debounce from "lodash/debounce"
 import TableModify from "../../../dashboard/components/Table"
@@ -80,6 +80,26 @@ export default function ListBooking({
       [paymentStatusCodes.FAILED]: "Thanh toán thất bại",
     }
     return statusMap[statusCode] || "Chưa thanh toán"
+  }
+
+  const statusDescriptions = {
+    [bookingStatusCodes.CONFIRMED]: "Đơn đặt phòng đã được xác nhận thành công và đang chờ check-in",
+    [bookingStatusCodes.PENDING]: "Đơn đặt phòng đang chờ chủ phòng xác nhận thông tin",
+    [bookingStatusCodes.NEEDCHECKIN]: "Khách hàng cần thực hiện thủ tục check-in trong ngày đến",
+    [bookingStatusCodes.CHECKEDIN]: "Khách đã check-in thành công và đang sử dụng phòng",
+    [bookingStatusCodes.NEEDCHECKOUT]: "Đến giờ check-out, khách cần hoàn tất thủ tục trả phòng",
+    [bookingStatusCodes.CHECKEDOUT]: "Khách đã check-out thành công, đang chờ xác nhận hoàn tất",
+    [bookingStatusCodes.CANCELLED]: "Đơn đặt phòng đã bị hủy bởi khách hoặc chủ phòng",
+    [bookingStatusCodes.COMPLETED]: "Đơn đặt phòng đã được hoàn tất toàn bộ quy trình",
+    [bookingStatusCodes.REFUND]: "Đơn đặt phòng đang yêu cầu hoàn tiền",
+  }
+
+  const statusPaymentDescriptions = {
+    [paymentStatusCodes.BOOKING]: "Đơn hàng đã được đặt thành công và đang chờ thanh toán",
+    [paymentStatusCodes.PENDING]: "Đơn hàng đang trong quá trình xử lý thanh toán",
+    [paymentStatusCodes.PAID]: "Đơn hàng đã được thanh toán đầy đủ",
+    [paymentStatusCodes.REFUND]: "Đơn hàng đã được hoàn tiền",
+    [paymentStatusCodes.FAILED]: "Thanh toán không thành công, cần thử lại hoặc chọn phương thức khác",
   }
 
   const statusOptions = Object.entries(bookingStatusCodes).map(([key, value]) => ({
@@ -205,80 +225,80 @@ export default function ListBooking({
       case "refundRequests":
         // Sort refund requests to the top
         sortedData.sort((a, b) => {
-          const aIsRefundRequest = 
+          const aIsRefundRequest =
             a._originalBooking.status === bookingStatusCodes.CANCELLED &&
             a._originalBooking.paymentStatus === paymentStatusCodes.REFUND
-          
-          const bIsRefundRequest = 
+
+          const bIsRefundRequest =
             b._originalBooking.status === bookingStatusCodes.CANCELLED &&
             b._originalBooking.paymentStatus === paymentStatusCodes.REFUND
-          
+
           if (aIsRefundRequest && !bIsRefundRequest) return -1
           if (!aIsRefundRequest && bIsRefundRequest) return 1
-          
+
           // If both or neither are refund requests, sort by creation date (newest first)
           return new Date(b._originalBooking.createdAt) - new Date(a._originalBooking.createdAt)
         })
         break
-        
+
       case "checkInToday":
         // Sort check-ins scheduled for today to the top
         sortedData.sort((a, b) => {
           const aCheckInDateTime = parseDateTime(a._originalBooking.checkInHour)
           const bCheckInDateTime = parseDateTime(b._originalBooking.checkInHour)
-          
+
           const aIsCheckInToday = aCheckInDateTime && aCheckInDateTime.format("DD/MM/YYYY") === today
           const bIsCheckInToday = bCheckInDateTime && bCheckInDateTime.format("DD/MM/YYYY") === today
-          
+
           if (aIsCheckInToday && !bIsCheckInToday) return -1
           if (!aIsCheckInToday && bIsCheckInToday) return 1
-          
+
           // If both or neither are today's check-ins, sort by check-in time
           if (aIsCheckInToday && bIsCheckInToday) {
             return aCheckInDateTime.diff(bCheckInDateTime)
           }
-          
+
           // Otherwise sort by creation date (newest first)
           return new Date(b._originalBooking.createdAt) - new Date(a._originalBooking.createdAt)
         })
         break
-        
+
       case "checkOutToday":
         // Sort check-outs scheduled for today to the top
         sortedData.sort((a, b) => {
           const aCheckOutDateTime = parseDateTime(a._originalBooking.checkOutHour)
           const bCheckOutDateTime = parseDateTime(b._originalBooking.checkOutHour)
-          
+
           const aIsCheckOutToday = aCheckOutDateTime && aCheckOutDateTime.format("DD/MM/YYYY") === today
           const bIsCheckOutToday = bCheckOutDateTime && bCheckOutDateTime.format("DD/MM/YYYY") === today
-          
+
           if (aIsCheckOutToday && !bIsCheckOutToday) return -1
           if (!aIsCheckOutToday && bIsCheckOutToday) return 1
-          
+
           // If both or neither are today's check-outs, sort by check-out time
           if (aIsCheckOutToday && bIsCheckOutToday) {
             return aCheckOutDateTime.diff(bCheckOutDateTime)
           }
-          
+
           // Otherwise sort by creation date (newest first)
           return new Date(b._originalBooking.createdAt) - new Date(a._originalBooking.createdAt)
         })
         break
-        
+
       case "pending":
         // Sort pending bookings to the top
         sortedData.sort((a, b) => {
           const aIsPending = a._originalBooking.status === bookingStatusCodes.PENDING
           const bIsPending = b._originalBooking.status === bookingStatusCodes.PENDING
-          
+
           if (aIsPending && !bIsPending) return -1
           if (!aIsPending && bIsPending) return 1
-          
+
           // If both or neither are pending, sort by creation date (newest first)
           return new Date(b._originalBooking.createdAt) - new Date(a._originalBooking.createdAt)
         })
         break
-        
+
       case "newest":
       default:
         // Sort by creation date (newest first)
@@ -642,6 +662,52 @@ export default function ListBooking({
               {activeFilterCount > 0 && <span className={styles.filterBadge}>{activeFilterCount}</span>}
             </Button>
           </Dropdown>
+
+          <div className={styles.statusDescriptionContainer}>
+            <Dropdown
+              overlay={
+                <div className={styles.statusDescriptionPopover}>
+                  <div className={styles.descriptionSection}>
+                    <h4>Trạng thái đặt phòng</h4>
+                    {Object.entries(statusDescriptions).map(([statusCode, description]) => (
+                      <div key={statusCode} className={styles.descriptionItem}>
+                        <span
+                          className={`${styles.statusDot} ${styles[getStatusClass(getBookingStatusDisplay(statusCode))]}`}
+                        />
+                        <div>
+                          <div className={styles.descriptionTitle}>{getBookingStatusDisplay(statusCode)}</div>
+                          <div className={styles.descriptionText}>{description}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className={styles.descriptionSection}>
+                    <h4>Trạng thái thanh toán</h4>
+                    {Object.entries(paymentStatusCodes).map(([key, value]) => (
+                      <div key={key} className={styles.descriptionItem}>
+                        <span
+                          className={`${styles.statusDot} ${styles[getPaymentClass(getPaymentStatusDisplay(value))]}`}
+                        />
+                        <div>
+                          <div className={styles.descriptionTitle}>{getPaymentStatusDisplay(value)}</div>
+                          <div className={styles.descriptionText}>
+                            {statusPaymentDescriptions[value] ||
+                              `Trạng thái thanh toán: ${getPaymentStatusDisplay(value)}`}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              }
+              trigger={["click"]}
+              placement="bottomRight"
+            >
+              <Button className={styles.infoButton} icon={<InfoCircleOutlined />}>
+                Thông tin trạng thái
+              </Button>
+            </Dropdown>
+          </div>
         </div>
 
         <div className={styles.tableContainer}>
