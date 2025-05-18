@@ -28,7 +28,7 @@ export default function ListBooking({
   generatePassword,
 }) {
   const [searchTerm, setSearchTerm] = useState("")
-  const [filteredData, setFilteredData] = useState(bookings)
+  const [filteredData, setFilteredData] = useState([])
   const [selectedValues, setSelectedValues] = useState({
     status: [],
     payment: [],
@@ -54,8 +54,11 @@ export default function ListBooking({
   })
 
   useEffect(() => {
+    setPagination(prev => ({ ...prev, current: 1, total: bookings.length }))
+  }, [bookings])
+
+  useEffect(() => {
     setFilteredData(bookings)
-    setPagination((prev) => ({ ...prev, total: bookings.length }))
   }, [bookings])
 
   const debouncedApplyFilters = debounce((filters) => {
@@ -65,7 +68,7 @@ export default function ListBooking({
   useEffect(() => {
     debouncedApplyFilters({ ...selectedValues, searchTerm })
     return () => debouncedApplyFilters.cancel()
-  }, [searchTerm, selectedValues, sortOption])
+  }, [searchTerm, selectedValues, sortOption, bookings]) 
 
   const getBookingStatusDisplay = (statusCode) => {
     const statusMap = {
@@ -173,6 +176,11 @@ export default function ListBooking({
   }
 
   const applyFilters = (filters) => {
+    if (!bookings || bookings.length === 0) {
+      setFilteredData([])
+      return
+    }
+
     let filtered = [...bookings]
 
     if (filters.status?.length)
@@ -196,7 +204,9 @@ export default function ListBooking({
           item._originalBooking._id?.toLowerCase().includes(filters.searchTerm.toLowerCase()),
       )
 
-    applySorting(filtered)
+    const sortedData = applySorting(filtered)
+    setFilteredData(sortedData)
+    setPagination((prev) => ({ ...prev, current: 1, total: sortedData.length }))
   }
 
   const applySorting = (data) => {
@@ -233,8 +243,7 @@ export default function ListBooking({
         sortedData.sort((a, b) => new Date(b._originalBooking.createdAt) - new Date(a._originalBooking.createdAt))
     }
 
-    setFilteredData(sortedData)
-    setPagination((prev) => ({ ...prev, current: 1, total: sortedData.length }))
+    return sortedData
   }
 
   const handleFilterChange = (filterName, newValues) => {
@@ -394,6 +403,14 @@ export default function ListBooking({
     }
   }
 
+  const handlePaginationChange = (page, pageSize) => {
+    setPagination({
+      ...pagination,
+      current: page,
+      pageSize: pageSize
+    })
+  }
+
   return (
     <div className={styles.contentContainer}>
       <h2>Danh Sách Booking</h2>
@@ -488,6 +505,7 @@ export default function ListBooking({
             pagination={{
               ...pagination,
               total: filteredData.length,
+              onChange: handlePaginationChange,
               showSizeChanger: false,
               className: styles.customPagination,
               itemRender: (page, type, originalElement) => {
