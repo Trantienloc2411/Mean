@@ -128,9 +128,6 @@ export default function ListBooking({
   const sortOptions = [
     { value: "newest", label: "Mới nhất" },
     { value: "refundRequests", label: "Yêu cầu hoàn tiền" },
-    { value: "checkInToday", label: "Check-in hôm nay" },
-    { value: "checkOutToday", label: "Check-out hôm nay" },
-    { value: "pending", label: "Chờ xác nhận" },
   ]
 
   const parseDateTime = (dateTimeStr) => {
@@ -240,52 +237,6 @@ export default function ListBooking({
           return new Date(b._originalBooking.createdAt) - new Date(a._originalBooking.createdAt)
         })
         break
-
-      case "checkInToday":
-        // Sort check-ins scheduled for today to the top
-        sortedData.sort((a, b) => {
-          const aCheckInDateTime = parseDateTime(a._originalBooking.checkInHour)
-          const bCheckInDateTime = parseDateTime(b._originalBooking.checkInHour)
-
-          const aIsCheckInToday = aCheckInDateTime && aCheckInDateTime.format("DD/MM/YYYY") === today
-          const bIsCheckInToday = bCheckInDateTime && bCheckInDateTime.format("DD/MM/YYYY") === today
-
-          if (aIsCheckInToday && !bIsCheckInToday) return -1
-          if (!aIsCheckInToday && bIsCheckInToday) return 1
-
-          // If both or neither are today's check-ins, sort by check-in time
-          if (aIsCheckInToday && bIsCheckInToday) {
-            return aCheckInDateTime.diff(bCheckInDateTime)
-          }
-
-          // Otherwise sort by creation date (newest first)
-          return new Date(b._originalBooking.createdAt) - new Date(a._originalBooking.createdAt)
-        })
-        break
-
-      case "checkOutToday":
-        // Sort check-outs scheduled for today to the top
-        sortedData.sort((a, b) => {
-          const aCheckOutDateTime = parseDateTime(a._originalBooking.checkOutHour)
-          const bCheckOutDateTime = parseDateTime(b._originalBooking.checkOutHour)
-
-          const aIsCheckOutToday = aCheckOutDateTime && aCheckOutDateTime.format("DD/MM/YYYY") === today
-          const bIsCheckOutToday = bCheckOutDateTime && bCheckOutDateTime.format("DD/MM/YYYY") === today
-
-          if (aIsCheckOutToday && !bIsCheckOutToday) return -1
-          if (!aIsCheckOutToday && bIsCheckOutToday) return 1
-
-          // If both or neither are today's check-outs, sort by check-out time
-          if (aIsCheckOutToday && bIsCheckOutToday) {
-            return aCheckOutDateTime.diff(bCheckOutDateTime)
-          }
-
-          // Otherwise sort by creation date (newest first)
-          return new Date(b._originalBooking.createdAt) - new Date(a._originalBooking.createdAt)
-        })
-        break
-
-      case "pending":
         // Sort pending bookings to the top
         sortedData.sort((a, b) => {
           const aIsPending = a._originalBooking.status === bookingStatusCodes.PENDING
