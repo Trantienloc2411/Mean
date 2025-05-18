@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react"
-import { Dropdown, Input, Button, message } from "antd"
-import { FilterOutlined, SearchOutlined, MoreOutlined, ExclamationCircleFilled } from "@ant-design/icons"
+import { Dropdown, Input, Button, message, Select } from "antd"
+import { FilterOutlined, SearchOutlined, MoreOutlined, ExclamationCircleFilled, SortAscendingOutlined } from "@ant-design/icons"
 import { CreditCardOutlined, DollarOutlined, BankOutlined, WalletOutlined } from "@ant-design/icons"
 import debounce from "lodash/debounce"
 import TableModify from "../../../dashboard/components/Table"
@@ -42,6 +42,7 @@ export default function ListBooking({
   const [statusModalVisible, setStatusModalVisible] = useState(false)
   const [selectedBookingId, setSelectedBookingId] = useState(null)
   const [isBookingDetailVisible, setIsBookingDetailVisible] = useState(false)
+  const [sortOption, setSortOption] = useState("newest")
 
   const {
     data: bookingDetailData,
@@ -102,6 +103,14 @@ export default function ListBooking({
       title: "Trạng thái thanh toán",
       options: paymentOptions,
     },
+  ]
+
+  const sortOptions = [
+    { value: "newest", label: "Mới nhất" },
+    { value: "refundRequests", label: "Yêu cầu hoàn tiền" },
+    { value: "checkInToday", label: "Check-in hôm nay" },
+    { value: "checkOutToday", label: "Check-out hôm nay" },
+    { value: "pending", label: "Chờ xác nhận" },
   ]
 
   const parseDateTime = (dateTimeStr) => {
@@ -184,26 +193,105 @@ export default function ListBooking({
       filtered = filtered.filter((item) => matchesDateTimeFilter(item, selectedValues.dateFilter))
     }
 
-    filtered.sort((a, b) => {
-      const aIsCancelledAndRefund =
-        a._originalBooking.status === bookingStatusCodes.CANCELLED &&
-        a._originalBooking.paymentStatus === paymentStatusCodes.REFUND
+    // Apply sorting based on selected option
+    applySorting(filtered)
+  }
 
-      const bIsCancelledAndRefund =
-        b._originalBooking.status === bookingStatusCodes.CANCELLED &&
-        b._originalBooking.paymentStatus === paymentStatusCodes.REFUND
+  const applySorting = (data) => {
+    let sortedData = [...data]
+    const today = dayjs().format("DD/MM/YYYY")
 
-      if (aIsCancelledAndRefund && !bIsCancelledAndRefund) return -1
-      if (!aIsCancelledAndRefund && bIsCancelledAndRefund) return 1
-      return 0
-    })
+    switch (sortOption) {
+      case "refundRequests":
+        // Sort refund requests to the top
+        sortedData.sort((a, b) => {
+          const aIsRefundRequest = 
+            a._originalBooking.status === bookingStatusCodes.CANCELLED &&
+            a._originalBooking.paymentStatus === paymentStatusCodes.REFUND
+          
+          const bIsRefundRequest = 
+            b._originalBooking.status === bookingStatusCodes.CANCELLED &&
+            b._originalBooking.paymentStatus === paymentStatusCodes.REFUND
+          
+          if (aIsRefundRequest && !bIsRefundRequest) return -1
+          if (!aIsRefundRequest && bIsRefundRequest) return 1
+          
+          // If both or neither are refund requests, sort by creation date (newest first)
+          return new Date(b._originalBooking.createdAt) - new Date(a._originalBooking.createdAt)
+        })
+        break
+        
+      case "checkInToday":
+        // Sort check-ins scheduled for today to the top
+        sortedData.sort((a, b) => {
+          const aCheckInDateTime = parseDateTime(a._originalBooking.checkInHour)
+          const bCheckInDateTime = parseDateTime(b._originalBooking.checkInHour)
+          
+          const aIsCheckInToday = aCheckInDateTime && aCheckInDateTime.format("DD/MM/YYYY") === today
+          const bIsCheckInToday = bCheckInDateTime && bCheckInDateTime.format("DD/MM/YYYY") === today
+          
+          if (aIsCheckInToday && !bIsCheckInToday) return -1
+          if (!aIsCheckInToday && bIsCheckInToday) return 1
+          
+          // If both or neither are today's check-ins, sort by check-in time
+          if (aIsCheckInToday && bIsCheckInToday) {
+            return aCheckInDateTime.diff(bCheckInDateTime)
+          }
+          
+          // Otherwise sort by creation date (newest first)
+          return new Date(b._originalBooking.createdAt) - new Date(a._originalBooking.createdAt)
+        })
+        break
+        
+      case "checkOutToday":
+        // Sort check-outs scheduled for today to the top
+        sortedData.sort((a, b) => {
+          const aCheckOutDateTime = parseDateTime(a._originalBooking.checkOutHour)
+          const bCheckOutDateTime = parseDateTime(b._originalBooking.checkOutHour)
+          
+          const aIsCheckOutToday = aCheckOutDateTime && aCheckOutDateTime.format("DD/MM/YYYY") === today
+          const bIsCheckOutToday = bCheckOutDateTime && bCheckOutDateTime.format("DD/MM/YYYY") === today
+          
+          if (aIsCheckOutToday && !bIsCheckOutToday) return -1
+          if (!aIsCheckOutToday && bIsCheckOutToday) return 1
+          
+          // If both or neither are today's check-outs, sort by check-out time
+          if (aIsCheckOutToday && bIsCheckOutToday) {
+            return aCheckOutDateTime.diff(bCheckOutDateTime)
+          }
+          
+          // Otherwise sort by creation date (newest first)
+          return new Date(b._originalBooking.createdAt) - new Date(a._originalBooking.createdAt)
+        })
+        break
+        
+      case "pending":
+        // Sort pending bookings to the top
+        sortedData.sort((a, b) => {
+          const aIsPending = a._originalBooking.status === bookingStatusCodes.PENDING
+          const bIsPending = b._originalBooking.status === bookingStatusCodes.PENDING
+          
+          if (aIsPending && !bIsPending) return -1
+          if (!aIsPending && bIsPending) return 1
+          
+          // If both or neither are pending, sort by creation date (newest first)
+          return new Date(b._originalBooking.createdAt) - new Date(a._originalBooking.createdAt)
+        })
+        break
+        
+      case "newest":
+      default:
+        // Sort by creation date (newest first)
+        sortedData.sort((a, b) => new Date(b._originalBooking.createdAt) - new Date(a._originalBooking.createdAt))
+        break
+    }
 
-    setFilteredData(filtered)
+    setFilteredData(sortedData)
   }
 
   useEffect(() => {
     applyFilters()
-  }, [selectedValues, searchTerm, dateRange, bookings])
+  }, [selectedValues, searchTerm, dateRange, bookings, sortOption])
 
   const handleFilterChange = (filterName, newValues) => {
     if (filterName === "reset") {
@@ -235,6 +323,10 @@ export default function ListBooking({
       ...selectedValues,
       [filterName]: newValues,
     })
+  }
+
+  const handleSortChange = (value) => {
+    setSortOption(value)
   }
 
   const debouncedSearch = debounce((value) => {
@@ -514,6 +606,16 @@ export default function ListBooking({
             className={styles.searchInput}
             prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
             allowClear
+          />
+
+          <Select
+            value={sortOption}
+            onChange={handleSortChange}
+            options={sortOptions}
+            className={styles.sortSelect}
+            suffixIcon={<SortAscendingOutlined />}
+            style={{ width: '180px', marginRight: '10px' }}
+            placeholder="Sắp xếp theo"
           />
 
           <Dropdown
