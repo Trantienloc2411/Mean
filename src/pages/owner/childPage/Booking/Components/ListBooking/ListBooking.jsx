@@ -347,12 +347,12 @@ export default function ListBooking({
               { key: "1", label: "Xem Chi Tiết", onClick: () => handleViewDetails(record) },
               ...(record._originalBooking.status === bookingStatusCodes.PENDING
                 ? [
-                    {
-                      key: "2",
-                      label: "Cập Nhật Trạng Thái",
-                      onClick: () => handleStatusUpdate(record),
-                    },
-                  ]
+                  {
+                    key: "2",
+                    label: "Cập Nhật Trạng Thái",
+                    onClick: () => handleStatusUpdate(record),
+                  },
+                ]
                 : []),
             ],
           }}
@@ -509,6 +509,8 @@ export default function ListBooking({
           onClose={handleCloseStatusModal}
           bookingStatusCodes={bookingStatusCodes}
           onStatusChange={handleCustomStatusChange}
+          paymentStatusCodes={paymentStatusCodes}
+          paymentMethodCodes={paymentMethodCodes}
           onGeneratePassword={generatePassword}
           isLoading={isUpdating}
         />

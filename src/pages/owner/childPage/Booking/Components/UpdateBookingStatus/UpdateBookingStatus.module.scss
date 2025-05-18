@@ -1,0 +1,224 @@
+.modalContainer {
+  :global(.ant-modal-content) {
+    border-radius: 12px;
+    overflow: hidden;
+  }
+
+  :global(.ant-modal-header) {
+    padding: 16px 24px;
+    background-color: #f8f9fa;
+    border-bottom: 1px solid #e9ecef;
+  }
+
+  :global(.ant-modal-body) {
+    padding: 24px;
+  }
+
+  :global(.ant-modal-footer) {
+    padding: 12px 24px;
+    border-top: 1px solid #e9ecef;
+  }
+}
+
+.modalTitle {
+  display: flex;
+  align-items: center;
+  font-size: 18px;
+  font-weight: 600;
+  color: #d4380d;
+
+  .refundIcon {
+    margin-right: 10px;
+    color: #fa8c16;
+    font-size: 22px;
+  }
+}
+
+.sectionHeader {
+  margin-bottom: 16px;
+
+  h4 {
+    font-weight: 600;
+    margin-bottom: 0;
+  }
+}
+
+.bookingCard, .paymentCard, .refundCard, .accountCard, .statusCard {
+  border-radius: 8px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+  margin-bottom: 16px;
+}
+
+.infoGrid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.infoRow {
+  display: flex;
+  flex-direction: column;
+
+  .infoLabel {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 4px;
+  }
+
+  .infoValue {
+    font-size: 15px;
+    font-weight: 500;
+    color: #334155;
+  }
+}
+
+.statusRow {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 8px;
+  
+  .statusGroup {
+    display: flex;
+    flex-direction: column;
+    
+    .infoLabel {
+      font-size: 13px;
+      color: #64748b;
+      margin-bottom: 6px;
+    }
+  }
+}
+
+.paymentSection {
+  margin-top: 16px;
+}
+
+.statusUpdateSection {
+  margin-top: 16px;
+}
+
+.paymentDetails {
+  .paymentMethod {
+    margin-bottom: 20px;
+
+    .methodInfo {
+      display: flex;
+      flex-direction: column;
+      margin-bottom: 10px;
+      
+      .infoLabel {
+        font-size: 13px;
+        color: #64748b;
+        margin-bottom: 6px;
+      }
+      
+      .methodValue {
+        font-size: 15px;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+      }
+    }
+  }
+}
+
+.priceBreakdown {
+  background-color: #f8fafc;
+  padding: 16px;
+  border-radius: 8px;
+  
+  .priceRow {
+    display: flex;
+    justify-content: space-between;
+    margin-bottom: 8px;
+    color: #475569;
+  }
+  
+  .priceDivider {
+    margin: 12px 0;
+  }
+  
+  .totalPrice {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 600;
+    color: #334155;
+    
+    .totalAmount {
+      color: #ef4444;
+      font-size: 16px;
+    }
+  }
+}
+
+.statusSelectContainer {
+  margin-bottom: 16px;
+  
+  .infoLabel {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+}
+
+.cancelReasonContainer {
+  margin-top: 16px;
+  
+  .infoLabel {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  
+  .cancelTextarea {
+    border-color: #e9ecef;
+    
+    &:focus, &:hover {
+      border-color: #fa8c16;
+      box-shadow: 0 0 0 2px rgba(250, 140, 22, 0.1);
+    }
+  }
+}
+
+.refundWarning {
+  background-color: #fffbeb;
+  padding: 10px 16px;
+  border-radius: 6px;
+  border-left: 3px solid #f59e0b;
+  margin-top: 16px;
+  font-size: 14px;
+}
+
+.refundButton {
+  background-color: #ef4444 !important;
+  color: white !important;
+  border-color: #ef4444 !important;
+  
+  &:hover {
+    background-color: #dc2626 !important;
+    border-color: #dc2626 !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .infoGrid {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+.confirmed { color: #2563eb; }
+.pending { color: #f59e0b; }
+.needcheckin { color: #06b6d4; }
+.inprogress { color: #10b981; }
+.needcheckout { color: #8b5cf6; }
+.checkedout { color: #3b82f6; }
+.canceled { color: #ef4444; }
+.complete { color: #10b981; }
+.refund { color: #f97316; }
+
+.booked { color: #2563eb; }
+.paid { color: #10b981; }
+.đã.hoàn.tiền { color: #f97316; }
+.cancelled { color: #ef4444; }
