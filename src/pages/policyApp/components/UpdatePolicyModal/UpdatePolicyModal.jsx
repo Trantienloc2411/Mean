@@ -14,6 +14,7 @@ import { useGetAllPolicySystemCategoriesQuery } from "../../../../redux/services
 import { useUpdatePolicySystemMutation } from "../../../../redux/services/policySystemApi"
 import { useGetStaffByIdQuery } from "../../../../redux/services/staffApi"
 import dayjs from "dayjs"
+import { Switch } from "antd"
 
 const { Title, Text } = Typography
 
@@ -87,6 +88,7 @@ const UpdatePolicyModal = ({ isOpen, onCancel, initialValues }) => {
         startDate: initialValues.startDate ? dayjs(initialValues.startDate, "DD/MM/YYYY HH:mm:ss") : null,
         endDate: initialValues.endDate ? dayjs(initialValues.endDate, "DD/MM/YYYY HH:mm:ss") : null,
         policySystemCategoryId: initialValues.policySystemCategoryId?._id || initialValues.policySystemCategoryId,
+        isActive: initialValues.isActive
       };
       form.setFieldsValue(formattedInitialValues);
     }
@@ -134,7 +136,7 @@ const UpdatePolicyModal = ({ isOpen, onCancel, initialValues }) => {
         values: processedValuesArray,
         startDate: startDateISO,
         endDate: endDateISO,
-        isActive: true,
+        isActive: values.isActive
       }
 
       console.log("Final payload:", formattedValues)
@@ -317,6 +319,17 @@ const UpdatePolicyModal = ({ isOpen, onCancel, initialValues }) => {
           >
             <Input.TextArea rows={3} placeholder="Nhập mô tả cho chính sách" maxLength={500} showCount />
           </Form.Item>
+          <Form.Item
+            name="isActive"
+            label="Trạng thái hoạt động"
+            valuePropName="checked" 
+            rules={[{ required: true, message: 'Vui lòng chọn trạng thái' }]}
+          >
+            <Switch
+              checkedChildren="Hoạt động"
+              unCheckedChildren="Ngừng hoạt động"
+            />
+          </Form.Item>
         </Card>
 
         <Card
@@ -471,7 +484,7 @@ const UpdatePolicyModal = ({ isOpen, onCancel, initialValues }) => {
                         label={
                           <Space>
                             <span>Đơn vị</span>
-                            <Tooltip title="Đơn vị tính cho giá trị này (VND, %, giờ, điểm)">
+                            <Tooltip title="Đơn vị tính cho giá trị này (VND, %, giờ, điểm, phút)">
                               <InfoCircleOutlined style={{ color: "#1890ff" }} />
                             </Tooltip>
                           </Space>
@@ -482,6 +495,7 @@ const UpdatePolicyModal = ({ isOpen, onCancel, initialValues }) => {
                           <Select.Option value="percent">Phần trăm (%)</Select.Option>
                           <Select.Option value="vnd">VND</Select.Option>
                           <Select.Option value="point">Điểm</Select.Option>
+                          <Select.Option value="min">Phút</Select.Option>
                           <Select.Option value="hour">Giờ</Select.Option>
                           <Select.Option value="day">Ngày</Select.Option>
                         </Select>
@@ -605,19 +619,19 @@ const UpdatePolicyModal = ({ isOpen, onCancel, initialValues }) => {
               style={{ flex: 1 }}
               rules={[
                 { required: true, message: "Vui lòng chọn ngày bắt đầu" },
-                ({ getFieldValue }) => ({
-                  validator(_, value) {
-                    if (!value) return Promise.resolve()
+                // ({ getFieldValue }) => ({
+                //   validator(_, value) {
+                //     if (!value) return Promise.resolve()
 
-                    const now = dayjs().startOf("minute")
-                    const selectedDate = dayjs(value)
+                //     const now = dayjs().startOf("minute")
+                //     const selectedDate = dayjs(value)
 
-                    if (selectedDate.isBefore(now)) {
-                      return Promise.reject(new Error("Ngày bắt đầu phải sau thời điểm hiện tại"))
-                    }
-                    return Promise.resolve()
-                  },
-                }),
+                //     if (selectedDate.isBefore(now)) {
+                //       return Promise.reject(new Error("Ngày bắt đầu phải sau thời điểm hiện tại"))
+                //     }
+                //     return Promise.resolve()
+                //   },
+                // }),
               ]}
             >
               <DatePicker

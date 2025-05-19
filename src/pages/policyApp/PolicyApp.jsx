@@ -121,16 +121,16 @@ export default function PolicyApp() {
         setSelectedPolicy(record);
         setIsUpdateModalOpen(true);
       },
-    },
-    {
-      key: '3',
-      label: 'Xoá',
-      danger: true,
-      onClick: (record) => {
-        setSelectedPolicy(record);
-        setIsDeleteModalOpen(true);
-      },
     }
+    // {
+    //   key: '3',
+    //   label: 'Xoá',
+    //   danger: true,
+    //   onClick: (record) => {
+    //     setSelectedPolicy(record);
+    //     setIsDeleteModalOpen(true);
+    //   },
+    // }
   ];
 
   const handleDeleteConfirm = async () => {
@@ -174,29 +174,31 @@ export default function PolicyApp() {
   const handleUpdatePolicy = async (values) => {
     try {
       console.log('[Debug] Submitting values:', values);
-      
+
       if (!selectedPolicy?._id) {
         message.error('Không tìm thấy ID chính sách');
         return;
       }
-  
+
       const formattedValues = {
         ...values,
         _id: selectedPolicy._id, // Đảm bảo có _id
-        startDate: values.startDate ? 
-          dayjs(values.startDate).format('DD-MM-YYYY HH:mm:ss') : 
+        startDate: values.startDate ?
+          dayjs(values.startDate).format('DD-MM-YYYY HH:mm:ss') :
           null,
-        endDate: values.endDate ? 
-          dayjs(values.endDate).format('DD-MM-YYYY HH:mm:ss') : 
+        endDate: values.endDate ?
+          dayjs(values.endDate).format('DD-MM-YYYY HH:mm:ss') :
           null,
+
+        isActive: values.isActive
       };
-  
+
       console.log('[Debug] Formatted payload:', formattedValues);
-  
+
       // Thêm log để kiểm tra API call
       const result = await updatePolicy(formattedValues).unwrap();
       console.log('[Debug] API Response:', result);
-      
+
       message.success('Cập nhật thành công!');
       setIsUpdateModalOpen(false);
     } catch (error) {
@@ -295,7 +297,11 @@ export default function PolicyApp() {
         return record.values.map((val, idx) => (
           <div key={idx}>
             {val.val1 && val.val2 ? `${val.val1} - ${val.val2}` : val.val1 || val.val2}
-            {val.unit && ` (${val.unit === 'percent' ? 'Phần trăm' : val.unit === 'vnd' ? 'VND' : val.unit})`}
+            {val.unit && ` (${val.unit === 'percent' ? 'Phần trăm'
+              : val.unit === 'vnd' ? 'VND'
+                : val.unit === 'min' ? 'Phút'
+                  : val.unit
+              })`}
           </div>
         ));
       }
@@ -387,7 +393,7 @@ export default function PolicyApp() {
           </div>
 
           <Button
-            type="default" 
+            type="default"
             onClick={() => setIsAddModalOpen(true)}
             icon={<PlusOutlined />}
             className={styles.addRoomButton}
