@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { Input, Button, DatePicker, Dropdown, Table, Spin, message } from 'antd';
+import { Input, Button, DatePicker, Dropdown, Table, Spin, message, Tabs } from 'antd';
 import { FilterOutlined, PlusOutlined, MoreOutlined, ReloadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
@@ -10,6 +10,7 @@ import DeletePolicyModal from './components/DeletePolicyModal/DeletePolicyModal.
 import AddPolicyModal from './components/AddPolicyModal/AddPolicyModal.jsx';
 import UpdatePolicyModal from './components/UpdatePolicyModal/UpdatePolicyModal.jsx';
 import DetailPolicyModal from './components/DetailPolicyModal/DetailPolicyModal.jsx';
+import PolicyCategory from './components/PolicyCategory/PolicyCategory.jsx';
 import {
   useGetAllPolicySystemsQuery,
   useCreatePolicySystemMutation,
@@ -19,7 +20,8 @@ import {
 } from '../../redux/services/policySystemApi.js';
 import { useGetAllPolicySystemCategoriesQuery } from '../../redux/services/policySystemCategoryApi.js';
 
-export default function PolicyApp() {
+// Component cho tab Chính sách
+function PolicySystem() {
   dayjs.extend(isBetween);
   const [selectedValues, setSelectedValues] = useState({
     status: [],
@@ -122,15 +124,6 @@ export default function PolicyApp() {
         setIsUpdateModalOpen(true);
       },
     }
-    // {
-    //   key: '3',
-    //   label: 'Xoá',
-    //   danger: true,
-    //   onClick: (record) => {
-    //     setSelectedPolicy(record);
-    //     setIsDeleteModalOpen(true);
-    //   },
-    // }
   ];
 
   const handleDeleteConfirm = async () => {
@@ -182,20 +175,18 @@ export default function PolicyApp() {
 
       const formattedValues = {
         ...values,
-        _id: selectedPolicy._id, // Đảm bảo có _id
+        _id: selectedPolicy._id,
         startDate: values.startDate ?
           dayjs(values.startDate).format('DD-MM-YYYY HH:mm:ss') :
           null,
         endDate: values.endDate ?
           dayjs(values.endDate).format('DD-MM-YYYY HH:mm:ss') :
           null,
-
         isActive: values.isActive
       };
 
       console.log('[Debug] Formatted payload:', formattedValues);
 
-      // Thêm log để kiểm tra API call
       const result = await updatePolicy(formattedValues).unwrap();
       console.log('[Debug] API Response:', result);
 
@@ -206,6 +197,7 @@ export default function PolicyApp() {
       message.error(`Lỗi: ${error.data?.message || error.message}`);
     }
   };
+
   const handleFilterChange = (filterName, newValues) => {
     setSelectedValues(prev => ({
       ...prev,
@@ -354,8 +346,7 @@ export default function PolicyApp() {
   }, [detailedPolicy]);
 
   return (
-    <div className={styles.contentContainer}>
-      <h1>Quản lý Chính Sách Hệ Thống</h1>
+    <>
       <div className={styles.contentTable}>
         <div className={styles.tool}>
           <div className={styles.searchFilter}>
@@ -449,45 +440,75 @@ export default function PolicyApp() {
             className={styles.reportTable}
           />
         )}
-
-        <AddPolicyModal
-          isOpen={isAddModalOpen}
-          onCancel={() => setIsAddModalOpen(false)}
-          onConfirm={handleAddPolicy}
-          categories={categoryData?.data || []}
-        />
-
-        <UpdatePolicyModal
-          isOpen={isUpdateModalOpen}
-          onCancel={() => {
-            setIsUpdateModalOpen(false);
-            setSelectedPolicy(null);
-          }}
-          onConfirm={handleUpdatePolicy}
-          initialValues={selectedPolicy}
-          categories={categoryData?.data || []}
-        />
-
-        <DetailPolicyModal
-          isOpen={isDetailModalOpen}
-          policy={detailedPolicy?.data || selectedPolicy}
-          isLoading={isDetailLoading}
-          onCancel={() => {
-            setIsDetailModalOpen(false);
-            setSelectedPolicy(null);
-          }}
-        />
-
-        <DeletePolicyModal
-          isOpen={isDeleteModalOpen}
-          onCancel={() => {
-            setIsDeleteModalOpen(false);
-            setSelectedPolicy(null);
-          }}
-          onConfirm={handleDeleteConfirm}
-          policyName={selectedPolicy?.name}
-        />
       </div>
+
+      <AddPolicyModal
+        isOpen={isAddModalOpen}
+        onCancel={() => setIsAddModalOpen(false)}
+        onConfirm={handleAddPolicy}
+        categories={categoryData?.data || []}
+      />
+
+      <UpdatePolicyModal
+        isOpen={isUpdateModalOpen}
+        onCancel={() => {
+          setIsUpdateModalOpen(false);
+          setSelectedPolicy(null);
+        }}
+        onConfirm={handleUpdatePolicy}
+        initialValues={selectedPolicy}
+        categories={categoryData?.data || []}
+      />
+
+      <DetailPolicyModal
+        isOpen={isDetailModalOpen}
+        policy={detailedPolicy?.data || selectedPolicy}
+        isLoading={isDetailLoading}
+        onCancel={() => {
+          setIsDetailModalOpen(false);
+          setSelectedPolicy(null);
+        }}
+      />
+
+      <DeletePolicyModal
+        isOpen={isDeleteModalOpen}
+        onCancel={() => {
+          setIsDeleteModalOpen(false);
+          setSelectedPolicy(null);
+        }}
+        onConfirm={handleDeleteConfirm}
+        policyName={selectedPolicy?.name}
+      />
+    </>
+  );
+}
+
+// Component chính với tabs
+export default function PolicyApp() {
+  const [activeTab, setActiveTab] = useState('policies');
+
+  const tabItems = [
+    {
+      key: 'categories',
+      label: 'Danh mục chính sách',
+      children: <PolicyCategory />,
+    },
+    {
+      key: 'policies',
+      label: 'Chính sách',
+      children: <PolicySystem />,
+    },
+  ];
+
+  return (
+    <div className={styles.contentContainer}>
+      <h1>Quản lý Chính Sách Hệ Thống</h1>
+      <Tabs
+        activeKey={activeTab}
+        onChange={setActiveTab}
+        items={tabItems}
+        style={{ marginTop: 20 }}
+      />
     </div>
   );
 }
