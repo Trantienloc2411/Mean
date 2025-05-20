@@ -27,6 +27,7 @@ export default function RoomList() {
   const [accommodationData, setAccommodationData] = useState(null)
   const [roomTypes, setRoomTypes] = useState([])
   const [isReloading, setIsReloading] = useState(false)
+  const [existingRoomNumbers, setExistingRoomNumbers] = useState([])
 
   const {
     data: accommodations,
@@ -52,6 +53,8 @@ export default function RoomList() {
   useEffect(() => {
     if (accommodations) {
       const uniqueRoomTypes = new Map()
+      const roomNumbers = accommodations.map(accommodation => accommodation.roomNo)
+      setExistingRoomNumbers(roomNumbers)
 
       accommodations.forEach((accommodation) => {
         if (accommodation.accommodationTypeId) {
@@ -225,6 +228,7 @@ export default function RoomList() {
         onCancel={() => setCreateModalVisible(false)}
         onSuccess={handleCreateSuccess}
         rentalLocationId={rentalLocationId}
+        existingRoomNumbers={existingRoomNumbers}
       />
 
       <AccommodationDetail
@@ -243,6 +247,7 @@ export default function RoomList() {
         accommodationData={accommodationData}
         isLoading={isLoadingDetail}
         rentalLocationId={rentalLocationId}
+        existingRoomNumbers={existingRoomNumbers}
       />
     </div>
   )
