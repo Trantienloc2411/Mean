@@ -8,12 +8,24 @@ import RoomList from "./components/RoomList";
 import SettingRentalLocation from "./settingRentalLocation/SettingRentalLocation";
 import { LeftOutlined } from "@ant-design/icons";
 import RoomTypeManagement from "./components/RoomTypeManagement/RoomTypeManagement";
+import { useEffect } from "react";
 
 export default function RentalLocationDetail() {
-  const { id } = useParams(); // Get ID from URL
+  const { id } = useParams();
   const navigate = useNavigate();
 
   const { data: rental, isLoading, error } = useGetRentalLocationByIdQuery(id);
+
+  useEffect(() => {
+    if (rental?.data) {
+      const ownerId = rental.data?.ownerId?._id || rental.data?.ownerId;
+      if (ownerId) {
+        localStorage.setItem('ownerId', ownerId);
+        console.log('Owner ID saved to localStorage:', ownerId);
+      }
+    }
+  }, [rental]);
+
   if (isLoading)
     return (
       <div
@@ -27,9 +39,11 @@ export default function RentalLocationDetail() {
         <Spin size="large" />
       </div>
     );
+
   if (error) return <p>Failed to load rental location.</p>;
+
   const rentalData = rental.data;
-  const ownerId = rentalData?.ownerId?._id || rentalData?.ownerId; 
+  const ownerId = rentalData?.ownerId?._id || rentalData?.ownerId;
   // console.log(rentalData);
 
   const items = [
@@ -82,7 +96,7 @@ export default function RentalLocationDetail() {
       <Button
         type="link"
         onClick={() => navigate(-1)}
-        // style={{ display: "flex", alignItems: "center" }}
+      // style={{ display: "flex", alignItems: "center" }}
       >
         <LeftOutlined /> Trở về
       </Button>

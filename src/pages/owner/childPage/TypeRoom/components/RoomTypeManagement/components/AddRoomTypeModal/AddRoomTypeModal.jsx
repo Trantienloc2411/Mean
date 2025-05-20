@@ -23,7 +23,11 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
   const [createAmenity, { isLoading: isCreatingService }] = useCreateAmenityMutation();
 
   const { data: ownerDetailData } = useGetOwnerDetailByUserIdQuery(id);
-  const ownerId = ownerDetailData?.id;
+  let ownerId = ownerDetailData?.id;
+
+  if (!ownerId) {
+    ownerId = localStorage.getItem('ownerId');
+  }
 
   const {
     data: services,

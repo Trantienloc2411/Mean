@@ -126,7 +126,7 @@ const getBookingStatusDisplay = (statusCode) => {
 
       const transactionData = {
         bookingId: booking._originalBooking._id,
-        paymentCode: `REFUND${Date.now().toString().substring(0, 7)}`,
+        paymentCode: `REFUND${Date.now().toString().substring(0, 13)}`,
         transactionEndDate: new Date().toISOString(),
         transactionStatus: 2, 
         description: `Hoàn tiền cho đơn đặt phòng ${booking._originalBooking._id}`,
