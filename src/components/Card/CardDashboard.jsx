@@ -8,12 +8,13 @@ const CardDashboard = ({
   iconName,
   backgroundColorIcon = "#d0cfff",
   colorIcon = "#8280FF",
-  height,
-  width,
+  height = 120,
+  width = 240, // default to a number
 }) => {
   const containerStyles = {
-    height: height,
-    minWidth: width,
+    height: typeof height === "number" ? height : parseInt(height, 10),
+    minWidth: typeof width === "number" ? width : parseInt(width, 10),
+    width: typeof width === "string" ? width : undefined, // set width if string (e.g., '20%')
     padding: "24px",
     borderRadius: "12px",
     boxShadow: "0 1px 3px rgba(0, 0, 0, 0.1)",
@@ -23,10 +24,10 @@ const CardDashboard = ({
     justifyContent: "center",
     transition: "transform 0.2s ease, box-shadow 0.2s ease",
     cursor: "pointer",
-    "&:hover": {
+    ":hover": {
       transform: "translateY(-2px)",
       boxShadow: "0 4px 6px rgba(0, 0, 0, 0.12)",
-    }
+    },
   };
 
   const titleStyles = {
@@ -82,7 +83,7 @@ CardDashboard.propTypes = {
   backgroundColorIcon: PropTypes.string,
   colorIcon: PropTypes.string,
   height: PropTypes.number,
-  width: PropTypes.number,
+  width: PropTypes.oneOfType([PropTypes.number, PropTypes.string]), // allow both
 };
 
 export default CardDashboard;

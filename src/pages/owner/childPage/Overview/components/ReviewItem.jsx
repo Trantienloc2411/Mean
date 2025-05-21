@@ -1,6 +1,6 @@
-import React from 'react';
-import { Avatar, Rate } from 'antd';
-import './ReviewList.scss';
+import React from "react";
+import { Avatar, Rate } from "antd";
+import "./ReviewList.scss";
 
 const ReviewItem = ({ avatar, name, rating, comment, date }) => {
   return (
@@ -15,6 +15,7 @@ const ReviewItem = ({ avatar, name, rating, comment, date }) => {
           <span className="review-date">{date}</span>
         </div>
         <p className="review-comment">{comment}</p>
+        <p className="review-place">{rentalLocationName}</p>
       </div>
     </div>
   );
