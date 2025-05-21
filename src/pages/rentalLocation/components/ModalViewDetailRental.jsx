@@ -333,11 +333,11 @@ export default function ModalViewDetailRental({
       open={visible}
       onCancel={onClose}
       width={"70%"}
-      bodyStyle={{ maxHeight: "60vh", overflowY: "auto", paddingRight: 16 }}
-      afterOpenChange={(isOpen) => {
-        document.body.style.overflow = isOpen ? "hidden" : "auto";
-      }}
-      destroyOnClose
+      // bodyStyle={{ maxHeight: "60vh", overflowY: "auto", paddingRight: 16 }}
+      // afterOpenChange={(isOpen) => {
+      // document.body.style.overflow = isOpen ? "hidden" : "auto";
+      // }}
+      // destroyOnClose
     >
       <Tabs activeKey={tab} onChange={setTab} items={tabItems} />
     </Modal>
