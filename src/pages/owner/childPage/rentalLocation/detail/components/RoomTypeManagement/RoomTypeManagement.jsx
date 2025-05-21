@@ -20,7 +20,7 @@ import {
 } from "../../../../../../../redux/services/rentalLocationApi";
 import { useParams } from "react-router-dom";
 
-const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
+const RoomTypeManagement2 = ({ isOwner, ownerId, rentalLocationId }) => {
   const { id } = useParams();
   const locationId = rentalLocationId || id;
 
@@ -478,4 +478,4 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
   );
 };
 
-export default RoomTypeManagement;
+export default RoomTypeManagement2;

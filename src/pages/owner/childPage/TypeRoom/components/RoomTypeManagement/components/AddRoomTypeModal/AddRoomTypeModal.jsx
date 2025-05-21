@@ -34,7 +34,7 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
     isLoading: isServicesLoading,
     refetch: refetchServices
   } = useGetAllAmenitiesQuery(
-    { ownerId }, 
+    { ownerId },
     { skip: !ownerId }
   );
 
@@ -144,7 +144,7 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
     try {
       const newService = await createAmenity({
         ...values,
-        ownerId, 
+        ownerId,
         status: values.status === "Active",
         isDelete: false
       }).unwrap();
@@ -247,9 +247,18 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
           <Form.Item
             name="maxPeopleNumber"
             label="Số người tối đa"
-            rules={[{ required: true, message: 'Vui lòng nhập số người tối đa' }]}
+            rules={[
+              { required: true, message: 'Vui lòng nhập số người tối đa' },
+              {
+                type: 'number',
+                min: 1,
+                max: 2,
+                message: 'Số người tối đa không được vượt quá 2'
+              }
+            ]}
+            help="Số người tối đa không nên vượt quá 2"
           >
-            <InputNumber min={1} placeholder="4" />
+            <InputNumber min={1} max={2} placeholder="2" />
           </Form.Item>
 
           <Form.Item
@@ -294,14 +303,15 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
             type: 'number',
             min: 0,
             max: 10,
-            message: 'Độ dài mật khẩu phải từ 1 đến 10, hoặc 0 nếu không dùng mật khẩu'
+            message: 'Độ dài mật khẩu phải từ 0 đến 10 (0 = không dùng mật khẩu)'
           }]}
+          help="Nhập số từ 0-10 (0 = không yêu cầu mật khẩu)"
         >
           <InputNumber
             min={0}
             max={10}
             precision={0}
-            placeholder="Độ dài mật khẩu (1-10)"
+            placeholder="Độ dài mật khẩu (0-10)"
             style={{ width: '100%' }}
           />
         </Form.Item>
