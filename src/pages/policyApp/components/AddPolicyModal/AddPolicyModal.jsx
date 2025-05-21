@@ -457,7 +457,7 @@ const AddPolicyModal = ({ isOpen, onCancel }) => {
                         label={
                           <Space>
                             <span>Đơn vị</span>
-                            <Tooltip title="Đơn vị tính cho giá trị này (VND, %, giờ, điểm)">
+                            <Tooltip title="Đơn vị tính cho giá trị này (VND, %, giờ, điểm, phút)">
                               <InfoCircleOutlined style={{ color: "#1890ff" }} />
                             </Tooltip>
                           </Space>
@@ -468,6 +468,7 @@ const AddPolicyModal = ({ isOpen, onCancel }) => {
                           <Select.Option value="percent">Phần trăm (%)</Select.Option>
                           <Select.Option value="vnd">VND</Select.Option>
                           <Select.Option value="point">Điểm</Select.Option>
+                          <Select.Option value="min">Phút</Select.Option>
                           <Select.Option value="hour">Giờ</Select.Option>
                           <Select.Option value="day">Ngày</Select.Option>
                         </Select>
