@@ -1,14 +1,22 @@
-import { useState, useEffect } from "react";
-import { Dropdown, Input, Button, Menu, message, Table } from "antd";
-import { FilterOutlined, SearchOutlined, MoreOutlined, WalletOutlined } from "@ant-design/icons";
-import debounce from "lodash/debounce";
-import Filter from "../../../../../../components/Filter/Filter";
-import UpdateBookingStatus from "../UpdateBookingStatus/UpdateBookingStatus";
-import BookingDetail from "../BookingDetail/BookingDetail";
-import styles from "./ListBooking.module.scss";
-import { useGetBookingByIdQuery } from "../../../../../../redux/services/bookingApi";
-import momoIcon from '../../../../../../../src/assets/momo.png';
-import dayjs from 'dayjs';
+import { useState, useEffect } from "react"
+import { Dropdown, Input, Button, message, Table, Select } from "antd"
+import {
+  FilterOutlined,
+  SearchOutlined,
+  MoreOutlined,
+  WalletOutlined,
+  SortAscendingOutlined,
+  InfoCircleOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons"
+import debounce from "lodash/debounce"
+import Filter from "../../../../../../components/Filter/Filter"
+import UpdateBookingStatus from "../UpdateBookingStatus/UpdateBookingStatus"
+import BookingDetail from "../BookingDetail/BookingDetail"
+import styles from "./ListBooking.module.scss"
+import { useGetBookingByIdQuery } from "../../../../../../redux/services/bookingApi"
+import momoIcon from "../../../../../../../src/assets/momo.png"
+import dayjs from "dayjs"
 
 export default function ListBooking({
   bookings = [],
@@ -19,23 +27,26 @@ export default function ListBooking({
   isUpdating,
   onSelectBookingDetail,
   generatePassword,
+  onReload,
 }) {
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredData, setFilteredData] = useState(bookings);
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filteredData, setFilteredData] = useState([])
   const [selectedValues, setSelectedValues] = useState({
     status: [],
     payment: [],
-    dateFilter: null
-  });
-  const [selectedBooking, setSelectedBooking] = useState(null);
-  const [statusModalVisible, setStatusModalVisible] = useState(false);
-  const [selectedBookingId, setSelectedBookingId] = useState(null);
-  const [isBookingDetailVisible, setIsBookingDetailVisible] = useState(false);
+    dateFilter: null,
+  })
+  const [selectedBooking, setSelectedBooking] = useState(null)
+  const [statusModalVisible, setStatusModalVisible] = useState(false)
+  const [selectedBookingId, setSelectedBookingId] = useState(null)
+  const [isBookingDetailVisible, setIsBookingDetailVisible] = useState(false)
+  const [sortOption, setSortOption] = useState("newest")
   const [pagination, setPagination] = useState({
-      current: 1,
-      pageSize: 7,
-      total: bookings.length,
-    });
+    current: 1,
+    pageSize: 7,
+    total: bookings.length,
+  })
+  const [isReloading, setIsReloading] = useState(false)
 
   const {
     data: bookingDetailData,
@@ -43,16 +54,24 @@ export default function ListBooking({
     isError: isDetailError,
   } = useGetBookingByIdQuery(selectedBookingId, {
     skip: !selectedBookingId,
-  });
+  })
 
   useEffect(() => {
-    setFilteredData(bookings);
-    setPagination(prev => ({
-      ...prev,
-      total: bookings.length,
-    }));
-  }, [bookings]);
+    setPagination(prev => ({ ...prev, current: 1, total: bookings.length }))
+  }, [bookings])
 
+  useEffect(() => {
+    setFilteredData(bookings)
+  }, [bookings])
+
+  const debouncedApplyFilters = debounce((filters) => {
+    applyFilters(filters)
+  }, 500)
+
+  useEffect(() => {
+    debouncedApplyFilters({ ...selectedValues, searchTerm })
+    return () => debouncedApplyFilters.cancel()
+  }, [searchTerm, selectedValues, sortOption, bookings]) 
 
   const getBookingStatusDisplay = (statusCode) => {
     const statusMap = {
@@ -64,7 +83,7 @@ export default function ListBooking({
       [bookingStatusCodes.CHECKEDOUT]: "Đã check-out",
       [bookingStatusCodes.CANCELLED]: "Đã hủy",
       [bookingStatusCodes.COMPLETED]: "Hoàn tất",
-      [bookingStatusCodes.REFUND]: "Hoàn tiền"
+      [bookingStatusCodes.REFUND]: "Hoàn tiền",
     }
     return statusMap[statusCode] || "Trạng thái không xác định"
   }
@@ -74,171 +93,187 @@ export default function ListBooking({
       [paymentStatusCodes.BOOKING]: "Đã đặt",
       [paymentStatusCodes.PENDING]: "Chờ thanh toán",
       [paymentStatusCodes.PAID]: "Đã thanh toán",
-      [paymentStatusCodes.REFUND]: "Đã hoàn tiền",
+      [paymentStatusCodes.REFUND]: "Yêu cầu hoàn tiền",
       [paymentStatusCodes.FAILED]: "Thanh toán thất bại",
     }
     return statusMap[statusCode] || "Chưa thanh toán"
   }
 
   const getPaymentMethod = (method) => {
-    const methods = {
-      [paymentMethodCodes.MOMO]: "MoMo",
-    };
-    return methods[method] || "Không xác định";
-  };
-  
+    const methods = { [paymentMethodCodes.MOMO]: "MoMo" }
+    return methods[method] || "Không xác định"
+  }
+
+  const statusDescriptions = {
+    [bookingStatusCodes.CONFIRMED]: "Đơn đặt phòng đã được xác nhận thành công và đang chờ check-in",
+    [bookingStatusCodes.PENDING]: "Đơn đặt phòng đang chờ chủ phòng xác nhận thông tin",
+    [bookingStatusCodes.NEEDCHECKIN]: "Khách hàng cần thực hiện thủ tục check-in trong ngày đến",
+    [bookingStatusCodes.CHECKEDIN]: "Khách đã check-in thành công và đang sử dụng phòng",
+    [bookingStatusCodes.NEEDCHECKOUT]: "Đến giờ check-out, khách cần hoàn tất thủ tục trả phòng",
+    [bookingStatusCodes.CHECKEDOUT]: "Khách đã check-out thành công, đang chờ xác nhận hoàn tất",
+    [bookingStatusCodes.CANCELLED]: "Đơn đặt phòng đã bị hủy bởi khách hoặc chủ phòng",
+    [bookingStatusCodes.COMPLETED]: "Đơn đặt phòng đã được hoàn tất toàn bộ quy trình",
+    [bookingStatusCodes.REFUND]: "Đơn hàng đã được hoàn tiền",
+  }
+
+  const statusPaymentDescriptions = {
+    [paymentStatusCodes.BOOKING]: "Đơn hàng đã được đặt thành công và đang chờ thanh toán",
+    [paymentStatusCodes.PENDING]: "Đơn hàng đang trong quá trình xử lý thanh toán",
+    [paymentStatusCodes.PAID]: "Đơn hàng đã được thanh toán đầy đủ",
+    [paymentStatusCodes.REFUND]: "Đơn đặt phòng đang yêu cầu hoàn tiền",
+    [paymentStatusCodes.FAILED]: "Thanh toán không thành công, cần thử lại hoặc chọn phương thức khác",
+  }
+
   const statusOptions = Object.entries(bookingStatusCodes).map(([key, value]) => ({
     label: <span className={`${styles.statusTag} ${styles[key.toLowerCase()]}`}>{getBookingStatusDisplay(value)}</span>,
     value: getBookingStatusDisplay(value),
-  }));
-  
+  }))
+
   const paymentOptions = Object.entries(paymentStatusCodes).map(([key, value]) => ({
     label: (
       <span className={`${styles.paymentTag} ${styles[key.toLowerCase()]}`}>{getPaymentStatusDisplay(value)}</span>
     ),
     value: getPaymentStatusDisplay(value),
-  }));
+  }))
 
   const filterGroups = [
-    {
-      name: "status",
-      title: "Trạng thái",
-      options: statusOptions,
-    },
-    {
-      name: "payment",
-      title: "Thanh toán",
-      options: paymentOptions,
-    },
+    { name: "status", title: "Trạng thái", options: statusOptions },
+    { name: "payment", title: "Thanh toán", options: paymentOptions },
   ]
 
-  const parseDateTime = (dateTimeStr) => {
-    if (!dateTimeStr) return null;
-    return dayjs(dateTimeStr, "DD/MM/YYYY HH:mm:ss");
-  };
+  const sortOptions = [
+    { value: "newest", label: "Mới nhất" },
+    { value: "checkInToday", label: "Check-in hôm nay" },
+    { value: "checkOutToday", label: "Check-out hôm nay" },
+    { value: "pending", label: "Chờ xác nhận" },
+  ]
+
+  const parseDateTime = (dateTimeStr) => dayjs(dateTimeStr, "DD/MM/YYYY HH:mm:ss")
 
   const matchesDateTimeFilter = (booking, dateFilter) => {
-    if (!dateFilter) return true;
-    if (!booking || !booking._originalBooking) return false;
-    
-    const checkInDateTime = parseDateTime(booking._originalBooking.checkInHour);
-    const checkOutDateTime = parseDateTime(booking._originalBooking.checkOutHour);
-    
-    if (!checkInDateTime || !checkOutDateTime) return false;
-    
+    if (!dateFilter) return true
+    const checkInDateTime = parseDateTime(booking._originalBooking.checkInHour)
+    const checkOutDateTime = parseDateTime(booking._originalBooking.checkOutHour)
+    if (!checkInDateTime || !checkOutDateTime) return false
+
     if (dateFilter.date) {
-      const filterDate = dateFilter.date.format('DD/MM/YYYY');
-      const bookingDate = checkInDateTime.format('DD/MM/YYYY');
-      
-      if (filterDate !== bookingDate) return false;
+      const filterDate = dateFilter.date.format("DD/MM/YYYY")
+      const bookingDate = checkInDateTime.format("DD/MM/YYYY")
+      if (filterDate !== bookingDate) return false
     }
-    
+
     if (dateFilter.timeRange) {
-      const [filterStartTime, filterEndTime] = dateFilter.timeRange;
-      
-      const checkInTime = checkInDateTime.hour() * 60 + checkInDateTime.minute();
-      const checkOutTime = checkOutDateTime.hour() * 60 + checkOutDateTime.minute();
-      
-      const filterStartMinutes = filterStartTime.hour() * 60 + filterStartTime.minute();
-      const filterEndMinutes = filterEndTime.hour() * 60 + filterEndTime.minute();
-      
-      const checkInInRange = checkInTime >= filterStartMinutes && checkInTime <= filterEndMinutes;
-      const checkOutInRange = checkOutTime >= filterStartMinutes && checkOutTime <= filterEndMinutes;
-      const bookingSpansFilterRange = checkInTime <= filterStartMinutes && checkOutTime >= filterEndMinutes;
-      
-      if (!(checkInInRange || checkOutInRange || bookingSpansFilterRange)) {
-        return false;
-      }
+      const [filterStartTime, filterEndTime] = dateFilter.timeRange
+      const checkInTime = checkInDateTime.hour() * 60 + checkInDateTime.minute()
+      const checkOutTime = checkOutDateTime.hour() * 60 + checkOutDateTime.minute()
+      const filterStartMinutes = filterStartTime.hour() * 60 + filterStartTime.minute()
+      const filterEndMinutes = filterEndTime.hour() * 60 + filterEndTime.minute()
+
+      const checkInInRange = checkInTime >= filterStartMinutes && checkInTime <= filterEndMinutes
+      const checkOutInRange = checkOutTime >= filterStartMinutes && checkOutTime <= filterEndMinutes
+      const bookingSpansFilterRange = checkInTime <= filterStartMinutes && checkOutTime >= filterEndMinutes
+
+      return checkInInRange || checkOutInRange || bookingSpansFilterRange
     }
-    
-    return true;
-  };
+    return true
+  }
 
   const applyFilters = (filters) => {
     if (!bookings || bookings.length === 0) {
-      setFilteredData([]);
-      return;
+      setFilteredData([])
+      return
     }
-  
-    let filtered = [...bookings];
-  
-    if (filters.status && filters.status.length > 0) {
-      filtered = filtered.filter((item) => {
-        if (!item || !item._originalBooking) return false;
-        const statusCode = item._originalBooking.status;
-        const statusText = getBookingStatusDisplay(statusCode);
-        return filters.status.includes(statusText);
-      });
+
+    let filtered = [...bookings]
+
+    if (filters.status?.length)
+      filtered = filtered.filter((item) =>
+        filters.status.includes(getBookingStatusDisplay(item._originalBooking.status)),
+      )
+
+    if (filters.payment?.length)
+      filtered = filtered.filter((item) =>
+        filters.payment.includes(getPaymentStatusDisplay(item._originalBooking.paymentStatus)),
+      )
+
+    if (filters.dateFilter) filtered = filtered.filter((item) => matchesDateTimeFilter(item, filters.dateFilter))
+
+    if (filters.searchTerm)
+      filtered = filtered.filter(
+        (item) =>
+          item._originalBooking.customerId?.userId?.fullName
+            ?.toLowerCase()
+            .includes(filters.searchTerm.toLowerCase()) ||
+          item._originalBooking._id?.toLowerCase().includes(filters.searchTerm.toLowerCase()),
+      )
+
+    const sortedData = applySorting(filtered)
+    setFilteredData(sortedData)
+    setPagination((prev) => ({ ...prev, current: 1, total: sortedData.length }))
+  }
+
+  const applySorting = (data) => {
+    const today = dayjs().format("DD/MM/YYYY")
+    const sortedData = [...data]
+
+    switch (sortOption) {
+      case "checkInToday":
+        sortedData.sort((a, b) => {
+          const aCheckIn = parseDateTime(a._originalBooking.checkInHour)
+          const bCheckIn = parseDateTime(b._originalBooking.checkInHour)
+          const aToday = aCheckIn?.format("DD/MM/YYYY") === today
+          const bToday = bCheckIn?.format("DD/MM/YYYY") === today
+          return aToday === bToday ? aCheckIn - bCheckIn : aToday ? -1 : 1
+        })
+        break
+      case "checkOutToday":
+        sortedData.sort((a, b) => {
+          const aCheckOut = parseDateTime(a._originalBooking.checkOutHour)
+          const bCheckOut = parseDateTime(b._originalBooking.checkOutHour)
+          const aToday = aCheckOut?.format("DD/MM/YYYY") === today
+          const bToday = bCheckOut?.format("DD/MM/YYYY") === today
+          return aToday === bToday ? aCheckOut - bCheckOut : aToday ? -1 : 1
+        })
+        break
+      case "pending":
+        sortedData.sort(
+          (a, b) =>
+            (a._originalBooking.status === bookingStatusCodes.PENDING ? -1 : 1) -
+            (b._originalBooking.status === bookingStatusCodes.PENDING ? -1 : 1),
+        )
+        break
+      default:
+        sortedData.sort((a, b) => new Date(b._originalBooking.createdAt) - new Date(a._originalBooking.createdAt))
     }
-  
-    if (filters.payment && filters.payment.length > 0) {
-      filtered = filtered.filter((item) => {
-        if (!item || !item._originalBooking) return false;
-        const paymentCode = item._originalBooking.paymentStatus;
-        const paymentText = getPaymentStatusDisplay(paymentCode);
-        return filters.payment.includes(paymentText);
-      });
-    }
-  
-    if (filters.dateFilter) {
-      filtered = filtered.filter(item => matchesDateTimeFilter(item, filters.dateFilter));
-    }
-  
-    const search = filters.searchTerm || searchTerm;
-    if (search) {
-      filtered = filtered.filter((item) => {
-        if (!item || !item._originalBooking || !item._originalBooking.customerId) return false;
-        const customerName = item._originalBooking.customerId.userId?.fullName || "";
-        return customerName.toLowerCase().includes(search.toLowerCase());
-      });
-    }
-  
-    setFilteredData(filtered);
-    setPagination(prev => ({
-      ...prev, 
-      current: 1, 
-      total: filtered.length,
-    }));
+
+    return sortedData
   }
 
   const handleFilterChange = (filterName, newValues) => {
-    if (filterName === "reset") {
-      setSelectedValues(newValues);
-      setSearchTerm("");
-      setFilteredData(bookings);
-      return;
-    }
-  
-    const updatedFilters = {
-      ...selectedValues,
-      [filterName]: newValues,
-    };
-  
-    setSelectedValues(updatedFilters);
-    applyFilters(updatedFilters);
-  };
-
-  const debouncedSearch = debounce((value) => {
-    setSearchTerm(value);
-    applyFilters({
-      ...selectedValues,
-      searchTerm: value,
-    });
-  }, 500);
-
-  const handleSearch = (e) => {
-    const value = e.target.value;
-    debouncedSearch(value);
+    const updatedFilters = filterName === "reset" ? newValues : { ...selectedValues, [filterName]: newValues }
+    setSelectedValues(updatedFilters)
+    if (filterName === "reset") setSearchTerm("")
   }
 
-  useEffect(() => {
-    return () => {
-      debouncedSearch.cancel();
-    }
-  }, [debouncedSearch]);
+  const handleSortChange = (value) => setSortOption(value)
+  const handleSearch = (e) => setSearchTerm(e.target.value)
 
-  const getStatusClass = (status) => {
-    const statusMap = {
+  const handleReloadData = async () => {
+    if (onReload && typeof onReload === 'function') {
+      setIsReloading(true)
+      try {
+        await onReload()
+        message.success('Dữ liệu đã được cập nhật')
+      } catch (error) {
+        message.error('Không thể tải lại dữ liệu. Vui lòng thử lại sau.')
+      } finally {
+        setIsReloading(false)
+      }
+    }
+  }
+
+  const getStatusClass = (status) =>
+    ({
       "Đã xác nhận": "confirmed",
       "Chờ xác nhận": "pending",
       "Cần check-in": "needcheckin",
@@ -247,249 +282,151 @@ export default function ListBooking({
       "Đã check-out": "checkedout",
       "Đã hủy": "canceled",
       "Hoàn tất": "complete",
-      "Hoàn tiền": "refund"
-    }
+      "Hoàn tiền": "refund",
+    })[status] || "pending"
 
-    return statusMap[status] || "pending"
-  }
-
-  const getPaymentClass = (payment) => {
-    const paymentMap = {
+  const getPaymentClass = (payment) =>
+    ({
       "Đã đặt": "booked",
       "Chờ thanh toán": "pending",
       "Đã thanh toán": "paid",
-      "Đã hoàn tiền": "refund",
+      "Yêu cầu hoàn tiền": "refund",
       "Thanh toán thất bại": "cancelled",
-    }
+    })[payment] || "pending"
 
-    return paymentMap[payment] || "pending"
-  }
-
-  const getPaymentIcon = (method) => {
-    const iconMap = {
-      [paymentMethodCodes.MOMO]: (
-        <img 
-          src={momoIcon}
-          alt="MoMo" 
-          className={styles.paymentIcon}
-        />
-      ),
-    };
-    return iconMap[method] || <WalletOutlined />;
-  };
+  const getPaymentIcon = (method) =>
+    method === paymentMethodCodes.MOMO ? (
+      <img src={momoIcon || "/placeholder.svg"} alt="MoMo" className={styles.paymentIcon} />
+    ) : (
+      <WalletOutlined />
+    )
 
   const columns = [
     {
-      title: "No.",
-      key: "no",
-      render: (_, __, index) =>
-        (pagination.current - 1) * pagination.pageSize + index + 1,
+      title: <span className={styles.tableHeader}>Mã Đặt Phòng</span>,
+      render: (_, record) => (
+        <div className={styles.indexCell}>
+          <strong>{record._originalBooking?._id}</strong>
+        </div>
+      ),
     },
     {
       title: <span className={styles.tableHeader}>Khách Hàng</span>,
-      key: "customerName",
-      render: (_, record) => {
-        if (!record || !record._originalBooking || !record._originalBooking.customerId) {
-          return "Không xác định";
-        }
-        return record._originalBooking.customerId.userId?.fullName || "Không xác định";
-      }
+      render: (_, record) => record._originalBooking.customerId.userId?.fullName || "Không xác định",
     },
     {
       title: <span className={styles.tableHeader}>Loại Phòng</span>,
-      key: "roomType",
-      render: (_, record) => {
-        if (!record || !record._originalBooking || !record._originalBooking.accommodationId) {
-          return "Không xác định";
-        }
-        return record._originalBooking.accommodationId.accommodationTypeId?.name || "Không xác định";
-      }
+      render: (_, record) => record._originalBooking.accommodationId.accommodationTypeId?.name || "Không xác định",
     },
     {
       title: <span className={styles.tableHeader}>Check-in / Check-out</span>,
-      key: "bookingTime",
       render: (_, record) => {
-        if (!record || !record._originalBooking) {
-          return "N/A";
-        }
-        const booking = record._originalBooking;
-        
-        const checkInDateTime = parseDateTime(booking.checkInHour);
-        const checkOutDateTime = parseDateTime(booking.checkOutHour);
-        
-        if (!checkInDateTime || !checkOutDateTime) {
-          return (
-            <div className={styles.timeInfo}>
-              {booking.checkInHour || "N/A"} - {booking.checkOutHour || "N/A"}
-            </div>
-          );
-        }
-        
+        const ci = parseDateTime(record._originalBooking.checkInHour)
+        const co = parseDateTime(record._originalBooking.checkOutHour)
         return (
           <div className={styles.timeInfo}>
-            <div>{checkInDateTime.format('DD/MM/YYYY')}</div>
-            <div>{checkInDateTime.format('HH:mm')} - {checkOutDateTime.format('HH:mm')}</div>
+            <div>{ci?.format("DD/MM/YYYY")}</div>
+            <div>
+              {ci?.format("HH:mm")} - {co?.format("HH:mm")}
+            </div>
           </div>
-        );
+        )
       },
     },
     {
       title: <span className={styles.tableHeader}>Số Người</span>,
-      key: "peopleCount",
-      render: (_, record) => {
-        if (!record || !record._originalBooking) {
-          return "N/A";
-        }
-        const booking = record._originalBooking;
-        return (
-          <div className={styles.peopleInfo}>
-            <span>NL: {booking.adultNumber || 0}</span>
-            <span>TE: {booking.childNumber || 0}</span>
-          </div>
-        );
-      },
+      render: (_, record) => (
+        <div className={styles.peopleInfo}>
+          <span>NL: {record._originalBooking.adultNumber}</span>
+          <span>TE: {record._originalBooking.childNumber}</span>
+        </div>
+      ),
     },
     {
       title: <span className={styles.tableHeader}>Thanh Toán</span>,
-      key: "paymentMethod",
       render: (_, record) => {
-        if (!record || !record._originalBooking) {
-          return "N/A";
-        }
-        const booking = record._originalBooking;
-        const paymentStatus = getPaymentStatusDisplay(booking.paymentStatus);
-        const paymentMethod = booking.paymentMethod;
-    
+        const paymentStatus = getPaymentStatusDisplay(record._originalBooking.paymentStatus)
         return (
           <div className={styles.paymentInfo}>
             <div className={styles.method}>
-              <span className={styles.paymentMethodIcon}>
-                {getPaymentIcon(paymentMethod)}
-              </span>
-              {getPaymentMethod(paymentMethod)}
+              {getPaymentIcon(record._originalBooking.paymentMethod)}
+              {getPaymentMethod(record._originalBooking.paymentMethod)}
             </div>
-            <div>
-              <span className={`${styles.paymentTag} ${styles[getPaymentClass(paymentStatus)]}`}>
-                {paymentStatus}
-              </span>
-            </div>
+            <span className={`${styles.paymentTag} ${styles[getPaymentClass(paymentStatus)]}`}>{paymentStatus}</span>
           </div>
-        );
+        )
       },
     },
     {
       title: <span className={styles.tableHeader}>Trạng Thái</span>,
-      key: "status",
       render: (_, record) => {
-        if (!record || !record._originalBooking) {
-          return "N/A";
-        }
-        const statusCode = record._originalBooking.status;
-        const statusText = getBookingStatusDisplay(statusCode);
-
-        return <span className={`${styles.statusTag} ${styles[getStatusClass(statusText)]}`}>{statusText}</span>;
+        const status = getBookingStatusDisplay(record._originalBooking.status)
+        return <span className={`${styles.statusTag} ${styles[getStatusClass(status)]}`}>{status}</span>
       },
     },
     {
       title: "",
-      key: "operation",
       render: (_, record) => (
         <Dropdown
-          trigger={["click"]}
           menu={{
-            items: menuItems(record).map((item) => ({
-              ...item,
-              onClick: () => item.onClick(record),
-            })),
+            items: [
+              { key: "1", label: "Xem Chi Tiết", onClick: () => handleViewDetails(record) },
+              ...(record._originalBooking.status === bookingStatusCodes.PENDING
+                ? [
+                  {
+                    key: "2",
+                    label: "Cập Nhật Trạng Thái",
+                    onClick: () => handleStatusUpdate(record),
+                  },
+                ]
+                : []),
+            ],
           }}
         >
-          <MoreOutlined 
-            onClick={(e) => e.preventDefault()}
-            style={{ fontSize: 18, cursor: "pointer" }}
-          />
+          <MoreOutlined style={{ fontSize: 18, cursor: "pointer" }} />
         </Dropdown>
       ),
     },
-  ];
-
-  const menuItems = (record) => {
-    if (!record || !record._originalBooking) {
-      return [
-        {
-          key: "1",
-          label: "Xem Chi Tiết",
-          onClick: () => {},
-          disabled: true
-        }
-      ];
-    }
-
-    const currentStatus = record._originalBooking.status;
-    const allowedStatuses = [bookingStatusCodes.CONFIRMED, bookingStatusCodes.PENDING];
-    
-    const items = [
-      {
-        key: "1",
-        label: "Xem Chi Tiết",
-        onClick: handleViewDetails,
-      }
-    ];
-
-    if (allowedStatuses.includes(currentStatus)) {
-      items.push({
-        key: "2",
-        label: "Cập Nhật Trạng Thái",
-        onClick: handleStatusUpdate,
-      });
-    }
-
-    return items;
-  };
+  ]
 
   const handleViewDetails = (booking) => {
-    if (!booking || !booking._originalBooking) return;
-    
-    const bookingId = booking._originalBooking._id || booking._originalBooking.id;
-    if (!bookingId) return;
-
-    setSelectedBookingId(bookingId);
-    setIsBookingDetailVisible(true);
-
-    if (onSelectBookingDetail) {
-      onSelectBookingDetail(bookingId);
-    }
+    const bookingId = booking._originalBooking._id
+    setSelectedBookingId(bookingId)
+    setIsBookingDetailVisible(true)
+    onSelectBookingDetail?.(bookingId)
   }
 
   const handleCloseBookingDetail = () => {
-    setIsBookingDetailVisible(false);
-    setSelectedBookingId(null);
+    setIsBookingDetailVisible(false)
+    setSelectedBookingId(null)
   }
 
   const handleStatusUpdate = (booking) => {
-    if (!booking) return;
-    setSelectedBooking(booking);
-    setStatusModalVisible(true);
+    setSelectedBooking(booking)
+    setStatusModalVisible(true)
   }
 
   const handleCloseStatusModal = () => {
-    setStatusModalVisible(false);
-    setSelectedBooking(null);
+    setStatusModalVisible(false)
+    setSelectedBooking(null)
   }
 
   const handleCustomStatusChange = async (bookingId, newStatusDisplay, cancelReason) => {
-    if (!onStatusChange) return;
-    
     try {
-      await onStatusChange(bookingId, newStatusDisplay, cancelReason);
-      handleCloseStatusModal();
+      await onStatusChange(bookingId, newStatusDisplay, cancelReason)
+      handleCloseStatusModal()
     } catch (error) {
-      message.error("Cập nhật trạng thái thất bại");
+      message.error("Cập nhật trạng thái thất bại")
     }
-  };
+  }
 
-  const handleTableChange = (pagination) => {
-    setPagination(pagination);
-  };
+  const handlePaginationChange = (page, pageSize) => {
+    setPagination({
+      ...pagination,
+      current: page,
+      pageSize: pageSize
+    })
+  }
 
   return (
     <div className={styles.contentContainer}>
@@ -497,21 +434,25 @@ export default function ListBooking({
       <div className={styles.listBooking}>
         <div className={styles.filterContainer}>
           <Input
-            placeholder="Tìm kiếm tên khách hàng"
+            placeholder="Tìm kiếm tên khách hàng hoặc mã đặt phòng"
+            value={searchTerm}
             onChange={handleSearch}
             className={styles.searchInput}
             prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
           />
 
+          <Select
+            value={sortOption}
+            onChange={handleSortChange}
+            options={sortOptions}
+            className={styles.sortSelect}
+            suffixIcon={<SortAscendingOutlined />}
+            style={{ width: "180px", marginRight: "10px" }}
+          />
+
           <Dropdown
             overlay={
-              <Filter
-                filterGroups={filterGroups}
-                selectedValues={selectedValues}
-                onFilterChange={handleFilterChange}
-                bookingStatusCodes={bookingStatusCodes}
-                paymentStatusCodes={paymentStatusCodes}
-              />
+              <Filter filterGroups={filterGroups} selectedValues={selectedValues} onFilterChange={handleFilterChange} />
             }
             trigger={["click"]}
             placement="bottomRight"
@@ -520,55 +461,85 @@ export default function ListBooking({
               Lọc
               {(Object.values(selectedValues).flat().length > 0 || selectedValues.dateFilter) && (
                 <span className={styles.filterBadge}>
-                  {Object.values(selectedValues).flat().filter(val => val !== undefined && val !== null).length + 
-                   (selectedValues.dateFilter ? 1 : 0)}
+                  {Object.values(selectedValues).flat().filter(Boolean).length + (selectedValues.dateFilter ? 1 : 0)}
                 </span>
               )}
             </Button>
           </Dropdown>
+
+          <Button 
+            icon={<ReloadOutlined spin={isReloading} />} 
+            onClick={handleReloadData} 
+            loading={isReloading}
+            className={styles.reloadButton}
+          >
+            Làm mới
+          </Button>
+
+          <div className={styles.statusDescriptionContainer}>
+            <Dropdown
+              overlay={
+                <div className={styles.statusDescriptionPopover}>
+                  <div className={styles.descriptionSection}>
+                    <h4>Trạng thái đặt phòng</h4>
+                    {Object.entries(statusDescriptions).map(([statusCode, description]) => (
+                      <div key={statusCode} className={styles.descriptionItem}>
+                        <span
+                          className={`${styles.statusDot} ${styles[getStatusClass(getBookingStatusDisplay(statusCode))]}`}
+                        />
+                        <div>
+                          <div className={styles.descriptionTitle}>{getBookingStatusDisplay(statusCode)}</div>
+                          <div className={styles.descriptionText}>{description}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  <div className={styles.descriptionSection}>
+                    <h4>Trạng thái thanh toán</h4>
+                    {Object.entries(paymentStatusCodes).map(([key, value]) => (
+                      <div key={key} className={styles.descriptionItem}>
+                        <span
+                          className={`${styles.statusDot} ${styles[getPaymentClass(getPaymentStatusDisplay(value))]}`}
+                        />
+                        <div>
+                          <div className={styles.descriptionTitle}>{getPaymentStatusDisplay(value)}</div>
+                          <div className={styles.descriptionText}>
+                            {statusPaymentDescriptions[value] ||
+                              `Trạng thái thanh toán: ${getPaymentStatusDisplay(value)}`}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              }
+              trigger={["click"]}
+              placement="bottomRight"
+            >
+              <Button className={styles.infoButton} icon={<InfoCircleOutlined />}>
+                Thông tin trạng thái
+              </Button>
+            </Dropdown>
+          </div>
         </div>
         <div className={styles.tableContainer}>
           <Table
             columns={columns}
             dataSource={filteredData}
-            rowKey={(record) => 
-              (record && record._originalBooking) ? 
-                (record._originalBooking._id || record._originalBooking.id || `row-${Math.random()}`) : 
-                `row-${Math.random()}`
-            }
-            loading={isUpdating}
+            rowKey={(record) => record._originalBooking?._id || Math.random()}
+            loading={isUpdating || isReloading}
             pagination={{
               ...pagination,
               total: filteredData.length,
-              pageSize: pagination.pageSize,
+              onChange: handlePaginationChange,
               showSizeChanger: false,
               className: styles.customPagination,
               itemRender: (page, type, originalElement) => {
-                const totalPages = Math.ceil(filteredData.length / pagination.pageSize);
-                if (type === "prev") {
-                  return (
-                    <button
-                      className={styles.paginationButton}
-                      disabled={page === 0}
-                    >
-                      « Trước
-                    </button>
-                  );
-                }
-                if (type === "next") {
-                  return (
-                    <button
-                      className={styles.paginationButton}
-                      disabled={page >= totalPages}
-                    >
-                      Tiếp »
-                    </button>
-                  );
-                }
-                return originalElement;
+                if (type === "prev") return <button className={styles.paginationButton}>« Trước</button>
+                if (type === "next") return <button className={styles.paginationButton}>Tiếp »</button>
+                return originalElement
               },
             }}
-            onChange={handleTableChange}
             className={styles.bookingTable}
             scroll={{ x: "max-content" }}
           />
@@ -581,12 +552,11 @@ export default function ListBooking({
           visible={statusModalVisible}
           onClose={handleCloseStatusModal}
           bookingStatusCodes={bookingStatusCodes}
-          onStatusChange={(bookingId, statusDisplay, cancelReason) =>
-            handleCustomStatusChange(bookingId, statusDisplay, cancelReason)
-          }
+          onStatusChange={handleCustomStatusChange}
+          paymentStatusCodes={paymentStatusCodes}
+          paymentMethodCodes={paymentMethodCodes}
           onGeneratePassword={generatePassword}
           isLoading={isUpdating}
-          className={styles.modalContainer}
         />
       )}
 
@@ -602,5 +572,5 @@ export default function ListBooking({
         paymentMethodCodes={paymentMethodCodes}
       />
     </div>
-  );
+  )
 }

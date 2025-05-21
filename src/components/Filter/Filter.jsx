@@ -57,7 +57,7 @@ export default function Filter({
       "Đã đặt": "booked",
       "Chờ thanh toán": "pending",
       "Đã thanh toán": "paid",
-      "Đã hoàn tiền": "refund",
+      "Yêu cầu hoàn tiền": "refund",
       "Thanh toán thất bại": "failed", 
     };
 

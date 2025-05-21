@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Input, Button, DatePicker, Dropdown, Table, Spin, message } from 'antd';
-import { FilterOutlined, PlusOutlined, MoreOutlined } from '@ant-design/icons';
+import { FilterOutlined, PlusOutlined, MoreOutlined, ReloadOutlined } from '@ant-design/icons';
 import dayjs from 'dayjs';
 import isBetween from 'dayjs/plugin/isBetween';
 import debounce from 'lodash/debounce';
@@ -34,6 +34,7 @@ export default function PolicyApp() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [isReloading, setIsReloading] = useState(false);
 
   const [selectedPolicyDetail, setSelectedPolicyDetail] = useState(null);
   const { data: detailedPolicy, isLoading: isDetailLoading } = useGetPolicySystemByIdQuery(
@@ -43,7 +44,7 @@ export default function PolicyApp() {
     }
   );
 
-  const { data: policyData, isLoading } = useGetAllPolicySystemsQuery(undefined, {
+  const { data: policyData, isLoading, refetch } = useGetAllPolicySystemsQuery(undefined, {
     onSuccess: (data) => {
       console.log('Received policy data:', data);
       if (data?.success && data.data) {
@@ -57,6 +58,18 @@ export default function PolicyApp() {
   const [createPolicy] = useCreatePolicySystemMutation();
   const [updatePolicy] = useUpdatePolicySystemMutation();
   const [deletePolicy] = useDeletePolicySystemMutation();
+
+  const handleReload = async () => {
+    try {
+      setIsReloading(true);
+      await refetch();
+      message.success('Dữ liệu đã được làm mới');
+    } catch (error) {
+      message.error('Làm mới dữ liệu thất bại');
+    } finally {
+      setIsReloading(false);
+    }
+  };
 
   const filterGroups = [
     {
@@ -363,6 +376,14 @@ export default function PolicyApp() {
                   (`(${Object.values(selectedValues).flat().length})`)}
               </Button>
             </Dropdown>
+            <Button
+              icon={<ReloadOutlined spin={isReloading} />}
+              onClick={handleReload}
+              loading={isReloading}
+              style={{ marginLeft: 10 }}
+            >
+              Làm mới
+            </Button>
           </div>
 
           <Button
@@ -380,7 +401,7 @@ export default function PolicyApp() {
           </Button>
         </div>
 
-        {isLoading ? (
+        {isLoading || isReloading ? (
           <div className={styles.loadingContainer}>
             <Spin size="large" />
           </div>

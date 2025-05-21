@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { Table, Button, Input, Dropdown, message, Tooltip, Select } from "antd";
-import { MoreOutlined, PlusOutlined, FilterOutlined } from "@ant-design/icons";
+import { MoreOutlined, PlusOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
 import styles from "./RoomTypeManagement.module.scss";
 import DeleteRoomTypeModal from "./components/DeleteRoomTypeModal/DeleteRoomTypeModal";
 import AddRoomTypeModal from "./components/AddRoomTypeModal/AddRoomTypeModal";
@@ -37,12 +37,14 @@ const RoomTypeManagement = ({ isOwner }) => {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [serviceNames, setServiceNames] = useState({});
+  const [isReloading, setIsReloading] = useState(false)
+
 
   const { data: ownerDetailData, isLoading: isOwnerDetailLoading } =
     useGetOwnerDetailByUserIdQuery(id);
   const ownerId = ownerDetailData?.id;
 
-  const { data: roomTypesData, isLoading: isRoomTypesLoading } =
+  const { data: roomTypesData, isLoading: isRoomTypesLoading, refetch } =
     useGetAccommodationTypesByOwnerQuery(ownerId, {
       skip: !ownerId,
     });
@@ -52,13 +54,13 @@ const RoomTypeManagement = ({ isOwner }) => {
   const roomTypes = Array.isArray(roomTypesData?.data)
     ? roomTypesData.data
     : Array.isArray(roomTypesData)
-    ? roomTypesData
-    : [];
+      ? roomTypesData
+      : [];
   const services = Array.isArray(servicesData?.data)
     ? servicesData.data
     : Array.isArray(servicesData)
-    ? servicesData
-    : [];
+      ? servicesData
+      : [];
 
   useEffect(() => {
     const fetchServiceNames = async () => {
@@ -218,6 +220,18 @@ const RoomTypeManagement = ({ isOwner }) => {
     }
   };
 
+  const handleReload = async () => {
+    try {
+      setIsReloading(true);
+      await refetch();
+      message.success("Đã làm mới dữ liệu");
+    } catch (error) {
+      message.error("Làm mới thất bại");
+    } finally {
+      setIsReloading(false);
+    }
+  };
+
   const debouncedSearch = debounce((value) => {
     setSearchTerm(value);
   }, 500);
@@ -372,7 +386,10 @@ const RoomTypeManagement = ({ isOwner }) => {
   ];
 
   const isLoading =
-    isRoomTypesLoading || isServicesLoading || isOwnerDetailLoading;
+    isRoomTypesLoading ||
+    isServicesLoading ||
+    isOwnerDetailLoading ||
+    isReloading;
 
   return (
     <div className={styles.contentContainer}>
@@ -400,6 +417,13 @@ const RoomTypeManagement = ({ isOwner }) => {
                 {getActiveFiltersCount() > 0 && ` (${getActiveFiltersCount()})`}
               </Button>
             </Dropdown>
+            <Button
+              icon={<ReloadOutlined spin={isReloading} />}
+              onClick={handleReload}
+              loading={isReloading}
+            >
+              Làm mới
+            </Button>
           </div>
           {isOwner && (
             <Button
@@ -442,7 +466,7 @@ const RoomTypeManagement = ({ isOwner }) => {
             setSelectedRoomType(null);
           }}
           onConfirm={handleUpdateRoomType}
-          initialValues={{ _id: selectedRoomType?._id }} 
+          initialValues={{ _id: selectedRoomType?._id }}
           services={services}
         />
 

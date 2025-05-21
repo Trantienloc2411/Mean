@@ -13,6 +13,13 @@ import SimpleLayout from "../layouts/SimpleLayout.jsx";
 // Lazy load pages
 const Login = lazy(() => import("../pages/auth/login/Login"));
 const Dashboard = lazy(() => import("../pages/dashboard/Dashboard"));
+const RevenueAdmin = lazy(() => import("../pages/revenue/Revenue"));
+const OwnerRevenueDetail = lazy(() =>
+  import("../pages/revenue/OwnerRevenue/OwnerRevenueDetail")
+);
+const OwnerRevenueDetailInOwner = lazy(() =>
+  import("../pages/owner/childPage/revenue/OwnerRevenue/OwnerRevenueDetail")
+);
 const Account = lazy(() => import("../pages/account/Account"));
 const Coupon = lazy(() => import("../pages/coupon/Coupon"));
 const Booking = lazy(() => import("../pages/booking/Booking"));
@@ -174,6 +181,8 @@ export const routes = [
     children: [
       { path: "", element: <Navigate to="/admin/dashboard" replace /> }, // Chuyển hướng từ /admin sang /admin/dashboard
       { path: "dashboard", element: <Dashboard /> },
+      { path: "revenue", element: <RevenueAdmin /> },
+      { path: "revenue/owner/:id", element: <OwnerRevenueDetail /> },
       { path: "account", element: <Account /> },
       { path: "coupon", element: <Coupon /> },
       { path: "booking", element: <Booking /> },
@@ -207,6 +216,7 @@ export const routes = [
     children: [
       { path: "", element: <Navigate to="/owner/:id/dashboard" replace /> }, // Chuyển hướng từ /admin sang /admin/dashboard
       { path: "owners", element: <Owner /> },
+      { path: "revenue", element: <OwnerRevenueDetailInOwner /> },
       { path: "dashboard", element: <OverviewOwner /> },
       { path: "booking", element: <BookingOwner /> },
       { path: "information", element: <InformationOwner /> },

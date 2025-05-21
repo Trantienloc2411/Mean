@@ -1,7 +1,7 @@
 .contentContainer {
   padding: 40px;
-  margin: 16px; 
-  background-color: #F9FAFB;
+  margin: 16px;
+  background-color: #f9fafb;
   min-height: 100vh;
   border-radius: 16px;
 
@@ -22,7 +22,8 @@
     background-color: white;
     padding: 20px;
     border-radius: 20px;
-    box-shadow: 0px 1px 3px rgba(16, 24, 40, 0.1), 0px 1px 2px rgba(16, 24, 40, 0.06);
+    box-shadow: 0px 1px 3px rgba(16, 24, 40, 0.1),
+      0px 1px 2px rgba(16, 24, 40, 0.06);
 
     .tool {
       display: flex;
@@ -46,25 +47,25 @@
   display: inline-block;
 
   &.completed {
-    background-color: #D1FAE5;
+    background-color: #d1fae5;
     color: #059669;
   }
 
   &.pending {
-    background-color: #FEF3C7;
-    color: #D97706;
+    background-color: #fef3c7;
+    color: #d97706;
   }
 
   &.failed {
-    background-color: #FEECEB;
-    color: #F36960;
+    background-color: #feeceb;
+    color: #f36960;
   }
 }
 
 .transactionTable {
   :global {
     .ant-table-thead > tr > th {
-      background-color: #F9FAFB;
+      background-color: #f9fafb;
       font-weight: 600;
       color: #667085;
     }
@@ -74,7 +75,7 @@
     }
 
     .ant-table-tbody > tr:hover > td {
-      background-color: #F9FAFB;
+      background-color: #f9fafb;
     }
 
     .ant-pagination {
@@ -140,7 +141,7 @@
         }
 
         &-active {
-          background: #F7F9FC;
+          background: #f7f9fc;
 
           a {
             color: #6366f1;
@@ -166,12 +167,12 @@
   padding: 4px 16px;
   cursor: pointer;
   transition: all 0.2s;
-  
+
   &:hover:not(:disabled) {
     border-color: #6366f1;
     color: #6366f1;
   }
-  
+
   &:disabled {
     background: #f5f5f5;
     color: rgba(0, 0, 0, 0.25);
@@ -179,14 +180,58 @@
     cursor: not-allowed;
   }
 }
-.searchInput{
+.searchInput {
   width: 300px;
   margin-bottom: 20px;
 }
-.transactionSection{
+.transactionSection {
   margin-top: 20px;
   margin-bottom: 20px;
 }
-.overviewSection{
+.overviewSection {
   margin-bottom: 24px;
+}
+
+.statusDescriptionPopover {
+  padding: 16px;
+  max-width: 400px;
+  background-color: #fff;
+
+  border-radius: 8px;
+  box-shadow: 0px 1px 3px rgba(16, 24, 40, 0.1),
+    0px 1px 2px rgba(16, 24, 40, 0.06);
+}
+
+.descriptionSection {
+  margin-bottom: 16px;
+}
+
+.descriptionItem {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.statusDot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-top: 6px;
+}
+
+/* Tuỳ biến màu cho từng trạng thái */
+.pending {
+  background-color: #faad14;
+}
+.completed {
+  background-color: #52c41a;
+}
+.failed {
+  background-color: #ff4d4f;
+}
+.momo {
+  background-color: #d81b60;
+}
+.payOwner {
+  background-color: #1890ff;
 }

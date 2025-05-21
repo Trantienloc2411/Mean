@@ -1,11 +1,11 @@
 import { apiSlice } from "./apiSlice";
-import dayjs from 'dayjs';
+import dayjs from "dayjs";
 
 const formatDateForAPI = (dateString) => {
   if (!dateString) return null;
-  
+
   try {
-    if (dateString.includes('T') && dateString.includes('Z')) {
+    if (dateString.includes("T") && dateString.includes("Z")) {
       return dateString;
     }
     if (dayjs.isDayjs(dateString)) {
@@ -13,7 +13,7 @@ const formatDateForAPI = (dateString) => {
     }
     return dayjs(dateString).toISOString();
   } catch (error) {
-    console.error('Error formatting date:', dateString, error);
+    console.error("Error formatting date:", dateString, error);
     return dateString;
   }
 };
@@ -35,7 +35,7 @@ export const policySystemApi = apiSlice.injectEndpoints({
       query: () => "/policy-system/all-policy-systems",
       transformResponse: (response) => {
         if (Array.isArray(response)) {
-          return response.map(policy => ({
+          return response.map((policy) => ({
             ...policy,
           }));
         }
@@ -52,7 +52,7 @@ export const policySystemApi = apiSlice.injectEndpoints({
             ...response.data,
             staffId: response.data.staffId || {},
             policySystemCategoryId: response.data.policySystemCategoryId || {},
-            values: response.data.values || []
+            values: response.data.values || [],
           };
         }
         return response;
@@ -63,7 +63,7 @@ export const policySystemApi = apiSlice.injectEndpoints({
     createPolicySystem: builder.mutation({
       query: (policySystem) => {
         const transformedData = transformPolicyData(policySystem);
-        console.log('Sending to API:', transformedData);
+        console.log("Sending to API:", transformedData);
         return {
           url: "/policy-system/create-policy-system",
           method: "POST",
@@ -89,6 +89,13 @@ export const policySystemApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["PolicySystem"],
     }),
+    getPolicyByHashtag: builder.query({
+      query: (hashtag) =>
+        `policy-system/all-policy-systems-by-hashtag/${hashtag}`,
+      providesTags: (result, error, hashtag) => [
+        { type: "PolicySystem", id: hashtag },
+      ],
+    }),
   }),
 });
 
@@ -98,4 +105,5 @@ export const {
   useCreatePolicySystemMutation,
   useUpdatePolicySystemMutation,
   useDeletePolicySystemMutation,
+  useGetPolicyByHashtagQuery,
 } = policySystemApi;
