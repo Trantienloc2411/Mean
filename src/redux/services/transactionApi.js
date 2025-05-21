@@ -18,6 +18,14 @@ export const transactionApi = apiSlice.injectEndpoints({
       }),
       invalidatesTags: ["Transaction"],
     }),
+    updateTransaction: builder.mutation({
+      query: ({ id, data }) => ({
+        url: `/transaction/${id}`,
+        method: "PUT",
+        body: data,
+      }),
+      invalidatesTags: ["Transaction"],
+    }),
   }),
 });
 
@@ -25,4 +33,5 @@ export const {
   useGetAllTransactionQuery,
   useCreateTransactionMutation,
   useGetAllTransactionByOwnerQuery,
+  useUpdateTransactionMutation,
 } = transactionApi;

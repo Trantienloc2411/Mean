@@ -4,23 +4,23 @@ import { DatePicker, Button, Tabs, message } from "antd";
 import dayjs from "dayjs";
 import isBetween from "dayjs/plugin/isBetween";
 import viVN from "antd/es/date-picker/locale/vi_VN";
-import { useGetBookingsByOwnerIdQuery } from "../../../redux/services/bookingApi";
-import {
-  useCreateTransactionMutation,
-  useGetAllTransactionByOwnerQuery,
-  useUpdateTransactionMutation,
-} from "../../../redux/services/transactionApi";
+
 import RevenueSummary from "./RevenueSummary";
 import BookingTable from "./BookingTable";
 import TransactionTable from "./TransactionTable";
 
 import TransactionModal from "./TransactionModal";
+import { ReloadOutlined } from "@ant-design/icons";
+import {
+  useCreateTransactionMutation,
+  useGetAllTransactionByOwnerQuery,
+} from "../../../../../redux/services/transactionApi";
+import { useGetBookingsByOwnerIdQuery } from "../../../../../redux/services/bookingApi";
 import {
   useGetOwnerByIdQuery,
   useGetOwnerDetailByUserIdQuery,
-} from "../../../redux/services/ownerApi";
-import { useGetPolicyByHashtagQuery } from "../../../redux/services/policySystemApi";
-import { ReloadOutlined } from "@ant-design/icons";
+} from "../../../../../redux/services/ownerApi";
+import { useGetPolicyByHashtagQuery } from "../../../../../redux/services/policySystemApi";
 
 dayjs.extend(isBetween);
 const { MonthPicker } = DatePicker;
@@ -44,20 +44,16 @@ export default function OwnerRevenuePage() {
   const [filterTransaction, setFilterTransaction] = useState([]);
   const [isTransferring, setIsTransferring] = useState(false);
   const [createTransaction] = useCreateTransactionMutation();
-  const [updateTransaction] = useUpdateTransactionMutation();
+  const { data: ownerDetail } = useGetOwnerDetailByUserIdQuery(id);
+
   const {
     data: bookings = [],
     isLoading,
     refetch: refetchBookings,
-  } = useGetBookingsByOwnerIdQuery(id);
+  } = useGetBookingsByOwnerIdQuery(ownerDetail?.id);
 
   const { data: transactions, refetch: refetchTransactions } =
-    useGetAllTransactionByOwnerQuery(id);
-  const { data: userOwner } = useGetOwnerByIdQuery(id);
-  const { data: ownerDetail } = useGetOwnerDetailByUserIdQuery(
-    userOwner?.userId
-  );
-
+    useGetAllTransactionByOwnerQuery(ownerDetail?.id);
   const { data: policyPrice } = useGetPolicyByHashtagQuery("phihethong");
   console.log("policyPrice", policyPrice);
 
@@ -108,8 +104,6 @@ export default function OwnerRevenuePage() {
     filteredBookings.forEach((b) => {
       const statusText = BOOKING_STATUS_MAP[b.status];
       if (statusText === "COMPLETED") {
-        console.log("b", b);
-
         totalRevenue += b.totalPrice;
         successCount += 1;
         ownerEarnings += b.totalPrice * (1 - platformFee);
@@ -155,14 +149,13 @@ export default function OwnerRevenuePage() {
   //     setIsTransferring(false);
   //   }
   // };
-  console.log("summary", summary);
   return (
     <div
       style={{
-        padding: 30,
-        background: "#f6f8fa",
+        // padding: 30,
+        // background: "#f6f8fa",
         margin: 20,
-        borderRadius: 20,
+        // borderRadius: 20,
       }}
     >
       <div
@@ -172,11 +165,11 @@ export default function OwnerRevenuePage() {
           marginBottom: 16,
         }}
       >
-        <h1 style={{ fontSize: 20, fontWeight: 600 }}>
+        <h1 style={{ fontWeight: 600 }}>
           Chi tiết doanh thu
-          <span style={{ fontWeight: 700 }}>
+          {/* <span style={{ fontWeight: 700 }}>
             {ownerDetail?.userId?.fullName || "Không rõ"}
-          </span>
+          </span> */}
         </h1>
 
         <div style={{ display: "flex", gap: 12 }}>
@@ -197,26 +190,24 @@ export default function OwnerRevenuePage() {
               refetchTransactions();
               message.success("Tải lại dữ liệu thành công!");
             }}
+            style={{ padding: "22px 16px" }}
           >
             Reload
           </Button>
-          <Button
+          {/* <Button
             type="primary"
             onClick={() => setIsModalOpen(true)}
             disabled={summary.totalRevenue === 0}
           >
             Chuyển tiền ({date.format("MM/YYYY")})
-          </Button>
+          </Button> */}
         </div>
       </div>
 
       <Tabs defaultActiveKey="1">
         <Tabs.TabPane tab="Giao dịch" key="1">
           <RevenueSummary summary={summary} />
-          <TransactionTable
-            onUpdateStatus={updateTransaction}
-            transactions={filterTransaction}
-          />
+          <TransactionTable transactions={filterTransaction} />
         </Tabs.TabPane>
 
         <Tabs.TabPane tab="Đơn đặt phòng" key="2">
@@ -237,7 +228,7 @@ export default function OwnerRevenuePage() {
               ownerId: id,
               transactionStatus: 2,
               transactionEndDate: null,
-              typeTransaction: 1,
+              typeTransaction: null,
             }).unwrap();
             message.success("Tạo giao dịch thành công!");
             setIsModalOpen(false);

@@ -2,6 +2,7 @@ import { Outlet, useNavigate, useLocation, useParams } from "react-router-dom";
 import {
   BarChartOutlined,
   CalendarOutlined,
+  DollarCircleOutlined,
   HomeOutlined,
   TagOutlined,
   UserOutlined,
@@ -63,6 +64,11 @@ const OwnerLayout = () => {
       key: `/owner/${id}/dashboard`,
       icon: <HomeOutlined />,
       label: "Tổng quan",
+    },
+    {
+      key: `/owner/${id}/revenue`,
+      icon: <DollarCircleOutlined />,
+      label: "Doanh thu",
     },
     {
       key: `/owner/${id}/rental-location`,

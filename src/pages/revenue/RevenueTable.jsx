@@ -1,8 +1,15 @@
 import React from "react";
 import { Table, Tag, Button, Tooltip, Badge } from "antd";
 import { EyeOutlined, BookOutlined } from "@ant-design/icons";
+import { useState } from "react";
+import styles from "./Revenue.module.scss";
 
 const RevenueTable = ({ data, handleViewDetail }) => {
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 7,
+    total: data.length,
+  });
   const columns = [
     {
       title: "Chủ sở hữu",
@@ -47,11 +54,11 @@ const RevenueTable = ({ data, handleViewDetail }) => {
           {status === "ACTIVE" ? "ĐANG HOẠT ĐỘNG" : "CHƯA CÓ BOOKING"}
         </Tag>
       ),
-      filters: [
-        { text: "Đang hoạt động", value: "ACTIVE" },
-        { text: "Chưa có booking", value: "PENDING" },
-      ],
-      onFilter: (value, record) => record.status === value,
+      // filters: [
+      //   { text: "Đang hoạt động", value: "ACTIVE" },
+      //   { text: "Chưa có booking", value: "PENDING" },
+      // ],
+      // onFilter: (value, record) => record.status === value,
     },
     {
       title: "Tổng doanh thu",
@@ -71,7 +78,6 @@ const RevenueTable = ({ data, handleViewDetail }) => {
       key: "profit",
       render: (_, record) =>
         (record.revenue - record.platformFee).toLocaleString() + " VND",
-      sorter: (a, b) => a.revenue - a.platformFee - (b.revenue - b.platformFee),
     },
     {
       title: "Hành động",
@@ -106,12 +112,39 @@ const RevenueTable = ({ data, handleViewDetail }) => {
         columns={columns}
         dataSource={data}
         pagination={{
-          pageSize: 10,
-          showSizeChanger: true,
-          showTotal: (total) => `Tổng cộng ${total} owner`,
+          current: pagination.current,
+          pageSize: 7,
+          total: data.length,
+          showSizeChanger: false,
+          onChange: (page) =>
+            setPagination((prev) => ({ ...prev, current: page })),
+          itemRender: (page, type, originalElement) => {
+            const totalPages = Math.ceil(data.length / 7);
+            if (type === "prev") {
+              return (
+                <button
+                  className={styles.paginationButton}
+                  disabled={pagination.current === 1}
+                >
+                  « Trước
+                </button>
+              );
+            }
+            if (type === "next") {
+              return (
+                <button
+                  className={styles.paginationButton}
+                  disabled={pagination.current >= totalPages}
+                >
+                  Tiếp »
+                </button>
+              );
+            }
+            return originalElement;
+          },
         }}
         rowKey="id"
-        bordered
+        // bordered
         size="middle"
       />
     </>

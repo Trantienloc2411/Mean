@@ -1,8 +1,7 @@
-import { Space, Input, Select, Card, Table, Tag, Button, message } from "antd";
+import { Space, Input, Select, Card, Table, Tag } from "antd"; // Gộp các import
 import dayjs from "dayjs";
 import { useState, useMemo } from "react";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import { Modal } from "antd";
 
 dayjs.extend(customParseFormat);
 
@@ -15,15 +14,15 @@ const TRANSACTION_STATUS_MAP = {
 };
 
 const TRANSACTION_STATUS_COLOR_MAP = {
-  1: "gold",
-  2: "green",
-  3: "red",
+  1: "gold", // Chờ xử lý
+  2: "green", // Hoàn tất
+  3: "red", // Thất bại
 };
 
-export default function TransactionTable({ transactions, onUpdateStatus }) {
+export default function TransactionTable({ transactions }) {
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState([]);
-  const [currentPage, setCurrentPage] = useState(1);
+  const [currentPage, setCurrentPage] = useState(1); // 👈 Thêm state trang hiện tại
   const pageSize = 6;
 
   const filterTransactionCode = useMemo(() => {
@@ -42,14 +41,6 @@ export default function TransactionTable({ transactions, onUpdateStatus }) {
           dayjs(a.transactionCreatedDate, DATE_FORMAT).valueOf()
       );
   }, [transactions, searchText, statusFilter]);
-
-  const handleCancelTransaction = (transactionId) => {
-    if (onUpdateStatus) {
-      onUpdateStatus({ id: transactionId, data: { transactionStatus: 3 } });
-    } else {
-      message.info("Chức năng cập nhật trạng thái chưa được kết nối.");
-    }
-  };
 
   const columns = [
     {
@@ -87,28 +78,6 @@ export default function TransactionTable({ transactions, onUpdateStatus }) {
     {
       title: "Nội dung",
       dataIndex: "description",
-    },
-    {
-      title: "Hành động",
-      dataIndex: "actions",
-      render: (_, record) =>
-        record.transactionStatus !== 3 && (
-          <Button
-            danger
-            size="small"
-            onClick={() => {
-              Modal.confirm({
-                title: "Xác nhận hủy giao dịch?",
-                content: "Bạn có chắc chắn muốn hủy giao dịch này không?",
-                okText: "Đồng ý",
-                cancelText: "Không",
-                onOk: () => handleCancelTransaction(record.id),
-              });
-            }}
-          >
-            Hủy giao dịch
-          </Button>
-        ),
     },
   ];
 

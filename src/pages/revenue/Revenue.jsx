@@ -5,15 +5,15 @@ import RevenueSummary from "./RevenueSummary";
 import RevenueTable from "./RevenueTable";
 import { useGetAllOwnerBookingsQuery } from "../../redux/services/bookingApi";
 import { useNavigate } from "react-router-dom";
-
-// Trong component
+import dayjs from "dayjs";
+import { useGetPolicyByHashtagQuery } from "../../redux/services/policySystemApi";
 
 const { Title } = Typography;
+const COMPLETED_STATUS = 7;
 
 const Revenue = () => {
   const navigate = useNavigate();
-  const [filterType, setFilterType] = useState("month");
-  const [dateRange, setDateRange] = useState([]);
+  const [date, setDate] = useState(null); // chỉ 1 tháng được chọn
 
   const {
     data: ownerBookingData,
@@ -21,31 +21,33 @@ const Revenue = () => {
     error,
     isLoading,
   } = useGetAllOwnerBookingsQuery();
+  const { data: policyPrice } = useGetPolicyByHashtagQuery("phihethong");
 
   const processedData = useMemo(() => {
-    console.log(ownerBookingData);
-
     if (!ownerBookingData?.owners?.length)
       return {
         tableData: [],
         summary: { totalRevenue: 0, totalPlatformFee: 0, totalOwnerProfit: 0 },
       };
 
-    const PLATFORM_FEE_PERCENTAGE = 0.15;
+    const PLATFORM_FEE_PERCENTAGE = parseFloat(
+      policyPrice?.data?.[0]?.values?.[0]?.val || "0.1"
+    );
 
     const filteredOwners = ownerBookingData.owners.map((owner) => {
-      let filteredBookings = [...owner.bookings];
+      // Lọc booking theo tháng và chỉ lấy status COMPLETED
+      let filteredBookings = owner.bookings.filter(
+        (booking) => booking.status === COMPLETED_STATUS
+      );
 
-      if (dateRange && dateRange.length === 2) {
-        const startDate = dateRange[0]?.startOf("day")?.valueOf();
-        const endDate = dateRange[1]?.endOf("day")?.valueOf();
+      if (date) {
+        const startDate = dayjs(date).startOf("month").valueOf();
+        const endDate = dayjs(date).endOf("month").valueOf();
 
-        if (startDate && endDate) {
-          filteredBookings = filteredBookings.filter((booking) => {
-            const bookingDate = new Date(booking.createdAt).getTime();
-            return bookingDate >= startDate && bookingDate <= endDate;
-          });
-        }
+        filteredBookings = filteredBookings.filter((booking) => {
+          const bookingDate = new Date(booking.createdAt).getTime();
+          return bookingDate >= startDate && bookingDate <= endDate;
+        });
       }
 
       return {
@@ -54,28 +56,22 @@ const Revenue = () => {
       };
     });
 
-    // Calculate revenue statistics
     let totalRevenue = 0;
     let totalPlatformFee = 0;
     let totalOwnerProfit = 0;
 
-    // Process data for table display
     const tableData = filteredOwners.map((owner, index) => {
-      // Calculate revenue metrics for this owner
       const ownerRevenue = owner.bookings.reduce(
         (sum, booking) => sum + (booking.totalPrice || 0),
         0
       );
-
       const platformFee = Math.round(ownerRevenue * PLATFORM_FEE_PERCENTAGE);
       const ownerProfit = ownerRevenue - platformFee;
 
-      // Accumulate totals
       totalRevenue += ownerRevenue;
       totalPlatformFee += platformFee;
       totalOwnerProfit += ownerProfit;
 
-      // Format data for table display
       return {
         id: owner.ownerId,
         key: index.toString(),
@@ -95,19 +91,15 @@ const Revenue = () => {
         totalOwnerProfit,
       },
     };
-  }, [ownerBookingData, dateRange]);
+  }, [ownerBookingData, date, policyPrice]);
 
-  // Handle view details
   const handleViewDetail = (ownerId) => {
-    // console.log("View details for owner:", ownerId);
-    // Add navigation or modal display logic here
     navigate(`/admin/revenue/owner/${ownerId}`);
   };
 
-  // Refetch when filter changes
   useEffect(() => {
     refetch();
-  }, [filterType, dateRange, refetch]);
+  }, [date, refetch]);
 
   return (
     <div
@@ -127,12 +119,7 @@ const Revenue = () => {
       ) : (
         <>
           <Card style={{ marginBottom: 24 }} bodyStyle={{ padding: 16 }}>
-            <RevenueFilter
-              filterType={filterType}
-              setFilterType={setFilterType}
-              dateRange={dateRange}
-              setDateRange={setDateRange}
-            />
+            <RevenueFilter date={date} setDate={setDate} />
           </Card>
 
           <Row gutter={16} style={{ marginBottom: 24 }}>
@@ -146,7 +133,7 @@ const Revenue = () => {
                 handleViewDetail={handleViewDetail}
               />
             ) : (
-              <Empty description="Không có dữ liệu doanh thu trong khoảng thời gian đã chọn" />
+              <Empty description="Không có dữ liệu doanh thu trong tháng đã chọn" />
             )}
           </Card>
         </>

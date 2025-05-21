@@ -17,6 +17,9 @@ const RevenueAdmin = lazy(() => import("../pages/revenue/Revenue"));
 const OwnerRevenueDetail = lazy(() =>
   import("../pages/revenue/OwnerRevenue/OwnerRevenueDetail")
 );
+const OwnerRevenueDetailInOwner = lazy(() =>
+  import("../pages/owner/childPage/revenue/OwnerRevenue/OwnerRevenueDetail")
+);
 const Account = lazy(() => import("../pages/account/Account"));
 const Coupon = lazy(() => import("../pages/coupon/Coupon"));
 const Booking = lazy(() => import("../pages/booking/Booking"));
@@ -213,6 +216,7 @@ export const routes = [
     children: [
       { path: "", element: <Navigate to="/owner/:id/dashboard" replace /> }, // Chuyển hướng từ /admin sang /admin/dashboard
       { path: "owners", element: <Owner /> },
+      { path: "revenue", element: <OwnerRevenueDetailInOwner /> },
       { path: "dashboard", element: <OverviewOwner /> },
       { path: "booking", element: <BookingOwner /> },
       { path: "information", element: <InformationOwner /> },
