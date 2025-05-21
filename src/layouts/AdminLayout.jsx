@@ -7,6 +7,7 @@ import {
   InfoCircleOutlined,
   LeftOutlined,
   LockOutlined,
+  MoneyCollectOutlined,
   RightOutlined,
   SettingOutlined,
   TagOutlined,
@@ -17,11 +18,16 @@ import { Layout, Menu } from "antd";
 import Logo from "../assets/images/logo.png";
 import { BsBuildings } from "react-icons/bs";
 import HeaderAdmin from "../components/layouts/header/HeaderAdmin";
-const { Header, Content, Sider } = Layout;
+const {   Header, Content, Sider } = Layout;
 
 // Danh sách menu items với đường dẫn
 const menuItems = [
   { key: "/admin/dashboard", icon: <HomeOutlined />, label: "Trang quản lý" },
+  {
+    key: "/admin/revenue",
+    icon: <MoneyCollectOutlined />,
+    label: "Doanh thu",
+  },
   { key: "/admin/account", icon: <UserOutlined />, label: "Tài khoản" },
   { key: "/admin/rental", icon: <BsBuildings />, label: "Địa điểm cho thuê" },
 
@@ -34,7 +40,11 @@ const menuItems = [
   },
   { key: "/admin/report", icon: <InfoCircleOutlined />, label: "Báo cáo" },
   { key: "/admin/policy", icon: <SettingOutlined />, label: "Chính sách" },
-  { key: "/admin/change-password", icon: <LockOutlined />, label: "Đổi mật khẩu" },
+  {
+    key: "/admin/change-password",
+    icon: <LockOutlined />,
+    label: "Đổi mật khẩu",
+  },
 ];
 
 const AdminLayout = () => {
