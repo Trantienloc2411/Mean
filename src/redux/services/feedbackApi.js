@@ -6,6 +6,11 @@ export const feedbackApi = apiSlice.injectEndpoints({
       query: (rentalId) => `/feedback/rental/${rentalId}`,
       providesTags: ["LandUsesRight"],
     }),
+
+    getFeedbackByOwnerId: builder.query({
+      query: (ownerId) => `/feedback/owner/${ownerId}`,
+      providesTags: ["LandUsesRight"],
+    }),
     updateFeedbackReply: builder.mutation({
       query: ({ feedbackId, contentReply }) => ({
         url: `/feedback/${feedbackId}`,
@@ -17,5 +22,8 @@ export const feedbackApi = apiSlice.injectEndpoints({
   }),
 });
 
-export const { useGetFeedbackByRentalIdQuery, useUpdateFeedbackReplyMutation } =
-  feedbackApi;
+export const {
+  useGetFeedbackByRentalIdQuery,
+  useGetFeedbackByOwnerIdQuery,
+  useUpdateFeedbackReplyMutation,
+} = feedbackApi;

@@ -28,8 +28,8 @@ import { message } from "antd";
 import { StarFilled } from "@ant-design/icons";
 
 dayjs.extend(relativeTime);
-dayjs.locale("vi");
 dayjs.extend(utc);
+dayjs.locale("vi");
 
 const { Text, Title } = Typography;
 const { Option } = Select;
@@ -38,16 +38,17 @@ const ReviewsComponent = () => {
   const { id } = useParams();
   const { data: feedbackData = [] } = useGetFeedbackByRentalIdQuery(id);
   const [updateFeedbackReply] = useUpdateFeedbackReplyMutation();
-
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [replyContent, setReplyContent] = useState("");
   const [selectedReview, setSelectedReview] = useState(null);
+  const [sortBy, setSortBy] = useState("newest");
 
   const openReplyModal = (review) => {
     setSelectedReview(review);
     setReplyContent(review.contentReply || "");
     setIsModalOpen(true);
   };
+
   const handleSendReply = async () => {
     if (!selectedReview) return;
 
@@ -63,18 +64,35 @@ const ReviewsComponent = () => {
     }
   };
 
-  const [sortBy, setSortBy] = useState("newest");
+  // Updated formatDate function to handle DD/MM/YYYY HH:mm:ss
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    try {
+      // Parse the date string with the specific format
+      const date = dayjs(dateString, "DD/MM/YYYY HH:mm:ss");
+      return date.isValid() ? date.format("DD/MM/YYYY HH:mm:ss") : "N/A";
+    } catch (error) {
+      console.error("Error formatting date:", dateString, error);
+      return "N/A";
+    }
+  };
 
   const stats = useMemo(() => {
-    if (!feedbackData.length) return { average: 0, total: 0 };
+    if (!feedbackData.length) return { average: 0, total: 0, distribution: [] };
 
     const total = feedbackData.length;
-    const sum = feedbackData.reduce((acc, review) => acc + review.rating, 0);
-    const average = parseFloat((sum / total).toFixed(1)); // Đảm bảo là số
+    const sum = feedbackData.reduce(
+      (acc, review) => acc + (review.rating || 0),
+      0
+    );
+    const average = total > 0 ? parseFloat((sum / total).toFixed(1)) : 0;
 
     const distribution = Array(5).fill(0);
     feedbackData.forEach((review) => {
-      distribution[review.rating - 1]++;
+      const rating = review.rating || 0;
+      if (rating >= 1 && rating <= 5) {
+        distribution[Math.floor(rating) - 1]++;
+      }
     });
 
     return {
@@ -88,23 +106,29 @@ const ReviewsComponent = () => {
   }, [feedbackData]);
 
   const sortedReviews = useMemo(() => {
+    if (!feedbackData) return [];
+
     const sorted = [...feedbackData];
-    switch (sortBy) {
-      case "newest":
-        return sorted.sort(
-          (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-        );
-      case "oldest":
-        return sorted.sort(
-          (a, b) => new Date(a.createdAt) - new Date(b.createdAt)
-        );
-      case "highest":
-        return sorted.sort((b, a) => b.rating - a.rating);
-      case "lowest":
-        return sorted.sort((a, b) => a.rating - b.rating);
-      default:
-        return sorted;
-    }
+    return sorted.sort((a, b) => {
+      switch (sortBy) {
+        case "newest":
+          return (
+            dayjs(b.createdAt, "DD/MM/YYYY HH:mm:ss").valueOf() -
+            dayjs(a.createdAt, "DD/MM/YYYY HH:mm:ss").valueOf()
+          );
+        case "oldest":
+          return (
+            dayjs(a.createdAt, "DD/MM/YYYY HH:mm:ss").valueOf() -
+            dayjs(b.createdAt, "DD/MM/YYYY HH:mm:ss").valueOf()
+          );
+        case "highest":
+          return (b.rating || 0) - (a.rating || 0);
+        case "lowest":
+          return (a.rating || 0) - (b.rating || 0);
+        default:
+          return 0;
+      }
+    });
   }, [feedbackData, sortBy]);
 
   const formatDate = (dateString) =>
@@ -120,7 +144,7 @@ const ReviewsComponent = () => {
             <Title level={1} style={{ marginBottom: 0 }}>
               {stats.average} <StarFilled style={{ color: "#fadb14" }} />
             </Title>
-            {/* <Rate disabled defaultValue={Number(stats.average)} allowHalf /> */}
+            <Rate disabled value={Number(stats.average)} allowHalf />
             <Text type="secondary">{stats.total} đánh giá</Text>
           </Col>
           <Col xs={24} sm={16}>
@@ -165,11 +189,7 @@ const ReviewsComponent = () => {
       <div style={{ marginBottom: 16, textAlign: "right" }}>
         <Space>
           <Text>Sắp xếp theo:</Text>
-          <Select
-            defaultValue="newest"
-            style={{ width: 180 }}
-            onChange={setSortBy}
-          >
+          <Select value={sortBy} style={{ width: 180 }} onChange={setSortBy}>
             <Option value="newest">Mới nhất</Option>
             <Option value="oldest">Cũ nhất</Option>
             <Option value="highest">Đánh giá cao nhất</Option>
@@ -198,15 +218,15 @@ const ReviewsComponent = () => {
                         backgroundColor: !avatar ? "#1890ff" : undefined,
                       }}
                     >
-                      {!avatar && userName[0].toUpperCase()}
+                      {!avatar && userName[0]?.toUpperCase()}
                     </Avatar>
                     <Text strong>{userName}</Text>
                   </Flex>
                   <Flex align="end" vertical gap={10}>
-                    <Rate disabled defaultValue={review.rating} />
-                    <Text type="secondary">
-                      {formatDate(review.createdAt)}
-                    </Text>
+
+                    <Rate disabled value={review.rating || 0} />
+                    <Text type="secondary">{formatDate(review.createdAt)}</Text>
+
                   </Flex>
                 </Flex>
                 <Text
