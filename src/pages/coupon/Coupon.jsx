@@ -1,5 +1,5 @@
 import styles from "../coupon/Coupon.module.scss";
-import { MoreOutlined, FilterOutlined, PlusOutlined } from "@ant-design/icons";
+import { MoreOutlined, FilterOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons";
 import { useState, useEffect } from "react";
 import { Dropdown, Input, Button, DatePicker, Tag, Table, message } from "antd";
 import debounce from "lodash/debounce";
@@ -36,6 +36,7 @@ export default function Coupon() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
+  const [isReloading, setIsReloading] = useState(false);
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 7,
@@ -161,8 +162,6 @@ export default function Coupon() {
   const handleDeleteConfirm = async () => {
     try {
       await deleteCoupon(selectedCoupon.id).unwrap();
-      await deleteCoupon(selectedCoupon.id).unwrap();
-      await deleteCoupon(selectedCoupon.id).unwrap();
       message.success({
         content: 'Xóa mã giảm giá thành công',
         className: 'custom-message',
@@ -247,6 +246,31 @@ export default function Coupon() {
 
   const handleSearch = (e) => {
     debouncedSearch(e.target.value);
+  };
+
+  // Handle reload button click
+  const handleReload = async () => {
+    try {
+      setIsReloading(true);
+      await refetch();
+      message.success({
+        content: 'Dữ liệu đã được làm mới',
+        className: 'custom-message',
+        style: {
+          marginTop: '10vh',
+        },
+      });
+    } catch (error) {
+      message.error({
+        content: 'Làm mới dữ liệu thất bại',
+        className: 'custom-message',
+        style: {
+          marginTop: '10vh',
+        },
+      });
+    } finally {
+      setIsReloading(false);
+    }
   };
 
   // Filter data based on selected filters and search term
@@ -443,6 +467,8 @@ export default function Coupon() {
               </Button>
             </Dropdown>
 
+           
+
             <DeleteCouponModal
               isOpen={isDeleteModalOpen}
               onCancel={handleDeleteCancel}
@@ -464,6 +490,14 @@ export default function Coupon() {
                   : null
               }
             />
+             <Button
+              icon={<ReloadOutlined spin={isReloading} />}
+              onClick={handleReload}
+              loading={isReloading}
+              style={{ marginRight: 10 }}
+            >
+              Làm mới
+            </Button>
           </div>
 
           <Button
@@ -511,7 +545,7 @@ export default function Coupon() {
         <Table
           columns={tableColumn}
           dataSource={filteredData || []}
-          loading={isLoading}
+          loading={isLoading || isReloading}
           pagination={{
             ...pagination,
             total: filteredData?.length || 0,

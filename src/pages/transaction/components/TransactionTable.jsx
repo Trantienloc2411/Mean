@@ -11,6 +11,7 @@ import TransactionDetailModal from "./TransactionDetailModal";
 import { useState } from "react";
 import styles from "./TransactionTable.module.scss";
 import { FaEye } from "react-icons/fa";
+import dayjs from "dayjs";
 
 export default function TransactionTable({ data, loading }) {
   const [isDetailModalVisible, setDetailModalVisible] = useState(false);
@@ -190,11 +191,16 @@ export default function TransactionTable({ data, loading }) {
   const handleDelete = (record) => {
     console.log("Xóa người dùng:", record);
   };
+  const sortedData = [...data].sort(
+    (a, b) =>
+      dayjs(b.createTime, "DD/MM/YYYY HH:mm").valueOf() -
+      dayjs(a.createTime, "DD/MM/YYYY HH:mm").valueOf()
+  );
 
   return (
     <div style={{ marginTop: 10 }}>
       <Table
-        dataSource={data}
+        dataSource={sortedData}
         loading={loading}
         columns={columns}
         rowKey="id"

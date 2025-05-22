@@ -12,8 +12,10 @@ export default function HeaderAdmin() {
   const userId = useSelector((state) => state.auth.userId);
 
   const { data: userData } = useGetUserQuery(userId);
-  const { data: notificationsResponse } = useGetNotificationsByUserQuery(userId);
-  const unreadCount = notificationsResponse?.data?.filter(n => !n.isRead).length || 0;
+  const { data: notificationsResponse } =
+    useGetNotificationsByUserQuery(userId);
+  const unreadCount =
+    notificationsResponse?.data?.filter((n) => !n.isRead).length || 0;
 
   useEffect(() => {
     const intervalId = setInterval(() => {
@@ -70,7 +72,7 @@ export default function HeaderAdmin() {
           <div>
             {time.toLocaleTimeString()} {time.toLocaleDateString()}
           </div>
-          <div ref={iconRef}>
+          {/* <div ref={iconRef}>
             <NotificationIcon
               count={unreadCount}
               onClick={(e) => {
@@ -78,16 +80,14 @@ export default function HeaderAdmin() {
                 setIsNotificationOpen((prev) => !prev);
               }}
             />
-          </div>
+          </div> */}
           <Avatar userData={userData} />
         </div>
       </div>
 
       {isNotificationOpen && (
         <div ref={panelRef}>
-          <NotificationPanel
-            onClose={() => setIsNotificationOpen(false)}
-          />
+          <NotificationPanel onClose={() => setIsNotificationOpen(false)} />
         </div>
       )}
     </div>

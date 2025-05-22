@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { Button, Input, message, Card } from "antd";
 import OverviewAccount from "./components/OverviewAccount";
-import { SearchOutlined } from "@ant-design/icons";
+import { SearchOutlined, ReloadOutlined } from "@ant-design/icons";
 import AccountTable from "./components/AccountTable";
 import FilterAccount from "./components/FilterAccount";
 import styles from "./Account.module.scss";
@@ -26,6 +26,7 @@ export default function Account() {
     isActive: null,
     isVerified: null,
   });
+  const [isReloading, setIsReloading] = useState(false);
 
   // Tạo một object lookup roleID -> roleName
   const roleMap = useMemo(() => {
@@ -102,6 +103,18 @@ export default function Account() {
     return <p>Error: {error.message}</p>;
   }
 
+  const handleReload = async () => {
+    try {
+      setIsReloading(true);
+      await refetch();
+      message.success("Dữ liệu đã được làm mới");
+    } catch (error) {
+      message.error("Làm mới dữ liệu thất bại");
+    } finally {
+      setIsReloading(false);
+    }
+  };
+
   return (
     <div className={styles.contentContainer}>
       <h2 className={styles.sectionTitle}>Quản lý tài khoản</h2>
@@ -136,6 +149,13 @@ export default function Account() {
                 onReset={resetFilters}
                 onApplyFilters={(filters) => setSelectedFilters(filters)}
               />
+              <Button
+                icon={<ReloadOutlined spin={isReloading} />}
+                onClick={handleReload}
+                loading={isReloading}
+              >
+                Làm mới
+              </Button>
             </div>
             <Button
               icon={<IoCreate />}
@@ -154,7 +174,7 @@ export default function Account() {
 
           <div className={styles.tableContainer}>
             <AccountTable
-              loading={isLoading}
+              loading={isLoading || isReloading}
               data={filteredUsers}
               refetch={refetch}
             />

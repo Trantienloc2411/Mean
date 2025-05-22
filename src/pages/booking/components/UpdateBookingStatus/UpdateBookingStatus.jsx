@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { Modal, Button, message, Spin } from 'antd';
-import { CreditCardOutlined, DollarOutlined, BankOutlined, WalletOutlined } from '@ant-design/icons';
+import { Modal, Button, message, Spin, Tag, Divider, Timeline, Card, Typography } from 'antd';
+import { CreditCardOutlined, DollarOutlined, BankOutlined, WalletOutlined, ClockCircleOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import styles from './UpdateBookingStatus.module.scss';
 import { useCreateNotificationMutation } from '../../../../redux/services/notificationApi';
 import { useCreateTransactionMutation } from '../../../../redux/services/transactionApi';
 import { useGetCustomerByIdQuery } from '../../../../redux/services/customerApi';
 import momoIcon from '../../../../../src/assets/momo.png';
+
+const { Text, Title } = Typography;
 
 const UpdateBookingStatus = ({
   booking,
@@ -63,34 +65,57 @@ const UpdateBookingStatus = ({
     }
   };
 
-  const getBookingStatusDisplay = (statusCode) => {
+const getBookingStatusDisplay = (statusCode) => {
     const statusMap = {
       [bookingStatusCodes.CONFIRMED]: "Đã xác nhận",
-      [bookingStatusCodes.PENDING]: "Đang chờ",
+      [bookingStatusCodes.PENDING]: "Chờ xác nhận",
       [bookingStatusCodes.NEEDCHECKIN]: "Cần check-in",
       [bookingStatusCodes.CHECKEDIN]: "Đã check-in",
       [bookingStatusCodes.NEEDCHECKOUT]: "Cần check-out",
       [bookingStatusCodes.CHECKEDOUT]: "Đã check-out",
-      [bookingStatusCodes.CANCELLED]: "Đã hủy",
-      [bookingStatusCodes.COMPLETED]: "Hoàn thành",
-      [bookingStatusCodes.REFUND]: "Đã hoàn tiền"
-    };
-    return statusMap[statusCode] || "Không xác định";
-  };
+      [bookingStatusCodes.CANCELLED]: "Đã huỷ",
+      [bookingStatusCodes.COMPLETED]: "Hoàn tất",
+      [bookingStatusCodes.REFUND]: "Đã hoàn tiền",
+    }
+    return statusMap[statusCode] || "Trạng thái không xác định"
+  }
 
   const getPaymentStatusDisplay = (statusCode) => {
     const statusMap = {
-      [paymentStatusCodes.BOOKING]: "Đặt cọc",
-      [paymentStatusCodes.PENDING]: "Đang chờ",
+      [paymentStatusCodes.BOOKING]: "Đã đặt",
+      [paymentStatusCodes.PENDING]: "Chờ thanh toán",
       [paymentStatusCodes.PAID]: "Đã thanh toán",
-      [paymentStatusCodes.REFUND]: "Đã hoàn tiền",
-      [paymentStatusCodes.FAILED]: "Thất bại",
-    };
-    return statusMap[statusCode] || "Chưa thanh toán";
+      [paymentStatusCodes.REFUND]: "Yêu cầu hoàn tiền",
+      [paymentStatusCodes.FAILED]: "Thanh toán thất bại",
+    }
+    return statusMap[statusCode] || "Chưa thanh toán"
+  }
+
+  const formatDate = (dateString) => {
+    if (!dateString) return "N/A";
+    
+    const date = new Date(dateString);
+    if (isNaN(date.getTime())) {
+      return dateString;
+    }
+    
+    return new Intl.DateTimeFormat('vi-VN', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    }).format(date);
+  };
+
+  const calculateRefundDeadline = () => {
+    if (!booking?._originalBooking?.timeExpireRefund) return "N/A";
+    return formatDate(booking._originalBooking.timeExpireRefund);
   };
 
   const isCancelled = booking?._originalBooking?.status === bookingStatusCodes.CANCELLED;
   const isPaymentRefund = booking?._originalBooking?.paymentStatus === paymentStatusCodes.REFUND;
+  const refundDeadline = calculateRefundDeadline();
 
   const handleRefund = async () => {
     try {
@@ -101,11 +126,11 @@ const UpdateBookingStatus = ({
 
       const transactionData = {
         bookingId: booking._originalBooking._id,
-        paymentCode: `PAY${Date.now().toString().substring(0, 7)}`,
+        paymentCode: `REFUND${Date.now().toString().substring(0, 13)}`,
         transactionEndDate: new Date().toISOString(),
-        transactionStatus: true,
-        description: `Payment refund for booking ID ${booking._originalBooking._id}`,
-        type: 1,
+        transactionStatus: 2, 
+        description: `Hoàn tiền cho đơn đặt phòng ${booking._originalBooking._id}`,
+        typeTransaction: 1, 
         amount: booking._originalBooking.totalPrice,
       };
 
@@ -113,8 +138,8 @@ const UpdateBookingStatus = ({
       const notificationData = {
         userId: booking._originalBooking.customerId.userId._id,
         bookingId: booking._originalBooking._id,
-        title: "Hoàn tiền thành công",
-        content: `Đơn đặt phòng ${booking._originalBooking._id} đã được hoàn tiền thành công. Số tiền ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(booking._originalBooking.basePrice)} đã được chuyển về tài khoản của bạn.`,
+        title: "Xác nhận hoàn tiền thành công",
+        content: `Đơn đặt phòng ${booking._originalBooking._id} đã được hoàn tiền thành công. Số tiền ${new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(booking._originalBooking.totalPrice)} đã được chuyển về tài khoản của bạn.`,
         isRead: false,
         type: 1
       };
@@ -129,9 +154,50 @@ const UpdateBookingStatus = ({
     }
   };
 
+  const renderStatusTag = (status) => {
+    const statusColorMap = {
+      [bookingStatusCodes.CONFIRMED]: "blue",
+      [bookingStatusCodes.PENDING]: "orange",
+      [bookingStatusCodes.NEEDCHECKIN]: "cyan",
+      [bookingStatusCodes.CHECKEDIN]: "green",
+      [bookingStatusCodes.NEEDCHECKOUT]: "purple",
+      [bookingStatusCodes.CHECKEDOUT]: "geekblue",
+      [bookingStatusCodes.CANCELLED]: "red",
+      [bookingStatusCodes.COMPLETED]: "success",
+      [bookingStatusCodes.REFUND]: "volcano"
+    };
+    
+    return (
+      <Tag color={statusColorMap[status] || "default"}>
+        {getBookingStatusDisplay(status)}
+      </Tag>
+    );
+  };
+
+  const renderPaymentStatusTag = (status) => {
+    const statusColorMap = {
+      [paymentStatusCodes.BOOKING]: "blue",
+      [paymentStatusCodes.PENDING]: "orange",
+      [paymentStatusCodes.PAID]: "green",
+      [paymentStatusCodes.REFUND]: "volcano",
+      [paymentStatusCodes.FAILED]: "red",
+    };
+    
+    return (
+      <Tag color={statusColorMap[status] || "default"}>
+        {getPaymentStatusDisplay(status)}
+      </Tag>
+    );
+  };
+
   return (
     <Modal
-      title="Xử Lý Hoàn Tiền"
+      title={
+        <div className={styles.modalTitle}>
+          <ExclamationCircleFilled className={styles.refundIcon} />
+          <span>Xử Lý Hoàn Tiền</span>
+        </div>
+      }
       open={visible}
       onCancel={onClose}
       className={styles.modalContainer}
@@ -142,112 +208,192 @@ const UpdateBookingStatus = ({
         isCancelled && isPaymentRefund && (
           <Button
             key="submit"
+            type="primary"
             loading={isLoading}
             onClick={handleRefund}
-            className={`ant-btn refundButton ${styles.refundButton}`} 
+            className={`ant-btn refundButton ${styles.refundButton}`}
+            danger
           >
             Xác Nhận Hoàn Tiền
           </Button>
         )
       ]}
-      width={600}
+      width={700}
     >
       <div className={styles.bookingInfoSection}>
-        <h3>Thông Tin Chi Tiết</h3>
-        <div className={styles.infoGrid}>
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Đơn Đặt Phòng:</span>
-            <span className={styles.infoValue}>{booking?._originalBooking?._id}</span>
-          </div>
-
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Khách hàng:</span>
-            <span className={styles.infoValue}>
-              {booking?._originalBooking?.customerId?.userId?.fullName}
-            </span>
-          </div>
-
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Trạng thái đặt phòng:</span>
-            <span className={`${styles.statusValue} ${styles[getBookingStatusDisplay(booking?._originalBooking?.status).toLowerCase()]}`}>
-              {getBookingStatusDisplay(booking?._originalBooking?.status)}
-            </span>
-          </div>
-
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Trạng thái thanh toán:</span>
-            <span className={`${styles.paymentValue} ${styles[getPaymentStatusDisplay(booking?._originalBooking?.paymentStatus).toLowerCase()]}`}>
-              {getPaymentStatusDisplay(booking?._originalBooking?.paymentStatus)}
-            </span>
-          </div>
-
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Phương thức thanh toán:</span>
-            <span className={styles.infoValue}>
-              {getPaymentIcon(booking?._originalBooking?.paymentMethod)}
-              {getPaymentMethodDisplay(booking?._originalBooking?.paymentMethod)}
-            </span>
-          </div>
-
-          <div className={styles.infoRow}>
-            <span className={styles.infoLabel}>Số tiền:</span>
-            <span className={styles.infoValue}>
-              {new Intl.NumberFormat('vi-VN', {
-                style: 'currency',
-                currency: 'VND'
-              }).format(booking._originalBooking?.totalPrice || 0)}
-            </span>
-          </div>
+        <div className={styles.sectionHeader}>
+          <Title level={4}>Thông Tin Đơn Đặt Phòng</Title>
         </div>
+
+        <Card className={styles.bookingCard}>
+          <div className={styles.infoGrid}>
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Mã đơn:</span>
+              <span className={styles.infoValue}>{booking?._originalBooking?._id}</span>
+            </div>
+
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Khách hàng:</span>
+              <span className={styles.infoValue}>
+                {booking?._originalBooking?.customerId?.userId?.fullName}
+              </span>
+            </div>
+
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Phòng:</span>
+              <span className={styles.infoValue}>
+                {booking?._originalBooking?.accommodationId?.accommodationTypeId?.name} - 
+                {booking?._originalBooking?.accommodationId?.roomNo}
+              </span>
+            </div>
+
+            <div className={styles.infoRow}>
+              <span className={styles.infoLabel}>Thời gian:</span>
+              <span className={styles.infoValue}>
+                Check-in: {formatDate(booking?._originalBooking?.checkInHour)}<br />
+                Check-out: {formatDate(booking?._originalBooking?.checkOutHour)}
+              </span>
+            </div>
+
+            <div className={styles.statusRow}>
+              <div className={styles.statusGroup}>
+                <span className={styles.infoLabel}>Trạng thái đặt phòng:</span>
+                {renderStatusTag(booking?._originalBooking?.status)}
+              </div>
+
+              <div className={styles.statusGroup}>
+                <span className={styles.infoLabel}>Trạng thái thanh toán:</span>
+                {renderPaymentStatusTag(booking?._originalBooking?.paymentStatus)}
+              </div>
+            </div>
+          </div>
+        </Card>
       </div>
 
-      {isCancelled && isPaymentRefund && (
-        <div className={styles.refundSection}>
-          <div className={styles.refundWarning}>
-            <p>⚠️ Thao tác này sẽ chuyển trạng thái đặt phòng sang <strong>"Đã hoàn tiền"</strong></p>
-            <ul className={styles.refundDetails}>
-              <li>
-                Phương thức hoàn tiền:
-                <span className={styles.paymentMethodDisplay}>
+      <Divider />
+
+      <div className={styles.paymentSection}>
+        <div className={styles.sectionHeader}>
+          <Title level={4}>Chi Tiết Thanh Toán</Title>
+        </div>
+
+        <Card className={styles.paymentCard}>
+          <div className={styles.paymentDetails}>
+            <div className={styles.paymentMethod}>
+              <div className={styles.methodInfo}>
+                <span className={styles.infoLabel}>Phương thức thanh toán:</span>
+                <span className={styles.methodValue}>
                   {getPaymentIcon(booking?._originalBooking?.paymentMethod)}
                   {getPaymentMethodDisplay(booking?._originalBooking?.paymentMethod)}
                 </span>
-              </li>
-              <li>Thời gian dự kiến: 3-5 ngày làm việc</li>
-            </ul>
+              </div>
+            </div>
+
+            <div className={styles.priceBreakdown}>
+              <div className={styles.priceRow}>
+                <span>Giá cơ bản:</span>
+                <span>{new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(booking?._originalBooking?.basePrice || 0)}</span>
+              </div>
+              <div className={styles.priceRow}>
+                <span>Thời gian sử dụng:</span>
+                <span>{booking?._originalBooking?.durationBookingHour || 0} giờ</span>
+              </div>
+              <Divider className={styles.priceDivider} />
+              <div className={styles.totalPrice}>
+                <span>Tổng tiền cần hoàn:</span>
+                <span className={styles.totalAmount}>
+                  {new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(booking?._originalBooking?.totalPrice || 0)}
+                </span>
+              </div>
+            </div>
+          </div>
+        </Card>
+      </div>
+
+      {isCancelled && isPaymentRefund && (
+        <>
+          <Divider />
+          <div className={styles.refundSection}>
+            <div className={styles.sectionHeader}>
+              <Title level={4}>Thông Tin Hoàn Tiền</Title>
+            </div>
+
+            <Card className={styles.refundCard}>
+              <Timeline
+                className={styles.refundTimeline}
+                items={[
+                  {
+                    color: 'green',
+                    children: (
+                      <div className={styles.timelineItem}>
+                        <div className={styles.timelineTitle}>Đơn đã hủy</div>
+                        <div className={styles.timelineDesc}>Đơn đặt phòng đã được hủy và yêu cầu hoàn tiền</div>
+                      </div>
+                    ),
+                  },
+                  {
+                    color: 'orange',
+                    children: (
+                      <div className={styles.timelineItem}>
+                        <div className={styles.timelineTitle}>Phương thức hoàn tiền</div>
+                        <div className={styles.timelineDesc}>
+                          {getPaymentIcon(booking?._originalBooking?.paymentMethod)}
+                          {getPaymentMethodDisplay(booking?._originalBooking?.paymentMethod)}
+                        </div>
+                      </div>
+                    ),
+                  },
+                ]}
+              />
+
+              <div className={styles.refundWarning}>
+                <Text type="warning">⚠️ Thời gian dự kiến hoàn tiền: 3-5 ngày làm việc</Text>
+              </div>
+            </Card>
           </div>
 
+          <Divider />
+
           <div className={styles.paymentInfoSection}>
-            <h3>Thông Tin Tài Khoản Nhận Hoàn Tiền</h3>
-            {isLoadingCustomer ? (
-              <Spin tip="Đang tải thông tin..." />
-            ) : customerError ? (
-              <div className={styles.errorMessage}>Không thể tải thông tin tài khoản</div>
-            ) : !customerPaymentInfo ? (
-              <div className={styles.noPaymentInfo}>Khách hàng chưa cung cấp thông tin tài khoản</div>
-            ) : (
-              <div className={styles.paymentInfoGrid}>
-                <div className={styles.infoRow}>
-                  <span className={styles.infoLabel}>Tên ngân hàng:</span>
-                  <span className={styles.infoValue}>{customerPaymentInfo.bankName}</span>
+            <div className={styles.sectionHeader}>
+              <Title level={4}>Thông Tin Tài Khoản Nhận Hoàn Tiền</Title>
+            </div>
+
+            <Card className={styles.accountCard}>
+              {isLoadingCustomer ? (
+                <Spin tip="Đang tải thông tin..." />
+              ) : customerError ? (
+                <div className={styles.errorMessage}>Không thể tải thông tin tài khoản</div>
+              ) : !customerPaymentInfo ? (
+                <div className={styles.noPaymentInfo}>
+                  <ExclamationCircleFilled className={styles.warningIcon} />
+                  <Text type="warning">Khách hàng chưa cung cấp thông tin tài khoản</Text>
                 </div>
-                <div className={styles.infoRow}>
-                  <span className={styles.infoLabel}>Số tài khoản:</span>
-                  <span className={styles.infoValue}>{customerPaymentInfo.bankNo}</span>
+              ) : (
+                <div className={styles.paymentInfoGrid}>
+                  <div className={styles.infoRow}>
+                    <span className={styles.infoLabel}>Tên ngân hàng:</span>
+                    <span className={styles.infoValue}>{customerPaymentInfo.bankName}</span>
+                  </div>
+                  <div className={styles.infoRow}>
+                    <span className={styles.infoLabel}>Số tài khoản:</span>
+                    <span className={styles.infoValue}>{customerPaymentInfo.bankNo}</span>
+                  </div>
+                  <div className={styles.infoRow}>
+                    <span className={styles.infoLabel}>Tên chủ tài khoản:</span>
+                    <span className={styles.infoValue}>{customerPaymentInfo.bankAccountName}</span>
+                  </div>
                 </div>
-                <div className={styles.infoRow}>
-                  <span className={styles.infoLabel}>Tên chủ tài khoản:</span>
-                  <span className={styles.infoValue}>{customerPaymentInfo.bankAccountName}</span>
-                </div>
-              </div>
-            )}
+              )}
+            </Card>
           </div>
-        </div>
+        </>
       )}
 
       {isCancelled && !isPaymentRefund && (
         <div className={styles.alertMessage}>
-          <p>❗ Không thể hoàn tiền. Đơn hàng cần có trạng thái thanh toán là "Đã hoàn tiền" trước khi thực hiện.</p>
+          <ExclamationCircleFilled className={styles.alertIcon} />
+          <Text type="danger">Không thể hoàn tiền. Đơn hàng cần có trạng thái thanh toán là "Yêu cầu hoàn tiền" trước khi thực hiện.</Text>
         </div>
       )}
     </Modal>

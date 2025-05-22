@@ -43,7 +43,7 @@
   }
 }
 
-.bookingCard, .paymentCard, .refundCard, .accountCard {
+.bookingCard, .paymentCard, .refundCard, .accountCard, .statusCard {
   border-radius: 8px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   margin-bottom: 16px;
@@ -90,6 +90,10 @@
 }
 
 .paymentSection {
+  margin-top: 16px;
+}
+
+.statusUpdateSection {
   margin-top: 16px;
 }
 
@@ -147,23 +151,33 @@
   }
 }
 
-.refundSection {
-  margin-top: 16px;
+.statusSelectContainer {
+  margin-bottom: 16px;
+  
+  .infoLabel {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
 }
 
-.refundTimeline {
-  margin: 12px 0 20px;
+.cancelReasonContainer {
+  margin-top: 16px;
   
-  .timelineItem {
-    .timelineTitle {
-      font-weight: 600;
-      color: #334155;
-      margin-bottom: 4px;
-    }
+  .infoLabel {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+  
+  .cancelTextarea {
+    border-color: #e9ecef;
     
-    .timelineDesc {
-      color: #64748b;
-      font-size: 14px;
+    &:focus, &:hover {
+      border-color: #fa8c16;
+      box-shadow: 0 0 0 2px rgba(250, 140, 22, 0.1);
     }
   }
 }
@@ -173,43 +187,8 @@
   padding: 10px 16px;
   border-radius: 6px;
   border-left: 3px solid #f59e0b;
-  margin: 10px 0;
-}
-
-.paymentInfoSection {
   margin-top: 16px;
-}
-
-.paymentInfoGrid {
-  display: grid;
-  grid-template-columns: 1fr;
-  gap: 12px;
-}
-
-.noPaymentInfo, .errorMessage {
-  padding: 20px;
-  text-align: center;
-  color: #64748b;
-  
-  .warningIcon {
-    color: #f59e0b;
-    margin-right: 8px;
-    font-size: 16px;
-  }
-}
-
-.alertMessage {
-  background-color: #fef2f2;
-  padding: 12px 16px;
-  border-radius: 8px;
-  display: flex;
-  align-items: center;
-  
-  .alertIcon {
-    color: #ef4444;
-    margin-right: 10px;
-    font-size: 18px;
-  }
+  font-size: 14px;
 }
 
 .refundButton {
@@ -225,10 +204,6 @@
 
 @media (min-width: 768px) {
   .infoGrid {
-    grid-template-columns: 1fr 1fr;
-  }
-  
-  .paymentInfoGrid {
     grid-template-columns: 1fr 1fr;
   }
 }

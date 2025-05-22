@@ -1,7 +1,7 @@
 import styles from "./Report.module.scss";
 import { useState, useEffect } from "react";
 import { Input, Button, Table, Dropdown, message } from "antd";
-import { MoreOutlined, FilterOutlined, SearchOutlined } from "@ant-design/icons";
+import { MoreOutlined, FilterOutlined, SearchOutlined, ReloadOutlined } from "@ant-design/icons";
 import Filter from "./components/Filter/Filter";
 import ReportDetail from "./components/ReportDetail/ReportDetail";
 import ReplyReport from "./components/ReplyReport/ReplyReport";
@@ -28,6 +28,7 @@ export default function Report() {
   const [isReplyModalOpen, setIsReplyModalOpen] = useState(false);
   const [selectedReport, setSelectedReport] = useState(null);
   const [selectedReportId, setSelectedReportId] = useState(null);
+  const [isReloading, setIsReloading] = useState(false);
 
   const {
     data: reports,
@@ -96,6 +97,18 @@ export default function Report() {
 
     setAllReports(prev => updateInArray(prev));
     setFilteredData(prev => updateInArray(prev));
+  };
+
+  const handleReload = async () => {
+    try {
+      setIsReloading(true);
+      await refetchReports();
+      message.success('Dữ liệu đã được làm mới');
+    } catch (error) {
+      message.error('Làm mới dữ liệu thất bại');
+    } finally {
+      setIsReloading(false);
+    }
   };
 
   const getMenuItems = (record) => {
@@ -311,6 +324,14 @@ export default function Report() {
               {getActiveFiltersCount() > 0 && ` (${getActiveFiltersCount()})`}
             </Button>
           </Dropdown>
+          <Button
+            icon={<ReloadOutlined spin={isReloading} />}
+            onClick={handleReload}
+            loading={isReloading}
+            style={{ marginLeft: 10 }}
+          >
+            Làm mới
+          </Button>
         </div>
       </div>
 
