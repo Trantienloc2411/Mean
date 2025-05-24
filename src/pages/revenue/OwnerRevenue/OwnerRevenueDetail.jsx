@@ -36,6 +36,13 @@ const BOOKING_STATUS_MAP = {
   8: "PENDING",
   9: "REFUND",
 };
+const PAYMENT_STATUS_MAP = {
+  1: "BOOKING",
+  2: "PENDING",
+  3: "PAID",
+  4: "REFUND",
+  5: "FAILED",
+};
 
 export default function OwnerRevenuePage() {
   const { id } = useParams();
@@ -91,47 +98,61 @@ export default function OwnerRevenuePage() {
 
     setFilteredBookings(filtered);
   }, [bookings, date]);
-  const summary = useMemo(() => {
-    let totalRevenue = 0;
-    let totalCancelled = 0;
-    let bookingCount = 0;
-    let successCount = 0;
-    let cancelledCount = 0;
-    let ownerEarnings = 0;
-    let platformFeeTotal = 0;
 
-    // Lấy phí nền tảng từ policy, fallback là 0.1 nếu chưa có dữ liệu
-    const platformFee = parseFloat(
-      policyPrice?.data?.[0]?.values?.[0]?.val || "0.1"
-    );
+const summary = useMemo(() => {
+  let totalRevenue = 0;
+  let totalRefundAmount = 0;
+  let totalCancelledAmount = 0;
 
-    filteredBookings.forEach((b) => {
-      const statusText = BOOKING_STATUS_MAP[b.status];
-      if (statusText === "COMPLETED") {
-        console.log("b", b);
+  let successCount = 0;
+  let cancelledCount = 0;
+  let refundCount = 0;
+  let pendingCount = 0;
+  let bookingCount = 0;
 
-        totalRevenue += b.totalPrice;
-        successCount += 1;
-        ownerEarnings += b.totalPrice * (1 - platformFee);
-        platformFeeTotal += b.totalPrice * platformFee;
-        bookingCount += 1;
-      } else if (statusText === "CANCELLED" || statusText === "REFUND") {
-        totalCancelled += b.totalPrice;
-        cancelledCount += 1;
-        bookingCount += 1;
-      }
-    });
+  let ownerEarnings = 0;
+  let platformFeeTotal = 0;
 
-    return {
-      totalRevenue,
-      totalCancelled,
-      successCount,
-      cancelledCount,
-      ownerEarnings,
-      platformFeeTotal,
-      bookingCount,
-    };
-  }, [filteredBookings, policyPrice]);
+  const platformFee = parseFloat(
+    policyPrice?.data?.[0]?.values?.[0]?.val || "0.1"
+  );
+
+  filteredBookings.forEach((b) => {
+    const statusText = BOOKING_STATUS_MAP[b.status];
+    const paymentStatusText = PAYMENT_STATUS_MAP[b.paymentStatus];
+    bookingCount += 1;
+
+    if (paymentStatusText === "PAID") {
+      totalRevenue += b.totalPrice;
+      const fee = b.totalPrice * platformFee;
+      ownerEarnings += b.totalPrice - fee;
+      platformFeeTotal += fee;
+      successCount += 1;
+    } else if (statusText === "CANCELLED") {
+      totalCancelledAmount += b.totalPrice;
+      cancelledCount += 1;
+    } else if (statusText === "REFUND") {
+      totalRefundAmount += b.totalPrice;
+      refundCount += 1;
+    } else if (statusText === "PENDING") {
+      pendingCount += 1;
+    }
+  });
+
+  return {
+    totalRevenue,
+    totalRefundAmount,
+    totalCancelledAmount,
+    ownerEarnings,
+    platformFeeTotal,
+    bookingCount,
+    successCount,
+    cancelledCount,
+    refundCount,
+    pendingCount,
+  };
+}, [filteredBookings, policyPrice]);
+
 
   // const handleTransfer = async () => {
   //   setIsTransferring(true);
