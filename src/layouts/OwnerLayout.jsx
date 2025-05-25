@@ -19,7 +19,8 @@ const OwnerLayout = () => {
   // useAppInit();
   const { id } = useParams(); // Lấy ID từ URL
   const userRole = localStorage.getItem("user_role"); // "admin" hoặc "owner"
-  console.log(userRole);
+
+  console.log("id", id);
 
   const menuItems = [
     {
