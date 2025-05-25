@@ -131,11 +131,6 @@ const ReviewsComponent = () => {
     });
   }, [feedbackData, sortBy]);
 
-  const formatDate = (dateString) =>
-    dateString
-      ? dayjs(dateString, 'DD/MM/YYYY HH:mm:ss').format('HH:mm DD/MM/YYYY')
-      : 'N/A';
-
   return (
     <div style={{ maxWidth: 800, margin: "0 auto", padding: "20px" }}>
       <Card style={{ marginBottom: 24, borderRadius: 8 }}>
