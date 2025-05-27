@@ -40,7 +40,7 @@ export default function UserDetailModal({ open, onClose, user }) {
         <Descriptions.Item label="Vai trò">{user.roleName}</Descriptions.Item>
         <Descriptions.Item label="Trạng thái">
           <span className={`${styles.isActive} ${styles[user.isActive]}`}>
-            {user.isActive === "true" ? "Hoạt động" : "Bị khóa"}
+            {user.isActive === "true" ? "Bị khóa" : "Hoạt động"}
           </span>
         </Descriptions.Item>
         <Descriptions.Item label="Xác thực Email">

@@ -319,7 +319,7 @@ export default function RentalForm({ ownerId, refetch }) {
   return (
     <Form form={form} layout="vertical" onFinish={handleSubmit}>
       <Flex gap={20} align="center" justify="space-between">
-        <h2 style={{ marginBottom: "20px" }}>Create Rental Information</h2>
+        <h2 style={{ marginBottom: "20px" }}>Tạo địa điểm mới</h2>
         <Form.Item style={{ textAlign: "center", marginTop: "20px" }}>
           <Button
             type="primary"
