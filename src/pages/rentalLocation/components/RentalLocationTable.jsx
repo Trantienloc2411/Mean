@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import ModalViewDetailRental from "./ModalViewDetailRental";
 import styles from "./RentalLocationTable.module.scss";
 import { FaEye } from "react-icons/fa";
-import _ from "lodash";
+import _, { size } from "lodash";
 import dayjs from "dayjs";
 export default function RentalLocationTable({ data, loading }) {
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
@@ -74,6 +74,7 @@ export default function RentalLocationTable({ data, loading }) {
     {
       title: "No.",
       dataIndex: "no",
+      width: 60,
       key: "no",
       render: (_, __, index) => {
         const { current, pageSize } = pagination;
