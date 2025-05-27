@@ -18,10 +18,18 @@ const BOOKING_STATUS_LABELS = {
   7: { text: "Hoàn tất", color: "green" },
   9: { text: "Hoàn tiền", color: "volcano" },
 };
+const PAYMENT_STATUS_LABELS = {
+  // 1: { text: "Đã xác nhận", color: "blue" },
+  2: { text: "Chờ", color: "processing" },
+  3: { text: "Đã Thanh toán", color: "geekblue" },
+  4: { text: "Hoàn tiền", color: "orange" },
+  5: { text: "Thất bại", color: "red" },
+};
 
 export default function BookingTable({ bookings = [], loading }) {
   const [searchText, setSearchText] = useState("");
   const [statusFilter, setStatusFilter] = useState([]);
+  const [paymentStatusFilter, setPaymentStatusFilter] = useState([]);
   const [currentPage, setCurrentPage] = useState(1); // 👈 Thêm state trang hiện tại
   const pageSize = 6;
 
@@ -33,13 +41,18 @@ export default function BookingTable({ bookings = [], loading }) {
       .filter((booking) =>
         statusFilter.length > 0 ? statusFilter.includes(booking.status) : true
       )
+      .filter((booking) =>
+        paymentStatusFilter.length > 0
+          ? paymentStatusFilter.includes(booking.paymentStatus)
+          : true
+      )
 
       .sort(
         (a, b) =>
           dayjs(b.createdAt, DATE_FORMAT).valueOf() -
           dayjs(a.createdAt, DATE_FORMAT).valueOf()
       );
-  }, [bookings, searchText, statusFilter]);
+  }, [bookings, searchText, statusFilter, paymentStatusFilter]);
 
   const columns = [
     {
@@ -77,6 +90,15 @@ export default function BookingTable({ bookings = [], loading }) {
         return <Tag color={s?.color || "default"}>{s?.text || "Không rõ"}</Tag>;
       },
     },
+    {
+      title: "Thanh toán",
+      align: "center",
+      dataIndex: "paymentStatus",
+      render: (paymentStatus) => {
+        const s = PAYMENT_STATUS_LABELS[paymentStatus];
+        return <Tag color={s?.color || "default"}>{s?.text || "Không rõ"}</Tag>;
+      },
+    },
   ];
 
   return (
@@ -98,6 +120,19 @@ export default function BookingTable({ bookings = [], loading }) {
             onChange={(value) => setStatusFilter(value)}
           >
             {Object.entries(BOOKING_STATUS_LABELS).map(([key, value]) => (
+              <Select.Option key={key} value={Number(key)}>
+                {value.text}
+              </Select.Option>
+            ))}
+          </Select>
+          <Select
+            mode="multiple"
+            placeholder="Lọc trạng thái thanh toán"
+            allowClear
+            style={{ width: 250 }}
+            onChange={(value) => setPaymentStatusFilter(value)}
+          >
+            {Object.entries(PAYMENT_STATUS_LABELS).map(([key, value]) => (
               <Select.Option key={key} value={Number(key)}>
                 {value.text}
               </Select.Option>

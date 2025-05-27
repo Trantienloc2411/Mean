@@ -1,12 +1,4 @@
-import { MoreOutlined } from "@ant-design/icons";
-import { Dropdown } from "antd";
-import { Menu } from "antd";
-import { Tag } from "antd";
 import { Table } from "antd";
-import {
-  TransactionStatusEnum,
-  TransactionTypeEnum,
-} from "../../../enums/transactionEnums";
 import TransactionDetailModal from "./TransactionDetailModal";
 import { useState } from "react";
 import styles from "./TransactionTable.module.scss";
