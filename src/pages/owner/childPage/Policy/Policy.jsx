@@ -500,36 +500,36 @@ export default function Policy() {
     { title: "Ngày tạo", dataIndex: "CreatedDate", key: "CreatedDate" },
     { title: "Ngày áp dụng", dataIndex: "ApplyDate", key: "ApplyDate" },
     { title: "Ngày kết thúc", dataIndex: "EndDate", key: "EndDate" },
-    {
-      title: "Trạng thái",
-      dataIndex: "Status",
-      key: "Status",
-      render: (status) => {
-        let className = "";
-        switch (status) {
-          case 2:
-            className = styles.approved;
-            break;
-          case 1:
-            className = styles.pending;
-            break;
-          case 3:
-            className = styles.rejected;
-            break;
-          default:
-            break;
-        }
-        return (
-          <span className={`${styles.status} ${className}`}>
-            {status === 2
-              ? "Đã duyệt"
-              : status === 1
-              ? "Đang chờ"
-              : "Bị từ chối"}
-          </span>
-        );
-      },
-    },
+    // {
+    //   title: "Trạng thái",
+    //   dataIndex: "Status",
+    //   key: "Status",
+    //   render: (status) => {
+    //     let className = "";
+    //     switch (status) {
+    //       case 2:
+    //         className = styles.approved;
+    //         break;
+    //       case 1:
+    //         className = styles.pending;
+    //         break;
+    //       case 3:
+    //         className = styles.rejected;
+    //         break;
+    //       default:
+    //         break;
+    //     }
+    //     return (
+    //       <span className={`${styles.status} ${className}`}>
+    //         {status === 2
+    //           ? "Đã duyệt"
+    //           : status === 1
+    //             ? "Đang chờ"
+    //             : "Bị từ chối"}
+    //       </span>
+    //     );
+    //   },
+    // },
     {
       title: "",
       key: "operation",

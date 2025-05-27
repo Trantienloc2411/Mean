@@ -23,6 +23,8 @@ import {
   saveUsername,
 } from "../../../utils/storage";
 import { message } from "antd";
+import { checkUserExistInSupabase } from "../../../redux/services/supabase";
+import { useEffect } from "react";
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
@@ -35,6 +37,7 @@ const Login = () => {
   const [getRoleById] = useLazyGetRoleByIdQuery();
   const [sendOTP, { isLoading: isLoadingSendOTP }] = useSendOtpEmailMutation();
   const [isLoading, setIsLoading] = useState(false);
+  const [userDataLogin, setUserDataLogin] = useState(null);
   const images = [
     "https://cdn.vietnambiz.vn/2020/2/26/kcn-1582688444973524474363.jpg",
     "https://kilala.vn/data/upload/article/3685/3.jpg",
@@ -44,6 +47,8 @@ const Login = () => {
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
+
+
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,7 +60,6 @@ const Login = () => {
         password: password,
       };
       const loginResult = await login({ data: formLogin }).unwrap();
-      console.log("Login response:", loginResult);
 
       if (loginResult?.accessToken) {
         saveToken(loginResult.accessToken);
@@ -63,8 +67,6 @@ const Login = () => {
         saveUsername(loginResult.fullName);
 
         const userData = await getUserById(loginResult._id).unwrap();
-
-        console.log(userData);
 
         if (!userData?.getUser.isActive) {
           notification.error({
@@ -84,7 +86,6 @@ const Login = () => {
               email: userData?.getUser.email,
             }).unwrap();
 
-            console.log(response);
             notification.success({
               message: response.message,
               description: "Xin hãy kiểm tra email của bạn.",
@@ -110,9 +111,11 @@ const Login = () => {
             saveRole(roleData.roleName);
             dispatch(setRole(roleData.roleName));
             setIsLoading(false);
+            
           }
           navigate("/");
         }
+
 
         notification.success({
           message: "Đăng nhập thành công",

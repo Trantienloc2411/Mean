@@ -28,16 +28,16 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
     isLoading: isAccommodationLoading,
     isError
   } = useGetAccommodationTypeByIdQuery(roomTypeId, {
-    skip: !roomTypeId || !isOpen 
+    skip: !roomTypeId || !isOpen
   });
 
   const { data: ownerDetailData } = useGetOwnerDetailByUserIdQuery(id);
   const ownerId = ownerDetailData?.id;
 
-  const { 
-    data: services, 
+  const {
+    data: services,
     isLoading: isServicesLoading,
-    refetch: refetchServices 
+    refetch: refetchServices
   } = useGetAllAmenitiesQuery(
     { ownerId },
     { skip: !ownerId }
@@ -86,7 +86,7 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
 
         const formattedValues = {
           ...values,
-          _id: roomTypeId, 
+          _id: roomTypeId,
           ownerId,
           image: fileList.map(file => file.url),
           serviceIds: values.serviceIds || [],
@@ -175,7 +175,7 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
       setUploading(false);
     }
   };
-  
+
   const handleAddService = async (values) => {
     try {
       const newService = await createAmenity({
@@ -186,12 +186,12 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
       }).unwrap();
 
       await refetchServices();
-      
+
       const currentServices = form.getFieldValue('serviceIds') || [];
       form.setFieldsValue({
         serviceIds: [...currentServices, newService._id]
       });
-      
+
       message.success("Thêm dịch vụ thành công!");
       setIsAddServiceModalOpen(false);
     } catch (error) {
@@ -282,9 +282,18 @@ const UpdateRoomTypeModal = ({ isOpen, onCancel, onConfirm, initialValues }) => 
           <Form.Item
             name="maxPeopleNumber"
             label="Số người tối đa"
-            rules={[{ required: true, message: 'Vui lòng nhập số người tối đa' }]}
+            rules={[
+              { required: true, message: 'Vui lòng nhập số người tối đa' },
+              {
+                type: 'number',
+                min: 1,
+                max: 2,
+                message: 'Số người tối đa không được vượt quá 2'
+              }
+            ]}
+            help="Số người tối đa không nên vượt quá 2"
           >
-            <InputNumber min={1} placeholder="4" />
+            <InputNumber min={1} max={2} placeholder="2" />
           </Form.Item>
 
           <Form.Item

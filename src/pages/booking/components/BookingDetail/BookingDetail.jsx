@@ -179,7 +179,7 @@ const BookingDetail = ({ bookingId, visible, onClose, bookingData, isLoading, is
               <Card className={styles.accommodationCard}>
                 <Title level={5}>Thông tin phòng</Title>
                 <Descriptions bordered column={1} className={styles.descriptions}>
-                  <Descriptions.Item label="Vị trí">
+                  <Descriptions.Item label="Tên địa điểm">
                     {getNestedValue(booking, 'accommodationId.rentalLocationId.name', "Không xác định")}
                   </Descriptions.Item>
                   <Descriptions.Item label="Loại phòng">
