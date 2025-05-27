@@ -12,7 +12,8 @@ import RoomTypeManagement from "./components/RoomTypeManagement/RoomTypeManageme
 export default function RentalLocationDetail() {
   const { id } = useParams(); // Get ID from URL
   const navigate = useNavigate();
-
+  const userRole = localStorage.getItem("user_role")?.toLowerCase();
+  const canEdit = userRole === `"owner"`;
   const { data: rental, isLoading, error } = useGetRentalLocationByIdQuery(id);
   if (isLoading)
     return (
@@ -29,7 +30,7 @@ export default function RentalLocationDetail() {
     );
   if (error) return <p>Failed to load rental location.</p>;
   const rentalData = rental.data;
-  const ownerId = rentalData?.ownerId?._id || rentalData?.ownerId; 
+  const ownerId = rentalData?.ownerId?._id || rentalData?.ownerId;
   // console.log(rentalData);
 
   const items = [
@@ -46,18 +47,29 @@ export default function RentalLocationDetail() {
       key: "2",
       label: "Hình ảnh",
       children: (
-        <ImageSlider rentalData={rentalData} images={rentalData?.image || []} />
+        <ImageSlider
+          canEdit={canEdit}
+          rentalData={rentalData}
+          images={rentalData?.image || []}
+        />
       ),
     },
     {
       key: "3",
       label: "Phòng",
-      children: <RoomList rooms={rental?.rooms || []} />,
+      children: <RoomList canEdit={canEdit} rooms={rental?.rooms || []} />,
     },
     {
       key: "4",
       label: "Loại Phòng",
-      children: <RoomTypeManagement ownerId={ownerId} isOwner={true} rentalLocationId={id} />,
+      children: (
+        <RoomTypeManagement
+          canEdit={canEdit}
+          ownerId={ownerId}
+          isOwner={true}
+          rentalLocationId={id}
+        />
+      ),
     },
     {
       key: "5",
@@ -67,7 +79,9 @@ export default function RentalLocationDetail() {
     {
       key: "6",
       label: "Cài đặt",
-      children: <SettingRentalLocation rentalData={rentalData} />,
+      children: (
+        <SettingRentalLocation canEdit={canEdit} rentalData={rentalData} />
+      ),
     },
   ];
   // <Button
