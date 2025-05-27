@@ -50,7 +50,7 @@ const STATUS_LABELS = {
   },
 };
 
-export default function SettingInformation({ rentalData }) {
+export default function SettingInformation({ rentalData, canEdit }) {
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
   const [data, setData] = useState(rentalData);
@@ -72,7 +72,9 @@ export default function SettingInformation({ rentalData }) {
     <div style={{ borderRadius: 12, padding: 0 }}>
       <Card
         title="Thông tin"
-        extra={<EditOutlined onClick={() => setIsInfoModalOpen(true)} />}
+        extra={
+          canEdit && <EditOutlined onClick={() => setIsInfoModalOpen(true)} />
+        }
       >
         <div>
           <Text strong style={{ fontSize: 22 }}>
@@ -110,7 +112,9 @@ export default function SettingInformation({ rentalData }) {
       <br />
       <Card
         title="Địa chỉ"
-        extra={<EditOutlined onClick={() => setIsMapModalOpen(true)} />}
+        extra={
+          canEdit && <EditOutlined onClick={() => setIsMapModalOpen(true)} />
+        }
       >
         <Col span={24}>
           <Text strong>Địa chỉ:</Text>{" "}
@@ -135,20 +139,25 @@ export default function SettingInformation({ rentalData }) {
           flexWrap: "wrap",
         }}
       >
-        <Button
-          type="default"
-          icon={<EditOutlined />}
-          onClick={() => setIsInfoModalOpen(true)}
-        >
-          Chỉnh sửa thông tin
-        </Button>
-        <Button
-          type="default"
-          icon={<EditOutlined />}
-          onClick={() => setIsMapModalOpen(true)}
-        >
-          Chỉnh sửa vị trí
-        </Button>
+        {canEdit && (
+          <Button
+            type="default"
+            icon={<EditOutlined />}
+            onClick={() => setIsInfoModalOpen(true)}
+          >
+            Chỉnh sửa thông tin
+          </Button>
+        )}
+        {canEdit && (
+          <Button
+            type="default"
+            icon={<EditOutlined />}
+            onClick={() => setIsMapModalOpen(true)}
+          >
+            Chỉnh sửa vị trí
+          </Button>
+        )}
+
         <Button
           type="primary"
           icon={<EnvironmentOutlined />}

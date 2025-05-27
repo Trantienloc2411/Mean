@@ -1,6 +1,11 @@
 import { useState, useEffect } from "react";
 import { Input, Button, Dropdown, Table, message } from "antd";
-import { FilterOutlined, PlusOutlined, MoreOutlined, ReloadOutlined } from "@ant-design/icons";
+import {
+  FilterOutlined,
+  PlusOutlined,
+  MoreOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import styles from "./Policy.module.scss";
 import Filter from "./components/Filter/Filter.jsx";
 import DeletePolicyModal from "./components/DeletePolicyModal/DeletePolicyModal.jsx";
@@ -35,7 +40,8 @@ export default function Policy() {
   const [selectedPolicyId, setSelectedPolicyId] = useState(null);
   const [policyDetailForUpdate, setPolicyDetailForUpdate] = useState(null);
   const [isReloading, setIsReloading] = useState(false);
-
+  const userRole = localStorage.getItem("user_role")?.toLowerCase();
+  const canEdit = userRole === `"owner"`;
 
   // const userId = localStorage.getItem("user_id");
   const { id } = useParams();
@@ -51,9 +57,9 @@ export default function Policy() {
   const {
     data: selectedPolicyDetail,
     isLoading: isLoadingPolicyDetail,
-    error: policyDetailError
+    error: policyDetailError,
   } = useGetPolicyOwnerByIdQuery(selectedPolicyId, {
-    skip: !selectedPolicyId || !isDetailModalOpen
+    skip: !selectedPolicyId || !isDetailModalOpen,
   });
 
   const {
@@ -248,23 +254,27 @@ export default function Policy() {
         setIsDetailModalOpen(true);
       },
     },
-    {
-      key: "2",
-      label: "Chỉnh sửa",
-      onClick: (record) => {
-        setSelectedPolicyId(record._id || record.id);
-        setIsUpdateModalOpen(true);
-      },
-    },
-    {
-      key: "3",
-      label: "Xoá",
-      danger: true,
-      onClick: (record) => {
-        setSelectedPolicy(record);
-        setIsDeleteModalOpen(true);
-      },
-    },
+    ...(canEdit
+      ? [
+          {
+            key: "2",
+            label: "Chỉnh sửa",
+            onClick: (record) => {
+              setSelectedPolicyId(record._id || record.id);
+              setIsUpdateModalOpen(true);
+            },
+          },
+          {
+            key: "3",
+            label: "Xoá",
+            danger: true,
+            onClick: (record) => {
+              setSelectedPolicy(record);
+              setIsDeleteModalOpen(true);
+            },
+          },
+        ]
+      : []),
   ];
 
   const handleDeleteConfirm = async () => {
@@ -414,7 +424,7 @@ export default function Policy() {
       console.error("Error updating policy:", error);
       message.error(
         "Cập nhật chính sách thất bại: " +
-        (error.data?.message || "Đã xảy ra lỗi")
+          (error.data?.message || "Đã xảy ra lỗi")
       );
     } finally {
       setIsUpdateModalOpen(false);
@@ -440,9 +450,9 @@ export default function Policy() {
     try {
       setIsReloading(true);
       await refetch();
-      message.success('Dữ liệu đã được làm mới');
+      message.success("Dữ liệu đã được làm mới");
     } catch (error) {
-      message.error('Làm mới dữ liệu thất bại');
+      message.error("Làm mới dữ liệu thất bại");
     } finally {
       setIsReloading(false);
     }
@@ -587,17 +597,18 @@ export default function Policy() {
               Làm mới
             </Button>
           </div>
-
-          <Button
-            type="primary"
-            onClick={() => setIsAddModalOpen(true)}
-            icon={<PlusOutlined />}
-            className={styles.addRoomButton}
-            loading={isCreating}
-            disabled={false}
-          >
-            Tạo chính sách mới
-          </Button>
+          {canEdit && (
+            <Button
+              type="primary"
+              onClick={() => setIsAddModalOpen(true)}
+              icon={<PlusOutlined />}
+              className={styles.addRoomButton}
+              loading={isCreating}
+              disabled={false}
+            >
+              Tạo chính sách mới
+            </Button>
+          )}
         </div>
 
         <Table

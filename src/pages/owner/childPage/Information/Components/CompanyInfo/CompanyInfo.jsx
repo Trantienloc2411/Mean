@@ -30,7 +30,8 @@ const CompanyInfo = ({ companyInfo, onUpdate }) => {
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState([]);
   const [loading, setLoading] = useState(false);
-
+  const userRole = localStorage.getItem("user_role")?.toLowerCase();
+  const canEdit = userRole === `"owner"`;
   const { id } = useParams();
   const [updateBusiness] = useUpdateBusinessMutation();
   const [createBusiness] = useCreateBusinessMutation();
@@ -331,7 +332,8 @@ const CompanyInfo = ({ companyInfo, onUpdate }) => {
     <Card
       title="Thông tin kinh doanh"
       extra={
-        !isEditing && (
+        !isEditing &&
+        canEdit && (
           <Button type="text" icon={<EditOutlined />} onClick={handleEdit}>
             Chỉnh sửa
           </Button>

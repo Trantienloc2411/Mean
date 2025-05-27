@@ -3,17 +3,21 @@ import SettingInformation from "./SettingInformation";
 import DocumentManagement from "../components/DocumentManagement";
 import RentalLogHistory from "./RentalLogHistory";
 
-export default function SettingRentalLocation({ rentalData }) {
+export default function SettingRentalLocation({ rentalData, canEdit }) {
   const items = [
     {
       key: "1",
       label: "Thông tin địa điểm",
-      children: <SettingInformation rentalData={rentalData} />,
+      children: (
+        <SettingInformation canEdit={canEdit} rentalData={rentalData} />
+      ),
     },
     {
       key: "2",
       label: "Danh sách giấy tờ",
-      children: <DocumentManagement rentalData={rentalData} />,
+      children: (
+        <DocumentManagement canEdit={canEdit} rentalData={rentalData} />
+      ),
     },
     {
       key: "3",

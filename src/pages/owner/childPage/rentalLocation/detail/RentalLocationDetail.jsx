@@ -13,7 +13,8 @@ import { useEffect } from "react";
 export default function RentalLocationDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
-
+  const userRole = localStorage.getItem("user_role")?.toLowerCase();
+  const canEdit = userRole === `"owner"`;
   const { data: rental, isLoading, error } = useGetRentalLocationByIdQuery(id);
 
   useEffect(() => {
@@ -60,18 +61,29 @@ export default function RentalLocationDetail() {
       key: "2",
       label: "Hình ảnh",
       children: (
-        <ImageSlider rentalData={rentalData} images={rentalData?.image || []} />
+        <ImageSlider
+          canEdit={canEdit}
+          rentalData={rentalData}
+          images={rentalData?.image || []}
+        />
       ),
     },
     {
       key: "3",
       label: "Phòng",
-      children: <RoomList rooms={rental?.rooms || []} />,
+      children: <RoomList canEdit={canEdit} rooms={rental?.rooms || []} />,
     },
     {
       key: "4",
       label: "Loại Phòng",
-      children: <RoomTypeManagement ownerId={ownerId} isOwner={true} rentalLocationId={id} />,
+      children: (
+        <RoomTypeManagement
+          canEdit={canEdit}
+          ownerId={ownerId}
+          isOwner={true}
+          rentalLocationId={id}
+        />
+      ),
     },
     {
       key: "5",
@@ -81,7 +93,9 @@ export default function RentalLocationDetail() {
     {
       key: "6",
       label: "Cài đặt",
-      children: <SettingRentalLocation rentalData={rentalData} />,
+      children: (
+        <SettingRentalLocation canEdit={canEdit} rentalData={rentalData} />
+      ),
     },
   ];
   // <Button
