@@ -99,60 +99,59 @@ export default function OwnerRevenuePage() {
     setFilteredBookings(filtered);
   }, [bookings, date]);
 
-const summary = useMemo(() => {
-  let totalRevenue = 0;
-  let totalRefundAmount = 0;
-  let totalCancelledAmount = 0;
+  const summary = useMemo(() => {
+    let totalRevenue = 0;
+    let totalRefundAmount = 0;
+    let totalCancelledAmount = 0;
 
-  let successCount = 0;
-  let cancelledCount = 0;
-  let refundCount = 0;
-  let pendingCount = 0;
-  let bookingCount = 0;
+    let successCount = 0;
+    let cancelledCount = 0;
+    let refundCount = 0;
+    let pendingCount = 0;
+    let bookingCount = 0;
 
-  let ownerEarnings = 0;
-  let platformFeeTotal = 0;
+    let ownerEarnings = 0;
+    let platformFeeTotal = 0;
 
-  const platformFee = parseFloat(
-    policyPrice?.data?.[0]?.values?.[0]?.val || "0.1"
-  );
+    const platformFee = parseFloat(
+      policyPrice?.data?.[0]?.values?.[0]?.val || "0.1"
+    );
 
-  filteredBookings.forEach((b) => {
-    const statusText = BOOKING_STATUS_MAP[b.status];
-    const paymentStatusText = PAYMENT_STATUS_MAP[b.paymentStatus];
-    bookingCount += 1;
+    filteredBookings.forEach((b) => {
+      const statusText = BOOKING_STATUS_MAP[b.status];
+      const paymentStatusText = PAYMENT_STATUS_MAP[b.paymentStatus];
+      bookingCount += 1;
 
-    if (paymentStatusText === "PAID") {
-      totalRevenue += b.totalPrice;
-      const fee = b.totalPrice * platformFee;
-      ownerEarnings += b.totalPrice - fee;
-      platformFeeTotal += fee;
-      successCount += 1;
-    } else if (statusText === "CANCELLED") {
-      totalCancelledAmount += b.totalPrice;
-      cancelledCount += 1;
-    } else if (statusText === "REFUND") {
-      totalRefundAmount += b.totalPrice;
-      refundCount += 1;
-    } else if (statusText === "PENDING") {
-      pendingCount += 1;
-    }
-  });
+      if (paymentStatusText === "PAID") {
+        totalRevenue += b.totalPrice;
+        const fee = b.totalPrice * platformFee;
+        ownerEarnings += b.totalPrice - fee;
+        platformFeeTotal += fee;
+        successCount += 1;
+      } else if (statusText === "CANCELLED") {
+        totalCancelledAmount += b.totalPrice;
+        cancelledCount += 1;
+      } else if (statusText === "REFUND") {
+        totalRefundAmount += b.totalPrice;
+        refundCount += 1;
+      } else if (statusText === "PENDING") {
+        pendingCount += 1;
+      }
+    });
 
-  return {
-    totalRevenue,
-    totalRefundAmount,
-    totalCancelledAmount,
-    ownerEarnings,
-    platformFeeTotal,
-    bookingCount,
-    successCount,
-    cancelledCount,
-    refundCount,
-    pendingCount,
-  };
-}, [filteredBookings, policyPrice]);
-
+    return {
+      totalRevenue,
+      totalRefundAmount,
+      totalCancelledAmount,
+      ownerEarnings,
+      platformFeeTotal,
+      bookingCount,
+      successCount,
+      cancelledCount,
+      refundCount,
+      pendingCount,
+    };
+  }, [filteredBookings, policyPrice]);
 
   // const handleTransfer = async () => {
   //   setIsTransferring(true);
@@ -194,7 +193,7 @@ const summary = useMemo(() => {
         }}
       >
         <h1 style={{ fontSize: 20, fontWeight: 600 }}>
-          Chi tiết doanh thu
+          Chi tiết doanh thu{" "}
           <span style={{ fontWeight: 700 }}>
             {ownerDetail?.userId?.fullName || "Không rõ"}
           </span>
