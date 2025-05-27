@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Modal, Form, Input, DatePicker, Select, Button, message } from "antd";
+import { Modal, Form, Input, DatePicker, Button, message } from "antd";
 import { useCreateUserMutation } from "../../../redux/services/userApi";
 
 export default function CreateAccountForm({ open, onClose, roles }) {
@@ -7,15 +7,22 @@ export default function CreateAccountForm({ open, onClose, roles }) {
   const [createUser, { isLoading }] = useCreateUserMutation();
   const [loading, setLoading] = useState(false);
 
+  // Tìm ID của role Admin từ danh sách roles
+  const adminRoleId = roles.find((role) => role.roleName === "Admin")?._id;
+
   const handleSubmit = async () => {
     try {
       const values = await form.validateFields();
       setLoading(true);
 
-      // Gọi API tạo tài khoản
-      await createUser({ ...values, avatarUrl: null }).unwrap();
+      // Gọi API tạo tài khoản với roleID là Admin
+      await createUser({
+        ...values,
+        avatarUrl: null,
+        roleID: adminRoleId,
+      }).unwrap();
 
-      message.success("Tạo tài khoản thành công!");
+      message.success("Tạo tài khoản Admin thành công!");
       form.resetFields();
       onClose();
     } catch (error) {
@@ -27,7 +34,7 @@ export default function CreateAccountForm({ open, onClose, roles }) {
 
   return (
     <Modal
-      title="Tạo tài khoản nhân viên"
+      title="Tạo tài khoản Admin"
       open={open}
       onCancel={onClose}
       footer={null}
@@ -70,20 +77,6 @@ export default function CreateAccountForm({ open, onClose, roles }) {
 
         <Form.Item label="Ngày sinh" name="doB">
           <DatePicker style={{ width: "100%" }} />
-        </Form.Item>
-
-        <Form.Item
-          label="Vai trò"
-          name="roleID"
-          rules={[{ required: true, message: "Vui lòng chọn vai trò!" }]}
-        >
-          <Select placeholder="Chọn vai trò">
-            {roles.map((role) => (
-              <Select.Option key={role._id} value={role._id}>
-                {role.roleName}
-              </Select.Option>
-            ))}
-          </Select>
         </Form.Item>
 
         <Form.Item>

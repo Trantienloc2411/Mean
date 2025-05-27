@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import {
   Modal,
   Form,
@@ -25,19 +25,26 @@ export default function EditRentalLocationModal({
   const [form] = Form.useForm();
   const [updateRentalLocation, { isLoading }] =
     useUpdateRentalLocationMutation();
+  const [isOverNightChecked, setIsOverNightChecked] = useState(false);
 
   useEffect(() => {
     if (visible && rentalData) {
+      const isOverNight = rentalData.isOverNight;
+      setIsOverNightChecked(isOverNight);
       form.setFieldsValue({
         name: rentalData.name,
         description: rentalData.description,
-        openHour: rentalData.openHour
+        openHour: isOverNight
+          ? dayjs("00:00", "HH:mm")
+          : rentalData.openHour
           ? dayjs(rentalData.openHour, "HH:mm")
           : null,
-        closeHour: rentalData.closeHour
+        closeHour: isOverNight
+          ? dayjs("23:59", "HH:mm")
+          : rentalData.closeHour
           ? dayjs(rentalData.closeHour, "HH:mm")
           : null,
-        isOverNight: rentalData.isOverNight,
+        isOverNight,
         status: rentalData.status,
         note: "Cập nhật trạng thái",
       });
@@ -55,8 +62,12 @@ export default function EditRentalLocationModal({
       const updatedData = {
         name: values.name,
         description: values.description,
-        openHour: values.openHour.format("HH:mm"),
-        closeHour: values.closeHour.format("HH:mm"),
+        openHour: values.isOverNight
+          ? "00:00"
+          : values.openHour.format("HH:mm"),
+        closeHour: values.isOverNight
+          ? "23:59"
+          : values.closeHour.format("HH:mm"),
         isOverNight: values.isOverNight,
         status: values.status,
         note: "Cập nhật trạng thái",
@@ -104,6 +115,7 @@ export default function EditRentalLocationModal({
                 format="HH:mm"
                 placeholder="08:00"
                 style={{ width: "100%" }}
+                disabled={isOverNightChecked}
               />
             </Form.Item>
           </Col>
@@ -119,6 +131,7 @@ export default function EditRentalLocationModal({
                 format="HH:mm"
                 placeholder="22:00"
                 style={{ width: "100%" }}
+                disabled={isOverNightChecked}
               />
             </Form.Item>
           </Col>
@@ -131,9 +144,25 @@ export default function EditRentalLocationModal({
               label="Cho phép qua đêm"
               valuePropName="checked"
             >
-              <Switch />
+              <Switch
+                onChange={(checked) => {
+                  setIsOverNightChecked(checked);
+                  if (checked) {
+                    form.setFieldsValue({
+                      openHour: dayjs("00:00", "HH:mm"),
+                      closeHour: dayjs("23:59", "HH:mm"),
+                    });
+                  } else {
+                    form.setFieldsValue({
+                      openHour: null,
+                      closeHour: null,
+                    });
+                  }
+                }}
+              />
             </Form.Item>
           </Col>
+
           {[3, 4].includes(rentalData.status) && (
             <Col span={12}>
               <Form.Item

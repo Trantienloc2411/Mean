@@ -33,11 +33,11 @@ const Revenue = () => {
     const PLATFORM_FEE_PERCENTAGE = parseFloat(
       policyPrice?.data?.[0]?.values?.[0]?.val || "0.1"
     );
-
     const filteredOwners = ownerBookingData.owners.map((owner) => {
-      // Lọc booking theo tháng và chỉ lấy status COMPLETED
+      // Lọc booking đã hoàn tất và đã thanh toán
       let filteredBookings = owner.bookings.filter(
-        (booking) => booking.status === COMPLETED_STATUS
+        (booking) => booking.paymentStatus === 3
+        // booking.status === COMPLETED_STATUS || booking.paymentStatus === 3
       );
 
       if (date) {
