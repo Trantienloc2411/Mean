@@ -160,9 +160,14 @@ export default function ModalViewDetailRental({
           <div className={styles.row}>
             <span className={styles.label}>Tên địa điểm:</span>
             <span>{data.name}</span>
-            <a onClick={() => onViewFullDetail(data)}>Xem chi tiết</a>
+            <Button
+              type="default"
+              // style={{ background: "gray", padding: "0 10px" }}
+              onClick={() => onViewFullDetail(data)}
+            >
+              Xem chi tiết
+            </Button>
           </div>
-
           <div className={styles.row}>
             <span className={styles.label}>Trạng thái:</span>
             <Tag
@@ -175,7 +180,6 @@ export default function ModalViewDetailRental({
               {statusInfo.label}
             </Tag>
           </div>
-
           {data.status !== RENTALLOCATION_STATUS.DELETED && (
             <div className={styles.row}>
               <span className={styles.label}>Cập nhật trạng thái:</span>
@@ -188,10 +192,10 @@ export default function ModalViewDetailRental({
                   disabled={isLoading}
                 >
                   {Object.entries(RENTALLOCATION_STATUS)
-                    .filter(
-                      ([, value]) => value !== RENTALLOCATION_STATUS.PENDING
-                      // value !== RENTALLOCATION_STATUS.DELETED // cũng ẩn luôn "Xoá"
-                    )
+                    // .filter(
+                    //   ([, value]) => value !== RENTALLOCATION_STATUS.PENDING
+                    //   // value !== RENTALLOCATION_STATUS.DELETED // cũng ẩn luôn "Xoá"
+                    // )
                     .map(([key, value]) => (
                       <Option key={value} value={value}>
                         {STATUS_LABELS[value].label}
@@ -221,12 +225,10 @@ export default function ModalViewDetailRental({
               </Space>
             </div>
           )}
-
           <div className={styles.row}>
             <span className={styles.label}>Ghi chú từ người kiểm duyệt:</span>
             <span>{data.note || "Không có ghi chú"}</span>
           </div>
-
           <div className={styles.row}>
             <span className={styles.label}>Địa chỉ:</span>
             <span>
@@ -237,32 +239,27 @@ export default function ModalViewDetailRental({
               />
             </span>
           </div>
-
           <div className={styles.row}>
             <span className={styles.label}>Giờ hoạt động:</span>
             <span>{`${data.openHour} - ${data.closeHour}`}</span>
           </div>
-
           <div className={styles.row}>
             <span className={styles.label}>Qua đêm:</span>
             <span>{data.isOverNight ? "Có" : "Không"}</span>
           </div>
-
           <div className={styles.row}>
             <span className={styles.label}>Mô tả:</span>
             <span>{data.description || "Không có mô tả"}</span>
           </div>
-
           <hr />
-
           <div className={styles.row}>
             <span className={styles.label}>Công ty:</span>
-            <span>{businessInfo?.companyName || "Chưa cập nhật"}</span>
+            <span>{businessInfo?.companyName || "N/A"}</span>
           </div>
-
+          {console.log("Business Info: ", businessInfo)}
           <div className={styles.row}>
             <span className={styles.label}>Người đại diện:</span>
-            <span>{businessInfo?.representativeName || "Chưa cập nhật"}</span>
+            <span>{businessInfo?.representativeName || "N/A"}</span>
           </div>
           {/*
           <div className={styles.row}>
