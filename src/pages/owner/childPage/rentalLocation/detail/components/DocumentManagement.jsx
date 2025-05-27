@@ -50,7 +50,7 @@ export default function DocumentManagement({ rentalData }) {
   }, [isEditModalOpen, fileData, form]);
 
   if (isLoading) return <p>Đang tải dữ liệu...</p>;
-  if (!fileData) return <RentalNone idRental={idRental} />;
+  if (!fileData) return <RentalNone idRental={idRental} canEdit={canEdit} />;
 
   const handleMenuClick = ({ key }) => {
     if (key === "approve") {
@@ -301,7 +301,7 @@ export default function DocumentManagement({ rentalData }) {
   );
 }
 
-function RentalNone({ idRental }) {
+function RentalNone({ idRental, canEdit }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [form] = Form.useForm();
   const [fileUrl, setFileUrl] = useState(null);
@@ -353,9 +353,11 @@ function RentalNone({ idRental }) {
   return (
     <div style={{ textAlign: "center", padding: "20px" }}>
       <p>Chưa có giấy tờ nào.</p>
-      <Button type="primary" onClick={() => setIsModalOpen(true)}>
-        Thêm giấy tờ
-      </Button>
+      {canEdit && (
+        <Button type="primary" onClick={() => setIsModalOpen(true)}>
+          Thêm giấy tờ
+        </Button>
+      )}
 
       <Modal
         title="Thêm giấy tờ"

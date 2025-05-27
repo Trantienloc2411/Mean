@@ -1,5 +1,5 @@
-import { Tag, Dropdown } from "antd"
-import { MoreOutlined } from "@ant-design/icons"
+import { Tag, Dropdown } from "antd";
+import { MoreOutlined } from "@ant-design/icons";
 
 // Enum
 const STATUS_MAP = {
@@ -10,33 +10,41 @@ const STATUS_MAP = {
   5: { label: "Bảo trì", color: "red" },
   6: { label: "Đóng", color: "gray" },
   7: { label: "Đang sử dụng", color: "cyan" },
-}
+};
 
-export default function RoomTableColumns({ onDetailClick, onEditClick }) {
+export default function RoomTableColumns({
+  onDetailClick,
+  onEditClick,
+  canEdit,
+}) {
   const handleMenuClick = (key, record) => {
     if (key === "detail") {
-      onDetailClick?.(record)
+      onDetailClick?.(record);
     } else if (key === "edit") {
-      onEditClick?.(record)
+      onEditClick?.(record);
     }
-  }
+  };
 
   const menuItems = [
     {
       key: "detail",
       label: "Xem chi tiết",
       onClick: (record) => {
-        onDetailClick?.(record)
+        onDetailClick?.(record);
       },
     },
-    {
-      key: "edit",
-      label: "Sửa",
-      onClick: (record) => {
-        onEditClick?.(record)
-      },
-    },
-  ]
+    ...(canEdit
+      ? [
+          {
+            key: "edit",
+            label: "Sửa",
+            onClick: (record) => {
+              onEditClick?.(record);
+            },
+          },
+        ]
+      : []),
+  ];
 
   return [
     {
@@ -72,7 +80,7 @@ export default function RoomTableColumns({ onDetailClick, onEditClick }) {
       dataIndex: ["accommodationTypeId", "serviceIds"],
       key: "serviceCount",
       render: (serviceIds) => {
-        const count = serviceIds?.length || 0
+        const count = serviceIds?.length || 0;
         return (
           <div
             style={{
@@ -84,7 +92,7 @@ export default function RoomTableColumns({ onDetailClick, onEditClick }) {
           >
             {count} dịch vụ
           </div>
-        )
+        );
       },
     },
     {
@@ -92,8 +100,11 @@ export default function RoomTableColumns({ onDetailClick, onEditClick }) {
       dataIndex: "status",
       key: "status",
       render: (status) => {
-        const statusInfo = STATUS_MAP[status] || { label: "Không xác định", color: "default" }
-        return <Tag color={statusInfo.color}>{statusInfo.label}</Tag>
+        const statusInfo = STATUS_MAP[status] || {
+          label: "Không xác định",
+          color: "default",
+        };
+        return <Tag color={statusInfo.color}>{statusInfo.label}</Tag>;
       },
     },
     {
@@ -113,5 +124,5 @@ export default function RoomTableColumns({ onDetailClick, onEditClick }) {
         </Dropdown>
       ),
     },
-  ]
+  ];
 }
