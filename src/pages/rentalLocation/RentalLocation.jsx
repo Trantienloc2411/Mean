@@ -39,6 +39,7 @@ export default function RentalLocation() {
       pending: 0, // 1
       pause: 0, // 4
       needUpdate: 0, // 5
+      deleted: 0, // 5
     };
     data.forEach((location) => {
       if (location.status === 3) {
@@ -50,6 +51,8 @@ export default function RentalLocation() {
       } else if (location.status === 4) {
         statusCounts.pause++;
       } else if (location.status === 5) {
+        statusCounts.deleted++;
+      } else if (location.status === 6) {
         statusCounts.needUpdate++;
       }
     });
@@ -79,9 +82,9 @@ export default function RentalLocation() {
     try {
       setIsReloading(true);
       await refetch();
-      message.success('Dữ liệu đã được làm mới');
+      message.success("Dữ liệu đã được làm mới");
     } catch (error) {
-      message.error('Làm mới dữ liệu thất bại');
+      message.error("Làm mới dữ liệu thất bại");
     } finally {
       setIsReloading(false);
     }
@@ -125,9 +128,9 @@ export default function RentalLocation() {
           </div>
 
           <div className={styles.tableContainer}>
-            <RentalLocationTable 
-              data={filteredLocations} 
-              loading={isLoading || isReloading} 
+            <RentalLocationTable
+              data={filteredLocations}
+              loading={isLoading || isReloading}
             />
           </div>
         </Card>

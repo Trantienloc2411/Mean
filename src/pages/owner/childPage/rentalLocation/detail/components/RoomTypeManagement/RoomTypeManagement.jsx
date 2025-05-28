@@ -1,6 +1,12 @@
 import { useState, useEffect } from "react";
 import { Table, Button, Input, Dropdown, message, Tooltip, Tag } from "antd";
-import { MoreOutlined, PlusOutlined, FilterOutlined, CloseOutlined, ReloadOutlined  } from "@ant-design/icons";
+import {
+  MoreOutlined,
+  PlusOutlined,
+  FilterOutlined,
+  CloseOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
 import styles from "./RoomTypeManagement.module.scss";
 import DeleteRoomTypeModal from "./components/DeleteRoomTypeModal/DeleteRoomTypeModal";
 import AddRoomTypeModal from "./components/AddRoomTypeModal/AddRoomTypeModal";
@@ -20,7 +26,12 @@ import {
 } from "../../../../../../../redux/services/rentalLocationApi";
 import { useParams } from "react-router-dom";
 
-const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
+const RoomTypeManagement = ({
+  isOwner,
+  ownerId,
+  rentalLocationId,
+  canEdit,
+}) => {
   const { id } = useParams();
   const locationId = rentalLocationId || id;
 
@@ -61,14 +72,14 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
   const roomTypes = Array.isArray(roomTypesData?.data)
     ? roomTypesData.data
     : Array.isArray(roomTypesData)
-      ? roomTypesData
-      : [];
+    ? roomTypesData
+    : [];
 
   const services = Array.isArray(servicesData?.data)
     ? servicesData.data
     : Array.isArray(servicesData)
-      ? servicesData
-      : [];
+    ? servicesData
+    : [];
 
   useEffect(() => {
     const processServiceNames = () => {
@@ -107,38 +118,36 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
   const handleRemoveRoomType = async (roomTypeId) => {
     try {
       setIsSubmitting(true);
-      
+
       if (!rentalLocationData?.data?.accommodationTypeIds) {
         throw new Error("Không tìm thấy dữ liệu chỗ ở");
       }
-  
+
       const currentIds = [...rentalLocationData.data.accommodationTypeIds];
-      
-      const updatedIds = currentIds.filter(id => id !== roomTypeId);
-  
+
+      const updatedIds = currentIds.filter((id) => id !== roomTypeId);
+
       if (updatedIds.length === currentIds.length) {
         throw new Error("Loại phòng này không tồn tại trong chỗ ở");
       }
-  
+
       await updateRentalLocation({
         id: locationId,
-        updatedData: { accommodationTypeIds: updatedIds }
+        updatedData: { accommodationTypeIds: updatedIds },
       }).unwrap();
-  
+
       message.success("Xóa loại phòng khỏi chỗ ở thành công");
-      await refetchRentalLocation(); 
-      refetchRoomTypes(); 
+      await refetchRentalLocation();
+      refetchRoomTypes();
     } catch (error) {
       console.error("Lỗi khi xóa:", error);
       message.error(
-        error.message || 
-        error.data?.message || 
-        "Xóa loại phòng thất bại"
+        error.message || error.data?.message || "Xóa loại phòng thất bại"
       );
     } finally {
       setIsSubmitting(false);
     }
-  }; 
+  };
 
   const handleReload = async () => {
     try {
@@ -161,14 +170,18 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
         setIsDetailModalOpen(true);
       },
     },
-    {
-      key: "2",
-      label: "Chỉnh sửa",
-      onClick: (record) => {
-        setSelectedRoomType(record);
-        setIsUpdateModalOpen(true);
-      },
-    },
+    ...(canEdit
+      ? [
+          {
+            key: "2",
+            label: "Chỉnh sửa",
+            onClick: (record) => {
+              setSelectedRoomType(record);
+              setIsUpdateModalOpen(true);
+            },
+          },
+        ]
+      : []),
   ];
 
   const filterGroups = [
@@ -357,23 +370,27 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
         </Dropdown>
       ),
     },
-    {
-      title: "",
-      key: "remove",
-      align: "center",
-      width: 60,
-      fixed: "right",
-      render: (_, record) => (
-        <Button
-          danger
-          type="link"
-          onClick={() => handleRemoveRoomType(record._id)}
-          disabled={!isOwner || isSubmitting}
-          icon={<CloseOutlined />}
-          loading={isSubmitting}
-        />
-      ),
-    },
+    ...(canEdit
+      ? [
+          {
+            title: "",
+            key: "remove",
+            align: "center",
+            width: 60,
+            fixed: "right",
+            render: (_, record) => (
+              <Button
+                danger
+                type="link"
+                onClick={() => handleRemoveRoomType(record._id)}
+                disabled={!isOwner || isSubmitting}
+                icon={<CloseOutlined />}
+                loading={isSubmitting}
+              />
+            ),
+          },
+        ]
+      : []),
   ];
 
   return (
@@ -410,7 +427,7 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
               Làm mới
             </Button>
           </div>
-          {isOwner && (
+          {canEdit && (
             <Button
               type="primary"
               onClick={() => setIsAddModalOpen(true)}
@@ -424,7 +441,9 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId }) => {
         </div>
 
         <Table
-          loading={isRoomTypesLoading || isServicesLoading || isUpdating  || isReloading}
+          loading={
+            isRoomTypesLoading || isServicesLoading || isUpdating || isReloading
+          }
           columns={columns}
           dataSource={filteredData}
           rowKey="_id"

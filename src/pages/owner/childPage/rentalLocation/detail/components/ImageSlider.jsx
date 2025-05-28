@@ -3,8 +3,9 @@ import { Image, Row, Col, Button } from "antd";
 import ImageUploadModal from "./ImageUploadModal";
 import { useUpdateRentalLocationMutation } from "../../../../../../redux/services/rentalApi";
 
-const ImageSlider = ({ images = [], setImages, rentalData }) => {
+const ImageSlider = ({ images = [], setImages, rentalData, canEdit }) => {
   const [modalOpen, setModalOpen] = useState(false);
+
   const [updateRentalLocation, { isLoading: isUpdating }] =
     useUpdateRentalLocationMutation();
   const validImages = Array.isArray(images) ? images : [];
@@ -26,13 +27,18 @@ const ImageSlider = ({ images = [], setImages, rentalData }) => {
 
   return (
     <div style={{ maxWidth: "1200px", margin: "0 auto" }}>
-      <Button
-        type="primary"
-        onClick={() => setModalOpen(true)}
-        style={{ marginBottom: 16 }}
-      >
-        Chỉnh sửa
-      </Button>
+      {canEdit && (
+        <div style={{ textAlign: "center", marginBottom: 16 }}>
+          <Button
+            type="primary"
+            onClick={() => setModalOpen(true)}
+            loading={isUpdating}
+          >
+            Thêm ảnh mới
+          </Button>
+        </div>
+      )}
+
       <Image.PreviewGroup>
         <Row gutter={[16, 16]} justify="start">
           {validImages.map((img, index) => (

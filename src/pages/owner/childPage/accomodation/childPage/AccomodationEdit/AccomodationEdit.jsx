@@ -10,18 +10,23 @@ import {
   Space,
   Spin,
   Badge,
-  Input
+  Input,
+  Alert,
+  Tooltip
 } from "antd";
-import { SaveOutlined, InfoCircleOutlined, PlusOutlined } from "@ant-design/icons";
+import { SaveOutlined, InfoCircleOutlined, PlusOutlined, QuestionCircleOutlined } from "@ant-design/icons";
 import TextArea from "antd/es/input/TextArea";
 import { useLocation } from "react-router-dom";
 import ImageUpload from "../../../rentalLocation/create/ImageUpload"; 
 import { 
-  useUpdateAccommodationMutation 
+  useUpdateAccommodationMutation,
+  useGetAccommodationsByRentalLocationQuery
 } from "../../../../../../redux/services/accommodationApi"; 
 import { useGetAllAccommodationTypesQuery, useCreateAccommodationTypeMutation } from "../../../../../../redux/services/accommodationTypeApi"; 
 import styles from "./AccomodationEdit.module.scss";
 import AddRoomTypeModal from "../../../TypeRoom/components/RoomTypeManagement/components/AddRoomTypeModal/AddRoomTypeModal";
+import { useParams } from "react-router-dom";
+import { useGetOwnerDetailByUserIdQuery } from "../../../../../../redux/services/ownerApi";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -68,13 +73,17 @@ export default function AccommodationEdit({
   onSuccess, 
   accommodationId, 
   accommodationData,
-  isLoading: isLoadingAccommodation 
+  isLoading: isLoadingAccommodation,
+  existingRoomNumbers = []
 }) {
   const [form] = Form.useForm();
   const [fileList, setFileList] = useState([]);
   const [isAddTypeModalOpen, setIsAddTypeModalOpen] = useState(false);
   const [selectOpen, setSelectOpen] = useState(false);
   const [selectedRoomType, setSelectedRoomType] = useState(null);
+  const [duplicateWarning, setDuplicateWarning] = useState(null);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const { id } = useParams();
   
   const location = useLocation();
   const pathnameParts = location.pathname.split("/");
@@ -83,6 +92,10 @@ export default function AccommodationEdit({
   const [updateAccommodation, { isLoading }] = useUpdateAccommodationMutation();
   const [createAccommodationType] = useCreateAccommodationTypeMutation();
   const { data: accommodationTypes, refetch: accommodationTypesRefetch } = useGetAllAccommodationTypesQuery(rentalLocationId);
+  const { data: existingAccommodations } = useGetAccommodationsByRentalLocationQuery(rentalLocationId);
+  const { data: ownerDetailData } = useGetOwnerDetailByUserIdQuery(id);
+
+  const ownerId = ownerDetailData?.id;
 
   useEffect(() => {
     if (visible && accommodationData && accommodationTypes?.data) {
@@ -102,6 +115,7 @@ export default function AccommodationEdit({
       });
 
       setFileList([]);
+      setDuplicateWarning(null);
       
       if (accommodationData.image && Array.isArray(accommodationData.image)) {
         const newFileList = accommodationData.image
@@ -127,8 +141,26 @@ export default function AccommodationEdit({
     }
   }, [visible, accommodationData, form, accommodationTypes]);
 
+  useEffect(() => {
+    const roomNo = form.getFieldValue("roomNo");
+    if (roomNo && 
+        existingRoomNumbers.includes(roomNo) && 
+        roomNo !== accommodationData?.roomNo) {
+      setDuplicateWarning(`Số phòng "${roomNo}" đã tồn tại!`);
+    } else {
+      setDuplicateWarning(null);
+    }
+  }, [form.getFieldValue("roomNo"), existingRoomNumbers, accommodationData?.roomNo]);
+
   const handleSaveAction = async (values) => {
+    setIsUpdating(true);
     try {
+      if (existingRoomNumbers.includes(values.roomNo) && values.roomNo !== accommodationData?.roomNo) {
+        message.error(`Số phòng "${values.roomNo}" đã tồn tại!`);
+        setIsUpdating(false);
+        return;
+      }
+
       const imageUrls = fileList.map(file => file.url || "").filter(url => url);
       
       const updatedData = {
@@ -153,6 +185,8 @@ export default function AccommodationEdit({
         content: "Có lỗi xảy ra khi cập nhật phòng!",
         style: { marginTop: '20px' },
       });
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -295,15 +329,57 @@ export default function AccommodationEdit({
 
               <Form.Item
                 name="roomNo"
-                label={<Text strong>Số phòng</Text>}
-                rules={[{ required: true, message: "Vui lòng nhập số phòng!" }]}
+                label={
+                  <Space>
+                    <Text strong>Số phòng</Text>
+                    <Tooltip title="Số phòng phải là duy nhất trong địa điểm cho thuê">
+                      <QuestionCircleOutlined />
+                    </Tooltip>
+                  </Space>
+                }
+                rules={[
+                  { required: true, message: "Vui lòng nhập số phòng!" },
+                  {
+                    pattern: /^\d+$/,
+                    message: "Chỉ được nhập số nguyên dương!"
+                  },
+                  {
+                    validator: (_, value) => {
+                      if (value && parseInt(value) < 0) {
+                        return Promise.reject(new Error('Không được nhập số âm!'));
+                      }
+                      if (existingRoomNumbers.includes(value) && value !== accommodationData?.roomNo) {
+                        return Promise.reject(new Error('Số phòng này đã tồn tại!'));
+                      }
+                      return Promise.resolve();
+                    }
+                  }
+                ]}
               >
                 <Input
                   placeholder="Nhập số phòng (vd: 001)"
                   size="large"
                   className={styles.inputField}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    if (existingRoomNumbers.includes(value) && value !== accommodationData?.roomNo) {
+                      setDuplicateWarning(`Số phòng "${value}" đã tồn tại!`);
+                    } else {
+                      setDuplicateWarning(null);
+                    }
+                  }}
                 />
               </Form.Item>
+
+              {duplicateWarning && (
+                <Alert
+                  message="Cảnh báo trùng lặp"
+                  description={duplicateWarning}
+                  type="warning"
+                  showIcon
+                  style={{ marginBottom: '16px' }}
+                />
+              )}
 
               <Form.Item 
                 name="description" 
@@ -346,10 +422,15 @@ export default function AccommodationEdit({
                 label={<Text strong>Hình ảnh phòng</Text>}
               >
                 <ImageUpload fileList={fileList} setFileList={setFileList} />
-                <div className={styles.imageHint}>
-                  <InfoCircleOutlined />
-                  <Text type="secondary">Ảnh đầu tiên sẽ được sử dụng làm ảnh chính</Text>
-                </div>
+                <Alert
+                  message={
+                    <Text type="secondary">Ảnh đầu tiên sẽ được sử dụng làm ảnh chính</Text>
+                  }
+                  type="info"
+                  showIcon
+                  icon={<InfoCircleOutlined />}
+                  style={{ marginTop: '8px' }}
+                />
               </Form.Item>
             </div>
 
@@ -358,13 +439,14 @@ export default function AccommodationEdit({
                 onClick={onCancel} 
                 size="large"
                 className={styles.cancelButton}
+                disabled={isLoading || isUpdating}
               >
                 Huỷ
               </Button>
               <Button
                 icon={<SaveOutlined />}
                 htmlType="submit"
-                loading={isLoading}
+                loading={isLoading || isUpdating}
                 className={styles.saveButton}
                 size="large"
               >
@@ -380,6 +462,7 @@ export default function AccommodationEdit({
         onCancel={() => setIsAddTypeModalOpen(false)}
         onConfirm={handleAddRoomType}
         rentalLocationId={rentalLocationId}
+        ownerId={ownerId}
         forceRender 
       />
     </>
