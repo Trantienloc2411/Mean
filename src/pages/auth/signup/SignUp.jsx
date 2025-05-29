@@ -64,7 +64,11 @@ const Signup = () => {
       }).unwrap();
       message.success("Đăng ký thành công!");
       console.log(response);
-      navigate("/login");
+      navigate("/login", { 
+        state: { 
+          email: formData.email.toLowerCase().trim() 
+        } 
+      });
     } catch (error) {
       message.error(error.data?.message || "Đăng ký thất bại!");
     }
@@ -212,6 +216,11 @@ const Signup = () => {
               {isLoading ? "Đang tạo tài khoản..." : "Tạo tài khoản"}
             </button>
           </form>
+          <div className={styles.loginPrompt}>
+            <span>Đã có tài khoản? </span>
+            <a href="/login">Đăng nhập</a>
+          </div>
+          <div className={styles.copyright}>Copyright © Mean 2025</div>
         </div>
       </div>
     </div>

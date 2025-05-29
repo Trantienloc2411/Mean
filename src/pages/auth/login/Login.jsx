@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { EyeInvisibleFilled, EyeFilled } from "@ant-design/icons";
 import { notification } from "antd";
 import ImageCarousel from "../../../components/ImageCarousel/ImageCarousel";
@@ -27,6 +27,7 @@ import { checkUserExistInSupabase } from "../../../redux/services/supabase";
 import { useEffect } from "react";
 
 const Login = () => {
+  const location = useLocation();
   const [showPassword, setShowPassword] = useState(false);
   const navigate = useNavigate();
   const [email, setEmail] = useState("");
@@ -44,11 +45,15 @@ const Login = () => {
     "https://www.chudu24.com/wp-content/uploads/2017/03/khach-san-sapa-capsule-28.jpg",
   ];
 
+  useEffect(() => {
+    if (location.state && location.state.email) {
+      setEmail(location.state.email);
+    }
+  }, [location.state]);
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
-
-
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -115,7 +120,6 @@ const Login = () => {
           }
           navigate("/");
         }
-
 
         notification.success({
           message: "Đăng nhập thành công",
