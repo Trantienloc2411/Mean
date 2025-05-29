@@ -66,7 +66,8 @@ const Signup = () => {
       console.log(response);
       navigate("/login", { 
         state: { 
-          email: formData.email.toLowerCase().trim() 
+          email: formData.email.toLowerCase().trim(),
+          password: formData.password 
         } 
       });
     } catch (error) {

@@ -49,6 +49,9 @@ const Login = () => {
     if (location.state && location.state.email) {
       setEmail(location.state.email);
     }
+    if (location.state && location.state.password) {
+      setPassword(location.state.password);
+    }
   }, [location.state]);
 
   const togglePasswordVisibility = () => {
