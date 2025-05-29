@@ -39,6 +39,7 @@ const Login = () => {
   const [sendOTP, { isLoading: isLoadingSendOTP }] = useSendOtpEmailMutation();
   const [isLoading, setIsLoading] = useState(false);
   const [userDataLogin, setUserDataLogin] = useState(null);
+  
   const images = [
     "https://cdn.vietnambiz.vn/2020/2/26/kcn-1582688444973524474363.jpg",
     "https://kilala.vn/data/upload/article/3685/3.jpg",
@@ -54,12 +55,33 @@ const Login = () => {
     }
   }, [location.state]);
 
+  const validateEmail = (email) =>
+    /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(email);
+
+  const isFormValid = () => {
+    const isEmailValid = validateEmail(email);
+    const isPasswordFilled = password.trim().length > 0;
+    
+    return isEmailValid && isPasswordFilled;
+  };
+
   const togglePasswordVisibility = () => {
     setShowPassword(!showPassword);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validateEmail(email)) {
+      message.error("Email không hợp lệ!");
+      return;
+    }
+    
+    if (!password.trim()) {
+      message.error("Vui lòng nhập mật khẩu!");
+      return;
+    }
+    
     setIsLoading(true);
 
     try {
@@ -141,6 +163,10 @@ const Login = () => {
     }
   };
 
+  const getEmailValidationClass = () => {
+    return email && !validateEmail(email) ? styles.invalid : '';
+  };
+
   return (
     <div className={styles.loginContainer}>
       <div className={styles.loginForm}>
@@ -158,10 +184,13 @@ const Login = () => {
               <input
                 type="email"
                 placeholder="Email"
-                className={styles.formInput}
+                className={`${styles.formInput} ${getEmailValidationClass()}`}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
+              {email && !validateEmail(email) && (
+                <span className={styles.errorText}>Email không hợp lệ</span>
+              )}
             </div>
             <div className={styles.formGroup}>
               <label>Mật khẩu</label>
@@ -191,8 +220,8 @@ const Login = () => {
             </div>
             <button
               type="submit"
-              className={styles.submitBtn}
-              disabled={isLoading}
+              className={`${styles.submitBtn} ${!isFormValid() ? styles.disabled : ''}`}
+              disabled={isLoading || !isFormValid()}
             >
               {isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
             </button>
