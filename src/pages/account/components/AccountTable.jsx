@@ -135,52 +135,115 @@ export default function AccountTable({ data, loading }) {
     {
       title: "No.",
       key: "no",
-      render: (_, __, index) => (pagination.current - 1) * pagination.pageSize + index + 1,
+      width: 60,
+      render: (_, __, index) =>
+        (pagination.current - 1) * pagination.pageSize + index + 1,
     },
     {
       title: "Tên",
       dataIndex: "fullName",
       key: "fullName",
-      width: 150,
+      width: 230,
       ellipsis: true,
       sorter: (a, b) => a.fullName.localeCompare(b.fullName),
     },
-    { title: "Số điện thoại", dataIndex: "phone", key: "phone" },
-    { title: "Email", dataIndex: "email", key: "email" },
     {
-      title: "Loại",
+      title: "Số điện thoại",
+      dataIndex: "phone",
+      key: "phone",
+      ellipsis: true,
+    },
+
+    { title: "Email", dataIndex: "email", key: "email", ellipsis: true },
+    {
+      title: "Vai Trò",
       dataIndex: "roleName",
       align: "center",
       key: "roleName",
-      render: (role) => (
-        <span className={`${styles.role} ${styles[role.toLowerCase()]}`}>
-          {role === "Admin" ? "Nhân viên" : role === "Owner" ? "Chủ hộ" : "Khách hàng"}
-        </span>
+      render: (role, record) => (
+        <>
+          <span className={`${styles.role} ${styles[role.toLowerCase()]}`}>
+            {role === "Admin"
+              ? "Nhân viên"
+              : role === "Owner"
+              ? "Chủ hộ"
+              : "Khách hàng"}
+          </span>
+          {record.owner && (
+            <span
+              style={{ margin: 8 }}
+              className={`${styles.isActive} ${
+                styles[record?.owner?.isApproved]
+              }`}
+            >
+              {record?.owner?.isApproved ? "Duyệt" : "Chưa duyệt"}
+            </span>
+          )}
+        </>
       ),
     },
+
     {
       title: "Trạng Thái",
       dataIndex: "isActive",
       align: "center",
       key: "isActive",
-      render: (isActive) => (
-        <span className={`${styles.isActive} ${styles[isActive]}`}>{isActive ? "Hoạt động" : "Đang Khóa"}</span>
+      render: (_, record) => (
+        <>
+          <span className={`${styles.isActive} ${styles[record.isActive]}`}>
+            {record.isActive ? "Hoạt động" : "Đang Khóa"}
+          </span>
+        </>
       ),
     },
+
+    // {
+    //   title: "Xác thực",
+    //   dataIndex: "isVerified",
+    //   align: "center",
+
+    //   key: "isVerified",
+    //   render: (_, record) => (
+    //     <div className={styles.verifyContainer}>
+    //       <span
+    //         className={`${styles.isVerifiedEmail} ${
+    //           styles[record.isVerifiedEmail]
+    //         }`}
+    //       >
+    //         Email
+    //       </span>
+    //       <span
+    //         className={`${styles.isVerifiedPhone} ${
+    //           styles[record.isVerifiedPhone]
+    //         }`}
+    //       >
+    //         Phone
+    //       </span>
+    //     </div>
+    //   ),
+    // },
+    // {
+    //   title: "Ngày tạo",
+    //   dataIndex: "createdAt",
+    //   align: "center",
+    //   key: "createdAt",
+    //   sorter: (a, b) => new Date(a.createdAt) - new Date(b.createdAt),
+    //   render: (createdAt) => new Date(createdAt).toLocaleDateString("vi-VN"),
+    // },
     {
       title: "Ngày cập nhật",
+      dataIndex: "updatedAt",
       align: "center",
-      key: "updatedAt",
-      sorter: (a, b) => {
-        const dateA = new Date(a.updatedAt)
-        const dateB = new Date(b.updatedAt)
-        return dateA - dateB
-      },
-      render: (_, record) => formatDateTime(record.updatedAt),
+      // sorter: (a, b) =>
+      //   dayjs(a.updatedAt, "DD/MM/YYYY HH:mm:ss").toDate() -
+      //   dayjs(b.updatedAt, "DD/MM/YYYY HH:mm:ss").toDate(),
+      render: (_, record) =>
+        dayjs(record.updatedAt).format("hh:mm:ss DD/MM/YYYY"),
     },
     {
       key: "view",
-      title: "Xem",
+      // title: "Xem",
+      width: 50,
       align: "center",
       render: (_, record) => (
         <>
@@ -208,8 +271,9 @@ export default function AccountTable({ data, loading }) {
     },
     {
       key: "status",
-      title: "Khóa",
+      // title: "Khóa",
       align: "center",
+      width: 50,
       render: (_, record) => (
         <>
           {["Customer", "Owner"].includes(record.roleName) &&

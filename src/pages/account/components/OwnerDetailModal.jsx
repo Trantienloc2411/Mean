@@ -24,12 +24,21 @@ export default function OwnerDetailModal({
   handleBlockUser,
   updateOwner,
 }) {
+  console.log(user);
+
   if (!user) return null;
-  const { data: owner, refetch } = useGetOwnerDetailByUserIdQuery(user?.id);
-  const { data: logsData, refetch: refetchLogs } =
-    useGetOwnerLogsByOwnerIdQuery(owner?._id, {
-      skip: !owner?._id,
-    });
+  const {
+    data: owner,
+    isLoading: isOwnerLoading,
+    refetch,
+  } = useGetOwnerDetailByUserIdQuery(user?._id);
+  const {
+    data: logsData,
+    refetch: refetchLogs,
+    isLoading: isLogsLoading,
+  } = useGetOwnerLogsByOwnerIdQuery(owner?._id, {
+    skip: !owner?._id,
+  });
 
   const handleRedirect = () => {
     window.open(`/owner/${owner?.userId._id}/information`, "_blank");
@@ -55,46 +64,48 @@ export default function OwnerDetailModal({
       }}
       destroyOnClose
     >
-      <div style={{ textAlign: "center", marginBottom: 20 }}>
-        <Avatar
-          size={100}
-          src={owner?.userId.avatarUrl?.[0]}
-          icon={!owner?.userId.avatarUrl?.length && <UserOutlined />}
-        />
-        <h2 style={{ marginTop: 10, marginBottom: 5 }}>
-          {owner?.userId.fullName}
-        </h2>
-        <Button type="primary" onClick={handleRedirect}>
-          Xem chi tiết
-        </Button>
-      </div>
-
-      <Tabs defaultActiveKey="1" centered>
-        <TabPane tab="👤 Người dùng" key="1">
-          <UserInfo
-            owner={owner}
-            handleActiveUser={handleActiveUser}
-            handleBlockUser={handleBlockUser}
-            onClose={onClose}
+      <Spin spinning={isOwnerLoading || isLogsLoading}>
+        <div style={{ textAlign: "center", marginBottom: 20 }}>
+          <Avatar
+            size={100}
+            src={owner?.userId.avatarUrl?.[0]}
+            icon={!owner?.userId.avatarUrl?.length && <UserOutlined />}
           />
-        </TabPane>
+          <h2 style={{ marginTop: 10, marginBottom: 5 }}>
+            {owner?.userId.fullName}
+          </h2>
+          <Button type="primary" onClick={handleRedirect}>
+            Xem chi tiết
+          </Button>
+        </div>
 
-        {/* {owner.businessInformationId && ( */}
-        <TabPane tab="🏢 Thông tin kinh doanh" key="2">
-          <BusinessInfo business={owner?.businessInformationId} />
-        </TabPane>
-        {/* )} */}
+        <Tabs defaultActiveKey="1" centered>
+          <TabPane tab="👤 Người dùng" key="1">
+            <UserInfo
+              owner={owner}
+              handleActiveUser={handleActiveUser}
+              handleBlockUser={handleBlockUser}
+              onClose={onClose}
+            />
+          </TabPane>
 
-        <TabPane tab="📄 Hồ sơ" key="3">
-          <ProfileInfo
-            owner={owner}
-            updateOwner={updateOwner}
-            refetch={refetch}
-            logsData={logsData}
-            refetchLogs={refetchLogs}
-          />
-        </TabPane>
-      </Tabs>
+          {/* {owner.businessInformationId && ( */}
+          <TabPane tab="🏢 Thông tin kinh doanh" key="2">
+            <BusinessInfo business={owner?.businessInformationId} />
+          </TabPane>
+          {/* )} */}
+
+          <TabPane tab="📄 Hồ sơ" key="3">
+            <ProfileInfo
+              owner={owner}
+              updateOwner={updateOwner}
+              refetch={refetch}
+              logsData={logsData}
+              refetchLogs={refetchLogs}
+            />
+          </TabPane>
+        </Tabs>
+      </Spin>
     </Modal>
   );
 }
@@ -156,11 +167,11 @@ function UserInfo({ owner, handleActiveUser, handleBlockUser, onClose }) {
         value={user?.isVerifiedEmail ? "Đã xác thực" : "Chưa xác thực"}
         isStatus={user?.isVerifiedEmail ? "true" : "false"}
       />
-      <InfoItem
+      {/* <InfoItem
         label="SĐT xác thực"
         value={user?.isVerifiedPhone ? "Đã xác thực" : "Chưa xác thực"}
         isStatus={user?.isVerifiedPhone ? "true" : "false"}
-      />
+      /> */}
       <InfoItem label="Ngày tạo" value={user?.createdAt} />
       <InfoItem label="Lần cập nhật" value={user?.updatedAt} />
     </div>
@@ -227,7 +238,7 @@ function ProfileInfo({ owner, updateOwner, refetch, logsData, refetchLogs }) {
   const [reason, setReason] = useState("");
 
   const approvalHistory = [...(logsData || [])].sort(
-    (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
+    (a, b) => new Date(b?.createdAt) - new Date(a?.createdAt)
   );
 
   const handleApprove = async () => {
@@ -310,10 +321,10 @@ function ProfileInfo({ owner, updateOwner, refetch, logsData, refetchLogs }) {
         />
         <InfoItem
           label="Trạng thái xóa"
-          value={owner.isDelete ? "Đã xóa" : "Còn hoạt động"}
+          value={owner?.isDelete ? "Đã xóa" : "Còn hoạt động"}
         />
-        <InfoItem label="Ngày tạo hồ sơ" value={owner.createdAt} />
-        <InfoItem label="Lần cập nhật" value={owner.updatedAt} />
+        <InfoItem label="Ngày tạo hồ sơ" value={owner?.createdAt} />
+        <InfoItem label="Lần cập nhật" value={owner?.updatedAt} />
       </div>
 
       <h3 style={{ marginTop: 24 }}>📜 Lịch sử phê duyệt</h3>
