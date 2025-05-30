@@ -14,6 +14,7 @@ import { useActiveUserMutation, useBlockUserMutation } from "../../../redux/serv
 import { FaEye, FaLock, FaLockOpen } from "react-icons/fa"
 import OwnerDetailModal from "./OwnerDetailModal"
 import { useUpdateOwnerMutation } from "../../../redux/services/ownerApi"
+import dayjs from 'dayjs';
 
 const StyledModalConfirm = ({
   open,
@@ -166,15 +167,14 @@ export default function AccountTable({ data, loading }) {
             {role === "Admin"
               ? "Nhân viên"
               : role === "Owner"
-              ? "Chủ hộ"
-              : "Khách hàng"}
+                ? "Chủ hộ"
+                : "Khách hàng"}
           </span>
           {record.owner && (
             <span
               style={{ margin: 8 }}
-              className={`${styles.isActive} ${
-                styles[record?.owner?.isApproved]
-              }`}
+              className={`${styles.isActive} ${styles[record?.owner?.isApproved]
+                }`}
             >
               {record?.owner?.isApproved ? "Duyệt" : "Chưa duyệt"}
             </span>
@@ -182,7 +182,6 @@ export default function AccountTable({ data, loading }) {
         </>
       ),
     },
-
     {
       title: "Trạng Thái",
       dataIndex: "isActive",
@@ -370,7 +369,6 @@ export default function AccountTable({ data, loading }) {
   return (
     <div style={{ marginTop: 10 }}>
       <Table
-        scroll={{ x: "max-content" }}
         dataSource={data}
         loading={loading}
         columns={columns}
