@@ -28,10 +28,8 @@ const { TextArea } = Input;
 // Hằng số API
 const PROVINCES_API_URL = "https://provinces.open-api.vn/api/p/";
 const LOCATIONIQ_API_URL = "https://us1.locationiq.com/v1/search.php";
-
-// Mặc định thời gian mở/đóng cửa
-const DEFAULT_OPEN_HOUR = "08:00";
-const DEFAULT_CLOSE_HOUR = "22:00";
+const DEFAULT_OPEN_HOUR = "06:00";
+const DEFAULT_CLOSE_HOUR = "23:00";
 
 // Hàm dịch vụ để sắp xếp các địa điểm theo alphabet Tiếng Việt
 const sortByVietnameseName = (items) => {
@@ -47,6 +45,21 @@ export default function RentalForm({ ownerId, refetch }) {
   // State cho form
   const [fileList, setFileList] = useState([]);
   const [isOverNight, setIsOverNight] = useState(true);
+
+  useEffect(() => {
+    if (isOverNight) {
+      form.setFieldsValue({
+        openHour: dayjs("00:00", "HH:mm"),
+        closeHour: dayjs("23:59", "HH:mm"),
+      });
+    } else {
+      form.setFieldsValue({
+        openHour: dayjs(DEFAULT_OPEN_HOUR, "HH:mm"),
+        closeHour: dayjs(DEFAULT_CLOSE_HOUR, "HH:mm"),
+      });
+    }
+  }, [isOverNight, form]);
+
   const [locationData, setLocationData] = useState({
     provinces: [],
     districts: [],
@@ -463,11 +476,15 @@ export default function RentalForm({ ownerId, refetch }) {
                   rules={[
                     { required: true, message: "Vui lòng chọn giờ mở cửa!" },
                   ]}
-                  initialValue={dayjs(DEFAULT_OPEN_HOUR, "HH:mm")}
                 >
-                  <TimePicker format="HH:mm" style={{ width: "100%" }} />
+                  <TimePicker
+                    format="HH:mm"
+                    style={{ width: "100%" }}
+                    disabled={isOverNight}
+                  />
                 </Form.Item>
               </Col>
+
               <Col xs={24} sm={24} md={12} className={styles.inputFormCreate}>
                 <Form.Item
                   name="closeHour"
@@ -475,12 +492,16 @@ export default function RentalForm({ ownerId, refetch }) {
                   rules={[
                     { required: true, message: "Vui lòng chọn giờ đóng cửa!" },
                   ]}
-                  initialValue={dayjs(DEFAULT_CLOSE_HOUR, "HH:mm")}
                 >
-                  <TimePicker format="HH:mm" style={{ width: "100%" }} />
+                  <TimePicker
+                    format="HH:mm"
+                    style={{ width: "100%" }}
+                    disabled={isOverNight}
+                  />
                 </Form.Item>
               </Col>
-              <Col>
+
+              <Col span={24}>
                 <Form.Item>
                   <Checkbox
                     checked={isOverNight}
