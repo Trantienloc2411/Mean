@@ -17,7 +17,7 @@ export default function OverviewTransaction({ transactionOverviewData }) {
         title="Tổng giao dịch"
         value={transactionOverviewData.totalTransaction}
         iconName={<GrTransaction />}
-        width={"15%"}
+        width={"20%"}
         height={120}
       />
       {/* <CardDashboard
@@ -35,7 +35,7 @@ export default function OverviewTransaction({ transactionOverviewData }) {
         title="Hoàn thành"
         value={transactionOverviewData.completedCount}
         iconName={<FaMoneyBill />}
-        width={"15%"}
+        width={"20%"}
         height={120}
       />
       <CardDashboard
@@ -44,7 +44,7 @@ export default function OverviewTransaction({ transactionOverviewData }) {
         title="Đang xử lý"
         value={transactionOverviewData.pendingCount}
         iconName={<GiPayMoney />}
-        width={"15%"}
+        width={"20%"}
         height={120}
       />
       <CardDashboard
@@ -53,7 +53,7 @@ export default function OverviewTransaction({ transactionOverviewData }) {
         title="Thất bại"
         value={transactionOverviewData.failedCount}
         iconName={<MdCancel />}
-        width={"15%"}
+        width={"20%"}
         height={120}
       />
     </Flex>

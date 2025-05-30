@@ -191,6 +191,15 @@ export default function Transaction() {
             </div>
           </div>
         </div>
+        <div className={styles.descriptionItem}>
+          <span className={`${styles.statusDot} ${styles.refund}`} />
+          <div>
+            <div className={styles.descriptionTitle}>REFUND</div>
+            <div className={styles.descriptionText}>
+              Hệ thống hoàn tiền cho khách hàng.
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   );
@@ -236,7 +245,7 @@ export default function Transaction() {
                 className={styles.infoButton}
                 icon={<InfoCircleOutlined />}
               >
-                Thông tin trạng thái
+                Thông tin mã giao dịch
               </Button>
             </Dropdown>
           </Flex>

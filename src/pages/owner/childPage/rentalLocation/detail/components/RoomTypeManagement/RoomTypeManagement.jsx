@@ -1,173 +1,260 @@
-import { useState, useEffect } from "react";
-import { Table, Button, Input, Dropdown, message, Tooltip, Tag } from "antd";
+import { useState, useEffect } from "react"
+import { Table, Button, Input, Dropdown, message, Tooltip, Tag, Modal, Alert } from "antd"
 import {
   MoreOutlined,
   PlusOutlined,
   FilterOutlined,
   CloseOutlined,
   ReloadOutlined,
-} from "@ant-design/icons";
-import styles from "./RoomTypeManagement.module.scss";
-import DeleteRoomTypeModal from "./components/DeleteRoomTypeModal/DeleteRoomTypeModal";
-import AddRoomTypeModal from "./components/AddRoomTypeModal/AddRoomTypeModal";
-import UpdateRoomTypeModal from "./components/UpdateRoomTypeModal/UpdateRoomTypeModal";
-import DetailRoomTypeModal from "./components/DetailRoomTypeModal/DetailRoomTypeModal";
-import Filter from "./components/Filter/Filter";
-import debounce from "lodash/debounce";
+  ExclamationCircleOutlined,
+  DeleteOutlined,
+} from "@ant-design/icons"
+import styles from "./RoomTypeManagement.module.scss"
+import AddRoomTypeModal from "./components/AddRoomTypeModal/AddRoomTypeModal"
+import UpdateRoomTypeModal from "./components/UpdateRoomTypeModal/UpdateRoomTypeModal"
+import DetailRoomTypeModal from "./components/DetailRoomTypeModal/DetailRoomTypeModal"
+import Filter from "./components/Filter/Filter"
+import debounce from "lodash/debounce"
 import {
   useGetAllAccommodationTypesQuery,
   useUpdateAccommodationTypeMutation,
   useDeleteAccommodationTypeMutation,
-} from "../../../../../../../redux/services/accommodationTypeApi";
-import { useGetAllAmenitiesQuery } from "../../../../../../../redux/services/serviceApi";
+} from "../../../../../../../redux/services/accommodationTypeApi"
+import { useGetAllAmenitiesQuery } from "../../../../../../../redux/services/serviceApi"
 import {
   useUpdateRentalLocationMutation,
   useGetRentalLocationByIdQuery,
-} from "../../../../../../../redux/services/rentalLocationApi";
-import { useParams } from "react-router-dom";
+} from "../../../../../../../redux/services/rentalLocationApi"
+import { useParams } from "react-router-dom"
 
-const RoomTypeManagement = ({
-  isOwner,
-  ownerId,
-  rentalLocationId,
-  canEdit,
+const StyledModalConfirm = ({
+  open,
+  title,
+  content,
+  onConfirm,
+  onCancel,
+  confirmText = "Xác nhận",
+  cancelText = "Hủy",
+  type = "warning",
+  loading = false,
+  error = null,
 }) => {
-  const { id } = useParams();
-  const locationId = rentalLocationId || id;
+  const getIcon = () => {
+    switch (type) {
+      case "danger":
+        return <DeleteOutlined className={styles.dangerIcon} />
+      case "warning":
+        return <ExclamationCircleOutlined className={styles.warningIcon} />
+      default:
+        return <ExclamationCircleOutlined className={styles.infoIcon} />
+    }
+  }
+
+  return (
+    <Modal
+      open={open}
+      onCancel={onCancel}
+      footer={null}
+      centered
+      width={420}
+      className={styles.styledModal}
+      maskClosable={false}
+    >
+      <div className={styles.modalContent}>
+        <div className={styles.iconWrapper}>{getIcon()}</div>
+
+        <div className={styles.textContent}>
+          <h3 className={styles.title}>{title}</h3>
+          <p className={styles.content}>{content}</p>
+
+          {error && <Alert message={error} type="error" showIcon className={styles.errorAlert} />}
+        </div>
+
+        <div className={styles.buttonGroup}>
+          <Button onClick={onCancel} className={styles.cancelButton} disabled={loading}>
+            {cancelText}
+          </Button>
+          <Button
+            danger={type === "danger"}
+            type="primary"
+            onClick={onConfirm}
+            loading={loading}
+            className={`${styles.confirmButton} ${type === "danger" ? styles.dangerButton : ""}`}
+          >
+            {confirmText}
+          </Button>
+        </div>
+      </div>
+    </Modal>
+  )
+}
+
+const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId, canEdit }) => {
+  const { id } = useParams()
+  const locationId = rentalLocationId || id
 
   const [selectedValues, setSelectedValues] = useState({
     maxOccupancy: [],
     priceRange: [],
     serviceTypes: [],
-  });
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredData, setFilteredData] = useState([]);
-  const [selectedRoomType, setSelectedRoomType] = useState(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [serviceNames, setServiceNames] = useState({});
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isReloading, setIsReloading] = useState(false);
+  })
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filteredData, setFilteredData] = useState([])
+  const [selectedRoomType, setSelectedRoomType] = useState(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [serviceNames, setServiceNames] = useState({})
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [isReloading, setIsReloading] = useState(false)
+  const [roomTypeToDelete, setRoomTypeToDelete] = useState(null)
+  const [deleteError, setDeleteError] = useState(null)
 
   const {
     data: roomTypesData,
     isLoading: isRoomTypesLoading,
     refetch: refetchRoomTypes,
-  } = useGetAllAccommodationTypesQuery(locationId, { skip: !locationId });
+  } = useGetAllAccommodationTypesQuery(locationId, { skip: !locationId })
 
-  const { data: servicesData, isLoading: isServicesLoading } =
-    useGetAllAmenitiesQuery();
-  const { data: rentalLocationData, refetch: refetchRentalLocation } =
-    useGetRentalLocationByIdQuery(locationId, {
-      skip: !locationId,
-    });
+  const { data: servicesData, isLoading: isServicesLoading } = useGetAllAmenitiesQuery()
+  const { data: rentalLocationData, refetch: refetchRentalLocation } = useGetRentalLocationByIdQuery(locationId, {
+    skip: !locationId,
+  })
 
-  const [updateRentalLocation, { isLoading: isUpdating }] =
-    useUpdateRentalLocationMutation();
-  const [updateAccommodationType] = useUpdateAccommodationTypeMutation();
-  const [deleteAccommodationType] = useDeleteAccommodationTypeMutation();
+  const [updateRentalLocation, { isLoading: isUpdating }] = useUpdateRentalLocationMutation()
+  const [updateAccommodationType] = useUpdateAccommodationTypeMutation()
+  const [deleteAccommodationType] = useDeleteAccommodationTypeMutation()
 
   const roomTypes = Array.isArray(roomTypesData?.data)
     ? roomTypesData.data
     : Array.isArray(roomTypesData)
-    ? roomTypesData
-    : [];
+      ? roomTypesData
+      : []
 
   const services = Array.isArray(servicesData?.data)
     ? servicesData.data
     : Array.isArray(servicesData)
-    ? servicesData
-    : [];
+      ? servicesData
+      : []
 
   useEffect(() => {
     const processServiceNames = () => {
-      const newServiceNames = {};
+      const newServiceNames = {}
       services.forEach((service) => {
-        newServiceNames[service._id] = service.name;
-      });
-      setServiceNames(newServiceNames);
-    };
+        newServiceNames[service._id] = service.name
+      })
+      setServiceNames(newServiceNames)
+    }
 
-    if (services.length > 0) processServiceNames();
-  }, [services]);
+    if (services.length > 0) processServiceNames()
+  }, [services])
 
   const handleUpdateRoomType = async (values) => {
     try {
-      setIsSubmitting(true);
+      setIsSubmitting(true)
       await updateAccommodationType({
         id: selectedRoomType._id,
         ...values,
-      }).unwrap();
-      message.success("Cập nhật loại phòng thành công");
-      refetchRoomTypes();
-      setIsUpdateModalOpen(false);
-      setSelectedRoomType(null);
+      }).unwrap()
+      message.success("Cập nhật loại phòng thành công")
+      refetchRoomTypes()
+      setIsUpdateModalOpen(false)
+      setSelectedRoomType(null)
     } catch (error) {
       if (error.data?.message) {
-        message.error(error.data.message);
+        message.error(error.data.message)
       } else {
-        message.error("Cập nhật loại phòng thất bại");
+        message.error("Cập nhật loại phòng thất bại")
       }
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
 
-  const handleRemoveRoomType = async (roomTypeId) => {
+  const handleRemoveRoomType = (roomTypeId) => {
+    setRoomTypeToDelete(roomTypeId)
+    setDeleteError(null) // Reset error when opening modal
+    setIsDeleteModalOpen(true)
+  }
+
+  const confirmDeleteRoomType = async () => {
     try {
-      setIsSubmitting(true);
+      setIsSubmitting(true)
+      setDeleteError(null) // Reset error before attempting delete
 
       if (!rentalLocationData?.data?.accommodationTypeIds) {
-        throw new Error("Không tìm thấy dữ liệu chỗ ở");
+        throw new Error("Không tìm thấy dữ liệu chỗ ở")
       }
 
-      const currentIds = [...rentalLocationData.data.accommodationTypeIds];
-
-      const updatedIds = currentIds.filter((id) => id !== roomTypeId);
+      const currentIds = [...rentalLocationData.data.accommodationTypeIds]
+      const updatedIds = currentIds.filter((id) => id !== roomTypeToDelete)
 
       if (updatedIds.length === currentIds.length) {
-        throw new Error("Loại phòng này không tồn tại trong chỗ ở");
+        throw new Error("Loại phòng này không tồn tại trong chỗ ở")
       }
 
       await updateRentalLocation({
         id: locationId,
         updatedData: { accommodationTypeIds: updatedIds },
-      }).unwrap();
+      }).unwrap()
 
-      message.success("Xóa loại phòng khỏi chỗ ở thành công");
-      await refetchRentalLocation();
-      refetchRoomTypes();
+      message.success("Xóa loại phòng khỏi chỗ ở thành công")
+      await refetchRentalLocation()
+      refetchRoomTypes()
+      setIsDeleteModalOpen(false)
+      setRoomTypeToDelete(null)
+      setDeleteError(null)
     } catch (error) {
-      console.error("Lỗi khi xóa:", error);
-      message.error(
-        error.message || error.data?.message || "Xóa loại phòng thất bại"
-      );
+      console.error("Lỗi khi xóa:", error)
+      const errorMessage = error.data?.message || ""
+      let displayError = ""
+
+      if (errorMessage.includes("cannot be deleted because it's used by an accommodation")) {
+        const roomTypeName = roomTypes.find((rt) => rt._id === roomTypeToDelete)?.name || "này"
+        displayError = `Không thể xóa loại phòng vì đang có phòng sử dụng loại ${roomTypeName}`
+      } else if (errorMessage.includes("AccommodationTypeId")) {
+        const match = errorMessage.match(/AccommodationTypeId\s+(\w+)/)
+        if (match) {
+          displayError = `Không thể xóa loại phòng (ID: ${match[1]}) vì đang có phòng sử dụng`
+        } else {
+          displayError = "Không thể xóa loại phòng vì đang có phòng sử dụng"
+        }
+      } else {
+        displayError = error.message || error.data?.message || "Xóa loại phòng thất bại"
+      }
+
+      setDeleteError(displayError)
     } finally {
-      setIsSubmitting(false);
+      setIsSubmitting(false)
     }
-  };
+  }
+
+  const cancelDeleteRoomType = () => {
+    setIsDeleteModalOpen(false)
+    setRoomTypeToDelete(null)
+    setDeleteError(null)
+  }
 
   const handleReload = async () => {
     try {
-      setIsReloading(true);
-      await refetchRoomTypes();
-      message.success("Dữ liệu đã được làm mới");
+      setIsReloading(true)
+      await refetchRoomTypes()
+      message.success("Dữ liệu đã được làm mới")
     } catch (error) {
-      message.error("Làm mới dữ liệu thất bại");
+      message.error("Làm mới dữ liệu thất bại")
     } finally {
-      setIsReloading(false);
+      setIsReloading(false)
     }
-  };
+  }
 
   const menuItems = [
     {
       key: "1",
       label: "Chi tiết",
       onClick: (record) => {
-        setSelectedRoomType(record);
-        setIsDetailModalOpen(true);
+        setSelectedRoomType(record)
+        setIsDetailModalOpen(true)
       },
     },
     ...(canEdit
@@ -176,13 +263,13 @@ const RoomTypeManagement = ({
             key: "2",
             label: "Chỉnh sửa",
             onClick: (record) => {
-              setSelectedRoomType(record);
-              setIsUpdateModalOpen(true);
+              setSelectedRoomType(record)
+              setIsUpdateModalOpen(true)
             },
           },
         ]
       : []),
-  ];
+  ]
 
   const filterGroups = [
     {
@@ -215,63 +302,57 @@ const RoomTypeManagement = ({
         value: service._id,
       })),
     },
-  ];
+  ]
 
   const handleFilterChange = (filterType, value) => {
     setSelectedValues((prev) => ({
       ...prev,
       [filterType]: value,
-    }));
-  };
+    }))
+  }
 
   const getActiveFiltersCount = () => {
-    return Object.values(selectedValues).flat().length;
-  };
+    return Object.values(selectedValues).flat().length
+  }
 
   const debouncedSearch = debounce((value) => {
-    setSearchTerm(value);
-  }, 500);
+    setSearchTerm(value)
+  }, 500)
 
   useEffect(() => {
     if (!roomTypes.length) {
-      setFilteredData([]);
-      return;
+      setFilteredData([])
+      return
     }
 
-    let filtered = [...roomTypes];
+    let filtered = [...roomTypes]
 
     if (searchTerm) {
-      filtered = filtered.filter((item) =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      filtered = filtered.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
     }
 
     if (selectedValues.maxOccupancy.length > 0) {
-      filtered = filtered.filter((item) =>
-        selectedValues.maxOccupancy.includes(item.maxPeopleNumber)
-      );
+      filtered = filtered.filter((item) => selectedValues.maxOccupancy.includes(item.maxPeopleNumber))
     }
 
     if (selectedValues.priceRange.length > 0) {
       filtered = filtered.filter((item) => {
         return selectedValues.priceRange.some((range) => {
-          const [min, max] = range.split("-").map(Number);
-          if (max === undefined) return item.basePrice >= min;
-          return item.basePrice >= min && item.basePrice <= max;
-        });
-      });
+          const [min, max] = range.split("-").map(Number)
+          if (max === undefined) return item.basePrice >= min
+          return item.basePrice >= min && item.basePrice <= max
+        })
+      })
     }
 
     if (selectedValues.serviceTypes.length > 0) {
       filtered = filtered.filter((item) =>
-        (item.serviceIds || [item.serviceId])?.some((id) =>
-          selectedValues.serviceTypes.includes(id)
-        )
-      );
+        (item.serviceIds || [item.serviceId])?.some((id) => selectedValues.serviceTypes.includes(id)),
+      )
     }
 
-    setFilteredData(filtered);
-  }, [searchTerm, selectedValues, roomTypes]);
+    setFilteredData(filtered)
+  }, [searchTerm, selectedValues, roomTypes])
 
   const customTagStyle = {
     borderRadius: "16px",
@@ -279,7 +360,7 @@ const RoomTypeManagement = ({
     fontSize: "12px",
     background: "#e2e3e5",
     color: "#343a40",
-  };
+  }
 
   const columns = [
     {
@@ -297,19 +378,19 @@ const RoomTypeManagement = ({
       align: "left",
       width: 150,
     },
-    {
-      title: "Mô tả",
-      dataIndex: "description",
-      key: "description",
-      align: "left",
-      width: 200,
-      ellipsis: true,
-      render: (description) => (
-        <Tooltip placement="topLeft" title={description}>
-          {description || "N/A"}
-        </Tooltip>
-      ),
-    },
+    // {
+    //   title: "Mô tả",
+    //   dataIndex: "description",
+    //   key: "description",
+    //   align: "left",
+    //   width: 200,
+    //   ellipsis: true,
+    //   render: (description) => (
+    //     <Tooltip placement="topLeft" title={description}>
+    //       {description || "N/A"}
+    //     </Tooltip>
+    //   ),
+    // },
     {
       title: "Số người tối đa",
       dataIndex: "maxPeopleNumber",
@@ -341,13 +422,9 @@ const RoomTypeManagement = ({
       align: "center",
       width: 100,
       render: (serviceIds, record) => {
-        const ids = serviceIds || [record.serviceId];
-        const count = ids?.filter((id) => id).length || 0;
-        return count > 0 ? (
-          <Tag style={customTagStyle}>{count} dịch vụ</Tag>
-        ) : (
-          "N/A"
-        );
+        const ids = serviceIds || [record.serviceId]
+        const count = ids?.filter((id) => id).length || 0
+        return count > 0 ? <Tag style={customTagStyle}>{count} dịch vụ</Tag> : "N/A"
       },
     },
     {
@@ -391,7 +468,7 @@ const RoomTypeManagement = ({
           },
         ]
       : []),
-  ];
+  ]
 
   return (
     <div className={styles.contentContainer}>
@@ -419,11 +496,7 @@ const RoomTypeManagement = ({
                 {getActiveFiltersCount() > 0 && ` (${getActiveFiltersCount()})`}
               </Button>
             </Dropdown>
-            <Button
-              icon={<ReloadOutlined spin={isReloading} />}
-              onClick={handleReload}
-              loading={isReloading}
-            >
+            <Button icon={<ReloadOutlined spin={isReloading} />} onClick={handleReload} loading={isReloading}>
               Làm mới
             </Button>
           </div>
@@ -441,13 +514,10 @@ const RoomTypeManagement = ({
         </div>
 
         <Table
-          loading={
-            isRoomTypesLoading || isServicesLoading || isUpdating || isReloading
-          }
+          loading={isRoomTypesLoading || isServicesLoading || isUpdating || isReloading}
           columns={columns}
           dataSource={filteredData}
           rowKey="_id"
-          scroll={{ x: 1500 }}
           pagination={{
             total: filteredData.length,
             pageSize: 7,
@@ -470,8 +540,8 @@ const RoomTypeManagement = ({
           ownerId={ownerId}
           isOpen={isUpdateModalOpen}
           onCancel={() => {
-            setIsUpdateModalOpen(false);
-            setSelectedRoomType(null);
+            setIsUpdateModalOpen(false)
+            setSelectedRoomType(null)
           }}
           onConfirm={handleUpdateRoomType}
           initialValues={selectedRoomType}
@@ -483,18 +553,29 @@ const RoomTypeManagement = ({
           isOpen={isDetailModalOpen}
           roomType={selectedRoomType}
           services={services.filter((s) =>
-            (
-              selectedRoomType?.serviceIds || [selectedRoomType?.serviceId]
-            )?.includes(s._id)
+            (selectedRoomType?.serviceIds || [selectedRoomType?.serviceId])?.includes(s._id),
           )}
           onCancel={() => {
-            setIsDetailModalOpen(false);
-            setSelectedRoomType(null);
+            setIsDetailModalOpen(false)
+            setSelectedRoomType(null)
           }}
+        />
+
+        <StyledModalConfirm
+          open={isDeleteModalOpen}
+          title="Xác nhận xóa loại phòng"
+          content="Bạn có chắc chắn muốn xóa loại phòng này khỏi chỗ ở? Hành động này không thể hoàn tác."
+          confirmText="Xóa"
+          cancelText="Hủy"
+          type="danger"
+          loading={isSubmitting}
+          error={deleteError}
+          onConfirm={confirmDeleteRoomType}
+          onCancel={cancelDeleteRoomType}
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default RoomTypeManagement;
+export default RoomTypeManagement

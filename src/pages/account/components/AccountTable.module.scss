@@ -16,6 +16,7 @@
     color: #448df2;
   }
 }
+
 .isActive {
   padding: 4px 12px;
   border-radius: 16px;
@@ -30,12 +31,14 @@
     color: #f36960;
   }
 }
+
 .verifyContainer {
   display: flex;
   gap: 10px;
   align-items: center;
   justify-content: center;
 }
+
 .isVerifiedEmail {
   padding: 4px 12px;
   border-radius: 16px;
@@ -50,6 +53,7 @@
     color: #f36960;
   }
 }
+
 .isVerifiedPhone {
   padding: 4px 12px;
   border-radius: 16px;
@@ -88,6 +92,7 @@
     cursor: not-allowed;
   }
 }
+
 .accountTable {
   :global {
     .ant-pagination {
@@ -174,7 +179,6 @@
 }
 
 .iconViewDetail {
-  // display: flex;
   align-items: center;
   color: #333;
   font-weight: 500;
@@ -187,6 +191,7 @@
     color: #0056b3;
   }
 }
+
 .infoGrid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -213,4 +218,286 @@
 
 .false {
   color: #ff4d4f;
+}
+
+// Styled Modal Confirm Styles
+.styledModal {
+  :global {
+    .ant-modal-content {
+      border-radius: 12px;
+      padding: 0;
+      overflow: hidden;
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    }
+
+    .ant-modal-header {
+      display: none;
+    }
+
+    .ant-modal-body {
+      padding: 0;
+    }
+
+    .ant-modal-close {
+      display: none;
+    }
+  }
+}
+
+.modalContent {
+  padding: 32px 24px 24px;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+
+.iconWrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 4px;
+
+  .dangerIcon {
+    font-size: 32px;
+    color: #ff4d4f;
+    background: #fff1f0;
+    padding: 16px;
+    border-radius: 50%;
+  }
+
+  .blockIcon {
+    font-size: 32px;
+    color: #ff7875;
+    background: #fff1f0;
+    padding: 16px;
+    border-radius: 50%;
+  }
+
+  .unblockIcon {
+    font-size: 32px;
+    color: #52c41a;
+    background: #f6ffed;
+    padding: 16px;
+    border-radius: 50%;
+  }
+
+  .warningIcon {
+    font-size: 32px;
+    color: #faad14;
+    background: #fffbe6;
+    padding: 16px;
+    border-radius: 50%;
+  }
+
+  .infoIcon {
+    font-size: 32px;
+    color: #1890ff;
+    background: #e6f7ff;
+    padding: 16px;
+    border-radius: 50%;
+  }
+}
+
+.textContent {
+  text-align: center;
+  max-width: 320px;
+}
+
+.title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #262626;
+  margin: 0 0 8px 0;
+  line-height: 1.4;
+}
+
+.content {
+  font-size: 14px;
+  color: #595959;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.errorAlert {
+  margin-top: 16px;
+  text-align: left;
+  
+  :global {
+    .ant-alert-message {
+      font-size: 13px;
+      line-height: 1.4;
+    }
+  }
+}
+
+.buttonGroup {
+  display: flex;
+  gap: 12px;
+  width: 100%;
+  justify-content: center;
+  margin-top: 8px;
+}
+
+.cancelButton {
+  min-width: 90px;
+  height: 36px;
+  border-radius: 6px;
+  border: 1px solid #d9d9d9;
+  background: #fff;
+  color: #595959;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  &:hover {
+    border-color: #40a9ff;
+    color: #40a9ff;
+    background: #f0f8ff;
+  }
+
+  &:focus {
+    border-color: #40a9ff;
+    color: #40a9ff;
+    box-shadow: 0 0 0 2px rgba(24, 144, 255, 0.2);
+  }
+
+  &:disabled {
+    color: rgba(0, 0, 0, 0.25);
+    background-color: #f5f5f5;
+    border-color: #d9d9d9;
+    cursor: not-allowed;
+  }
+}
+
+.confirmButton {
+  min-width: 90px;
+  height: 36px;
+  border-radius: 6px;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  cursor: pointer;
+  border: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+.blockButton {
+  background: #ff7875 !important;
+  color: #fff !important;
+
+  &:hover:not(:disabled) {
+    background: #ff9c99 !important;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgba(255, 120, 117, 0.2) !important;
+  }
+}
+
+.unblockButton {
+  background: #52c41a !important;
+  color: #fff !important;
+
+  &:hover:not(:disabled) {
+    background: #73d13d !important;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgba(82, 196, 26, 0.2) !important;
+  }
+}
+
+.dangerButton {
+  background: #ff4d4f !important;
+  color: #fff !important;
+
+  &:hover:not(:disabled) {
+    background: #ff7875 !important;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgba(255, 77, 79, 0.2) !important;
+  }
+}
+
+.warningButton {
+  background: #faad14 !important;
+  color: #fff !important;
+
+  &:hover:not(:disabled) {
+    background: #ffc53d !important;
+  }
+
+  &:focus {
+    box-shadow: 0 0 0 2px rgba(250, 173, 20, 0.2) !important;
+  }
+}
+
+.loadingSpinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid transparent;
+  border-top: 2px solid currentColor;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+// Responsive design for modal
+@media (max-width: 480px) {
+  .modalContent {
+    padding: 24px 16px 20px;
+    gap: 16px;
+  }
+
+  .iconWrapper {
+    width: 56px;
+    height: 56px;
+
+    .dangerIcon,
+    .blockIcon,
+    .unblockIcon,
+    .warningIcon,
+    .infoIcon {
+      font-size: 28px;
+      padding: 14px;
+    }
+  }
+
+  .title {
+    font-size: 16px;
+  }
+
+  .content {
+    font-size: 13px;
+  }
+
+  .buttonGroup {
+    flex-direction: column-reverse;
+    gap: 8px;
+
+    .cancelButton,
+    .confirmButton {
+      width: 100%;
+    }
+  }
 }

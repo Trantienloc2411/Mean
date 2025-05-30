@@ -23,7 +23,6 @@ const CardDashboard = ({
     flexDirection: "column",
     justifyContent: "center",
     transition: "transform 0.2s ease, box-shadow 0.2s ease",
-    cursor: "pointer",
     ":hover": {
       transform: "translateY(-2px)",
       boxShadow: "0 4px 6px rgba(0, 0, 0, 0.12)",

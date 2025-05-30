@@ -21,6 +21,7 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
   const [form] = Form.useForm();
   const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false);
   const [createAmenity, { isLoading: isCreatingService }] = useCreateAmenityMutation();
+  const [nameError, setNameError] = useState(null); 
 
   const { data: ownerDetailData } = useGetOwnerDetailByUserIdQuery(id);
   let ownerId = ownerDetailData?.id;
@@ -41,6 +42,16 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
   const [fileList, setFileList] = useState([]);
   const [uploading, setUploading] = useState(false);
 
+  const handleNameChange = () => {
+    if (nameError) {
+      setNameError(null);
+      form.setFields([{
+        name: 'name',
+        errors: []
+      }]);
+    }
+  };
+
   const handleSubmit = () => {
     form.validateFields()
       .then((values) => {
@@ -57,14 +68,33 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
           serviceIds: values.serviceIds || []
         };
 
-        onConfirm(formattedValues);
-        form.resetFields();
-        setFileList([]);
+        setNameError(null);
+        
+        onConfirm(formattedValues)
+          .then(() => {
+            form.resetFields();
+            setFileList([]);
+            setNameError(null);
+          })
+          .catch((error) => {
+            if (error?.data?.message?.includes('already exists for this owner') || 
+                error?.message?.includes('already exists for this owner')) {
+              setNameError('Tên loại phòng đã tồn tại, vui lòng nhập tên khác');
+              form.setFields([{
+                name: 'name',
+                errors: ['Tên loại phòng đã tồn tại, vui lòng nhập tên khác']
+              }]);
+              form.getFieldInstance('name')?.focus();
+            } else {
+              message.error(error?.data?.message || error?.message || "Thêm loại phòng thất bại");
+            }
+          });
       })
       .catch((info) => {
         console.log('Validate Failed:', info);
       });
   };
+
   const uploadProps = {
     name: "file",
     multiple: true,
@@ -173,13 +203,25 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
       }));
   };
 
+  useEffect(() => {
+    if (!isOpen) {
+      setNameError(null);
+    }
+  }, [isOpen]);
+
   return (
     <Modal
       title="Thêm loại phòng mới"
       open={isOpen}
-      onCancel={onCancel}
+      onCancel={() => {
+        setNameError(null);
+        onCancel();
+      }}
       footer={[
-        <Button key="cancel" onClick={onCancel}>
+        <Button key="cancel" onClick={() => {
+          setNameError(null);
+          onCancel();
+        }}>
           Huỷ
         </Button>,
         <Button
@@ -232,8 +274,14 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
           name="name"
           label="Tên loại phòng"
           rules={[{ required: true, message: 'Vui lòng nhập tên loại phòng' }]}
+          validateStatus={nameError ? 'error' : ''}
+          help={nameError}
         >
-          <Input placeholder="Nhập tên loại phòng" />
+          <Input 
+            placeholder="Nhập tên loại phòng" 
+            onChange={handleNameChange}
+            style={nameError ? { borderColor: '#ff4d4f' } : {}}
+          />
         </Form.Item>
 
         <Form.Item
