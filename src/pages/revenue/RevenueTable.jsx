@@ -20,8 +20,9 @@ const RevenueTable = ({ data, handleViewDetail }) => {
       ),
     },
     {
-      title: "Số booking",
+      title: "Booking hoàn tất",
       dataIndex: "bookingCount",
+      align: "center",
       key: "bookingCount",
       render: (count) => (
         <Badge

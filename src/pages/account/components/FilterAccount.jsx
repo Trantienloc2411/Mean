@@ -41,7 +41,7 @@ export default function FilterAccount({
               key={role}
               checked={filters.roles.includes(role)}
               onChange={() => handleRoleChange(role)}
-            // style={{ display: "block", marginLeft: 8 }}
+              // style={{ display: "block", marginLeft: 8 }}
             >
               {role}
             </Checkbox>
@@ -109,6 +109,33 @@ export default function FilterAccount({
         </div>
 
         <Divider style={{ margin: "8px 0" }} />
+        <strong>Trạng thái duyệt (Owner)</strong>
+        <div style={{ marginBottom: 8, marginLeft: 8 }}>
+          <Checkbox
+            checked={filters.isOwnerApproved === true}
+            onChange={() =>
+              onFilterChange(
+                "isOwnerApproved",
+                filters.isOwnerApproved === true ? null : true
+              )
+            }
+          >
+            Đã duyệt
+          </Checkbox>
+          <Checkbox
+            checked={filters.isOwnerApproved === false}
+            onChange={() =>
+              onFilterChange(
+                "isOwnerApproved",
+                filters.isOwnerApproved === false ? null : false
+              )
+            }
+            style={{ marginLeft: 8 }}
+          >
+            Chưa duyệt
+          </Checkbox>
+        </div>
+        <Divider style={{ margin: "8px 0" }} />
 
         <Space style={{ display: "flex", justifyContent: "space-between" }}>
           <Button onClick={onReset}>Reset</Button>
@@ -128,9 +155,7 @@ export default function FilterAccount({
       open={open}
       onOpenChange={setOpen}
     >
-      <Button icon={<FilterOutlined />}>
-        Lọc
-      </Button>
+      <Button icon={<FilterOutlined />}>Lọc</Button>
     </Dropdown>
   );
 }
