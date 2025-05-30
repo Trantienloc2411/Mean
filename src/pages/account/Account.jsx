@@ -25,6 +25,7 @@ export default function Account() {
     roles: [],
     isActive: null,
     isVerified: null,
+    isOwnerApproved: null,
   });
   const [isReloading, setIsReloading] = useState(false);
 
@@ -77,9 +78,16 @@ export default function Account() {
           const matchesVerified =
             selectedFilters.isVerified === null ||
             user.isVerified === selectedFilters.isVerified;
+          const matchesOwnerApproved =
+            selectedFilters.isOwnerApproved === null ||
+            user?.owner?.isApproved === selectedFilters.isOwnerApproved;
 
           return (
-            matchesSearch && matchesRole && matchesActive && matchesVerified
+            matchesSearch &&
+            matchesRole &&
+            matchesActive &&
+            matchesVerified &&
+            matchesOwnerApproved
           );
         });
       setFilteredUsers(filtered);
@@ -95,6 +103,7 @@ export default function Account() {
       roles: [],
       isActive: null,
       isVerified: null,
+      isOwnerApproved: null,
     });
   };
 
@@ -109,7 +118,8 @@ export default function Account() {
       await refetch();
       message.success("Dữ liệu đã được làm mới");
     } catch (error) {
-      message.error("Làm mới dữ liệu thất bại");
+      // console.error("Error refreshing data:", error);
+      message.error("Làm mới dữ liệu thất bại", error);
     } finally {
       setIsReloading(false);
     }
@@ -163,9 +173,9 @@ export default function Account() {
               className={styles.createButton}
               onClick={() => setOpenCreateUser(true)}
               style={{
-                backgroundColor: '#fff',
-                borderColor: '#667085',
-                color: '#667085',
+                backgroundColor: "#fff",
+                borderColor: "#667085",
+                color: "#667085",
               }}
             >
               Tạo tài khoản

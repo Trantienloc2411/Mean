@@ -66,7 +66,7 @@ export default function UserDetailModal({ open, onClose, user }) {
           )}
         </Descriptions.Item>
 
-        <Descriptions.Item label="Xác thực SĐT">
+        {/* <Descriptions.Item label="Xác thực SĐT">
           {user && (
             <span
               className={`${styles.isVerifiedPhone} ${
@@ -87,7 +87,7 @@ export default function UserDetailModal({ open, onClose, user }) {
               )}
             </span>
           )}
-        </Descriptions.Item>
+        </Descriptions.Item> */}
         <Descriptions.Item label="Ngày tạo">{user.createdAt}</Descriptions.Item>
         <Descriptions.Item label="Lần cập nhật gần nhất">
           {user.updatedAt}
