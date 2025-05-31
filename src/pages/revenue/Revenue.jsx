@@ -101,6 +101,20 @@ const Revenue = () => {
     refetch();
   }, [date, refetch]);
 
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Spin size="large" />
+      </div>
+    );
+  }
   return (
     <div
       style={{
