@@ -132,7 +132,7 @@ function PolicySystem() {
           value: true,
         },
         {
-          label: <span className={`${styles.status} ${styles.expired}`}>Ngừng hoạt động</span>,
+          label: <span className={`${styles.status} ${styles.expired}`}>Không hoạt động</span>,
           value: false,
         }
       ]

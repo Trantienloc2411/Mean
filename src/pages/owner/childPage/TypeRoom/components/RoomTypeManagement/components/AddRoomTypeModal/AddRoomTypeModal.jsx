@@ -1,99 +1,174 @@
-import { Modal, Form, Input, InputNumber, Select, Button, Spin, Image, Upload, message } from "antd";
-import { useGetAllAmenitiesQuery } from '../../../../../../../../redux/services/serviceApi';
-import styles from './AddRoomTypeModal.module.scss';
-import { useState } from "react";
-import { supabase } from "../../../../../../../../redux/services/supabase";
-import { InboxOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons";
-import { useGetOwnerDetailByUserIdQuery } from '../../../../../../../../redux/services/ownerApi';
-import { useParams } from "react-router-dom";
-import AddAmenityModal from '../../../RoomAmenitiesManagement/components/AddAmenityModal/AddAmenityModal';
-import { useCreateAmenityMutation } from '../../../../../../../../redux/services/serviceApi';
-import { useEffect } from "react";
+import { Modal, Form, Input, InputNumber, Select, Button, Spin, Image, Upload, message } from "antd"
+import { useGetAllAmenitiesQuery, useCreateAmenityMutation } from "../../../../../../../../redux/services/serviceApi"
+import { useCreateAccommodationTypeMutation } from "../../../../../../../../redux/services/accommodationTypeApi"
+import { useUpdateRentalLocationMutation } from "../../../../../../../../redux/services/rentalLocationApi"
+import styles from "./AddRoomTypeModal.module.scss"
+import { useState, useEffect } from "react"
+import { supabase } from "../../../../../../../../redux/services/supabase"
+import { InboxOutlined, DeleteOutlined, PlusOutlined } from "@ant-design/icons"
+import { useGetOwnerDetailByUserIdQuery } from "../../../../../../../../redux/services/ownerApi"
+import { useParams } from "react-router-dom"
+import AddAmenityModal from "../../../RoomAmenitiesManagement/components/AddAmenityModal/AddAmenityModal"
 
-const { TextArea } = Input;
-const { Option } = Select;
-const { Dragger } = Upload;
+const { TextArea } = Input
+const { Option } = Select
+const { Dragger } = Upload
 
-const MAX_IMAGES = 10;
+const MAX_IMAGES = 10
 
-const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
-  const { id } = useParams();
-  const [form] = Form.useForm();
-  const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false);
-  const [createAmenity, { isLoading: isCreatingService }] = useCreateAmenityMutation();
-  const [nameError, setNameError] = useState(null); 
+const AddRoomTypeModal = ({
+  isOpen,
+  onModalCancel,
+  onModalSuccess,
+  ownerId: propOwnerId,
+  rentalLocationId,
+  existingRoomTypeIdsForRental,
+  refetchRentalDataInParent,
+}) => {
+  const { id: routeUserId } = useParams()
+  const [form] = Form.useForm()
+  const [isAddServiceModalOpen, setIsAddServiceModalOpen] = useState(false)
+  const [nameError, setNameError] = useState(null)
+  const [fileList, setFileList] = useState([])
+  const [uploading, setUploading] = useState(false)
+  const [internalLoading, setInternalLoading] = useState(false)
 
-  const { data: ownerDetailData } = useGetOwnerDetailByUserIdQuery(id);
-  let ownerId = ownerDetailData?.id;
+  const [createAccommodationTypeHook, { isLoading: isCreatingForOwner }] = useCreateAccommodationTypeMutation()
+  const [updateRentalLocationHook, { isLoading: isUpdatingRental }] = useUpdateRentalLocationMutation()
+  const [createAmenity, { isLoading: isCreatingService }] = useCreateAmenityMutation()
 
-  if (!ownerId) {
-    ownerId = localStorage.getItem('ownerId');
+  const { data: ownerDetailDataFromRoute, isLoading: isOwnerDetailLoading } = useGetOwnerDetailByUserIdQuery(
+    routeUserId,
+    {
+      skip: !!propOwnerId || !routeUserId,
+    },
+  )
+
+  let ownerIdToUse = propOwnerId
+  if (!ownerIdToUse && ownerDetailDataFromRoute?.id) {
+    ownerIdToUse = ownerDetailDataFromRoute.id
+  }
+  if (!ownerIdToUse) {
+    const storedOwnerId = localStorage.getItem("ownerId")
+    if (storedOwnerId) {
+      ownerIdToUse = storedOwnerId
+    }
   }
 
   const {
     data: services,
     isLoading: isServicesLoading,
-    refetch: refetchServices
-  } = useGetAllAmenitiesQuery(
-    { ownerId },
-    { skip: !ownerId }
-  );
+    refetch: refetchServices,
+  } = useGetAllAmenitiesQuery({ ownerId: ownerIdToUse }, { skip: !ownerIdToUse || !isOpen })
 
-  const [fileList, setFileList] = useState([]);
-  const [uploading, setUploading] = useState(false);
+  useEffect(() => {
+    if (isOpen) {
+      form.resetFields()
+      setFileList([])
+      setNameError(null)
+      if (ownerIdToUse) {
+        refetchServices()
+      }
+    } else {
+      form.resetFields()
+      setFileList([])
+      setNameError(null)
+    }
+  }, [isOpen, form, ownerIdToUse, refetchServices])
 
   const handleNameChange = () => {
     if (nameError) {
-      setNameError(null);
-      form.setFields([{
-        name: 'name',
-        errors: []
-      }]);
+      setNameError(null)
+      form.setFields([{ name: "name", errors: [] }])
     }
-  };
+  }
 
-  const handleSubmit = () => {
-    form.validateFields()
-      .then((values) => {
-        if (!ownerId) {
-          message.error("Không tìm thấy thông tin chủ nhà!");
-          return;
+  const handleSubmit = async () => {
+    try {
+      const values = await form.validateFields()
+      if (!ownerIdToUse) {
+        message.error("Không tìm thấy thông tin chủ nhà hợp lệ để tạo loại phòng!")
+        return
+      }
+
+      setInternalLoading(true)
+      setNameError(null)
+
+      const formattedValuesForOwner = {
+        ...values,
+        ownerId: ownerIdToUse,
+        numberOfPasswordRoom: values.numberOfPasswordRoom || 0,
+        image: fileList.map((file) => file.url),
+        serviceIds: values.serviceIds || [],
+      }
+
+      let apiResponseAfterCreate
+
+      try {
+        apiResponseAfterCreate = await createAccommodationTypeHook(formattedValuesForOwner).unwrap()
+        message.success("Thêm loại phòng cho chủ nhà thành công!")
+      } catch (ownerError) {
+        if (
+          ownerError?.data?.message?.includes("already exists for this owner") ||
+          ownerError?.message?.includes("already exists for this owner")
+        ) {
+          setNameError("Tên loại phòng đã tồn tại, vui lòng nhập tên khác")
+          form.setFields([{ name: "name", errors: ["Tên loại phòng đã tồn tại, vui lòng nhập tên khác"] }])
+          form.getFieldInstance("name")?.focus()
+        } else {
+          message.error(ownerError?.data?.message || ownerError?.message || "Thêm loại phòng cho chủ nhà thất bại")
         }
+        setInternalLoading(false)
+        return
+      }
 
-        const formattedValues = {
-          ...values,
-          ownerId,
-          numberOfPasswordRoom: values.numberOfPasswordRoom || 0,
-          image: fileList.map(file => file.url),
-          serviceIds: values.serviceIds || []
-        };
+      const newlyCreatedRoomTypeData = apiResponseAfterCreate?.data || apiResponseAfterCreate
+      const newRoomTypeId = newlyCreatedRoomTypeData?._id || newlyCreatedRoomTypeData?.id
 
-        setNameError(null);
-        
-        onConfirm(formattedValues)
-          .then(() => {
-            form.resetFields();
-            setFileList([]);
-            setNameError(null);
+      if (rentalLocationId && newRoomTypeId) {
+        try {
+          message.loading({ content: "Đang thêm loại phòng vào chỗ ở hiện tại...", key: "rentalUpdate", duration: 0 })
+          const currentRentalIds = existingRoomTypeIdsForRental || []
+          const updatedRentalIds = [...new Set([...currentRentalIds, newRoomTypeId])]
+
+          await updateRentalLocationHook({
+            id: rentalLocationId,
+            updatedData: { accommodationTypeIds: updatedRentalIds },
+          }).unwrap()
+          message.success({
+            content: "Đã thêm loại phòng vào chỗ ở hiện tại thành công!",
+            key: "rentalUpdate",
+            duration: 2,
           })
-          .catch((error) => {
-            if (error?.data?.message?.includes('already exists for this owner') || 
-                error?.message?.includes('already exists for this owner')) {
-              setNameError('Tên loại phòng đã tồn tại, vui lòng nhập tên khác');
-              form.setFields([{
-                name: 'name',
-                errors: ['Tên loại phòng đã tồn tại, vui lòng nhập tên khác']
-              }]);
-              form.getFieldInstance('name')?.focus();
-            } else {
-              message.error(error?.data?.message || error?.message || "Thêm loại phòng thất bại");
-            }
-          });
-      })
-      .catch((info) => {
-        console.log('Validate Failed:', info);
-      });
-  };
+
+          if (refetchRentalDataInParent) {
+            await refetchRentalDataInParent()
+          }
+        } catch (rentalError) {
+          console.error("Error adding new room type to rental:", rentalError)
+          message.error(
+            `Lỗi khi thêm vào chỗ ở: ${rentalError?.data?.message || rentalError?.message || "Thất bại không rõ nguyên nhân."}. Loại phòng đã được tạo cho chủ nhà.`,
+          )
+        }
+      } else if (rentalLocationId && !newRoomTypeId) {
+        console.error("Failed to extract newRoomTypeId from API response:", apiResponseAfterCreate)
+        message.warning("Không thể thêm vào chỗ ở: ID loại phòng mới không hợp lệ sau khi tạo cho chủ nhà.")
+      }
+
+      setInternalLoading(false)
+
+      if (onModalSuccess) {
+        await onModalSuccess(newlyCreatedRoomTypeData)
+      } else {
+        if (onModalCancel) {
+          onModalCancel()
+        }
+      }
+    } catch (validationError) {
+      console.log("Validate Failed:", validationError)
+      setInternalLoading(false)
+    }
+  }
 
   const uploadProps = {
     name: "file",
@@ -102,320 +177,283 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
     maxCount: MAX_IMAGES,
     beforeUpload: (file) => {
       if (fileList.length >= MAX_IMAGES) {
-        message.error(`Bạn chỉ được tải lên tối đa ${MAX_IMAGES} ảnh!`);
-        return Upload.LIST_IGNORE;
+        message.error(`Bạn chỉ được tải lên tối đa ${MAX_IMAGES} ảnh!`)
+        return Upload.LIST_IGNORE
       }
-      const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png";
+      const isJpgOrPng = file.type === "image/jpeg" || file.type === "image/png"
       if (!isJpgOrPng) {
-        message.error("Chỉ cho phép tải lên file JPG/PNG!");
-        return Upload.LIST_IGNORE;
+        message.error("Chỉ cho phép tải lên file JPG/PNG!")
+        return Upload.LIST_IGNORE
       }
       if (file.size / 1024 / 1024 >= 5) {
-        message.error("Hình ảnh phải nhỏ hơn 5MB!");
-        return Upload.LIST_IGNORE;
+        message.error("Hình ảnh phải nhỏ hơn 5MB!")
+        return Upload.LIST_IGNORE
       }
-      return true;
+      return true
     },
     customRequest: async ({ file, onSuccess, onError }) => {
-      setUploading(true);
-      const fileName = `${Date.now()}-${file.name}`;
-
+      setUploading(true)
+      const fileName = `${Date.now()}-${file.name}`
       try {
         const { data, error } = await supabase.storage
           .from("image")
-          .upload(fileName, file, { cacheControl: "3600", upsert: false });
-
-        if (error || !data) throw new Error("Tải ảnh lên thất bại!");
-
-        const { data: urlData } = supabase.storage
-          .from("image")
-          .getPublicUrl(data.path);
-        if (!urlData.publicUrl) throw new Error("Không lấy được URL ảnh!");
-
-        setFileList(prev => [
-          ...prev,
-          {
-            uid: file.uid,
-            url: urlData.publicUrl,
-            name: fileName,
-            path: data.path,
-          }
-        ]);
-
-        message.success("Tải ảnh lên thành công!");
-        onSuccess("ok");
+          .upload(fileName, file, { cacheControl: "3600", upsert: false })
+        if (error || !data) throw new Error("Tải ảnh lên thất bại!")
+        const { data: urlData } = supabase.storage.from("image").getPublicUrl(data.path)
+        if (!urlData.publicUrl) throw new Error("Không lấy được URL ảnh!")
+        setFileList((prev) => [...prev, { uid: file.uid, url: urlData.publicUrl, name: fileName, path: data.path }])
+        message.success("Tải ảnh lên thành công!")
+        onSuccess("ok")
       } catch (error) {
-        message.error(error.message);
-        onError(error);
+        message.error(error.message)
+        onError(error)
       } finally {
-        setUploading(false);
+        setUploading(false)
       }
     },
-  };
+  }
 
   const handleRemove = async (file) => {
-    setUploading(true);
+    setUploading(true)
     try {
-      const filePath = file.path || file.name;
-      const { error } = await supabase.storage.from("image").remove([filePath]);
-
-      if (error) throw error;
-
-      setFileList(prev => prev.filter(item => item.uid !== file.uid));
-      message.success("Đã xóa ảnh!");
+      const filePath = file.path || file.name
+      const { error } = await supabase.storage.from("image").remove([filePath])
+      if (error) throw error
+      setFileList((prev) => prev.filter((item) => item.uid !== file.uid))
+      message.success("Đã xóa ảnh!")
     } catch (error) {
-      message.error("Lỗi khi xóa ảnh!");
+      message.error("Lỗi khi xóa ảnh!")
     } finally {
-      setUploading(false);
+      setUploading(false)
     }
-  };
+  }
 
   const handleAddService = async (values) => {
     try {
       const newService = await createAmenity({
         ...values,
-        ownerId,
+        ownerId: ownerIdToUse,
         status: values.status === "Active",
-        isDelete: false
-      }).unwrap();
-
-      await refetchServices();
-
-      const currentServices = form.getFieldValue('serviceIds') || [];
-      form.setFieldsValue({
-        serviceIds: [...currentServices, newService._id]
-      });
-
-      message.success("Thêm dịch vụ thành công!");
-      setIsAddServiceModalOpen(false);
+        isDelete: false,
+      }).unwrap()
+      await refetchServices()
+      const currentServices = form.getFieldValue("serviceIds") || []
+      form.setFieldsValue({ serviceIds: [...currentServices, newService._id] })
+      message.success("Thêm dịch vụ thành công!")
+      setIsAddServiceModalOpen(false)
     } catch (error) {
-      message.error(`Lỗi khi thêm dịch vụ: ${error.message}`);
+      message.error(`Lỗi khi thêm dịch vụ: ${error.data?.message || error.message}`)
     }
-  };
+  }
 
   const getServicesOptions = () => {
-    const servicesList = services?.data || services || [];
+    const servicesList = services?.data || services || []
     return servicesList
-      .filter(service => service.status)
-      .map(service => ({
-        label: service.name,
-        value: service._id
-      }));
-  };
+      .filter((service) => service.status)
+      .map((service) => ({ label: service.name, value: service._id }))
+  }
 
-  useEffect(() => {
-    if (!isOpen) {
-      setNameError(null);
-    }
-  }, [isOpen]);
+  const combinedLoading =
+    uploading ||
+    internalLoading ||
+    isCreatingForOwner ||
+    isUpdatingRental ||
+    isServicesLoading ||
+    isOwnerDetailLoading ||
+    isCreatingService
 
   return (
     <Modal
-      title="Thêm loại phòng mới"
+      title="Thêm loại phòng mới cho chủ nhà"
       open={isOpen}
       onCancel={() => {
-        setNameError(null);
-        onCancel();
+        if (combinedLoading) return
+        if (onModalCancel) onModalCancel()
       }}
       footer={[
-        <Button key="cancel" onClick={() => {
-          setNameError(null);
-          onCancel();
-        }}>
+        <Button
+          key="cancel"
+          onClick={() => {
+            if (combinedLoading) return
+            if (onModalCancel) onModalCancel()
+          }}
+          disabled={combinedLoading}
+        >
           Huỷ
         </Button>,
-        <Button
-          key="submit"
-          type="primary"
-          onClick={handleSubmit}
-          loading={uploading}
-        >
+        <Button key="submit" type="primary" onClick={handleSubmit} loading={combinedLoading} disabled={combinedLoading}>
           Thêm loại phòng
-        </Button>
+        </Button>,
       ]}
       width={800}
+      destroyOnClose
     >
-      <Form
-        form={form}
-        layout="vertical"
-        name="addRoomTypeForm"
-        className={styles.modalForm}
-      >
-
-        <Form.Item
-          name="serviceIds"
-          label="Dịch vụ"
-          rules={[{ required: true, message: 'Vui lòng chọn dịch vụ' }]}
-        >
-          <Select
-            mode="multiple"
-            placeholder="Chọn dịch vụ"
-            loading={isServicesLoading}
-            options={getServicesOptions()}
-            dropdownRender={(menu) => (
-              <>
-                {menu}
-                <div
-                  style={{
-                    padding: '8px',
-                    cursor: 'pointer',
-                    borderTop: '1px solid #e8e8e8'
-                  }}
-                  onClick={() => setIsAddServiceModalOpen(true)}
-                >
-                  <PlusOutlined /> Thêm dịch vụ mới
-                </div>
-              </>
-            )}
-          />
-        </Form.Item>
-
-        <Form.Item
-          name="name"
-          label="Tên loại phòng"
-          rules={[{ required: true, message: 'Vui lòng nhập tên loại phòng' }]}
-          validateStatus={nameError ? 'error' : ''}
-          help={nameError}
-        >
-          <Input 
-            placeholder="Nhập tên loại phòng" 
-            onChange={handleNameChange}
-            style={nameError ? { borderColor: '#ff4d4f' } : {}}
-          />
-        </Form.Item>
-
-        <Form.Item
-          name="description"
-          label="Mô tả"
-        >
-          <TextArea rows={4} placeholder="Nhập mô tả cho loại phòng" />
-        </Form.Item>
-
-        <div className={styles.formRow}>
-          <Form.Item
-            name="maxPeopleNumber"
-            label="Số người tối đa"
-            rules={[
-              { required: true, message: 'Vui lòng nhập số người tối đa' },
-              {
-                type: 'number',
-                min: 1,
-                max: 2,
-                message: 'Số người tối đa không được vượt quá 2'
-              }
-            ]}
-            help="Số người tối đa không nên vượt quá 2"
-          >
-            <InputNumber min={1} max={2} placeholder="2" />
+      <Spin spinning={combinedLoading} tip="Đang xử lý...">
+        <Form form={form} layout="vertical" name="ownerAddRoomTypeForm" className={styles.modalForm}>
+          <Form.Item name="serviceIds" label="Dịch vụ" rules={[{ required: true, message: "Vui lòng chọn dịch vụ" }]}>
+            <Select
+              mode="multiple"
+              placeholder="Chọn dịch vụ"
+              loading={isServicesLoading}
+              options={getServicesOptions()}
+              dropdownRender={(menu) => (
+                <>
+                  {menu}
+                  <div
+                    style={{ padding: "8px", cursor: "pointer", borderTop: "1px solid #e8e8e8" }}
+                    onClick={() => setIsAddServiceModalOpen(true)}
+                  >
+                    <PlusOutlined /> Thêm dịch vụ mới
+                  </div>
+                </>
+              )}
+            />
           </Form.Item>
 
           <Form.Item
-            name="basePrice"
-            label="Giá cơ bản"
-            rules={[{ required: true, message: 'Vui lòng nhập giá cơ bản' }]}
+            name="name"
+            label="Tên loại phòng"
+            rules={[{ required: true, message: "Vui lòng nhập tên loại phòng" }]}
+            validateStatus={nameError ? "error" : ""}
+            help={nameError}
+          >
+            <Input
+              placeholder="Nhập tên loại phòng"
+              onChange={handleNameChange}
+              style={nameError ? { borderColor: "#ff4d4f" } : {}}
+            />
+          </Form.Item>
+
+          <Form.Item name="description" label="Mô tả">
+            <TextArea rows={4} placeholder="Nhập mô tả cho loại phòng" />
+          </Form.Item>
+
+          <div className={styles.formRow}>
+            <Form.Item
+              name="maxPeopleNumber"
+              label="Số người tối đa"
+              rules={[
+                { required: true, message: 'Vui lòng nhập số người tối đa' },
+                {
+                  type: 'number',
+                  min: 1,
+                  max: 2,
+                  message: 'Số người tối đa không được vượt quá 2'
+                }
+              ]}
+              help="Số người tối đa không nên vượt quá 2"
+            >
+              <InputNumber min={1} max={2} placeholder="2" style={{ width: "100%" }} />
+            </Form.Item>
+
+            <Form.Item
+              name="basePrice"
+              label="Giá cơ bản"
+              rules={[{ required: true, message: "Vui lòng nhập giá cơ bản" }]}
+            >
+              <InputNumber
+                min={0}
+                step={100000}
+                placeholder="200000"
+                addonAfter="VNĐ"
+                formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+                parser={(value) => String(value).replace(/\$\s?|(,*)/g, "")}
+                style={{ width: "100%" }}
+              />
+            </Form.Item>
+          </div>
+
+          <Form.Item
+            name="overtimeHourlyPrice"
+            label="Giá phụ trội theo giờ"
+            rules={[{ required: true, message: "Vui lòng nhập giá phụ trội theo giờ" }]}
           >
             <InputNumber
               min={0}
-              step={100000}
-              placeholder="200000"
+              step={10000}
+              placeholder="20000"
               addonAfter="VNĐ"
-              formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-              parser={value => value.replace(/\$\s?|(,*)/g, '')}
+              formatter={(value) => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",")}
+              parser={(value) => String(value).replace(/\$\s?|(,*)/g, "")}
+              style={{ width: "100%" }}
             />
           </Form.Item>
-        </div>
 
-        <Form.Item
-          name="overtimeHourlyPrice"
-          label="Giá phụ trội theo giờ"
-          rules={[{ required: true, message: 'Vui lòng nhập giá phụ trội theo giờ' }]}
-        >
-          <InputNumber
-            min={0}
-            step={10000}
-            placeholder="20000"
-            addonAfter="VNĐ"
-            formatter={value => `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ',')}
-            parser={value => value.replace(/\$\s?|(,*)/g, '')}
-          />
-        </Form.Item>
+          <Form.Item
+            name="numberOfPasswordRoom"
+            label="Độ dài mật khẩu phòng (số ký tự)"
+            tooltip="Nhập số từ 1-10 cho độ dài mật khẩu, hoặc 0 nếu không cần mật khẩu"
+            rules={[
+              {
+                required: true,
+                message: "Vui lòng nhập độ dài mật khẩu",
+              },
+              {
+                type: "number",
+                min: 0,
+                max: 10,
+                message: "Độ dài mật khẩu phải từ 0 đến 10 (0 = không dùng mật khẩu)",
+              },
+            ]}
+            help="Nhập số từ 0-10 (0 = không yêu cầu mật khẩu)"
+          >
+            <InputNumber
+              min={0}
+              max={10}
+              precision={0}
+              placeholder="Độ dài mật khẩu (0-10)"
+              style={{ width: "100%" }}
+            />
+          </Form.Item>
 
-        <Form.Item
-          name="numberOfPasswordRoom"
-          label="Độ dài mật khẩu phòng (số ký tự)"
-          tooltip="Nhập số từ 1-10 cho độ dài mật khẩu, hoặc 0 nếu không cần mật khẩu"
-          rules={[{
-            required: true,
-            message: 'Vui lòng nhập độ dài mật khẩu'
-          }, {
-            type: 'number',
-            min: 0,
-            max: 10,
-            message: 'Độ dài mật khẩu phải từ 0 đến 10 (0 = không dùng mật khẩu)'
-          }]}
-          help="Nhập số từ 0-10 (0 = không yêu cầu mật khẩu)"
-        >
-          <InputNumber
-            min={0}
-            max={10}
-            precision={0}
-            placeholder="Độ dài mật khẩu (0-10)"
-            style={{ width: '100%' }}
-          />
-        </Form.Item>
-
-        <Form.Item label={`Hình ảnh loại phòng (${fileList.length}/${MAX_IMAGES})`}>
-          <Spin spinning={uploading} tip="Đang xử lý...">
-            <Dragger {...uploadProps} showUploadList={false}>
-              <p className="ant-upload-drag-icon">
-                <InboxOutlined />
-              </p>
-              <p className="ant-upload-text">
-                Kéo và thả ảnh vào đây hoặc nhấn để tải lên
-              </p>
-              <p className="ant-upload-hint">
-                Hỗ trợ JPG, PNG. Tối đa {MAX_IMAGES} ảnh, mỗi ảnh ≤5MB
-              </p>
-            </Dragger>
-          </Spin>
-
-          <div style={{ display: "flex", flexWrap: "wrap", marginTop: 16, gap: 8 }}>
-            {fileList.map((file) => (
-              <div key={file.uid} style={{ position: "relative" }}>
-                <Image
-                  src={file.url}
-                  width={100}
-                  height={100}
-                  style={{ objectFit: "cover", borderRadius: 8 }}
-                />
-                <DeleteOutlined
-                  onClick={() => handleRemove(file)}
-                  style={{
-                    position: "absolute",
-                    top: 4,
-                    right: 4,
-                    color: "white",
-                    background: "rgba(0, 0, 0, 0.5)",
-                    borderRadius: "50%",
-                    padding: 4,
-                    cursor: "pointer",
-                    fontSize: 16,
-                  }}
-                />
-              </div>
-            ))}
-          </div>
-        </Form.Item>
-      </Form>
-
+          <Form.Item label={`Hình ảnh loại phòng (${fileList.length}/${MAX_IMAGES})`}>
+            <Spin spinning={uploading} tip="Đang xử lý...">
+              <Dragger {...uploadProps} showUploadList={false}>
+                <p className="ant-upload-drag-icon">
+                  <InboxOutlined />
+                </p>
+                <p className="ant-upload-text">Kéo và thả ảnh vào đây hoặc nhấn để tải lên</p>
+                <p className="ant-upload-hint">Hỗ trợ JPG, PNG. Tối đa {MAX_IMAGES} ảnh, mỗi ảnh ≤5MB</p>
+              </Dragger>
+            </Spin>
+            <div style={{ display: "flex", flexWrap: "wrap", marginTop: 16, gap: 8 }}>
+              {fileList.map((file) => (
+                <div key={file.uid} style={{ position: "relative" }}>
+                  <Image
+                    src={file.url || "/placeholder.svg?width=100&height=100&text=Image"} // Fallback for missing URL
+                    alt={file.name || "Uploaded image"}
+                    width={100}
+                    height={100}
+                    style={{ objectFit: "cover", borderRadius: 8 }}
+                  />
+                  <DeleteOutlined
+                    onClick={() => handleRemove(file)}
+                    style={{
+                      position: "absolute",
+                      top: 4,
+                      right: 4,
+                      color: "white",
+                      background: "rgba(0, 0, 0, 0.5)",
+                      borderRadius: "50%",
+                      padding: 4,
+                      cursor: "pointer",
+                      fontSize: 16,
+                    }}
+                  />
+                </div>
+              ))}
+            </div>
+          </Form.Item>
+        </Form>
+      </Spin>
       <AddAmenityModal
         isOpen={isAddServiceModalOpen}
         onCancel={() => setIsAddServiceModalOpen(false)}
         onConfirm={handleAddService}
-        isLoading={isCreatingService}
+        isLoading={isCreatingService} 
       />
     </Modal>
-  );
-};
+  )
+}
 
-export default AddRoomTypeModal;
+export default AddRoomTypeModal

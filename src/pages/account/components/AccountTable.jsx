@@ -375,27 +375,37 @@ export default function AccountTable({ data, loading }) {
         rowKey="_id"
         pagination={{
           current: pagination.current,
-          pageSize: 7,
+          pageSize: pagination.pageSize,
           total: data.length,
           showSizeChanger: false,
-          onChange: (page) => setPagination((prev) => ({ ...prev, current: page })),
+          onChange: (page) => setPagination(prev => ({ ...prev, current: page })),
+          className: styles.customPagination, // Thêm dòng này
           itemRender: (page, type, originalElement) => {
-            const totalPages = Math.ceil(data.length / 7)
-            if (type === "prev") {
+            const totalPages = Math.ceil(data.length / pagination.pageSize);
+
+            if (type === 'prev') {
               return (
-                <button className={styles.paginationButton} disabled={pagination.current === 1}>
+                <button
+                  className={styles.paginationButton}
+                  disabled={pagination.current === 1}
+                >
                   « Trước
                 </button>
-              )
+              );
             }
-            if (type === "next") {
+
+            if (type === 'next') {
               return (
-                <button className={styles.paginationButton} disabled={pagination.current >= totalPages}>
+                <button
+                  className={styles.paginationButton}
+                  disabled={pagination.current >= totalPages}
+                >
                   Tiếp »
                 </button>
-              )
+              );
             }
-            return originalElement
+
+            return originalElement;
           },
         }}
         className={styles.accountTable}
