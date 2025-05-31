@@ -229,10 +229,10 @@ export default function OwnerRevenuePage() {
           </Button>
         </div>
       </div>
+      <RevenueSummary summary={summary} />
 
       <Tabs defaultActiveKey="1">
         <Tabs.TabPane tab="Giao dịch" key="1">
-          <RevenueSummary summary={summary} />
           <TransactionTable
             onUpdateStatus={updateTransaction}
             transactions={filterTransaction}
@@ -240,7 +240,6 @@ export default function OwnerRevenuePage() {
         </Tabs.TabPane>
 
         <Tabs.TabPane tab="Đơn đặt phòng" key="2">
-          <RevenueSummary summary={summary} />
           <BookingTable bookings={filteredBookings} loading={isLoading} />
         </Tabs.TabPane>
       </Tabs>

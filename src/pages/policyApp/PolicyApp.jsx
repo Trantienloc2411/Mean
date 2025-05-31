@@ -1,24 +1,38 @@
-import { useState, useEffect } from 'react';
-import { Input, Button, DatePicker, Dropdown, Table, Spin, message, Tabs } from 'antd';
-import { FilterOutlined, PlusOutlined, MoreOutlined, ReloadOutlined } from '@ant-design/icons';
-import dayjs from 'dayjs';
-import isBetween from 'dayjs/plugin/isBetween';
-import debounce from 'lodash/debounce';
-import styles from './PolicyApp.module.scss';
-import Filter from './components/Filter/Filter.jsx';
-import DeletePolicyModal from './components/DeletePolicyModal/DeletePolicyModal.jsx';
-import AddPolicyModal from './components/AddPolicyModal/AddPolicyModal.jsx';
-import UpdatePolicyModal from './components/UpdatePolicyModal/UpdatePolicyModal.jsx';
-import DetailPolicyModal from './components/DetailPolicyModal/DetailPolicyModal.jsx';
-import PolicyCategory from './components/PolicyCategory/PolicyCategory.jsx';
+import { useState, useEffect } from "react";
+import {
+  Input,
+  Button,
+  DatePicker,
+  Dropdown,
+  Table,
+  Spin,
+  message,
+  Tabs,
+} from "antd";
+import {
+  FilterOutlined,
+  PlusOutlined,
+  MoreOutlined,
+  ReloadOutlined,
+} from "@ant-design/icons";
+import dayjs from "dayjs";
+import isBetween from "dayjs/plugin/isBetween";
+import debounce from "lodash/debounce";
+import styles from "./PolicyApp.module.scss";
+import Filter from "./components/Filter/Filter.jsx";
+import DeletePolicyModal from "./components/DeletePolicyModal/DeletePolicyModal.jsx";
+import AddPolicyModal from "./components/AddPolicyModal/AddPolicyModal.jsx";
+import UpdatePolicyModal from "./components/UpdatePolicyModal/UpdatePolicyModal.jsx";
+import DetailPolicyModal from "./components/DetailPolicyModal/DetailPolicyModal.jsx";
+import PolicyCategory from "./components/PolicyCategory/PolicyCategory.jsx";
 import {
   useGetAllPolicySystemsQuery,
   useCreatePolicySystemMutation,
   useUpdatePolicySystemMutation,
   useDeletePolicySystemMutation,
-  useGetPolicySystemByIdQuery
-} from '../../redux/services/policySystemApi.js';
-import { useGetAllPolicySystemCategoriesQuery } from '../../redux/services/policySystemCategoryApi.js';
+  useGetPolicySystemByIdQuery,
+} from "../../redux/services/policySystemApi.js";
+import { useGetAllPolicySystemCategoriesQuery } from "../../redux/services/policySystemCategoryApi.js";
 
 // Component cho tab Chính sách
 function PolicySystem() {
@@ -39,20 +53,22 @@ function PolicySystem() {
   const [isReloading, setIsReloading] = useState(false);
 
   const [selectedPolicyDetail, setSelectedPolicyDetail] = useState(null);
-  const { data: detailedPolicy, isLoading: isDetailLoading } = useGetPolicySystemByIdQuery(
-    selectedPolicy?._id,
-    {
-      skip: !selectedPolicy?._id || !isDetailModalOpen
-    }
-  );
+  const { data: detailedPolicy, isLoading: isDetailLoading } =
+    useGetPolicySystemByIdQuery(selectedPolicy?._id, {
+      skip: !selectedPolicy?._id || !isDetailModalOpen,
+    });
 
-  const { data: policyData, isLoading, refetch } = useGetAllPolicySystemsQuery(undefined, {
+  const {
+    data: policyData,
+    isLoading,
+    refetch,
+  } = useGetAllPolicySystemsQuery(undefined, {
     onSuccess: (data) => {
-      console.log('Received policy data:', data);
+      console.log("Received policy data:", data);
       if (data?.success && data.data) {
         setFilteredData(data.data);
       }
-    }
+    },
   });
 
   const { data: categoryData } = useGetAllPolicySystemCategoriesQuery();
@@ -65,9 +81,9 @@ function PolicySystem() {
     try {
       setIsReloading(true);
       await refetch();
-      message.success('Dữ liệu đã được làm mới');
+      message.success("Dữ liệu đã được làm mới");
     } catch (error) {
-      message.error('Làm mới dữ liệu thất bại');
+      message.error("Làm mới dữ liệu thất bại");
     } finally {
       setIsReloading(false);
     }
@@ -78,52 +94,61 @@ function PolicySystem() {
       name: "unit",
       title: "Đơn vị",
       options: [
-        { key: '1', label: "Phần trăm", value: "percent" },
-        { key: '2', label: "VND", value: "vnd" },
+        { key: "1", label: "Phần trăm", value: "percent" },
+        { key: "2", label: "VND", value: "vnd" },
       ],
     },
     {
-      name: 'status',
-      title: 'Trạng thái',
+      name: "status",
+      title: "Trạng thái",
       options: [
         {
-          label: <span className={`${styles.status} ${styles.active}`}>Đang hoạt động</span>,
+          label: (
+            <span className={`${styles.status} ${styles.active}`}>
+              Đang hoạt động
+            </span>
+          ),
           value: true,
         },
         {
-          label: <span className={`${styles.status} ${styles.expired}`}>Ngừng hoạt động</span>,
+          label: (
+            <span className={`${styles.status} ${styles.expired}`}>
+              Ngừng hoạt động
+            </span>
+          ),
           value: false,
-        }
-      ]
+        },
+      ],
     },
     {
       name: "category",
       title: "Danh mục",
-      options: categoryData?.data?.map(category => ({
-        key: category._id,
-        label: category.categoryName,
-        value: category._id
-      })) || []
-    }
+      options:
+        categoryData?.data?.map((category) => ({
+          key: category._id,
+          label: category.categoryName,
+          value: category._id,
+        })) || [],
+    },
   ];
 
   const menuItems = [
     {
-      key: '1',
-      label: 'Chi tiết',
+      key: "1",
+      label: "Chi tiết",
       onClick: (record) => {
         setSelectedPolicy(record);
         setIsDetailModalOpen(true);
       },
     },
     {
-      key: '2',
-      label: 'Chỉnh sửa',
+      key: "2",
+      label: "Chỉnh sửa",
       onClick: (record) => {
         setSelectedPolicy(record);
         setIsUpdateModalOpen(true);
       },
-    }
+    },
   ];
 
   const handleDeleteConfirm = async () => {
@@ -131,10 +156,10 @@ function PolicySystem() {
       await deletePolicy(selectedPolicy._id).unwrap();
       setIsDeleteModalOpen(false);
       setSelectedPolicy(null);
-      message.success('Xóa chính sách thành công');
+      message.success("Xóa chính sách thành công");
     } catch (error) {
       console.error("Error deleting policy:", error);
-      message.error('Có lỗi xảy ra khi xóa chính sách');
+      message.error("Có lỗi xảy ra khi xóa chính sách");
     }
   };
 
@@ -145,68 +170,72 @@ function PolicySystem() {
         name: values.name,
         description: values.description || "",
         values: values.values || [],
-        startDate: values.startDate ? dayjs(values.startDate).format('DD/MM/YYYY HH:mm:ss') : null,
-        endDate: values.endDate ? dayjs(values.endDate).format('DD/MM/YYYY HH:mm:ss') : null,
-        isActive: true
+        startDate: values.startDate
+          ? dayjs(values.startDate).format("DD/MM/YYYY HH:mm:ss")
+          : null,
+        endDate: values.endDate
+          ? dayjs(values.endDate).format("DD/MM/YYYY HH:mm:ss")
+          : null,
+        isActive: true,
       };
 
       console.log("Creating policy with dates:", {
         startDate: newPolicy.startDate,
-        endDate: newPolicy.endDate
+        endDate: newPolicy.endDate,
       });
 
       await createPolicy(newPolicy).unwrap();
       setIsAddModalOpen(false);
-      message.success('Tạo chính sách thành công');
+      message.success("Tạo chính sách thành công");
     } catch (error) {
       console.error("Error adding policy:", error);
-      message.error('Có lỗi xảy ra khi tạo chính sách');
+      message.error("Có lỗi xảy ra khi tạo chính sách");
     }
   };
 
   const handleUpdatePolicy = async (values) => {
     try {
-      console.log('[Debug] Submitting values:', values);
+      console.log("[Debug] Submitting values:", values);
 
       if (!selectedPolicy?._id) {
-        message.error('Không tìm thấy ID chính sách');
+        message.error("Không tìm thấy ID chính sách");
         return;
       }
 
       const formattedValues = {
         ...values,
         _id: selectedPolicy._id,
-        startDate: values.startDate ?
-          dayjs(values.startDate).format('DD-MM-YYYY HH:mm:ss') :
-          null,
-        endDate: values.endDate ?
-          dayjs(values.endDate).format('DD-MM-YYYY HH:mm:ss') :
-          null,
-        isActive: values.isActive
+        startDate: values.startDate
+          ? dayjs(values.startDate).format("DD-MM-YYYY HH:mm:ss")
+          : null,
+        endDate: values.endDate
+          ? dayjs(values.endDate).format("DD-MM-YYYY HH:mm:ss")
+          : null,
+        isActive: values.isActive,
       };
 
-      console.log('[Debug] Formatted payload:', formattedValues);
+      console.log("[Debug] Formatted payload:", formattedValues);
 
       const result = await updatePolicy(formattedValues).unwrap();
-      console.log('[Debug] API Response:', result);
+      console.log("[Debug] API Response:", result);
 
-      message.success('Cập nhật thành công!');
+      message.success("Cập nhật thành công!");
       setIsUpdateModalOpen(false);
     } catch (error) {
-      console.error('[Debug] Update Error:', error);
+      console.error("[Debug] Update Error:", error);
       message.error(`Lỗi: ${error.data?.message || error.message}`);
     }
   };
 
   const handleFilterChange = (filterName, newValues) => {
-    setSelectedValues(prev => ({
+    setSelectedValues((prev) => ({
       ...prev,
       [filterName]: newValues,
     }));
   };
 
   const handleDateRangeChange = (dates, dateStrings) => {
-    setSelectedValues(prev => ({
+    setSelectedValues((prev) => ({
       ...prev,
       dateRange: dates ? dateStrings : [],
     }));
@@ -222,9 +251,10 @@ function PolicySystem() {
     let filtered = [...policyData.data];
 
     if (searchTerm) {
-      filtered = filtered.filter((item) =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      filtered = filtered.filter(
+        (item) =>
+          item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.description?.toLowerCase().includes(searchTerm.toLowerCase())
       );
     }
 
@@ -236,7 +266,9 @@ function PolicySystem() {
 
     if (selectedValues.unit?.length > 0) {
       filtered = filtered.filter((item) => {
-        return item.values?.some(val => selectedValues.unit.includes(val.unit));
+        return item.values?.some((val) =>
+          selectedValues.unit.includes(val.unit)
+        );
       });
     }
 
@@ -262,61 +294,78 @@ function PolicySystem() {
     {
       title: "No.",
       key: "id",
-      render: (_, __, index) => index + 1
+      render: (_, __, index) => index + 1,
     },
     {
       title: "Tên chính sách",
       dataIndex: "name",
-      key: "name"
+      key: "name",
     },
     {
       title: "Mô tả",
       dataIndex: "description",
       key: "description",
-      render: (desc) => desc || 'N/A'
+      render: (desc) => desc || "N/A",
     },
     {
       title: "Danh mục",
       key: "category",
-      render: (record) => record.policySystemCategoryId?.categoryName || 'N/A'
+      render: (record) => record.policySystemCategoryId?.categoryName || "N/A",
     },
     {
       title: "Giá trị",
       key: "values",
       render: (record) => {
-        if (!record.values || record.values.length === 0) return 'Không có';
+        if (!record.values || record.values.length === 0) return "Không có";
 
         return record.values.map((val, idx) => (
           <div key={idx}>
-            {val.val1 && val.val2 ? `${val.val1} - ${val.val2}` : val.val1 || val.val2}
-            {val.unit && ` (${val.unit === 'percent' ? 'Phần trăm'
-              : val.unit === 'vnd' ? 'VND'
-                : val.unit === 'min' ? 'Phút'
+            {val.val1 && val.val2
+              ? `${val.val1} - ${val.val2}`
+              : val.val1 || val.val2}
+            {val.unit &&
+              ` (${
+                val.unit === "percent"
+                  ? "Phần trăm"
+                  : val.unit === "vnd"
+                  ? "VND"
+                  : val.unit === "min"
+                  ? "Phút"
                   : val.unit
               })`}
           </div>
         ));
-      }
+      },
     },
     {
       title: "Ngày bắt đầu",
       dataIndex: "startDate",
       key: "startDate",
-      render: (date) => date ? dayjs(date, "DD/MM/YYYY HH:mm:ss").format("DD/MM/YYYY HH:mm:ss") : 'N/A'
+      render: (date) =>
+        date
+          ? dayjs(date, "DD/MM/YYYY HH:mm:ss").format("DD/MM/YYYY HH:mm:ss")
+          : "N/A",
     },
     {
       title: "Ngày kết thúc",
       dataIndex: "endDate",
       key: "endDate",
-      render: (date) => date ? dayjs(date, "DD/MM/YYYY HH:mm:ss").format("DD/MM/YYYY HH:mm:ss") : 'N/A'
+      render: (date) =>
+        date
+          ? dayjs(date, "DD/MM/YYYY HH:mm:ss").format("DD/MM/YYYY HH:mm:ss")
+          : "N/A",
     },
     {
       title: "Trạng thái",
       dataIndex: "isActive",
       key: "isActive",
       render: (isActive) => (
-        <span className={`${styles.status} ${isActive ? styles.active : styles.expired}`}>
-          {isActive ? 'Đang hoạt động' : 'Không hoạt động'}
+        <span
+          className={`${styles.status} ${
+            isActive ? styles.active : styles.expired
+          }`}
+        >
+          {isActive ? "Đang hoạt động" : "Không hoạt động"}
         </span>
       ),
     },
@@ -336,7 +385,7 @@ function PolicySystem() {
           <MoreOutlined onClick={(e) => e.preventDefault()} />
         </Dropdown>
       ),
-    }
+    },
   ];
 
   useEffect(() => {
@@ -345,6 +394,20 @@ function PolicySystem() {
     }
   }, [detailedPolicy]);
 
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Spin size="large" />
+      </div>
+    );
+  }
   return (
     <>
       <div className={styles.contentTable}>
@@ -370,7 +433,7 @@ function PolicySystem() {
               <Button icon={<FilterOutlined />}>
                 Lọc
                 {Object.values(selectedValues).flat().length > 0 &&
-                  (`(${Object.values(selectedValues).flat().length})`)}
+                  `(${Object.values(selectedValues).flat().length})`}
               </Button>
             </Dropdown>
             <Button
@@ -389,9 +452,9 @@ function PolicySystem() {
             icon={<PlusOutlined />}
             className={styles.addRoomButton}
             style={{
-              backgroundColor: '#fff',
-              borderColor: '#667085',
-              color: '#667085',
+              backgroundColor: "#fff",
+              borderColor: "#667085",
+              color: "#667085",
             }}
           >
             Tạo chính sách mới
@@ -485,18 +548,18 @@ function PolicySystem() {
 
 // Component chính với tabs
 export default function PolicyApp() {
-  const [activeTab, setActiveTab] = useState('policies');
+  const [activeTab, setActiveTab] = useState("policies");
 
   const tabItems = [
     {
-      key: 'categories',
-      label: 'Danh mục chính sách',
-      children: <PolicyCategory />,
+      key: "policies",
+      label: "Chính sách",
+      children: <PolicySystem />,
     },
     {
-      key: 'policies',
-      label: 'Chính sách',
-      children: <PolicySystem />,
+      key: "categories",
+      label: "Danh mục chính sách",
+      children: <PolicyCategory />,
     },
   ];
 
