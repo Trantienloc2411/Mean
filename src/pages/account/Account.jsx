@@ -12,6 +12,7 @@ import {
 import CreateAccountForm from "./components/CreateAccountForm";
 // import { useLazyRefreshTokenQuery } from "../../redux/services/authApi";
 import { IoCreate } from "react-icons/io5";
+import { Spin } from "antd";
 
 export default function Account() {
   const { data: users, refetch, error, isLoading } = useGetUsersQuery();
@@ -125,6 +126,20 @@ export default function Account() {
     }
   };
 
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Spin size="large" />
+      </div>
+    );
+  }
   return (
     <div className={styles.contentContainer}>
       <h2 className={styles.sectionTitle}>Quản lý tài khoản</h2>
@@ -167,7 +182,7 @@ export default function Account() {
                 Làm mới
               </Button>
             </div>
-            <Button
+            {/* <Button
               icon={<IoCreate />}
               type="default"
               className={styles.createButton}
@@ -179,7 +194,7 @@ export default function Account() {
               }}
             >
               Tạo tài khoản
-            </Button>
+            </Button> */}
           </div>
 
           <div className={styles.tableContainer}>

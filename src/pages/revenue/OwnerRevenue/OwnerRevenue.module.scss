@@ -1,0 +1,134 @@
+.transactionStatus {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+  text-align: center;
+  min-width: 100px;
+
+  &.status-1 {
+    background-color: #fef3c7; // vàng nhạt (chờ xử lý)
+    color: #b45309; // cam đậm
+  }
+
+  &.status-2 {
+    background-color: #bbf7d0;
+    color: #15803d;
+  }
+
+  &.status-3 {
+    background-color: #fee2e2;
+    color: #b91c1c;
+  }
+
+  &.unknown {
+    background-color: #e5e7eb;
+    color: #374151;
+  }
+}
+
+// const BOOKING_STATUS_LABELS = {
+//   8: { text: "Đang xử lý", color: "gold" },
+//   1: { text: "Đã xác nhận", color: "blue" },
+//   // 2: { text: "Chờ nhận phòng", color: "processing" },
+//   3: { text: "Đã nhận phòng", color: "geekblue" },
+//   // 4: { text: "Chờ trả phòng", color: "orange" },
+//   5: { text: "Đã trả phòng", color: "cyan" },
+//   6: { text: "Đã hủy", color: "red" },
+//   7: { text: "Hoàn tất", color: "green" },
+//   9: { text: "Hoàn tiền", color: "volcano" },
+// };
+.bookingStatus {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+  text-align: center;
+  min-width: 100px;
+
+  &.status-1 {
+    background-color: #dbeafe; // light blue
+    color: #2563eb; // blue (Đã xác nhận)
+  }
+
+  &.status-2 {
+    background-color: #fef9c3; // light gold
+    color: #d97706; // gold/dark yellow (Chờ nhận phòng)
+  }
+
+  &.status-3 {
+    background-color: #ede9fe; // light geekblue
+    color: #7c3aed; // geekblue (Đã nhận phòng)
+  }
+
+  &.status-4 {
+    background-color: #ffedd5; // light orange
+    color: #ea580c; // orange (Chờ trả phòng)
+  }
+
+  &.status-5 {
+    background-color: #cffafe; // light cyan
+    color: #0891b2; // cyan (Đã trả phòng)
+  }
+
+  &.status-6 {
+    background-color: #fee2e2; // light red
+    color: #b91c1c; // red (Đã hủy)
+  }
+
+  &.status-7 {
+    background-color: #bbf7d0; // light green
+    color: #15803d; // green (Hoàn tất)
+  }
+
+  &.status-8 {
+    background-color: #fef3c7; // light gold
+    color: #b45309; // gold (Đang xử lý)
+  }
+
+  &.status-9 {
+    background-color: #fef2f2; // light volcano
+    color: #c2410c; // volcano (Hoàn tiền)
+  }
+
+  &.unknown {
+    background-color: #e5e7eb; // gray-200
+    color: #374151; // gray-700
+  }
+}
+.paymentStatus {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+  text-align: center;
+  min-width: 100px;
+
+  &.status-2 {
+    background-color: #fef9c3; // light gold (Chờ)
+    color: #d97706; // gold (processing)
+  }
+
+  &.status-3 {
+    background-color: #ede9fe; // light geekblue
+    color: #7c3aed; // geekblue (Đã thanh toán)
+  }
+
+  &.status-4 {
+    background-color: #ffedd5; // light orange
+    color: #ea580c; // orange (Hoàn tiền)
+  }
+
+  &.status-5 {
+    background-color: #fee2e2; // light red
+    color: #b91c1c; // red (Thất bại)
+  }
+
+  &.unknown {
+    background-color: #e5e7eb; // gray-200
+    color: #374151; // gray-700
+  }
+}
