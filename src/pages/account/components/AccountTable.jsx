@@ -205,10 +205,8 @@ export default function AccountTable({ data, loading }) {
                 display: "inline-block",
                 minWidth: 80,
                 textAlign: "center",
+                margin: 8 
               }}
-              style={{ margin: 8 }}
-              className={`${styles.isActive} ${styles[record?.owner?.isApproved]
-                }`}
             >
               {record.owner.isApproved ? "Duyệt" : "Chưa duyệt"}
             </span>
