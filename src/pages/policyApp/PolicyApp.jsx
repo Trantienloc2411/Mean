@@ -73,14 +73,55 @@ function PolicySystem() {
     }
   };
 
+  const getDistinctUnits = (data) => {
+    const units = new Set();
+    data?.forEach(item => {
+      item.values?.forEach(val => {
+        if (val.unit) {
+          units.add(val.unit);
+        }
+      });
+    });
+    return Array.from(units);
+  };
+
+  const getDistinctCategories = (data) => {
+    const categories = new Map();
+    data?.forEach(item => {
+      if (item.policySystemCategoryId) {
+        categories.set(
+          item.policySystemCategoryId._id,
+          {
+            id: item.policySystemCategoryId._id,
+            name: item.policySystemCategoryId.categoryName
+          }
+        );
+      }
+    });
+    return Array.from(categories.values());
+  };
+
+  const getUnitLabel = (unit) => {
+    switch (unit) {
+      case 'percent': return 'Phần trăm';
+      case 'vnd': return 'VND';
+      case 'min': return 'Phút';
+      default: return unit;
+    }
+  };
+
+  const distinctUnits = getDistinctUnits(policyData?.data);
+  const distinctCategories = getDistinctCategories(policyData?.data);
+
   const filterGroups = [
     {
       name: "unit",
       title: "Đơn vị",
-      options: [
-        { key: '1', label: "Phần trăm", value: "percent" },
-        { key: '2', label: "VND", value: "vnd" },
-      ],
+      options: distinctUnits.map((unit, index) => ({
+        key: index.toString(),
+        label: getUnitLabel(unit),
+        value: unit
+      })),
     },
     {
       name: 'status',
@@ -99,13 +140,14 @@ function PolicySystem() {
     {
       name: "category",
       title: "Danh mục",
-      options: categoryData?.data?.map(category => ({
-        key: category._id,
-        label: category.categoryName,
-        value: category._id
-      })) || []
+      options: distinctCategories.map(category => ({
+        key: category.id,
+        label: category.name,
+        value: category.id
+      }))
     }
   ];
+
 
   const menuItems = [
     {
@@ -247,14 +289,32 @@ function PolicySystem() {
     }
 
     if (selectedValues.dateRange?.length === 2) {
-      const [start, end] = selectedValues.dateRange;
+      const [filterStart, filterEnd] = selectedValues.dateRange;
+      const filterStartDate = dayjs(filterStart, "DD/MM/YYYY");
+      const filterEndDate = dayjs(filterEnd, "DD/MM/YYYY");
+
       filtered = filtered.filter((item) => {
+        if (!item.startDate || !item.endDate) return false;
+
         const itemStart = dayjs(item.startDate, "DD/MM/YYYY HH:mm:ss");
         const itemEnd = dayjs(item.endDate, "DD/MM/YYYY HH:mm:ss");
-        return itemStart.isAfter(dayjs(start)) && itemEnd.isBefore(dayjs(end));
+        if (!itemStart.isValid() || !itemEnd.isValid() ||
+          !filterStartDate.isValid() || !filterEndDate.isValid()) {
+          console.warn('Invalid date found:', {
+            itemStart: item.startDate,
+            itemEnd: item.endDate,
+            filterStart,
+            filterEnd
+          });
+          return false;
+        }
+        const policyStartsAfterFilterStart = itemStart.format('YYYY-MM-DD') >= filterStartDate.format('YYYY-MM-DD');
+        const policyEndsAfterFilterStart = itemEnd.isAfter(filterStartDate.subtract(1, 'day'));
+        const policyStartsBeforeFilterEnd = itemStart.isBefore(filterEndDate.add(1, 'day'));
+
+        return policyStartsAfterFilterStart && policyEndsAfterFilterStart && policyStartsBeforeFilterEnd;
       });
     }
-
     setFilteredData(filtered);
   }, [searchTerm, selectedValues, policyData]);
 
