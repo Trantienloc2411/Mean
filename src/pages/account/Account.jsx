@@ -167,7 +167,7 @@ export default function Account() {
                 Làm mới
               </Button>
             </div>
-            <Button
+            {/* <Button
               icon={<IoCreate />}
               type="default"
               className={styles.createButton}
@@ -179,7 +179,7 @@ export default function Account() {
               }}
             >
               Tạo tài khoản
-            </Button>
+            </Button> */}
           </div>
 
           <div className={styles.tableContainer}>

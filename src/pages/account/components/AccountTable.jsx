@@ -15,6 +15,8 @@ import {
   useUpdateOwnerMutation,
 } from "../../../redux/services/ownerApi";
 import { Modal } from "antd";
+import { Tag } from "antd";
+import { Flex } from "antd";
 
 export default function AccountTable({ data, loading }) {
   const navigate = useNavigate();
@@ -63,8 +65,22 @@ export default function AccountTable({ data, loading }) {
       align: "center",
       key: "roleName",
       render: (role, record) => (
-        <>
-          <span className={`${styles.role} ${styles[role.toLowerCase()]}`}>
+        <div
+          style={{
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            gap: 4,
+          }}
+        >
+          <span
+            className={`${styles.role} ${styles[role.toLowerCase()]}`}
+            style={{
+              display: "inline-block",
+              minWidth: 80,
+              textAlign: "center",
+            }}
+          >
             {role === "Admin"
               ? "Nhân viên"
               : role === "Owner"
@@ -73,15 +89,19 @@ export default function AccountTable({ data, loading }) {
           </span>
           {record.owner && (
             <span
-              style={{ margin: 8 }}
-              className={`${styles.isActive} ${
-                styles[record?.owner?.isApproved]
+              className={`${styles.approvedOwner} ${
+                styles[record.owner.isApproved ? "true" : "false"]
               }`}
+              style={{
+                display: "inline-block",
+                minWidth: 80,
+                textAlign: "center",
+              }}
             >
-              {record?.owner?.isApproved ? "Duyệt" : "Chưa duyệt"}
+              {record.owner.isApproved ? "Duyệt" : "Chưa duyệt"}
             </span>
           )}
-        </>
+        </div>
       ),
     },
 
