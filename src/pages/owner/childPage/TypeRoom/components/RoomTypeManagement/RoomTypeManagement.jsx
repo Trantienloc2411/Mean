@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Table, Button, Input, Dropdown, message, Tooltip, Select } from "antd";
+import { Table, Button, Input, Dropdown, message, Tooltip, Select, InputNumber } from "antd";
 import { MoreOutlined, PlusOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
 import styles from "./RoomTypeManagement.module.scss";
 import DeleteRoomTypeModal from "./components/DeleteRoomTypeModal/DeleteRoomTypeModal";
@@ -21,12 +21,13 @@ import {
 import { Tag } from "antd";
 import { useGetOwnerDetailByUserIdQuery } from "../../../../../../redux/services/ownerApi";
 import { useParams } from "react-router-dom";
+import { useMemo } from "react";
 
 const RoomTypeManagement = ({ isOwner }) => {
   const { id } = useParams();
   const [selectedValues, setSelectedValues] = useState({
     maxOccupancy: [],
-    priceRange: [],
+    priceRange: { min: null, max: null },
     serviceTypes: [],
   });
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,8 +38,17 @@ const RoomTypeManagement = ({ isOwner }) => {
   const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [serviceNames, setServiceNames] = useState({});
-  const [isReloading, setIsReloading] = useState(false)
+  const [isReloading, setIsReloading] = useState(false);
 
+  const getOwnerIdFromStorage = () => {
+    try {
+      const storedOwnerId = localStorage.getItem('ownerId');
+      return storedOwnerId;
+    } catch (error) {
+      console.error('Error getting ownerId from localStorage:', error);
+      return null;
+    }
+  };
 
   const { data: ownerDetailData, isLoading: isOwnerDetailLoading } =
     useGetOwnerDetailByUserIdQuery(id);
@@ -48,8 +58,16 @@ const RoomTypeManagement = ({ isOwner }) => {
     useGetAccommodationTypesByOwnerQuery(ownerId, {
       skip: !ownerId,
     });
+
+  const storageOwnerId = getOwnerIdFromStorage();
   const { data: servicesData, isLoading: isServicesLoading } =
-    useGetAllAmenitiesQuery();
+    useGetAllAmenitiesQuery({ ownerId: storageOwnerId }, {
+      skip: !storageOwnerId,
+    });
+
+  const [createAccommodationType] = useCreateAccommodationTypeMutation();
+  const [updateAccommodationType] = useUpdateAccommodationTypeMutation();
+  const [deleteAccommodationType] = useDeleteAccommodationTypeMutation();
 
   const roomTypes = Array.isArray(roomTypesData?.data)
     ? roomTypesData.data
@@ -97,70 +115,40 @@ const RoomTypeManagement = ({ isOwner }) => {
     }
   }, [filteredData]);
 
-  const [createAccommodationType] = useCreateAccommodationTypeMutation();
-  const [updateAccommodationType] = useUpdateAccommodationTypeMutation();
-  const [deleteAccommodationType] = useDeleteAccommodationTypeMutation();
+  const filterGroups = useMemo(() => {
+    if (!roomTypes.length) return [];
 
-  const menuItems = [
-    {
-      key: "1",
-      label: "Chi tiết",
-      onClick: (record) => {
-        setSelectedRoomType(record);
-        setIsDetailModalOpen(true);
-      },
-    },
-    {
-      key: "2",
-      label: "Chỉnh sửa",
-      onClick: (record) => {
-        setSelectedRoomType(record);
-        setIsUpdateModalOpen(true);
-      },
-    },
-    {
-      key: "3",
-      label: "Xoá",
-      danger: true,
-      onClick: (record) => {
-        setSelectedRoomType(record);
-        setIsDeleteModalOpen(true);
-      },
-    },
-  ];
+    const uniqueMaxPeople = [...new Set(roomTypes.map(room => room.maxPeopleNumber))]
+      .filter(num => num != null)
+      .sort((a, b) => a - b)
+      .map(num => ({
+        label: `${num} người`,
+        value: num
+      }));
 
-  const filterGroups = [
-    {
-      name: "maxOccupancy",
-      title: "Số người tối đa",
-      options: [
-        { label: "2 người", value: 2 },
-        { label: "4 người", value: 4 },
-        { label: "6 người", value: 6 },
-        { label: "8 người", value: 8 },
-        { label: "10 người", value: 10 },
-      ],
-    },
-    {
-      name: "priceRange",
-      title: "Khoảng giá",
-      options: [
-        { label: "Dưới 100.000đ", value: "0-100000" },
-        { label: "100.000đ - 200.000đ", value: "100000-200000" },
-        { label: "200.000đ - 300.000đ", value: "200000-300000" },
-        { label: "300.000đ - 500.000đ", value: "300000-500000" },
-        { label: "Trên 500.000đ", value: "500000" },
-      ],
-    },
-    {
-      name: "serviceTypes",
-      title: "Loại dịch vụ",
-      options: services.map((service) => ({
-        label: service.name,
-        value: service._id,
-      })),
-    },
-  ];
+    return [
+      {
+        name: "maxOccupancy",
+        title: "Số người tối đa",
+        type: "checkbox",
+        options: uniqueMaxPeople,
+      },
+      {
+        name: "priceRange",
+        title: "Khoảng giá",
+        type: "range",
+      },
+      {
+        name: "serviceTypes",
+        title: "Loại dịch vụ",
+        type: "checkbox",
+        options: services.map((service) => ({
+          label: service.name,
+          value: service._id,
+        })),
+      },
+    ];
+  }, [roomTypes, services]);
 
   const handleFilterChange = (filterType, value) => {
     setSelectedValues((prev) => ({
@@ -170,7 +158,13 @@ const RoomTypeManagement = ({ isOwner }) => {
   };
 
   const getActiveFiltersCount = () => {
-    return Object.values(selectedValues).flat().length;
+    let count = 0;
+    count += selectedValues.maxOccupancy.length;
+    count += selectedValues.serviceTypes.length;
+    if (selectedValues.priceRange.min || selectedValues.priceRange.max) {
+      count += 1;
+    }
+    return count;
   };
 
   const handleDeleteConfirm = async () => {
@@ -200,9 +194,12 @@ const RoomTypeManagement = ({ isOwner }) => {
       await createAccommodationType(formattedValues).unwrap();
       message.success("Thêm loại phòng thành công");
       setIsAddModalOpen(false);
+
+      return Promise.resolve();
     } catch (error) {
       console.error("Error details:", error);
-      message.error("Thêm loại phòng thất bại");
+
+      return Promise.reject(error);
     }
   };
 
@@ -256,20 +253,37 @@ const RoomTypeManagement = ({ isOwner }) => {
       );
     }
 
-    if (selectedValues.priceRange.length > 0) {
+    if (selectedValues.priceRange.min !== null || selectedValues.priceRange.max !== null) {
       filtered = filtered.filter((item) => {
-        return selectedValues.priceRange.some((range) => {
-          const [min, max] = range.split("-").map(Number);
-          if (max === undefined) return item.basePrice >= min;
-          return item.basePrice >= min && item.basePrice <= max;
-        });
+        const price = item.basePrice;
+        const min = selectedValues.priceRange.min;
+        const max = selectedValues.priceRange.max;
+
+        if (min !== null && max !== null) {
+          return price >= min && price <= max;
+        } else if (min !== null) {
+          return price >= min;
+        } else if (max !== null) {
+          return price <= max;
+        }
+        return true;
       });
     }
 
     if (selectedValues.serviceTypes.length > 0) {
-      filtered = filtered.filter((item) =>
-        selectedValues.serviceTypes.includes(item.serviceId)
-      );
+      filtered = filtered.filter((item) => {
+        if (item.serviceIds && Array.isArray(item.serviceIds)) {
+          const serviceIdsInRoom = item.serviceIds.map(service =>
+            typeof service === 'string' ? service : service._id
+          );
+          return selectedValues.serviceTypes.some(id =>
+            serviceIdsInRoom.includes(id)
+          );
+        } else if (item.serviceId) {
+          return selectedValues.serviceTypes.includes(item.serviceId);
+        }
+        return false;
+      });
     }
 
     setFilteredData(filtered);
@@ -285,6 +299,7 @@ const RoomTypeManagement = ({ isOwner }) => {
       minute: "2-digit",
     });
   };
+
   const customTagStyle = {
     borderRadius: "16px",
     padding: "4px 12px",
@@ -292,6 +307,34 @@ const RoomTypeManagement = ({ isOwner }) => {
     background: "#e2e3e5",
     color: "#343a40",
   };
+
+  const menuItems = [
+    {
+      key: "1",
+      label: "Chi tiết",
+      onClick: (record) => {
+        setSelectedRoomType(record);
+        setIsDetailModalOpen(true);
+      },
+    },
+    {
+      key: "2",
+      label: "Chỉnh sửa",
+      onClick: (record) => {
+        setSelectedRoomType(record);
+        setIsUpdateModalOpen(true);
+      },
+    },
+    {
+      key: "3",
+      label: "Xoá",
+      danger: true,
+      onClick: (record) => {
+        setSelectedRoomType(record);
+        setIsDeleteModalOpen(true);
+      },
+    },
+  ];
 
   const columns = [
     {
@@ -309,19 +352,19 @@ const RoomTypeManagement = ({ isOwner }) => {
       align: "left",
       width: 150,
     },
-    {
-      title: "Mô tả",
-      dataIndex: "description",
-      key: "description",
-      align: "left",
-      width: 200,
-      ellipsis: true,
-      render: (description) => (
-        <Tooltip placement="topLeft" title={description}>
-          {description || "N/A"}
-        </Tooltip>
-      ),
-    },
+    // {
+    //   title: "Mô tả",
+    //   dataIndex: "description",
+    //   key: "description",
+    //   align: "left",
+    //   width: 200,
+    //   ellipsis: true,
+    //   render: (description) => (
+    //     <Tooltip placement="topLeft" title={description}>
+    //       {description || "N/A"}
+    //     </Tooltip>
+    //   ),
+    // },
     {
       title: "Số người tối đa",
       dataIndex: "maxPeopleNumber",
@@ -359,7 +402,6 @@ const RoomTypeManagement = ({ isOwner }) => {
         if (record.serviceId) {
           return <div style={customTagStyle}>1 dịch vụ</div>;
         }
-
         return "N/A";
       },
     },
@@ -442,7 +484,6 @@ const RoomTypeManagement = ({ isOwner }) => {
           columns={columns}
           dataSource={filteredData}
           rowKey="_id"
-          scroll={{ x: 1500 }}
           pagination={{
             total: filteredData.length,
             pageSize: 7,
