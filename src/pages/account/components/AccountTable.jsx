@@ -194,23 +194,19 @@ export default function AccountTable({ data, loading }) {
             {role === "Admin"
               ? "Nhân viên"
               : role === "Owner"
-              ? "Chủ hộ"
-              : "Khách hàng"}
+                ? "Chủ hộ"
+                : "Khách hàng"}
           </span>
           {record.owner && (
             <span
-              className={`${styles.approvedOwner} ${
-                styles[record.owner.isApproved ? "true" : "false"]
-              }`}
+              className={`${styles.approvedOwner} ${styles[record.owner.isApproved ? "true" : "false"]
+                }`}
               style={{
                 display: "inline-block",
                 minWidth: 80,
                 textAlign: "center",
+                margin: 8 
               }}
-              style={{ margin: 8 }}
-              className={`${styles.isActive} ${
-                styles[record?.owner?.isApproved]
-              }`}
             >
               {record.owner.isApproved ? "Duyệt" : "Chưa duyệt"}
             </span>
@@ -411,33 +407,44 @@ export default function AccountTable({ data, loading }) {
         rowKey="_id"
         pagination={{
           current: pagination.current,
-          pageSize: 7,
+          pageSize: pagination.pageSize,
           total: data.length,
           showSizeChanger: false,
-          onChange: (page) =>
-            setPagination((prev) => ({ ...prev, current: page })),
+          onChange: (page) => setPagination(prev => ({ ...prev, current: page })),
+          className: styles.customPagination,
           itemRender: (page, type, originalElement) => {
-            const totalPages = Math.ceil(data.length / 7);
-            if (type === "prev") {
+            const totalPages = Math.ceil(data.length / pagination.pageSize);
+
+            if (type === 'prev') {
               return (
                 <button
                   className={styles.paginationButton}
                   disabled={pagination.current === 1}
+                  onClick={() => setPagination(prev => ({
+                    ...prev,
+                    current: prev.current - 1
+                  }))}
                 >
                   « Trước
                 </button>
               );
             }
-            if (type === "next") {
+
+            if (type === 'next') {
               return (
                 <button
                   className={styles.paginationButton}
                   disabled={pagination.current >= totalPages}
+                  onClick={() => setPagination(prev => ({
+                    ...prev,
+                    current: prev.current + 1
+                  }))}
                 >
                   Tiếp »
                 </button>
               );
             }
+
             return originalElement;
           },
         }}
