@@ -1,37 +1,35 @@
-import styles from "./Dashboard.module.scss";
-import { useState, useEffect } from "react";
-import Table from "./components/Table";
-import ReviewList from "./components/List";
-import moment from "moment";
-import { useGetUsersQuery } from "../../redux/services/userApi";
-import { useGetAllBookingsQuery } from "../../redux/services/bookingApi";
+"use client"
 
-import { placeLove, reviewList } from "./data/dataFake";
-import Overview from "./components/Overview";
-import {
-  Area,
-  AreaChart,
-  CartesianAxis,
-  Tooltip,
-  XAxis,
-  YAxis,
-} from "recharts";
-import { Space, Card, Row, Col, Statistic } from "antd";
-import { ResponsiveContainer } from "recharts";
-import { PieChart, Pie, Cell, Legend } from "recharts";
-import QuarterlyUsersChart from "./components/QuarterlyUsersChart";
-import MonthlyBookingsChart from "./components/MonthlyBookingsChart";
-import MonthlyRevenueChart from "./components/MonthlyRevenueChart";
-import BookingStatusPieChart from "./components/BookingStatusPieChart";
-import { Spin } from "antd";
-import { Flex } from "antd";
+import styles from "./Dashboard.module.scss"
+import { useState, useEffect } from "react"
+import Table from "./components/Table"
+import ReviewList from "./components/List"
+import moment from "moment"
+import { useGetUsersQuery } from "../../redux/services/userApi"
+import { useGetAllBookingsQuery } from "../../redux/services/bookingApi"
+import { useGetTotalRevenueQuery } from "../../redux/services/customQueryApi"
+import { useGetTotalTransactionsQuery } from "../../redux/services/customQueryApi"
+
+import { placeLove, reviewList } from "./data/dataFake"
+import Overview from "./components/Overview"
+import QuarterlyUsersChart from "./components/QuarterlyUsersChart"
+import MonthlyBookingsChart from "./components/MonthlyBookingsChart"
+import MonthlyRevenueChart from "./components/MonthlyRevenueChart"
+import BookingStatusPieChart from "./components/BookingStatusPieChart"
 
 export default function Dashboard() {
-  const { data: userData, isLoading: isLoadingUsers } = useGetUsersQuery();
-  const { data: bookingData, isLoading: isLoadingBookings } =
-    useGetAllBookingsQuery();
+  // console.log("--- Dashboard Component Start ---")
 
-  console.log(bookingData);
+  const { data: rawUserData, isLoading: isLoadingUsers, isError: isErrorUsers } = useGetUsersQuery()
+  const { data: rawBookingData, isLoading: isLoadingBookings, isError: isErrorBookings } = useGetAllBookingsQuery()
+  const { data: totalRevenueFromHook, isLoading: isLoadingTotalRevenue } = useGetTotalRevenueQuery()
+  const { data: totalTransactionsFromHook, isLoading: isLoadingTotalTransactions } = useGetTotalTransactionsQuery()
+
+  const usersArray = rawUserData?.data || (Array.isArray(rawUserData) ? rawUserData : [])
+  const bookingsArray = rawBookingData?.data || (Array.isArray(rawBookingData) ? rawBookingData : [])
+
+  const overviewTotalRevenue = totalRevenueFromHook?.totalRevenue || totalRevenueFromHook || 0
+  const overviewTotalTransactions = totalTransactionsFromHook?.totalTransactions || totalTransactionsFromHook || 0
 
   const columnPlace = [
     {
@@ -56,183 +54,181 @@ export default function Dashboard() {
       key: "ratingAverage",
       sorter: (a, b) => a.ratingAverage - b.ratingAverage,
     },
-  ];
+  ]
 
-  // State to store the data
-  const [monthlyData, setMonthlyData] = useState([]);
-  const [quarterlyData, setQuarterlyData] = useState([]);
-  const [bookingStats, setBookingStats] = useState({ total: 0, data: [] });
+  const [monthlyData, setMonthlyData] = useState([])
+  const [quarterlyData, setQuarterlyData] = useState([])
+  const [bookingStats, setBookingStats] = useState({ total: 0, data: [] })
 
-  // Add this function to process API data and count users by quarter
   const processUsersByQuarter = (users) => {
-    if (!users) return [];
-
-    const quarterCounts = {
-      Q1: 0,
-      Q2: 0,
-      Q3: 0,
-      Q4: 0,
-    };
-
-    users.forEach((user) => {
-      const date = moment(user.createdAt, "DD/MM/YYYY HH:mm:ss");
-      const quarter = Math.ceil((date.month() + 1) / 3);
-      const quarterKey = `Q${quarter}`;
-      if (user.roleID != "67927feaa0a58ce4f7e8e83a") {
-        quarterCounts[quarterKey]++;
+    if (!users || users.length === 0) return []
+    const quarterCounts = { Q1: 0, Q2: 0, Q3: 0, Q4: 0 }
+    users.forEach((user, index) => {
+      // Assuming user.createdAt might also be "DD/MM/YYYY HH:mm:ss" or ISO
+      // Let moment try to parse it; if it's "DD/MM/YYYY...", provide format
+      const dateString = user.createdAt?.$date || user.createdAt
+      let date = moment(dateString) // Try ISO/standard first
+      if (!date.isValid() && typeof dateString === "string" && dateString.includes("/")) {
+        // If not valid and looks like "DD/MM/YYYY...", try with specific format
+        date = moment(dateString, "DD/MM/YYYY HH:mm:ss")
       }
-    });
 
-    const currentYear = moment().year();
-    return Object.entries(quarterCounts).map(([quarter, count]) => ({
+      if (date.isValid()) {
+        const quarter = Math.ceil((date.month() + 1) / 3)
+        const quarterKey = `Q${quarter}`
+        if (user.roleID !== "67927feaa0a58ce4f7e8e83a") {
+          quarterCounts[quarterKey]++
+        }
+      } else {
+        console.warn(`[processUsersByQuarter] Invalid date for user ${index}:`, dateString, user)
+      }
+    })
+    const currentYear = moment().year()
+    const result = Object.entries(quarterCounts).map(([quarter, count]) => ({
       quarter: `${quarter}/${currentYear}`,
       users: count,
-    }));
-  };
+    }))
+    return result
+  }
 
-  // Update the processBookingStatus function
   const processBookingStatus = (bookings) => {
-    if (!bookings) return { total: 0, data: [] };
-
-    const statusCounts = {
-      complete: 0,
-      cancel: 0,
-      pending: 0,
-    };
-    console.log(bookings);
-
+    // console.log("[processBookingStatus] Input bookings count:", bookings?.length)
+    if (!bookings || bookings.length === 0) {
+      return { total: 0, data: [] }
+    }
+    const statusCounts = { complete: 0, cancel: 0, pending: 0 }
     bookings.forEach((booking) => {
-      // Đã hoàn thành: có completedDate hoặc paymentStatus là "Hoàn thành"
-      if (booking.completedDate || booking.paymentStatus === "Hoàn thành") {
-        statusCounts.complete++;
+      let isComplete = false
+      if (
+        booking.paymentStatus === 3 ||
+        booking.paymentStatus === 4 ||
+        (booking.completedDate && moment(booking.completedDate.$date || booking.completedDate).isValid())
+      ) {
+        isComplete = true
+        statusCounts.complete++
+      } else if (booking.isCancel) {
+        statusCounts.cancel++
+      } else {
+        statusCounts.pending++
       }
-      // Đã hủy: isCancel là true
-      else if (booking.isCancel) {
-        statusCounts.cancel++;
-      }
-      // Chờ thanh toán: các trường hợp còn lại
-      else {
-        statusCounts.pending++;
-      }
-    });
-
+    })
     const data = [
-      {
-        name: "Hoàn thành",
-        value: statusCounts.complete,
-        color: "#14b8a6",
-        description: "Đã thanh toán và hoàn thành",
-      },
-      {
-        name: "Đã hủy",
-        value: statusCounts.cancel,
-        color: "#ef4444",
-        description: "Đơn đặt phòng đã bị hủy",
-      },
-      {
-        name: "Chờ thanh toán",
-        value: statusCounts.pending,
-        color: "#f59e0b",
-        description: "Đang chờ thanh toán",
-      },
-    ];
-
-    return {
+      { name: "Hoàn thành", value: statusCounts.complete, color: "#14b8a6" },
+      { name: "Đã hủy", value: statusCounts.cancel, color: "#ef4444" },
+      { name: "Chờ/Khác", value: statusCounts.pending, color: "#f59e0b" },
+    ]
+    const result = {
       total: bookings.length,
       data: data.filter((item) => item.value > 0),
-    };
-  };
+    }
+    // console.log("[processBookingStatus] Output:", result)
+    return result
+  }
 
-  // Update the monthly bookings processing
   const processBookingsByMonth = (bookings) => {
-    if (!bookings) return [];
+    console.log("[processBookingsByMonth] Input bookings count:", bookings?.length)
+    if (!bookings || bookings.length === 0) {
+      return []
+    }
+    const monthlyBookings = {}
+    bookings.forEach((booking, index) => {
+      // Extract the date string, assuming it might be in booking.createdAt directly
+      // or nested if it were an object like { $date: "..." }
+      const dateString = booking.createdAt?.$date || booking.createdAt
 
-    const monthlyBookings = {};
+      // IMPORTANT: Provide the format string to moment
+      const date = moment(dateString, "DD/MM/YYYY HH:mm:ss", true) // Added format and strict parsing
 
-    bookings.forEach((booking) => {
-      const date = moment(booking.createdAt, "DD/MM/YYYY HH:mm:ss");
-      const monthKey = date.format("MM/YY");
-      const fullMonth = date.format("MM/YYYY");
-
-      if (!monthlyBookings[monthKey]) {
-        monthlyBookings[monthKey] = {
-          month: monthKey,
-          fullMonth: fullMonth,
-          bookings: 0,
-          revenue: 0,
-        };
+      if (date.isValid()) {
+        const monthKey = date.format("MM/YY")
+        const fullMonth = date.format("MM/YYYY")
+        if (!monthlyBookings[monthKey]) {
+          monthlyBookings[monthKey] = { month: monthKey, fullMonth: fullMonth, bookings: 0, revenue: 0 }
+        }
+        monthlyBookings[monthKey].bookings++
+        if (booking.paymentStatus === 3) {
+          monthlyBookings[monthKey].revenue += booking.totalPrice || 0
+        }
+      } else {
+        // Fallback: if strict parsing "DD/MM/YYYY HH:mm:ss" fails, try if it's an ISO string
+        const isoDate = moment(dateString)
+        if (isoDate.isValid()) {
+          const monthKey = isoDate.format("MM/YY")
+          const fullMonth = isoDate.format("MM/YYYY")
+          if (!monthlyBookings[monthKey]) {
+            monthlyBookings[monthKey] = { month: monthKey, fullMonth: fullMonth, bookings: 0, revenue: 0 }
+          }
+          monthlyBookings[monthKey].bookings++
+          if (booking.paymentStatus === 3) {
+            monthlyBookings[monthKey].revenue += booking.totalPrice || 0
+          }
+        } else {
+          console.warn(
+            `[processBookingsByMonth] Invalid date for booking ${index} (tried DD/MM/YYYY HH:mm:ss and ISO):`,
+            dateString,
+            booking,
+          )
+        }
       }
-
-      monthlyBookings[monthKey].bookings++;
-      // Sử dụng totalPrice từ API
-      monthlyBookings[monthKey].revenue += booking.totalPrice || 0;
-    });
-
-    return Object.values(monthlyBookings)
-      .sort(
-        (a, b) =>
-          moment(a.fullMonth, "MM/YYYY") - moment(b.fullMonth, "MM/YYYY")
-      )
-      .slice(-6);
-  };
+    })
+    console.log("[processBookingsByMonth] Aggregated Data (before Object.values):", monthlyBookings)
+    const result = Object.values(monthlyBookings)
+      .sort((a, b) => moment(a.fullMonth, "MM/YYYY").valueOf() - moment(b.fullMonth, "MM/YYYY").valueOf())
+      .slice(-6)
+    console.log("[processBookingsByMonth] Output (last 6 months):", result)
+    return result
+  }
 
   const countUser = (users) => {
-    if (!users) return 0;
-    let userCount = 0;
-    users.forEach((user) => {
-      if (user.roleID != "67927feaa0a58ce4f7e8e83a") {
-        userCount++;
-      }
-    });
-    return userCount;
-  };
+    if (!users || users.length === 0) return 0
+    return users.filter((user) => user.roleID !== "67927feaa0a58ce4f7e8e83a").length
+  }
 
-  const countBooking = (bookings) => {
-    if (!bookings?.data) return 0; // Check if bookings exists and has 'data'
-    console.log("Line 187", bookings.data.length);
-    return bookings.data.length;
-  };
-
-  const countRevenue = (bookings) => {
-    console.log("Line 192", bookings);
-    if (!bookings) return 0;
-    let revenue = 0;
-    bookings.forEach((booking) => {
-      revenue += booking.totalPrice || 0;
-    });
-    return revenue;
-  };
-
-  // Update useEffect
   useEffect(() => {
-    if (userData) {
-      setQuarterlyData(processUsersByQuarter(userData));
+    // console.log("--- useEffect Start ---")
+    // console.log("Raw User Data in useEffect:", rawUserData)
+    // console.log("Raw Booking Data in useEffect:", rawBookingData)
+    // console.log("Processed usersArray length in useEffect:", usersArray.length)
+    // console.log("Processed bookingsArray length in useEffect:", bookingsArray.length)
+
+    if (usersArray.length > 0) {
+      const qData = processUsersByQuarter(usersArray)
+      // console.log("Setting Quarterly Data:", qData)
+      setQuarterlyData(qData)
+    } else {
+      // console.log("No users, setting empty Quarterly Data")
+      setQuarterlyData([])
     }
 
-    if (bookingData?.data) {
-      const processedBookings = processBookingsByMonth(bookingData.data);
-      setMonthlyData(processedBookings);
-      setBookingStats(processBookingStatus(bookingData.data));
+    if (bookingsArray.length > 0) {
+      // console.log("Processing bookingsArray for monthlyData and bookingStats. Count:", bookingsArray.length)
+      const mData = processBookingsByMonth(bookingsArray)
+      const bStats = processBookingStatus(bookingsArray)
+      // console.log("Setting Monthly Data:", mData)
+      setMonthlyData(mData)
+      // console.log("Setting Booking Stats:", bStats)
+      setBookingStats(bStats)
+    } else {
+      // console.log("No bookings, setting empty Monthly Data and Booking Stats")
+      setMonthlyData([])
+      setBookingStats({ total: 0, data: [] })
     }
-  }, [userData, bookingData]);
+    // console.log("--- useEffect End ---")
+  }, [rawUserData, rawBookingData, usersArray, bookingsArray]) // Added usersArray and bookingsArray to dependencies
 
-  // Loading state
-  const isLoading = isLoadingUsers || isLoadingBookings;
+  const isLoading = isLoadingUsers || isLoadingBookings || isLoadingTotalRevenue || isLoadingTotalTransactions
 
   if (isLoading) {
-    return (
-      <div
-        style={{
-          height: "100vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Spin size="large" />
-      </div>
-    );
+    // console.log("Dashboard is Loading...")
+    return <div>Loading...</div>
   }
+
+  if (isErrorUsers || isErrorBookings) {
+    // console.error("Error fetching data. User error:", isErrorUsers, "Booking error:", isErrorBookings)
+    return <div>Error loading dashboard data. Please try again.</div>
+  }
+
+  // console.log("--- Dashboard Render ---")
 
   return (
     <>
@@ -240,58 +236,28 @@ export default function Dashboard() {
         <h1 className={styles.sectionTitle}>Tổng quan</h1>
         <Overview
           totalUser={
-            countUser(userData) > 1000
-              ? `${(countUser(userData) / 1000).toFixed(1)}K`
-              : countUser(userData)
+            countUser(usersArray) > 1000 ? `${(countUser(usersArray) / 1000).toFixed(1)}K` : countUser(usersArray)
           }
           totalTransaction={
-            countBooking(bookingData) > 1000
-              ? `${(countBooking(bookingData) / 1000).toFixed(1)}K`
-              : countBooking(bookingData)
+            overviewTotalTransactions > 1000
+              ? `${(overviewTotalTransactions / 1000).toFixed(1)}K`
+              : overviewTotalTransactions
           }
           totalRevenue={
-            countRevenue(bookingData) > 1000
-              ? `${(countRevenue(bookingData) / 1000).toFixed(1)}K`
-              : countRevenue(bookingData) + " VNĐ"
+            overviewTotalRevenue > 1000
+              ? `${(overviewTotalRevenue / 1000).toFixed(1)}K VNĐ`
+              : `${overviewTotalRevenue} VNĐ`
           }
-          countViewer="10"
         />
 
         <h1 className={styles.sectionTitle}>Thống kê chi tiết</h1>
         <div className={styles.chartList}>
-          <QuarterlyUsersChart
-            data={quarterlyData}
-            year={quarterlyData[0]?.quarter.split("/")[1]}
-          />
+          <QuarterlyUsersChart data={quarterlyData} year={quarterlyData[0]?.quarter.split("/")[1] || moment().year()} />
           <MonthlyBookingsChart data={monthlyData} />
           <MonthlyRevenueChart data={monthlyData} />
-          <BookingStatusPieChart
-            data={bookingStats.data}
-            total={bookingStats.total}
-          />
-        </div>
-
-        {/* Bottom section with tables */}
-        <div className={styles.listGroupContainer}>
-          <div className={styles.listLovePlaceContainer}>
-            <h1 className={styles.sectionTitle}>
-              Top 5 địa điểm được yêu thích nhất
-            </h1>
-            <div className={styles.tableContainer}>
-              <Table
-                tableColumn={columnPlace}
-                tableData={placeLove}
-                isPagination={false}
-              />
-            </div>
-          </div>
-
-          <div className={styles.listReviewCustomerContainer}>
-            <h1 className={styles.sectionTitle}>Đánh giá khách hàng</h1>
-            <ReviewList itemLayout={"horizontal"} dataSource={reviewList} />
-          </div>
+          <BookingStatusPieChart data={bookingStats.data} total={bookingStats.total} />
         </div>
       </div>
     </>
-  );
+  )
 }

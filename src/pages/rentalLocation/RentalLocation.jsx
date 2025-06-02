@@ -7,7 +7,6 @@ import RentalLocationTable from "./components/RentalLocationTable";
 import FilterRentalLocation from "./components/FilterRentalLocation";
 import { useGetAllRentalLocationQuery } from "../../redux/services/rentalApi";
 import styles from "./RentalLocation.module.scss";
-import { Spin } from "antd";
 
 export default function RentalLocation() {
   const { data, isLoading, refetch } = useGetAllRentalLocationQuery();
@@ -90,21 +89,6 @@ export default function RentalLocation() {
       setIsReloading(false);
     }
   };
-
-  if (isLoading) {
-    return (
-      <div
-        style={{
-          height: "100vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Spin size="large" />
-      </div>
-    );
-  }
 
   return (
     <div className={styles.contentContainer}>

@@ -112,6 +112,35 @@ export const bookingApi = apiSlice.injectEndpoints({
         { type: "Booking", id: "LIST" },
       ],
     }),
+
+    getBoookingStatsWeekly : builder.query({
+      query: (userId) => `/booking/stats/weekly-count/${userId}`,
+      transformResponse: (response) => response?.weeklyBookingCounts,
+      providesTags: ["Booking"],  
+    }),
+
+    getBookingStatsMonthly : builder.query({
+      query: (userId) => `/booking/stats/monthly-count/${userId}`,
+      transformResponse: (response) => response?.monthlyBookingCounts,
+      providesTags: ["Booking"],
+    }),
+
+    getStatsRevenueWeekly : builder.query({
+      query: (userId) => `/booking/stats/weekly-revenue/${userId}`,
+      transformResponse: (response) => response?.weeklyRevenue,
+      providesTags: ["Booking"],
+    }),
+
+    getStatsRevenueMonthly : builder.query({
+      query: (userId) => `/booking/stats/monthly-revenue/${userId}`,
+      transformResponse: (response) => response?.monthlyRevenue,
+      providesTags: ["Booking"],
+    }),
+
+
+
+    
+
   }),
 });
 
@@ -125,4 +154,8 @@ export const {
   useUpdateBookingMutation,
   useGenerateBookingPasswordMutation,
   useGetAllOwnerBookingsQuery,
+  useGetBoookingStatsWeeklyQuery,
+  useGetBookingStatsMonthlyQuery,
+  useGetStatsRevenueWeeklyQuery,
+  useGetStatsRevenueMonthlyQuery,
 } = bookingApi;

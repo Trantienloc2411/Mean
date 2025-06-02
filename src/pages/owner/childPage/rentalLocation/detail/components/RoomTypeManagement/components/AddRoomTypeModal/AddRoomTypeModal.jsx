@@ -3,8 +3,8 @@ import { Modal, Form, Select, Button, Spin, message, Alert } from "antd"
 import {
   useGetAccommodationTypesByOwnerQuery,
   useGetAllAccommodationTypesQuery,
-} from "../../../../../../../../../redux/services/accommodationTypeApi" 
-import { useUpdateRentalLocationMutation } from "../../../../../../../../../redux/services/rentalApi" 
+} from "../../../../../../../../../redux/services/accommodationTypeApi"
+import { useUpdateRentalLocationMutation } from "../../../../../../../../../redux/services/rentalApi"
 import { PlusOutlined, HomeOutlined, AppstoreAddOutlined } from "@ant-design/icons"
 import AddNewRoomTypeModal from "../../../../../../TypeRoom/components/RoomTypeManagement/components/AddRoomTypeModal/AddRoomTypeModal"
 import styles from "./AddRoomTypeModal.module.scss"
@@ -23,35 +23,32 @@ const AddRoomTypeModal = ({
   const [isAddNewRoomTypeModalOpen, setIsAddNewRoomTypeModalOpen] = useState(false)
 
   const {
-    data: accommodationTypesByOwner,
-    isLoading: isLoadingOwnerTypes,
-    error: ownerTypesError,
-    refetch: refetchAccommodationTypesByOwner,
+    data: accommodationTypes,
+    isLoading: isLoadingTypes,
+    error: typesError,
+    refetch: refetchAccommodationTypes,
   } = useGetAccommodationTypesByOwnerQuery(ownerId, {
     skip: !ownerId || !isOpen,
   })
 
-  const { refetch: refetchRentalAccommodationTypes } = useGetAllAccommodationTypesQuery(rentalLocationId, {
+  const { refetch: refetchAllAccommodationTypes } = useGetAllAccommodationTypesQuery(rentalLocationId, {
     skip: !rentalLocationId,
   })
 
-  const [updateRentalLocation, { isLoading: isUpdatingRental, error: updateError }] = useUpdateRentalLocationMutation()
+  const [updateRentalLocation, { isLoading: isUpdating, error: updateError }] = useUpdateRentalLocationMutation()
 
   useEffect(() => {
     if (isOpen) {
       form.resetFields()
       setErrorMessage("")
-      if (ownerId) {
-        refetchAccommodationTypesByOwner()
-      }
     }
-  }, [isOpen, form, ownerId, refetchAccommodationTypesByOwner])
+  }, [isOpen, form])
 
   useEffect(() => {
-    if (ownerTypesError) {
-      setErrorMessage("Không thể tải danh sách loại phòng của chủ nhà. Vui lòng thử lại sau.")
+    if (typesError) {
+      setErrorMessage("Không thể tải danh sách loại phòng. Vui lòng thử lại sau.")
     }
-  }, [ownerTypesError])
+  }, [typesError])
 
   const handleSubmit = async () => {
     try {
@@ -62,12 +59,14 @@ const AddRoomTypeModal = ({
       if (!Array.isArray(values.accommodationTypeIds) || values.accommodationTypeIds.length === 0) {
         throw new Error("Vui lòng chọn ít nhất một loại phòng")
       }
+
       if (!rentalLocationId) {
         throw new Error("Không tìm thấy ID chỗ ở")
       }
 
-      const currentIdsInRental = existingRoomTypeIds || []
-      const mergedIds = [...new Set([...currentIdsInRental, ...values.accommodationTypeIds])]
+      const currentIds = existingRoomTypeIds || []
+      const newIds = values.accommodationTypeIds.filter((id) => !currentIds.includes(id))
+      const mergedIds = [...currentIds, ...newIds]
 
       const cleanId = String(rentalLocationId).trim()
       const dataUpdate = {
@@ -79,11 +78,15 @@ const AddRoomTypeModal = ({
         updatedData: dataUpdate,
       }).unwrap()
 
-      await refetchRentalAccommodationTypes()
-      message.success("Thêm loại phòng vào chỗ ở thành công")
-      onCancel() 
+      await refetchAllAccommodationTypes()
+
+      message.success("Thêm loại phòng thành công")
+
+      // Close the modal
+      onCancel()
     } catch (error) {
       console.error("Error updating rental location:", error)
+
       if (error.errorFields) {
         message.error("Vui lòng kiểm tra lại thông tin nhập")
       } else if (error.data?.message) {
@@ -91,35 +94,34 @@ const AddRoomTypeModal = ({
       } else if (error.message) {
         setErrorMessage(error.message)
       } else {
-        setErrorMessage("Đã xảy ra lỗi khi thêm loại phòng vào chỗ ở")
+        setErrorMessage("Đã xảy ra lỗi khi thêm loại phòng")
       }
     } finally {
       setLocalSubmitting(false)
     }
   }
 
-  const handleAddNewRoomTypeSuccess = async (newlyCreatedRoomType) => {
+  const handleAddNewRoomType = async (newRoomTypeData) => {
     try {
-      await refetchAccommodationTypesByOwner() 
-
-      if (newlyCreatedRoomType && newlyCreatedRoomType._id) {
+      await refetchAccommodationTypes()
+      if (newRoomTypeData && newRoomTypeData._id) {
         const currentSelectedIds = form.getFieldValue("accommodationTypeIds") || []
         form.setFieldsValue({
-          accommodationTypeIds: [...new Set([...currentSelectedIds, newlyCreatedRoomType._id])],
+          accommodationTypeIds: [...currentSelectedIds, newRoomTypeData._id],
         })
-        message.success(`Loại phòng "${newlyCreatedRoomType.name}" đã được tạo và chọn.`)
-      } else {
-        message.success("Tạo loại phòng mới thành công!")
       }
-      setIsAddNewRoomTypeModalOpen(false) 
+
+      message.success("Tạo loại phòng mới thành công")
+      setIsAddNewRoomTypeModalOpen(false)
     } catch (error) {
-      message.error("Đã xảy ra lỗi khi xử lý loại phòng mới sau khi tạo.")
-      console.error("Error in handleAddNewRoomTypeSuccess:", error)
+      message.error("Đã xảy ra lỗi khi tạo loại phòng mới")
+      console.error("Error adding new room type:", error)
     }
   }
 
-  const isDisabled = externalSubmitting || localSubmitting || isUpdatingRental || isLoadingOwnerTypes
-  const isLoadingOverall = isLoadingOwnerTypes || isUpdatingRental || localSubmitting || externalSubmitting
+  const isDisabled = externalSubmitting || localSubmitting || isUpdating || isLoadingTypes
+
+  const isLoading = isLoadingTypes || isUpdating || localSubmitting || externalSubmitting
 
   return (
     <>
@@ -127,7 +129,7 @@ const AddRoomTypeModal = ({
         title={
           <div className={styles.modalTitle}>
             <AppstoreAddOutlined className={styles.modalIcon} />
-            <span>Thêm loại phòng vào chỗ ở</span>
+            <span>Thêm loại phòng</span>
           </div>
         }
         open={isOpen}
@@ -151,9 +153,9 @@ const AddRoomTypeModal = ({
             />
           )}
 
-          {isLoadingOwnerTypes && !accommodationTypesByOwner ? (
+          {isLoadingTypes ? (
             <div className={styles.loadingContainer}>
-              <Spin size="large" tip="Đang tải dữ liệu loại phòng của chủ nhà..." />
+              <Spin size="large" tip="Đang tải dữ liệu..." />
             </div>
           ) : (
             <Form form={form} layout="vertical" preserve={false} className={styles.form}>
@@ -175,27 +177,27 @@ const AddRoomTypeModal = ({
               >
                 <Select
                   mode="multiple"
-                  placeholder="Chọn loại phòng từ danh sách của chủ nhà"
-                  loading={isLoadingOwnerTypes}
-                  options={(accommodationTypesByOwner?.data || []).map((type) => {
-                    const isExistingInCurrentRental = existingRoomTypeIds.includes(type._id)
+                  placeholder="Chọn loại phòng"
+                  loading={isLoadingTypes}
+                  options={(accommodationTypes?.data || []).map((type) => {
+                    const isExisting = existingRoomTypeIds.includes(type._id)
                     return {
-                      label: `${type.name}${isExistingInCurrentRental ? " (Đã có trong chỗ ở này)" : ""}`,
+                      label: `${type.name}${isExisting ? " (Đã thêm)" : ""}`,
                       value: type._id,
-                      disabled: isExistingInCurrentRental,
+                      disabled: isExisting,
                     }
                   })}
                   showSearch
                   optionFilterProp="label"
-                  filterOption={(input, option) => String(option.label).toLowerCase().includes(input.toLowerCase())}
-                  notFoundContent={ownerTypesError ? "Lỗi tải dữ liệu" : "Không tìm thấy loại phòng"}
+                  filterOption={(input, option) => option.label.toLowerCase().includes(input.toLowerCase())}
+                  notFoundContent={typesError ? "Lỗi tải dữ liệu" : "Không tìm thấy loại phòng"}
                   className={styles.select}
                   dropdownRender={(menu) => (
                     <>
                       {menu}
                       <div className={styles.addNewOption} onClick={() => setIsAddNewRoomTypeModalOpen(true)}>
                         <PlusOutlined className={styles.plusIcon} />
-                        <span>Tạo và thêm loại phòng mới</span>
+                        <span>Thêm loại phòng mới</span>
                       </div>
                     </>
                   )}
@@ -204,9 +206,9 @@ const AddRoomTypeModal = ({
             </Form>
           )}
 
-          {isUpdatingRental && (
+          {isUpdating && (
             <div className={styles.updatingContainer}>
-              <Spin tip="Đang cập nhật chỗ ở..." />
+              <Spin tip="Đang cập nhật..." />
             </div>
           )}
 
@@ -217,11 +219,11 @@ const AddRoomTypeModal = ({
             <Button
               type="primary"
               onClick={handleSubmit}
-              loading={isLoadingOverall}
+              loading={isLoading}
               disabled={isDisabled}
               className={styles.confirmButton}
             >
-              Xác nhận thêm
+              Xác nhận
             </Button>
           </div>
         </div>
@@ -229,12 +231,9 @@ const AddRoomTypeModal = ({
 
       <AddNewRoomTypeModal
         isOpen={isAddNewRoomTypeModalOpen}
-        onModalCancel={() => setIsAddNewRoomTypeModalOpen(false)}
-        onModalSuccess={handleAddNewRoomTypeSuccess}
-        ownerId={ownerId} 
-        rentalLocationId={rentalLocationId}
-        existingRoomTypeIdsForRental={existingRoomTypeIds}
-        refetchRentalDataInParent={refetchRentalAccommodationTypes} 
+        onCancel={() => setIsAddNewRoomTypeModalOpen(false)}
+        onConfirm={handleAddNewRoomType}
+        ownerId={ownerId}
       />
     </>
   )

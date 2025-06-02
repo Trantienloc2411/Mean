@@ -1,13 +1,11 @@
-"use client";
-
-import { useParams } from "react-router-dom";
-import { Skeleton, Row, Col, message } from "antd";
-import { useState, useEffect } from "react";
-import AccountInfo from "./Components/AccountInfo/AccountInfo";
-import AccountStatus from "./Components/AccountStatus/AccountStatus";
-import CompanyInfo from "./Components/CompanyInfo/CompanyInfo";
-import styles from "./Information.module.scss";
-import { notification } from "antd";
+import { useParams } from "react-router-dom"
+import { Skeleton, Row, Col, message } from "antd"
+import { useState, useEffect } from "react"
+import AccountInfo from "./Components/AccountInfo/AccountInfo"
+import AccountStatus from "./Components/AccountStatus/AccountStatus"
+import CompanyInfo from "./Components/CompanyInfo/CompanyInfo"
+import styles from "./Information.module.scss"
+import { notification } from "antd"
 
 import {
   useGetOwnerDetailByUserIdQuery,
@@ -118,6 +116,17 @@ export default function Information() {
   // Update info (fake logic)
   const handleUpdateUserInfo = async (updatedInfo) => {
     try {
+      // Call the updateUser mutation with the correct payload structure
+      const result = await updateUser({
+        id: id,
+        updatedUser: {
+          fullName: updatedInfo.fullName,
+          phone: updatedInfo.phone,
+          avatarUrl: [updatedInfo.avatar]
+        }
+      }).unwrap()
+
+      // Update local state after successful API call
       setUserInfo((prev) => ({
         ...prev,
         ...updatedInfo,
