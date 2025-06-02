@@ -242,7 +242,8 @@
       border-radius: 12px;
       padding: 0;
       overflow: hidden;
-      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+        0 10px 10px -5px rgba(0, 0, 0, 0.04);
     }
 
     .ant-modal-header {
@@ -341,7 +342,7 @@
 .errorAlert {
   margin-top: 16px;
   text-align: left;
-  
+
   :global {
     .ant-alert-message {
       font-size: 13px;
@@ -473,8 +474,12 @@
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 // Responsive design for modal
@@ -515,4 +520,25 @@
       width: 100%;
     }
   }
+}
+/* ví dụ */
+.approvedOwner {
+  border-radius: 20px;
+  padding: 2px 6px;
+  font-size: 12px;
+}
+
+.pending {
+  background-color: #fff3cd;
+  color: #856404;
+}
+
+.approved {
+  background-color: #d4edda;
+  color: #155724;
+}
+
+.denied {
+  background-color: #f8d7da;
+  color: #721c24;
 }

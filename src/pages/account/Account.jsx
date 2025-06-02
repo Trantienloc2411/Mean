@@ -81,7 +81,7 @@ export default function Account() {
             user.isVerified === selectedFilters.isVerified;
           const matchesOwnerApproved =
             selectedFilters.isOwnerApproved === null ||
-            user?.owner?.isApproved === selectedFilters.isOwnerApproved;
+            user?.owner?.approvalStatus === selectedFilters.isOwnerApproved;
 
           return (
             matchesSearch &&

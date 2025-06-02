@@ -125,7 +125,13 @@ export default function BankInfo({ bankData, refetch }) {
         <Form.Item
           label="Số tài khoản"
           name="bankNo"
-          rules={[{ required: true }]}
+          rules={[
+            {
+              required: true,
+              pattern: /^[0-9]+$/,
+              message: "Số tài khoản chỉ được chứa số!",
+            },
+          ]}
         >
           <Input readOnly={!isEditing} />
         </Form.Item>
@@ -133,9 +139,24 @@ export default function BankInfo({ bankData, refetch }) {
         <Form.Item
           label="Tên chủ tài khoản"
           name="bankAccountName"
-          rules={[{ required: true }]}
+          rules={[
+            { required: true, message: "Vui lòng nhập tên chủ tài khoản!" },
+            {
+              pattern: /^[A-Z\s]+$/,
+              message: "Chỉ được nhập chữ in hoa không dấu!",
+            },
+          ]}
         >
-          <Input readOnly={!isEditing} />
+          <Input
+            readOnly={!isEditing}
+            onChange={(e) => {
+              const value = e.target.value
+                .normalize("NFD") // Tách dấu ra khỏi ký tự
+                .replace(/[\u0300-\u036f]/g, "") // Xóa dấu
+                .toUpperCase(); // Chuyển thành in hoa
+              form.setFieldsValue({ bankAccountName: value });
+            }}
+          />
         </Form.Item>
       </Form>
 
@@ -245,15 +266,26 @@ function NotHaveBank({ ownerId, createBank, refetch }) {
           <Form.Item
             label="Số tài khoản"
             name="accountNumber"
-            rules={[{ required: true, message: "Vui lòng nhập số tài khoản!" }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập số tài khoản!" },
+              {
+                pattern: /^[0-9]+$/,
+                message: "Số tài khoản chỉ được chứa chữ số!",
+              },
+            ]}
           >
             <Input />
           </Form.Item>
+          {console.log("aaa")}
           <Form.Item
             label="Tên chủ tài khoản"
             name="accountHolder"
             rules={[
               { required: true, message: "Vui lòng nhập tên chủ tài khoản!" },
+              {
+                pattern: /^[A-Z\s]+$/,
+                message: "Chỉ được nhập chữ in hoa không dấu và không có số!",
+              },
             ]}
           >
             <Input />
