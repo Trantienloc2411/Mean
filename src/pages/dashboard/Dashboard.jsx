@@ -250,6 +250,7 @@ export default function Dashboard() {
           }
         />
 
+
         <h1 className={styles.sectionTitle}>Thống kê chi tiết</h1>
         <div className={styles.chartList}>
           <QuarterlyUsersChart data={quarterlyData} year={quarterlyData[0]?.quarter.split("/")[1] || moment().year()} />

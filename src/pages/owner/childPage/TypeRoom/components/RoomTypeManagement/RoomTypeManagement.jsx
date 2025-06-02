@@ -1,130 +1,124 @@
-import { useState, useEffect } from "react";
-import { Table, Button, Input, Dropdown, message, Tooltip, Select, InputNumber } from "antd";
-import { MoreOutlined, PlusOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons";
-import styles from "./RoomTypeManagement.module.scss";
-import DeleteRoomTypeModal from "./components/DeleteRoomTypeModal/DeleteRoomTypeModal";
-import AddRoomTypeModal from "./components/AddRoomTypeModal/AddRoomTypeModal";
-import UpdateRoomTypeModal from "./components/UpdateRoomTypeModal/UpdateRoomTypeModal";
-import DetailRoomTypeModal from "./components/DetailRoomTypeModal/DetailRoomTypeModal";
-import Filter from "./components/Filter/Filter";
-import debounce from "lodash/debounce";
+import { useState, useEffect } from "react"
+import { Table, Button, Input, Dropdown, message } from "antd"
+import { MoreOutlined, PlusOutlined, FilterOutlined, ReloadOutlined } from "@ant-design/icons"
+import styles from "./RoomTypeManagement.module.scss"
+import DeleteRoomTypeModal from "./components/DeleteRoomTypeModal/DeleteRoomTypeModal"
+import AddRoomTypeModal from "./components/AddRoomTypeModal/AddRoomTypeModal"
+import UpdateRoomTypeModal from "./components/UpdateRoomTypeModal/UpdateRoomTypeModal"
+import DetailRoomTypeModal from "./components/DetailRoomTypeModal/DetailRoomTypeModal"
+import Filter from "./components/Filter/Filter"
+import debounce from "lodash/debounce"
 import {
   useGetAccommodationTypesByOwnerQuery,
   useCreateAccommodationTypeMutation,
   useUpdateAccommodationTypeMutation,
   useDeleteAccommodationTypeMutation,
-} from "../../../../../../redux/services/accommodationTypeApi";
-import {
-  useGetAllAmenitiesQuery,
-  useGetAmenityByIdQuery,
-} from "../../../../../../redux/services/serviceApi";
-import { Tag } from "antd";
-import { useGetOwnerDetailByUserIdQuery } from "../../../../../../redux/services/ownerApi";
-import { useParams } from "react-router-dom";
-import { useMemo } from "react";
+} from "../../../../../../redux/services/accommodationTypeApi"
+import { useGetAllAmenitiesQuery } from "../../../../../../redux/services/serviceApi"
+import { useGetOwnerDetailByUserIdQuery } from "../../../../../../redux/services/ownerApi"
+import { useParams } from "react-router-dom"
+import { useMemo } from "react"
 
 const RoomTypeManagement = ({ isOwner }) => {
-  const { id } = useParams();
+  const { id } = useParams()
   const [selectedValues, setSelectedValues] = useState({
     maxOccupancy: [],
     priceRange: { min: null, max: null },
     serviceTypes: [],
-  });
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredData, setFilteredData] = useState([]);
-  const [selectedRoomType, setSelectedRoomType] = useState(null);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [serviceNames, setServiceNames] = useState({});
-  const [isReloading, setIsReloading] = useState(false);
+  })
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filteredData, setFilteredData] = useState([])
+  const [selectedRoomType, setSelectedRoomType] = useState(null)
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false)
+  const [serviceNames, setServiceNames] = useState({})
+  const [isReloading, setIsReloading] = useState(false)
 
   const getOwnerIdFromStorage = () => {
     try {
-      const storedOwnerId = localStorage.getItem('ownerId');
-      return storedOwnerId;
+      const storedOwnerId = localStorage.getItem("ownerId")
+      return storedOwnerId
     } catch (error) {
-      console.error('Error getting ownerId from localStorage:', error);
-      return null;
+      console.error("Error getting ownerId from localStorage:", error)
+      return null
     }
-  };
+  }
 
-  const { data: ownerDetailData, isLoading: isOwnerDetailLoading } =
-    useGetOwnerDetailByUserIdQuery(id);
-  const ownerId = ownerDetailData?.id;
+  const { data: ownerDetailData, isLoading: isOwnerDetailLoading } = useGetOwnerDetailByUserIdQuery(id)
+  const ownerId = ownerDetailData?.id
 
-  const { data: roomTypesData, isLoading: isRoomTypesLoading, refetch } =
-    useGetAccommodationTypesByOwnerQuery(ownerId, {
-      skip: !ownerId,
-    });
+  const {
+    data: roomTypesData,
+    isLoading: isRoomTypesLoading,
+    refetch,
+  } = useGetAccommodationTypesByOwnerQuery(ownerId, {
+    skip: !ownerId,
+  })
 
-  const storageOwnerId = getOwnerIdFromStorage();
-  const { data: servicesData, isLoading: isServicesLoading } =
-    useGetAllAmenitiesQuery({ ownerId: storageOwnerId }, {
+  const storageOwnerId = getOwnerIdFromStorage()
+  const { data: servicesData, isLoading: isServicesLoading } = useGetAllAmenitiesQuery(
+    { ownerId: storageOwnerId },
+    {
       skip: !storageOwnerId,
-    });
-
-  const [createAccommodationType] = useCreateAccommodationTypeMutation();
-  const [updateAccommodationType] = useUpdateAccommodationTypeMutation();
-  const [deleteAccommodationType] = useDeleteAccommodationTypeMutation();
+    },
+  )
+  const [createAccommodationType] = useCreateAccommodationTypeMutation()
+  const [updateAccommodationType] = useUpdateAccommodationTypeMutation()
+  const [deleteAccommodationType] = useDeleteAccommodationTypeMutation()
 
   const roomTypes = Array.isArray(roomTypesData?.data)
     ? roomTypesData.data
     : Array.isArray(roomTypesData)
       ? roomTypesData
-      : [];
+      : []
   const services = Array.isArray(servicesData?.data)
     ? servicesData.data
     : Array.isArray(servicesData)
       ? servicesData
-      : [];
+      : []
 
   useEffect(() => {
     const fetchServiceNames = async () => {
-      const uniqueServiceIds = [
-        ...new Set(filteredData.map((room) => room.serviceId)),
-      ];
-      const newServiceNames = { ...serviceNames };
-      let hasChanges = false;
+      const uniqueServiceIds = [...new Set(filteredData.map((room) => room.serviceId))]
+      const newServiceNames = { ...serviceNames }
+      let hasChanges = false
 
       for (const serviceId of uniqueServiceIds) {
         if (!serviceNames[serviceId]) {
           try {
-            const response = await fetch(`/service/${serviceId}`);
-            const data = await response.json();
-            newServiceNames[serviceId] = data.name;
-            hasChanges = true;
+            const response = await fetch(`/service/${serviceId}`) // Note: This fetch might need to be an API call via Redux or similar
+            const data = await response.json()
+            newServiceNames[serviceId] = data.name
+            hasChanges = true
           } catch (error) {
-            console.error(
-              `Error fetching service name for ID ${serviceId}:`,
-              error
-            );
-            newServiceNames[serviceId] = "Unknown Service";
+            console.error(`Error fetching service name for ID ${serviceId}:`, error)
+            newServiceNames[serviceId] = "Unknown Service"
           }
         }
       }
 
       if (hasChanges) {
-        setServiceNames(newServiceNames);
+        setServiceNames(newServiceNames)
       }
-    };
+    }
 
     if (filteredData.length > 0) {
-      fetchServiceNames();
+      fetchServiceNames()
     }
-  }, [filteredData]);
+  }, [filteredData, serviceNames]) 
 
   const filterGroups = useMemo(() => {
-    if (!roomTypes.length) return [];
+    if (!roomTypes.length) return []
 
-    const uniqueMaxPeople = [...new Set(roomTypes.map(room => room.maxPeopleNumber))]
-      .filter(num => num != null)
+    const uniqueMaxPeople = [...new Set(roomTypes.map((room) => room.maxPeopleNumber))]
+      .filter((num) => num != null)
       .sort((a, b) => a - b)
-      .map(num => ({
+      .map((num) => ({
         label: `${num} người`,
-        value: num
-      }));
+        value: num,
+      }))
 
     return [
       {
@@ -144,161 +138,142 @@ const RoomTypeManagement = ({ isOwner }) => {
         type: "checkbox",
         options: services.map((service) => ({
           label: service.name,
-          value: service._id,
+          value: service._id, 
         })),
       },
-    ];
-  }, [roomTypes, services]);
+    ]
+  }, [roomTypes, services])
 
   const handleFilterChange = (filterType, value) => {
     setSelectedValues((prev) => ({
       ...prev,
       [filterType]: value,
-    }));
-  };
+    }))
+  }
 
   const getActiveFiltersCount = () => {
-    let count = 0;
-    count += selectedValues.maxOccupancy.length;
-    count += selectedValues.serviceTypes.length;
+    let count = 0
+    count += selectedValues.maxOccupancy.length
+    count += selectedValues.serviceTypes.length
     if (selectedValues.priceRange.min || selectedValues.priceRange.max) {
-      count += 1;
+      count += 1
     }
-    return count;
-  };
+    return count
+  }
 
   const handleDeleteConfirm = async () => {
     if (!selectedRoomType?._id) {
-      message.error("Không tìm thấy ID loại phòng");
-      return;
+      message.error("Không tìm thấy ID loại phòng")
+      return
     }
 
     try {
-      await deleteAccommodationType(selectedRoomType._id).unwrap();
-      message.success("Xóa loại phòng thành công");
-      setIsDeleteModalOpen(false);
-      setSelectedRoomType(null);
+      await deleteAccommodationType(selectedRoomType._id).unwrap()
+      message.success("Xóa loại phòng thành công")
+      setIsDeleteModalOpen(false)
+      setSelectedRoomType(null)
+      refetch() 
     } catch (error) {
-      message.error(error?.data?.message || "Xóa loại phòng thất bại");
+      message.error(error?.data?.message || "Xóa loại phòng thất bại")
     }
-  };
-
-  const handleAddRoomType = async (values) => {
-    try {
-      const formattedValues = { ...values };
-      if (formattedValues.serviceIds && formattedValues.serviceIds.length > 0) {
-        formattedValues.serviceId = formattedValues.serviceIds[0];
-      }
-
-      console.log("Sending to API:", formattedValues);
-      await createAccommodationType(formattedValues).unwrap();
-      message.success("Thêm loại phòng thành công");
-      setIsAddModalOpen(false);
-
-      return Promise.resolve();
-    } catch (error) {
-      console.error("Error details:", error);
-
-      return Promise.reject(error);
-    }
-  };
+  }
+  const handleAddRoomTypeSuccess = async (newlyCreatedRoomTypeData) => {
+    setIsAddModalOpen(false)
+    refetch()
+    return Promise.resolve() 
+  }
 
   const handleUpdateRoomType = async (values) => {
     try {
       await updateAccommodationType({
         id: selectedRoomType._id,
         ...values,
-      }).unwrap();
-      message.success("Cập nhật loại phòng thành công");
-      setIsUpdateModalOpen(false);
-      setSelectedRoomType(null);
+      }).unwrap()
+      message.success("Cập nhật loại phòng thành công")
+      setIsUpdateModalOpen(false)
+      setSelectedRoomType(null)
+      refetch() 
     } catch (error) {
-      message.error("Cập nhật loại phòng thất bại");
+      message.error(error?.data?.message || "Cập nhật loại phòng thất bại")
     }
-  };
+  }
 
   const handleReload = async () => {
     try {
-      setIsReloading(true);
-      await refetch();
-      message.success("Đã làm mới dữ liệu");
+      setIsReloading(true)
+      await refetch()
+      message.success("Đã làm mới dữ liệu")
     } catch (error) {
-      message.error("Làm mới thất bại");
+      message.error("Làm mới thất bại")
     } finally {
-      setIsReloading(false);
+      setIsReloading(false)
     }
-  };
+  }
 
   const debouncedSearch = debounce((value) => {
-    setSearchTerm(value);
-  }, 500);
+    setSearchTerm(value)
+  }, 500)
 
   useEffect(() => {
     if (!roomTypes.length) {
-      setFilteredData([]);
-      return;
+      setFilteredData([])
+      return
     }
 
-    let filtered = [...roomTypes];
+    let filtered = [...roomTypes]
 
     if (searchTerm) {
-      filtered = filtered.filter((item) =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      filtered = filtered.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
     }
 
     if (selectedValues.maxOccupancy.length > 0) {
-      filtered = filtered.filter((item) =>
-        selectedValues.maxOccupancy.includes(item.maxPeopleNumber)
-      );
+      filtered = filtered.filter((item) => selectedValues.maxOccupancy.includes(item.maxPeopleNumber))
     }
 
     if (selectedValues.priceRange.min !== null || selectedValues.priceRange.max !== null) {
       filtered = filtered.filter((item) => {
-        const price = item.basePrice;
-        const min = selectedValues.priceRange.min;
-        const max = selectedValues.priceRange.max;
+        const price = item.basePrice
+        const min = selectedValues.priceRange.min
+        const max = selectedValues.priceRange.max
 
         if (min !== null && max !== null) {
-          return price >= min && price <= max;
+          return price >= min && price <= max
         } else if (min !== null) {
-          return price >= min;
+          return price >= min
         } else if (max !== null) {
-          return price <= max;
+          return price <= max
         }
-        return true;
-      });
+        return true
+      })
     }
 
     if (selectedValues.serviceTypes.length > 0) {
       filtered = filtered.filter((item) => {
         if (item.serviceIds && Array.isArray(item.serviceIds)) {
-          const serviceIdsInRoom = item.serviceIds.map(service =>
-            typeof service === 'string' ? service : service._id
-          );
-          return selectedValues.serviceTypes.some(id =>
-            serviceIdsInRoom.includes(id)
-          );
+          const serviceIdsInRoom = item.serviceIds.map((service) =>
+            typeof service === "string" ? service : service._id,
+          )
+          return selectedValues.serviceTypes.some((id) => serviceIdsInRoom.includes(id))
         } else if (item.serviceId) {
-          return selectedValues.serviceTypes.includes(item.serviceId);
+          return selectedValues.serviceTypes.includes(item.serviceId)
         }
-        return false;
-      });
+        return false
+      })
     }
 
-    setFilteredData(filtered);
-  }, [searchTerm, selectedValues, roomTypes]);
+    setFilteredData(filtered)
+  }, [searchTerm, selectedValues, roomTypes])
 
   const formatDate = (dateString) => {
-    const date = new Date(dateString);
+    const date = new Date(dateString)
     return date.toLocaleString("vi-VN", {
       year: "numeric",
       month: "2-digit",
       day: "2-digit",
       hour: "2-digit",
       minute: "2-digit",
-    });
-  };
+    })
+  }
 
   const customTagStyle = {
     borderRadius: "16px",
@@ -306,23 +281,23 @@ const RoomTypeManagement = ({ isOwner }) => {
     fontSize: "12px",
     background: "#e2e3e5",
     color: "#343a40",
-  };
+  }
 
   const menuItems = [
     {
       key: "1",
       label: "Chi tiết",
       onClick: (record) => {
-        setSelectedRoomType(record);
-        setIsDetailModalOpen(true);
+        setSelectedRoomType(record)
+        setIsDetailModalOpen(true)
       },
     },
     {
       key: "2",
       label: "Chỉnh sửa",
       onClick: (record) => {
-        setSelectedRoomType(record);
-        setIsUpdateModalOpen(true);
+        setSelectedRoomType(record)
+        setIsUpdateModalOpen(true)
       },
     },
     {
@@ -330,11 +305,11 @@ const RoomTypeManagement = ({ isOwner }) => {
       label: "Xoá",
       danger: true,
       onClick: (record) => {
-        setSelectedRoomType(record);
-        setIsDeleteModalOpen(true);
+        setSelectedRoomType(record)
+        setIsDeleteModalOpen(true)
       },
     },
-  ];
+  ]
 
   const columns = [
     {
@@ -352,19 +327,6 @@ const RoomTypeManagement = ({ isOwner }) => {
       align: "left",
       width: 150,
     },
-    // {
-    //   title: "Mô tả",
-    //   dataIndex: "description",
-    //   key: "description",
-    //   align: "left",
-    //   width: 200,
-    //   ellipsis: true,
-    //   render: (description) => (
-    //     <Tooltip placement="topLeft" title={description}>
-    //       {description || "N/A"}
-    //     </Tooltip>
-    //   ),
-    // },
     {
       title: "Số người tối đa",
       dataIndex: "maxPeopleNumber",
@@ -397,12 +359,12 @@ const RoomTypeManagement = ({ isOwner }) => {
       width: 100,
       render: (serviceIds, record) => {
         if (serviceIds && Array.isArray(serviceIds) && serviceIds.length > 0) {
-          return <div style={customTagStyle}>{serviceIds.length} dịch vụ</div>;
+          return <div style={customTagStyle}>{serviceIds.length} dịch vụ</div>
         }
-        if (record.serviceId) {
-          return <div style={customTagStyle}>1 dịch vụ</div>;
+        if (record.serviceId && (!serviceIds || serviceIds.length === 0)) {
+          return <div style={customTagStyle}>1 dịch vụ</div>
         }
-        return "N/A";
+        return "N/A"
       },
     },
     {
@@ -425,13 +387,9 @@ const RoomTypeManagement = ({ isOwner }) => {
         </Dropdown>
       ),
     },
-  ];
+  ]
 
-  const isLoading =
-    isRoomTypesLoading ||
-    isServicesLoading ||
-    isOwnerDetailLoading ||
-    isReloading;
+  const isLoading = isRoomTypesLoading || isServicesLoading || isOwnerDetailLoading || isReloading
 
   return (
     <div className={styles.contentContainer}>
@@ -459,11 +417,7 @@ const RoomTypeManagement = ({ isOwner }) => {
                 {getActiveFiltersCount() > 0 && ` (${getActiveFiltersCount()})`}
               </Button>
             </Dropdown>
-            <Button
-              icon={<ReloadOutlined spin={isReloading} />}
-              onClick={handleReload}
-              loading={isReloading}
-            >
+            <Button icon={<ReloadOutlined spin={isReloading} />} onClick={handleReload} loading={isReloading}>
               Làm mới
             </Button>
           </div>
@@ -495,44 +449,47 @@ const RoomTypeManagement = ({ isOwner }) => {
 
         <AddRoomTypeModal
           isOpen={isAddModalOpen}
-          onCancel={() => setIsAddModalOpen(false)}
-          onConfirm={handleAddRoomType}
-          services={services}
+          onModalCancel={() => setIsAddModalOpen(false)} 
+          onModalSuccess={handleAddRoomTypeSuccess} 
+          services={services} 
+          ownerId={ownerId} 
         />
 
         <UpdateRoomTypeModal
           isOpen={isUpdateModalOpen}
           onCancel={() => {
-            setIsUpdateModalOpen(false);
-            setSelectedRoomType(null);
+            setIsUpdateModalOpen(false)
+            setSelectedRoomType(null)
           }}
           onConfirm={handleUpdateRoomType}
-          initialValues={{ _id: selectedRoomType?._id }}
+          initialValues={selectedRoomType} 
           services={services}
         />
 
         <DetailRoomTypeModal
           isOpen={isDetailModalOpen}
           roomType={selectedRoomType}
-          service={services.find((s) => s._id === selectedRoomType?.serviceId)}
+          service={services.find(
+            (s) => selectedRoomType?.serviceIds?.includes(s._id) || s._id === selectedRoomType?.serviceId,
+          )}
           onCancel={() => {
-            setIsDetailModalOpen(false);
-            setSelectedRoomType(null);
+            setIsDetailModalOpen(false)
+            setSelectedRoomType(null)
           }}
         />
 
         <DeleteRoomTypeModal
           isOpen={isDeleteModalOpen}
           onCancel={() => {
-            setIsDeleteModalOpen(false);
-            setSelectedRoomType(null);
+            setIsDeleteModalOpen(false)
+            setSelectedRoomType(null)
           }}
           onConfirm={handleDeleteConfirm}
           roomTypeName={selectedRoomType?.name}
         />
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default RoomTypeManagement;
+export default RoomTypeManagement
