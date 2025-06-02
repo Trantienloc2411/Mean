@@ -3,7 +3,6 @@ import { useMemo, useState } from "react";
 import dayjs from "dayjs";
 import { Tag } from "antd";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import styles from "./OwnerRevenue.module.scss";
 import { Select } from "antd";
 dayjs.extend(customParseFormat);
 const DATE_FORMAT = "DD/MM/YYYY HH:mm:ss";
@@ -87,23 +86,17 @@ export default function BookingTable({ bookings = [], loading }) {
       align: "center",
       dataIndex: "status",
       render: (status) => {
-        const label = BOOKING_STATUS_LABELS[status]?.text || "Không rõ";
-        const className = status
-          ? `${styles.bookingStatus} ${styles[`status-${status}`]}`
-          : `${styles.bookingStatus} ${styles.unknown}`;
-        return <span className={className}>{label}</span>;
+        const s = BOOKING_STATUS_LABELS[status];
+        return <Tag color={s?.color || "default"}>{s?.text || "Không rõ"}</Tag>;
       },
     },
     {
       title: "Thanh toán",
       align: "center",
       dataIndex: "paymentStatus",
-      render: (status) => {
-        const label = PAYMENT_STATUS_LABELS[status]?.text || "Không rõ";
-        const className = status
-          ? `${styles.paymentStatus} ${styles[`status-${status}`]}`
-          : `${styles.paymentStatus} ${styles.unknown}`;
-        return <span className={className}>{label}</span>;
+      render: (paymentStatus) => {
+        const s = PAYMENT_STATUS_LABELS[paymentStatus];
+        return <Tag color={s?.color || "default"}>{s?.text || "Không rõ"}</Tag>;
       },
     },
   ];

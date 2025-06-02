@@ -8,7 +8,6 @@ import {
   useGetBookingByIdQuery,
 } from "../../redux/services/bookingApi";
 import dayjs from "dayjs";
-import { Spin } from "antd";
 
 const BOOKING_STATUS = Object.freeze({
   CONFIRMED: 1,
@@ -136,20 +135,7 @@ export default function Booking() {
     setSelectedBookingId(bookingId);
   };
 
-  if (isLoading) {
-    return (
-      <div
-        style={{
-          height: "100vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Spin size="large" />
-      </div>
-    );
-  }
+  if (isLoading) return <div>Đang tải...</div>;
   if (error) return <div>Lỗi tải booking</div>;
 
   return (

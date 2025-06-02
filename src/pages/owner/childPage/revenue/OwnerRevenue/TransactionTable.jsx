@@ -1,8 +1,7 @@
-import { Space, Input, Select, Card, Table } from "antd"; // Gộp các import
+import { Space, Input, Select, Card, Table, Tag } from "antd"; // Gộp các import
 import dayjs from "dayjs";
 import { useState, useMemo } from "react";
 import customParseFormat from "dayjs/plugin/customParseFormat";
-import styles from "./OwnerRevenue.module.scss";
 
 dayjs.extend(customParseFormat);
 
@@ -12,6 +11,12 @@ const TRANSACTION_STATUS_MAP = {
   1: "Chờ xử lý",
   2: "Hoàn tất",
   3: "Thất bại",
+};
+
+const TRANSACTION_STATUS_COLOR_MAP = {
+  1: "gold", // Chờ xử lý
+  2: "green", // Hoàn tất
+  3: "red", // Thất bại
 };
 
 export default function TransactionTable({ transactions }) {
@@ -60,13 +65,9 @@ export default function TransactionTable({ transactions }) {
       title: "Trạng thái",
       dataIndex: "transactionStatus",
       render: (status) => (
-        <span
-          className={`${styles.transactionStatus} ${
-            styles[`status-${status}`] || styles.unknown
-          }`}
-        >
+        <Tag color={TRANSACTION_STATUS_COLOR_MAP[status]}>
           {TRANSACTION_STATUS_MAP[status] || "Không xác định"}
-        </span>
+        </Tag>
       ),
     },
     {

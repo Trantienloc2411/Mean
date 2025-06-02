@@ -17,21 +17,6 @@
   }
 }
 
-.approvedOwner {
-  padding: 4px 12px;
-  border-radius: 16px;
-  font-size: 12px;
-  display: inline-block;
-  &.true {
-    background: #d1fae5;
-    color: #059669;
-  }
-  &.false {
-    // ✅ sửa lại từ .fasle
-    background: #feeceb;
-    color: #f36960;
-  }
-}
 .isActive {
   padding: 4px 12px;
   border-radius: 16px;

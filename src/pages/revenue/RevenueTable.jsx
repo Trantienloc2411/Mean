@@ -41,16 +41,19 @@ const RevenueTable = ({ data, handleViewDetail }) => {
     {
       title: "Trạng thái",
       dataIndex: "status",
-      align: "center",
       key: "status",
       render: (status) => (
-        <span className={`${styles.statusTag} ${styles[status]}`}>
-          {status === "ACTIVE"
-            ? "ĐANG HOẠT ĐỘNG"
-            : status === "PENDING"
-            ? "CHƯA CÓ BOOKING"
-            : "KHÔNG HOẠT ĐỘNG"}
-        </span>
+        <Tag
+          color={
+            status === "ACTIVE"
+              ? "green"
+              : status === "PENDING"
+              ? "orange"
+              : "red"
+          }
+        >
+          {status === "ACTIVE" ? "ĐANG HOẠT ĐỘNG" : "CHƯA CÓ BOOKING"}
+        </Tag>
       ),
       // filters: [
       //   { text: "Đang hoạt động", value: "ACTIVE" },
@@ -61,28 +64,24 @@ const RevenueTable = ({ data, handleViewDetail }) => {
     {
       title: "Tổng doanh thu",
       dataIndex: "revenue",
-      align: "right",
       key: "revenue",
       render: (val) => val.toLocaleString() + " VND",
       sorter: (a, b) => a.revenue - b.revenue,
     },
     {
       title: "Phí nền tảng",
-      align: "right",
       dataIndex: "platformFee",
       key: "platformFee",
       render: (val) => val.toLocaleString() + " VND",
     },
     {
       title: "Lợi nhuận Owner",
-      align: "right",
       key: "profit",
       render: (_, record) =>
         (record.revenue - record.platformFee).toLocaleString() + " VND",
     },
     {
       title: "Hành động",
-      align: "center",
       key: "action",
       render: (_, record) => (
         <Tooltip title="Xem chi tiết booking">
