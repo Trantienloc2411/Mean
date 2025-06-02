@@ -16,6 +16,7 @@ import CardListBooking from "./components/CardListBooking.jsx";
 import { useGetBookingsByOwnerIdQuery } from "../../../../redux/services/bookingApi.js";
 import { useGetOwnerDetailByUserIdQuery } from "../../../../redux/services/ownerApi.js";
 import { useGetFeedbackByOwnerIdQuery } from "../../../../redux/services/feedbackApi.js";
+import { useGetBoookingStatsWeeklyQuery, useGetBookingStatsMonthlyQuery, useGetStatsRevenueWeeklyQuery, useGetStatsRevenueMonthlyQuery} from "../../../../redux/services/bookingApi.js"
 import { useParams } from "react-router-dom";
 import {
   AreaChart,
@@ -41,6 +42,16 @@ export default function Overview() {
   const [feedback, setFeedback] = useState([]);
 
   const { data: ownerDetail } = useGetOwnerDetailByUserIdQuery(id);
+
+  const { data: weeklyBookingStats, isLoading: isLoadingWeeklyStats } =
+    useGetBoookingStatsWeeklyQuery(id);
+  const { data: monthlyBookingStats, isLoading: isLoadingMonthlyStats } =
+    useGetBookingStatsMonthlyQuery(id);
+  const { data: weeklyRevenueStats, isLoading: isLoadingWeeklyRevenue } =
+    useGetStatsRevenueWeeklyQuery(id);
+  const { data: monthlyRevenueStats, isLoading: isLoadingMonthlyRevenue } =
+    useGetStatsRevenueMonthlyQuery(id);
+
 
   const { data: bookingDetail } = useGetBookingsByOwnerIdQuery(
     ownerDetail?.id,
@@ -83,41 +94,36 @@ export default function Overview() {
   const cancelledBookings =
     bookingDetail?.filter((booking) => booking.status === 6).length || 0;
   const totalRevenue =
-    bookingDetail?.reduce(
-      (sum, booking) => sum + (booking.totalPrice || 0),
+    bookingDetail?.filter((booking) => booking.paymentStatus === 3).  
+    reduce(
+      (sum, booking) => sum + (booking.totalPrice || 0)
+      ,
       0
     ) || 0;
 
-  // Sample data for charts
-  const weeklyData = [
-    { name: "T2", bookings: 4, revenue: 400000 },
-    { name: "T3", bookings: 3, revenue: 300000 },
-    { name: "T4", bookings: 5, revenue: 500000 },
-    { name: "T5", bookings: 7, revenue: 700000 },
-    { name: "T6", bookings: 6, revenue: 600000 },
-    { name: "T7", bookings: 8, revenue: 800000 },
-    { name: "CN", bookings: 9, revenue: 900000 },
-  ];
+  const transformStatsData = (bookingStats, revenueStats) => {
+  const mergedData = [];
 
-  const monthlyData = [
-    { name: "Tháng 1", bookings: 30, revenue: 3000000 },
-    { name: "Tháng 2", bookings: 25, revenue: 2500000 },
-    { name: "Tháng 3", bookings: 35, revenue: 3500000 },
-    { name: "Tháng 4", bookings: 40, revenue: 4000000 },
-    { name: "Tháng 5", bookings: 45, revenue: 4500000 },
-    { name: "Tháng 6", bookings: 50, revenue: 5000000 },
-  ];
+  for (const key in bookingStats || {}) {
+    mergedData.push({
+      name: key, 
+      bookings: bookingStats[key] || 0,
+      revenue: revenueStats?.[key] || 0,
+    });
+  }
 
-  const pieData = [
-    { name: "Phòng Basic", value: 40 },
-    { name: "Phòng Plus", value: 30 },
-    { name: "Phòng VIP", value: 20 },
-    { name: "Phòng Deluxe", value: 10 },
-  ];
+  return mergedData;
+};
+
+
 
   const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
 
-  const chartData = activeTab === "weekly" ? weeklyData : monthlyData;
+  const chartData =
+  activeTab === "weekly"
+    ? transformStatsData(weeklyBookingStats, weeklyRevenueStats)
+    : transformStatsData(monthlyBookingStats, monthlyRevenueStats);
+
 
   return (
     <div className={styles.contentContainer}>
@@ -268,36 +274,6 @@ export default function Overview() {
       </div>
 
       <div className={styles.bottomSection}>
-        <div className={styles.pieChartCard}>
-          <h3 className={styles.chartTitle}>Phân bổ loại phòng</h3>
-          <div className={styles.pieChartWrapper}>
-            <ResponsiveContainer width="100%" height={300}>
-              <PieChart>
-                <Pie
-                  data={pieData}
-                  cx="50%"
-                  cy="50%"
-                  labelLine={false}
-                  outerRadius={100}
-                  fill="#8884d8"
-                  dataKey="value"
-                  label={({ name, percent }) =>
-                    `${name}: ${(percent * 100).toFixed(0)}%`
-                  }
-                >
-                  {pieData.map((entry, index) => (
-                    <Cell
-                      key={`cell-${index}`}
-                      fill={COLORS[index % COLORS.length]}
-                    />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value) => [`${value}%`, "Tỷ lệ"]} />
-                <Legend />
-              </PieChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
 
         <div className={styles.reviewsCard}>
           <h3 className={styles.chartTitle}>Đánh giá gần đây</h3>

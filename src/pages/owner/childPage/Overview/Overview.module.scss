@@ -115,24 +115,10 @@
     }
 
     .bottomSection {
-        display: grid;
         grid-template-columns: 1fr 1fr;
         gap: 20px;
 
-        .pieChartCard, .reviewsCard {
-            background-color: white;
-            border-radius: 12px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.05);
-            padding: 20px;
-
-            .chartTitle {
-                font-size: 16px;
-                font-weight: 600;
-                margin-top: 0;
-                margin-bottom: 16px;
-                color: #333;
-            }
-        }
+    
 
         .pieChartWrapper, .reviewsWrapper {
             height: 300px;

@@ -112,27 +112,39 @@ export default function FilterAccount({
         <strong>Trạng thái duyệt (Owner)</strong>
         <div style={{ marginBottom: 8, marginLeft: 8 }}>
           <Checkbox
-            checked={filters.isOwnerApproved === true}
+            checked={filters.isOwnerApproved === 1}
             onChange={() =>
               onFilterChange(
                 "isOwnerApproved",
-                filters.isOwnerApproved === true ? null : true
+                filters.isOwnerApproved === 1 ? null : 1
               )
             }
           >
-            Đã duyệt
+            Chờ duyệt
           </Checkbox>
           <Checkbox
-            checked={filters.isOwnerApproved === false}
+            checked={filters.isOwnerApproved === 2}
             onChange={() =>
               onFilterChange(
                 "isOwnerApproved",
-                filters.isOwnerApproved === false ? null : false
+                filters.isOwnerApproved === 2 ? null : 2
               )
             }
             style={{ marginLeft: 8 }}
           >
-            Chưa duyệt
+            Đã duyệt
+          </Checkbox>
+          <Checkbox
+            checked={filters.isOwnerApproved === 3}
+            onChange={() =>
+              onFilterChange(
+                "isOwnerApproved",
+                filters.isOwnerApproved === 3 ? null : 3
+              )
+            }
+            style={{ marginLeft: 8 }}
+          >
+            Từ chối
           </Checkbox>
         </div>
         <Divider style={{ margin: "8px 0" }} />

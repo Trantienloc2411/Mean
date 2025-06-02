@@ -1,11 +1,12 @@
 import { Flex } from "antd";
-import { FaUser, FaUserTie, FaUsers } from "react-icons/fa";
+import { FaUser, FaUserFriends, FaUserTie, FaUsers } from "react-icons/fa";
 import CardDashboard from "../../../components/Card/CardDashboard";
 
 export default function OverviewAccount({
   totalUser,
   countCustomer,
-  countStaff,
+  countAdmin,
+  countOwner,
 }) {
   return (
     <Flex gap={30} justify="start" wrap="wrap">
@@ -27,6 +28,17 @@ export default function OverviewAccount({
             ? `${(countCustomer / 1000).toFixed(1)}K`
             : countCustomer
         }
+        iconName={<FaUserFriends />}
+        backgroundColorIcon="#d0cfff"
+        colorIcon="#8280FF"
+        width="25%"
+        height={120}
+      />
+      <CardDashboard
+        title="Chủ cho thuê"
+        value={
+          countAdmin > 1000 ? `${(countAdmin / 1000).toFixed(1)}K` : countAdmin
+        }
         iconName={<FaUser />}
         backgroundColorIcon="#d0cfff"
         colorIcon="#8280FF"
@@ -34,9 +46,9 @@ export default function OverviewAccount({
         height={120}
       />
       <CardDashboard
-        title="Quản lý"
+        title="Quản trị viên"
         value={
-          countStaff > 1000 ? `${(countStaff / 1000).toFixed(1)}K` : countStaff
+          countOwner > 1000 ? `${(countOwner / 1000).toFixed(1)}K` : countOwner
         }
         iconName={<FaUserTie />}
         backgroundColorIcon="#d0cfff"

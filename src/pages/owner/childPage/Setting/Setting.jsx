@@ -95,11 +95,11 @@ export default function Setting() {
     //   ),
     // },
 
-    {
-      key: "bankAccount",
-      label: "Tài khoản ngân hàng",
-      children: <BankAccount refetch={refetch} bankData={bankInfo} />,
-    },
+    // {
+    //   key: "bankAccount",
+    //   label: "Tài khoản ngân hàng",
+    //   children: <BankAccount refetch={refetch} bankData={bankInfo} />,
+    // },
     ...(canEdit
       ? [
           {

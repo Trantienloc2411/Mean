@@ -20,6 +20,7 @@ export default function OwnerDetailModal({
   open,
   onClose,
   user,
+  refetch,
   handleActiveUser,
   handleBlockUser,
   updateOwner,
@@ -30,7 +31,7 @@ export default function OwnerDetailModal({
   const {
     data: owner,
     isLoading: isOwnerLoading,
-    refetch,
+    refetch: refetchOwner,
   } = useGetOwnerDetailByUserIdQuery(user?._id);
   const {
     data: logsData,
@@ -99,9 +100,10 @@ export default function OwnerDetailModal({
             <ProfileInfo
               owner={owner}
               updateOwner={updateOwner}
-              refetch={refetch}
+              refetchOwner={refetchOwner}
               logsData={logsData}
               refetchLogs={refetchLogs}
+              refetch={refetch}
             />
           </TabPane>
         </Tabs>
@@ -215,7 +217,7 @@ const OWNER_STATUS = {
   APPROVING: 1,
   APPROVED: 2,
   DENIED: 3,
-  PENDING: 4,
+  // PENDING: 4,
 };
 
 const formatStatus = (status) => {
@@ -224,21 +226,34 @@ const formatStatus = (status) => {
       return <span className={styles.true}>Đã duyệt</span>;
     case OWNER_STATUS.DENIED:
       return <span className={styles.false}>Từ chối</span>;
-    case OWNER_STATUS.PENDING:
-      return <span className={styles.pending}>Chờ cập nhật</span>;
+    // case OWNER_STATUS.PENDING:
+    //   return <span className={styles.pending}>Chờ cập nhật</span>;
     case OWNER_STATUS.APPROVING:
-      return <span className={styles.pending}>Chờ duyệt</span>;
+      return <span style={{ color: "#faad14" }}>Chờ duyệt</span>;
     default:
       return <span>Không xác định</span>;
   }
 };
 
-function ProfileInfo({ owner, updateOwner, refetch, logsData, refetchLogs }) {
+function ProfileInfo({
+  owner,
+  updateOwner,
+  refetchOwner,
+  refetch,
+  logsData,
+  refetchLogs,
+}) {
   const [modalVisible, setModalVisible] = useState(false);
   const [reason, setReason] = useState("");
 
+  const parseDateString = (str) => {
+    const [day, month, yearAndTime] = str.split("/");
+    const [year, time] = yearAndTime.split(" ");
+    return new Date(`${year}-${month}-${day}T${time}`);
+  };
+
   const approvalHistory = [...(logsData || [])].sort(
-    (a, b) => new Date(b?.createdAt) - new Date(a?.createdAt)
+    (a, b) => parseDateString(b?.createdAt) - parseDateString(a?.createdAt)
   );
 
   const handleApprove = async () => {
@@ -253,6 +268,8 @@ function ProfileInfo({ owner, updateOwner, refetch, logsData, refetchLogs }) {
       // message.success(" Đã phê duyệt chủ sở hữu!");
       setReason("");
       refetchLogs();
+      refetchOwner();
+      refetch();
       setModalVisible(false);
       await refetch();
     } catch (error) {
@@ -276,6 +293,8 @@ function ProfileInfo({ owner, updateOwner, refetch, logsData, refetchLogs }) {
       // message.success(" Đã từ chối phê duyệt!");
       setReason("");
       refetchLogs();
+      refetchOwner();
+      refetch();
       setModalVisible(false);
       await refetch();
     } catch (error) {
