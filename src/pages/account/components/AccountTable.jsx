@@ -193,9 +193,9 @@ export default function AccountTable({ data, loading, refetch }) {
               }}
             >
               {role === "Admin"
-                ? "Nhân viên"
+                ? "Quản trị viên"
                 : role === "Owner"
-                ? "Chủ hộ"
+                ? "Chủ cho thuê"
                 : "Khách hàng"}
             </span>
 
