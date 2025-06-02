@@ -64,56 +64,56 @@ const ProfileCard = ({ initialData, onUpdate }) => {
       if (fileList.length > 0) {
         const file = fileList[0].originFileObj;
         const fileExt = file.name.split(".").pop();
-        const fileName = `${Math.random()
-          .toString(36)
-          .substring(2, 15)}.${fileExt}`;
+        const fileName = `${Date.now()}-${Math.random().toString(36).substring(2, 8)}.${fileExt}`;
         const filePath = `avatars/${fileName}`;
 
-        const { data, error } = await supabase.storage
+        const { data: uploadData, error: uploadError } = await supabase.storage
           .from("avatars")
           .upload(filePath, file, {
             cacheControl: "3600",
             upsert: false,
           });
 
-        if (error) {
-          throw error;
+        if (uploadError) {
+          throw uploadError;
         }
 
-        // Get public URL
-        const { data: urlData } = supabase.storage
+        const { data: publicData } = supabase.storage
           .from("avatars")
           .getPublicUrl(filePath);
 
-        avatarUrl = urlData.publicUrl;
+        avatarUrl = publicData.publicUrl;
       }
 
+      // Check if there are actual changes
+      const trimmedValues = {
+        fullName: values.fullName.trim(),
+        phone: values.phone.trim(),
+      };
 
-      // Here you would update the user data in your database
-      // For example:
-      // const { error } = await supabase
-      //   .from('users')
-      //   .update({
-      //     fullName: values.fullName,
-      //     phone: values.phone,
-      //     avatarUrl: avatarUrl
-      //   })
-      //   .eq('id', userId);
- 
+      const hasChanges = 
+        trimmedValues.fullName !== defaultData.fullName ||
+        trimmedValues.phone !== defaultData.phone ||
+        fileList.length > 0;
 
-      // For now, we'll just simulate a successful update
-      message.success("Thông tin đã được cập nhật thành công!");
+      if (!hasChanges) {
+        message.info("Không có thay đổi nào để cập nhật!");
+        setIsEditing(false);
+        setFileList([]);
+        return;
+      }
 
       // If you have an onUpdate callback, call it with the updated data
       if (onUpdate) {
         onUpdate({
           ...defaultData,
-          fullName: values.fullName,
-          phone: values.phone,
+          fullName: trimmedValues.fullName,
+          phone: trimmedValues.phone,
           avatar: avatarUrl,
         });
       }
 
+      message.success("Thông tin đã được cập nhật thành công!");
       setIsEditing(false);
       setFileList([]);
     } catch (error) {
@@ -172,7 +172,19 @@ const ProfileCard = ({ initialData, onUpdate }) => {
       <Form.Item
         name="fullName"
         label="Họ và tên"
-        rules={[{ required: true, message: "Vui lòng nhập họ và tên!" }]}
+        rules={[
+          { required: true, message: "Vui lòng nhập họ và tên!" },
+          { whitespace: true, message: "Họ và tên không được chỉ chứa khoảng trắng!" },
+          { 
+            validator: (_, value) => {
+              if (value && value.trim() === "") {
+                return Promise.reject("Họ và tên không được chỉ chứa khoảng trắng!");
+              }
+              return Promise.resolve();
+            }
+          }
+        ]}
+        normalize={(value) => (value || "").trim()}
       >
         <Input placeholder="Nhập họ và tên" />
       </Form.Item>
@@ -194,7 +206,9 @@ const ProfileCard = ({ initialData, onUpdate }) => {
         rules={[
           { required: true, message: "Vui lòng nhập số điện thoại!" },
           { pattern: /^[0-9]{10,11}$/, message: "Số điện thoại không hợp lệ!" },
+          { whitespace: true, message: "Số điện thoại không được chứa khoảng trắng!" }
         ]}
+        normalize={(value) => (value || "").trim()}
       >
         <Input placeholder="Nhập số điện thoại" />
       </Form.Item>
@@ -230,6 +244,7 @@ const ProfileCard = ({ initialData, onUpdate }) => {
             onClick={handleSave}
             icon={<SaveOutlined />}
             loading={loading}
+            disabled={loading}
           >
             Lưu
           </Button>
