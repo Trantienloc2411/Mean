@@ -88,6 +88,7 @@ const ProfileCard = ({ initialData, onUpdate }) => {
         avatarUrl = urlData.publicUrl;
       }
 
+
       // Here you would update the user data in your database
       // For example:
       // const { error } = await supabase
@@ -98,6 +99,7 @@ const ProfileCard = ({ initialData, onUpdate }) => {
       //     avatarUrl: avatarUrl
       //   })
       //   .eq('id', userId);
+ 
 
       // For now, we'll just simulate a successful update
       message.success("Thông tin đã được cập nhật thành công!");
