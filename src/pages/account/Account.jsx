@@ -40,21 +40,37 @@ export default function Account() {
   }, [roles]);
 
   const countUser = (users) => {
-    if (!users) return { totalUser: 0, countCustomer: 0, countStaff: 0 };
+    if (!users)
+      return {
+        totalUser: 0,
+        countCustomer: 0,
+        countAdmin: 0,
+        countOwner: 0,
+      };
 
     let totalUser = users.length;
     let countCustomer = 0;
-    let countStaff = 0;
+    let countAdmin = 0;
+    let countOwner = 0;
+    console.log(roles);
 
     users.forEach((user) => {
-      if (user.roleID === "67f87c9ac19b91da666bbdc5") {
-        countStaff++;
-      } else {
+      if (
+        user.roleID === roles?.find((role) => role.roleName === "Customer")?._id
+      ) {
         countCustomer++;
+      } else if (
+        user.roleID === roles?.find((role) => role.roleName === "Admin")?._id
+      ) {
+        countAdmin++;
+      } else if (
+        user.roleID === roles?.find((role) => role.roleName === "Owner")?._id
+      ) {
+        countOwner++;
       }
     });
 
-    return { totalUser, countCustomer, countStaff };
+    return { totalUser, countCustomer, countAdmin, countOwner };
   };
 
   useEffect(() => {
@@ -80,7 +96,7 @@ export default function Account() {
             user.isVerified === selectedFilters.isVerified;
           const matchesOwnerApproved =
             selectedFilters.isOwnerApproved === null ||
-            user?.owner?.isApproved === selectedFilters.isOwnerApproved;
+            user?.owner?.approvalStatus === selectedFilters.isOwnerApproved;
 
           return (
             matchesSearch &&
@@ -134,7 +150,8 @@ export default function Account() {
         <OverviewAccount
           totalUser={countUser(users).totalUser}
           countCustomer={countUser(users).countCustomer}
-          countStaff={countUser(users).countStaff}
+          countAdmin={countUser(users).countAdmin}
+          countOwner={countUser(users).countOwner}
         />
       </div>
 

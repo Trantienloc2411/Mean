@@ -49,11 +49,11 @@ const OwnerLayout = () => {
       icon: <MdOutlinePolicy />,
       label: "Chính sách",
     },
-    {
-      key: `/owner/${id}/setting`,
-      icon: <BarChartOutlined />,
-      label: "Cài đặt",
-    },
+    // {
+    //   key: `/owner/${id}/setting`,
+    //   icon: <BarChartOutlined />,
+    //   label: "Cài đặt",
+    // },
   ];
   const menuItemsOwner = [
     {

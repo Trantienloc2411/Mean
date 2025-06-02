@@ -25,9 +25,11 @@ export default function StatusInfo({
   tooltipAccountVerified,
   refetchLogs,
   approvalLogs = [],
-
   updateOwner,
 }) {
+  const userRole = localStorage.getItem("user_role")?.toLowerCase();
+  const canEdit = userRole === `"owner"`;
+
   const [resubmitVisible, setResubmitVisible] = useState(false);
   const [resubmitNote, setResubmitNote] = useState("");
   const getEyeIconColor = () => {
@@ -49,7 +51,7 @@ export default function StatusInfo({
       await updateOwner({
         id: ownerId,
         updatedData: {
-          approvalStatus: 4, // hoặc "RE_SUBMITTED" nếu có enum riêng
+          approvalStatus: 1, // hoặc "RE_SUBMITTED" nếu có enum riêng
           note: resubmitNote,
         },
       }).unwrap();
@@ -78,8 +80,6 @@ export default function StatusInfo({
         return "Đã phê duyệt";
       case 3:
         return "Bị từ chối";
-      case 4:
-        return "Phê duyệt lại";
       default:
         return "Không xác định";
     }
@@ -123,6 +123,16 @@ export default function StatusInfo({
   ];
   console.log(approvalLogs);
 
+  const parseDateString = (str) => {
+    const [day, month, yearAndTime] = str.split("/");
+    const [year, time] = yearAndTime.split(" ");
+    return new Date(`${year}-${month}-${day}T${time}`);
+  };
+
+  const approvalHistory = [...(approvalLogs || [])].sort(
+    (a, b) => parseDateString(b?.createdAt) - parseDateString(a?.createdAt)
+  );
+
   return (
     <>
       <Card title="Trạng thái tài khoản" className={styles.cardStyle}>
@@ -155,7 +165,7 @@ export default function StatusInfo({
                     <Tooltip title="Xem/Gửi lại phê duyệt">
                       <EyeOutlined
                         style={{
-                          color: getEyeIconColor(),
+                          color: "#1890ff",
                           cursor: "pointer",
                           marginLeft: 8,
                         }}
@@ -182,22 +192,35 @@ export default function StatusInfo({
           <Button key="cancel" onClick={() => setResubmitVisible(false)}>
             Hủy
           </Button>,
-          <Button key="resubmit" type="primary" onClick={handleReSend}>
-            Gửi lại
-          </Button>,
+          canEdit && (
+            <Button
+              key="resubmit"
+              type="primary"
+              onClick={handleReSend}
+              disabled={approvalStatus !== 3}
+            >
+              Gửi lại
+            </Button>
+          ),
         ]}
         width={800}
         style={{ maxWidth: "90%" }}
       >
-        <p>Nhập lý do bạn muốn gửi lại phê duyệt:</p>
-        <Input.TextArea
-          rows={4}
-          placeholder="Nhập lý do..."
-          value={resubmitNote}
-          onChange={(e) => setResubmitNote(e.target.value)}
-        />
+        <h3>Trạng thái phê duyệt hiện tại : {getApprovalValue()}</h3>
 
+        {canEdit && approvalStatus === 3 && (
+          <div>
+            <p>Nhập lý do bạn muốn gửi lại phê duyệt:</p>
+            <Input.TextArea
+              rows={4}
+              placeholder="Nhập lý do..."
+              value={resubmitNote}
+              onChange={(e) => setResubmitNote(e.target.value)}
+            />
+          </div>
+        )}
         <hr style={{ margin: "20px 0" }} />
+
         <h4>Lịch sử phê duyệt</h4>
         <Table
           columns={[
@@ -219,9 +242,6 @@ export default function StatusInfo({
                     break;
                   case 3:
                     statusText = "Bị từ chối";
-                    break;
-                  case 4:
-                    statusText = "Phê duyệt lại";
                     break;
                   default:
                     statusText = "Không xác định";
@@ -251,9 +271,7 @@ export default function StatusInfo({
               render: (note) => note || "—",
             },
           ]}
-          dataSource={[...(approvalLogs || [])].sort(
-            (a, b) => new Date(b.createdAt) - new Date(a.createdAt)
-          )}
+          dataSource={approvalHistory}
           pagination={false}
           size="small"
           rowKey={(record, index) => `resubmit-${index}`}

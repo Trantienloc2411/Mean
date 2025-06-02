@@ -81,9 +81,9 @@ const StyledModalConfirm = ({
   )
 }
 
-export default function AccountTable({ data, loading }) {
-  const navigate = useNavigate()
-  const [updateOwner] = useUpdateOwnerMutation()
+export default function AccountTable({ data, loading, refetch }) {
+  const navigate = useNavigate();
+  const [updateOwner] = useUpdateOwnerMutation();
 
   const [selectedUser, setSelectedUser] = useState(null)
   const [selectedUserOwner, setSelectedUserOwner] = useState(null)
@@ -161,26 +161,62 @@ export default function AccountTable({ data, loading }) {
       dataIndex: "roleName",
       align: "center",
       key: "roleName",
-      render: (role, record) => (
-        <>
-          <span className={`${styles.role} ${styles[role.toLowerCase()]}`}>
-            {role === "Admin"
-              ? "Nhân viên"
-              : role === "Owner"
-                ? "Chủ hộ"
-                : "Khách hàng"}
-          </span>
-          {record.owner && (
+      render: (role, record) => {
+        const approvalStatus = record.owner?.approvalStatus;
+        const statusTextMap = {
+          1: "Chờ duyệt",
+          2: "Đã duyệt",
+          3: "Từ chối",
+        };
+
+        const statusClassMap = {
+          1: "pending",
+          2: "approved",
+          3: "denied",
+        };
+
+        return (
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              gap: 4,
+            }}
+          >
             <span
-              style={{ margin: 8 }}
-              className={`${styles.isActive} ${styles[record?.owner?.isApproved]
-                }`}
+              className={`${styles.role} ${styles[role.toLowerCase()]}`}
+              style={{
+                display: "inline-block",
+                minWidth: 80,
+                textAlign: "center",
+              }}
             >
-              {record?.owner?.isApproved ? "Duyệt" : "Chưa duyệt"}
+              {role === "Admin"
+                ? "Quản trị viên"
+                : role === "Owner"
+                ? "Chủ cho thuê"
+                : "Khách hàng"}
             </span>
-          )}
-        </>
-      ),
+
+            {record.owner && (
+              <span
+                className={`${styles.approvedOwner} ${
+                  styles[statusClassMap[approvalStatus]]
+                }`}
+                style={{
+                  display: "inline-block",
+                  minWidth: 80,
+                  textAlign: "center",
+                  margin: 8,
+                }}
+              >
+                {statusTextMap[approvalStatus] || "Không rõ"}
+              </span>
+            )}
+          </div>
+        );
+      },
     },
     {
       title: "Trạng Thái",
@@ -378,19 +414,41 @@ export default function AccountTable({ data, loading }) {
           pageSize: 7,
           total: data.length,
           showSizeChanger: false,
-          onChange: (page) => setPagination((prev) => ({ ...prev, current: page })),
+          onChange: (page) =>
+            setPagination((prev) => ({ ...prev, current: page })),
+          className: styles.customPagination,
           itemRender: (page, type, originalElement) => {
-            const totalPages = Math.ceil(data.length / 7)
+            const totalPages = Math.ceil(data.length / pagination.pageSize);
+
             if (type === "prev") {
               return (
-                <button className={styles.paginationButton} disabled={pagination.current === 1}>
+                <button
+                  className={styles.paginationButton}
+                  disabled={pagination.current === 1}
+                  onClick={() =>
+                    setPagination((prev) => ({
+                      ...prev,
+                      current: prev.current - 1,
+                    }))
+                  }
+                >
                   « Trước
                 </button>
               )
             }
+
             if (type === "next") {
               return (
-                <button className={styles.paginationButton} disabled={pagination.current >= totalPages}>
+                <button
+                  className={styles.paginationButton}
+                  disabled={pagination.current >= totalPages}
+                  onClick={() =>
+                    setPagination((prev) => ({
+                      ...prev,
+                      current: prev.current + 1,
+                    }))
+                  }
+                >
                   Tiếp »
                 </button>
               )
@@ -409,6 +467,7 @@ export default function AccountTable({ data, loading }) {
         handleBlockUser={handleBlockUser}
         handleActiveUser={handleActiveUser}
         updateOwner={updateOwner}
+        refetch={refetch}
       />
 
       <StyledModalConfirm
