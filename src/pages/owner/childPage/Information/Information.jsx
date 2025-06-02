@@ -1,5 +1,3 @@
-"use client"
-
 import { useParams } from "react-router-dom"
 import { Skeleton, Row, Col, message } from "antd"
 import { useState, useEffect } from "react"
@@ -7,18 +5,19 @@ import AccountInfo from "./Components/AccountInfo/AccountInfo"
 import AccountStatus from "./Components/AccountStatus/AccountStatus"
 import CompanyInfo from "./Components/CompanyInfo/CompanyInfo"
 import styles from "./Information.module.scss"
-import {notification} from "antd"
+import { notification } from "antd"
 
-import { useGetOwnerDetailByUserIdQuery, useUpdateOwnerMutation } from "../../../../redux/services/ownerApi"
+import { useGetOwnerDetailByUserIdQuery } from "../../../../redux/services/ownerApi"
 import { useGetOwnerLogsByOwnerIdQuery } from "../../../../redux/services/ownerLogApi"
 import { checkUserExistInSupabase, createOrGetUserProfile } from "../../../../redux/services/supabase"
+import { useUpdateUserMutation } from "../../../../redux/services/userApi"
 
 export default function Information() {
   const { id } = useParams()
 
   // Get owner detail
   const { data: ownerDetail, refetch: refreshOwner, isLoading: ownerLoading } = useGetOwnerDetailByUserIdQuery(id)
-  const [updateOwner] = useUpdateOwnerMutation()
+  const [updateUser] = useUpdateUserMutation()
   // State
   const [userInfo, setUserInfo] = useState(null)
   const [companyInfo, setCompanyInfo] = useState(null)
@@ -47,7 +46,7 @@ export default function Information() {
               username: user.fullName || user.email || `user_${id}`,
               roleName: "owner", // Assuming this is an owner profile
             }
-            
+
             const createResult = await createOrGetUserProfile(userData)
           }
         } catch (error) {
@@ -101,10 +100,23 @@ export default function Information() {
   // Update info (fake logic)
   const handleUpdateUserInfo = async (updatedInfo) => {
     try {
+      // Call the updateUser mutation with the correct payload structure
+      const result = await updateUser({
+        id: id,
+        updatedUser: {
+          fullName: updatedInfo.fullName,
+          phone: updatedInfo.phone,
+          avatarUrl: [updatedInfo.avatar]
+        }
+      }).unwrap()
+
+      // Update local state after successful API call
       setUserInfo((prev) => ({
         ...prev,
         ...updatedInfo,
       }))
+
+      message.success("Thông tin đã được cập nhật thành công!")
     } catch (error) {
       console.error("Error updating user info:", error)
       message.error("Có lỗi xảy ra khi cập nhật thông tin tài khoản!")
@@ -150,7 +162,7 @@ export default function Information() {
               approvalLogs={logsData || []}
               userInfo={userInfo}
               refetchLogs={refetchLogs}
-              updateOwner={updateOwner}
+              updateOwner={updateUser}
               refreshOwner={refreshOwner}
             />
           </div>

@@ -1,12 +1,7 @@
 import styles from "./Report.module.scss";
 import { useState, useEffect } from "react";
 import { Input, Button, Table, Dropdown, message } from "antd";
-import {
-  MoreOutlined,
-  FilterOutlined,
-  SearchOutlined,
-  ReloadOutlined,
-} from "@ant-design/icons";
+import { MoreOutlined, FilterOutlined, SearchOutlined, ReloadOutlined } from "@ant-design/icons";
 import Filter from "./components/Filter/Filter";
 import ReportDetail from "./components/ReportDetail/ReportDetail";
 import ReplyReport from "./components/ReplyReport/ReplyReport";
@@ -16,9 +11,8 @@ import customParseFormat from "dayjs/plugin/customParseFormat";
 import {
   useGetAllReportsQuery,
   useGetReportByIdQuery,
-  useUpdateReportMutation,
+  useUpdateReportMutation
 } from "../../redux/services/reportApi";
-import { Spin } from "antd";
 
 dayjs.extend(customParseFormat);
 
@@ -40,13 +34,15 @@ export default function Report() {
     data: reports,
     isLoading,
     error,
-    refetch: refetchReports,
+    refetch: refetchReports
   } = useGetAllReportsQuery();
 
-  const { data: reportDetail, isLoading: isDetailLoading } =
-    useGetReportByIdQuery(selectedReportId, {
-      skip: !selectedReportId,
-    });
+  const {
+    data: reportDetail,
+    isLoading: isDetailLoading
+  } = useGetReportByIdQuery(selectedReportId, {
+    skip: !selectedReportId
+  });
 
   const [updateReport, { isLoading: isUpdating }] = useUpdateReportMutation();
 
@@ -65,7 +61,7 @@ export default function Report() {
         contentReply: report.contentReply,
         replyBy: report.replyBy,
         updatedAt: report.updatedAt,
-        originalData: report,
+        originalData: report
       }));
       setAllReports(transformedData);
       setFilteredData(transformedData);
@@ -84,7 +80,7 @@ export default function Report() {
         contentReply: reportDetail.contentReply,
         replyBy: reportDetail.replyBy,
         updatedAt: reportDetail.updatedAt,
-        originalData: reportDetail,
+        originalData: reportDetail
       };
       setSelectedReport(updatedReport);
 
@@ -95,22 +91,21 @@ export default function Report() {
   const updateLocalReportData = (updatedReport) => {
     if (!updatedReport) return;
 
-    const updateInArray = (array) =>
-      array.map((item) =>
-        item.id === updatedReport.id ? { ...item, ...updatedReport } : item
-      );
+    const updateInArray = (array) => array.map(item =>
+      item.id === updatedReport.id ? { ...item, ...updatedReport } : item
+    );
 
-    setAllReports((prev) => updateInArray(prev));
-    setFilteredData((prev) => updateInArray(prev));
+    setAllReports(prev => updateInArray(prev));
+    setFilteredData(prev => updateInArray(prev));
   };
 
   const handleReload = async () => {
     try {
       setIsReloading(true);
       await refetchReports();
-      message.success("Dữ liệu đã được làm mới");
+      message.success('Dữ liệu đã được làm mới');
     } catch (error) {
-      message.error("Làm mới dữ liệu thất bại");
+      message.error('Làm mới dữ liệu thất bại');
     } finally {
       setIsReloading(false);
     }
@@ -121,7 +116,7 @@ export default function Report() {
       {
         key: "1",
         label: "Chi tiết",
-      },
+      }
     ];
 
     if (!record.hasReply) {
@@ -147,13 +142,11 @@ export default function Report() {
 
   const handleReportViewed = async (reportId) => {
     try {
-      const reportToUpdate = allReports.find(
-        (report) => report.id === reportId
-      );
+      const reportToUpdate = allReports.find(report => report.id === reportId);
       if (reportToUpdate && !reportToUpdate.isReviewed) {
         const updateData = {
           id: reportId,
-          isReviewed: true,
+          isReviewed: true
         };
 
         await updateReport(updateData);
@@ -210,11 +203,7 @@ export default function Report() {
       width: 120,
       render: (isReviewed) => {
         return (
-          <span
-            className={`${styles.status} ${
-              isReviewed ? styles.replied : styles.pending
-            }`}
-          >
+          <span className={`${styles.status} ${isReviewed ? styles.replied : styles.pending}`}>
             {isReviewed ? "Đã xem" : "Chưa xem"}
           </span>
         );
@@ -232,10 +221,7 @@ export default function Report() {
             onClick: ({ key }) => handleMenuClick(key, record),
           }}
         >
-          <MoreOutlined
-            onClick={(e) => e.preventDefault()}
-            className={styles.actionIcon}
-          />
+          <MoreOutlined onClick={(e) => e.preventDefault()} className={styles.actionIcon} />
         </Dropdown>
       ),
     },
@@ -259,29 +245,26 @@ export default function Report() {
 
     if (searchTerm) {
       const lowerSearch = searchTerm.toLowerCase();
-      filtered = filtered.filter(
-        (item) =>
-          item.bookingId?.toLowerCase().includes(lowerSearch) ||
-          item.reason?.toLowerCase().includes(lowerSearch)
+      filtered = filtered.filter(item =>
+        (item.bookingId?.toLowerCase().includes(lowerSearch)) ||
+        (item.reason?.toLowerCase().includes(lowerSearch))
       );
     }
 
     if (selectedValues.status?.length > 0) {
       filtered = filtered.filter((item) => {
-        return selectedValues.status.some((status) => {
-          if (status === "reviewed") return item.isReviewed === true;
-          if (status === "pending") return item.isReviewed === false;
+        return selectedValues.status.some(status => {
+          if (status === 'reviewed') return item.isReviewed === true;
+          if (status === 'pending') return item.isReviewed === false;
           return false;
         });
       });
     }
 
     if (selectedValues.date) {
-      const selectedDate = dayjs(selectedValues.date).startOf("day");
+      const selectedDate = dayjs(selectedValues.date).startOf('day');
       filtered = filtered.filter((item) => {
-        const itemDate = dayjs(item.createdAt, "DD/MM/YYYY HH:mm:ss").startOf(
-          "day"
-        );
+        const itemDate = dayjs(item.createdAt, 'DD/MM/YYYY HH:mm:ss').startOf('day');
         return itemDate.isSame(selectedDate);
       });
     }
@@ -311,22 +294,8 @@ export default function Report() {
     setIsDetailModalOpen(false);
   };
 
-  if (isLoading) {
-    return (
-      <div
-        style={{
-          height: "100vh",
-          display: "flex",
-          justifyContent: "center",
-          alignItems: "center",
-        }}
-      >
-        <Spin size="large" />
-      </div>
-    );
-  }
-  if (error)
-    return <div>Đã xảy ra lỗi khi tải dữ liệu: {error.toString()}</div>;
+  if (isLoading) return <div>Đang tải dữ liệu...</div>;
+  if (error) return <div>Đã xảy ra lỗi khi tải dữ liệu: {error.toString()}</div>;
 
   return (
     <div className={styles.contentContainer}>

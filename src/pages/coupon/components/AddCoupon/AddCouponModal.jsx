@@ -1,3 +1,5 @@
+"use client"
+
 import { Modal, Form, Input, DatePicker, Radio, Checkbox, Button, message } from "antd"
 import dayjs from "dayjs"
 
@@ -5,18 +7,17 @@ const AddCouponModal = ({ isOpen, onCancel, onConfirm, isLoading }) => {
   const [form] = Form.useForm()
   const [messageApi, contextHolder] = message.useMessage()
 
-  // Disallow selecting dates and times before current time
+  const MAX_VALUE_LIMIT = 1000000 // Define the limit
+
   const disabledDate = (current) => {
     return current && current < dayjs().startOf("day")
   }
 
-  // Disable past hours for today's date
   const disabledDateTime = (date) => {
     if (date && date.isSame(dayjs(), "day")) {
       const currentHour = dayjs().hour()
       const currentMinute = dayjs().minute()
       const currentSecond = dayjs().second()
-
       return {
         disabledHours: () => Array.from({ length: currentHour }, (_, i) => i),
         disabledMinutes: (selectedHour) =>
@@ -30,7 +31,6 @@ const AddCouponModal = ({ isOpen, onCancel, onConfirm, isLoading }) => {
     return {}
   }
 
-  // Handle start date-time change to validate end date-time
   const handleStartDateChange = (date) => {
     const endDate = form.getFieldValue("endDate")
     if (endDate && date && date.isAfter(endDate)) {
@@ -38,122 +38,32 @@ const AddCouponModal = ({ isOpen, onCancel, onConfirm, isLoading }) => {
       messageApi.error({
         content: "Thời gian kết thúc phải sau thời gian bắt đầu",
         className: "custom-message",
-        style: {
-          marginTop: "20vh",
-        },
+        style: { marginTop: "20vh" },
       })
     }
   }
 
-  const validateForm = (values) => {
-    const { name, startDate, endDate, discountBasedOn, amount, maxDiscount } = values
-
-    if (!name?.trim()) {
-      messageApi.error({
-        content: "Vui lòng nhập tên mã giảm giá",
-        className: "custom-message",
-        style: {
-          marginTop: "20vh",
-        },
-      })
-      return false
+  const handleSubmit = async () => {
+    let values
+    try {
+      values = await form.validateFields()
+    } catch (info) {
+      console.log("AntD Validate Failed:", info)
+      return
     }
 
-    if (!startDate || !endDate) {
-      messageApi.error({
-        content: "Vui lòng chọn thời gian bắt đầu và kết thúc",
-        className: "custom-message",
-        style: {
-          marginTop: "20vh",
-        },
-      })
-      return false
+    const formattedValues = {
+      ...values,
+      startDate: values.startDate.format("DD/MM/YYYY HH:mm:ss"),
+      endDate: values.endDate.format("DD/MM/YYYY HH:mm:ss"),
     }
 
-    if (dayjs(startDate).isAfter(dayjs(endDate))) {
-      messageApi.error({
-        content: "Thời gian bắt đầu không thể sau thời gian kết thúc",
-        className: "custom-message",
-        style: {
-          marginTop: "20vh",
-        },
-      })
-      return false
+    try {
+      await onConfirm(formattedValues)
+      form.resetFields()
+    } catch (error) {
+      console.log("Server submission failed, form data preserved in AddCouponModal.")
     }
-
-    if (!discountBasedOn) {
-      messageApi.error({
-        content: "Vui lòng chọn hình thức giảm giá",
-        className: "custom-message",
-        style: {
-          marginTop: "20vh",
-        },
-      })
-      return false
-    }
-
-    if (!amount || amount <= 0) {
-      messageApi.error({
-        content: "Giá trị giảm giá phải lớn hơn 0",
-        className: "custom-message",
-        style: {
-          marginTop: "20vh",
-        },
-      })
-      return false
-    }
-
-    if (discountBasedOn === "Percentage" && amount > 100) {
-      messageApi.error({
-        content: "Giá trị phần trăm không thể vượt quá 100%",
-        className: "custom-message",
-        style: {
-          marginTop: "20vh",
-        },
-      })
-      return false
-    }
-
-    if (maxDiscount && maxDiscount <= 0) {
-      messageApi.error({
-        content: "Giảm giá tối đa phải lớn hơn 0",
-        className: "custom-message",
-        style: {
-          marginTop: "20vh",
-        },
-      })
-      return false
-    }
-
-    return true
-  }
-
-  const handleSubmit = () => {
-    form
-      .validateFields()
-      .then((values) => {
-        // Format dates to match API requirements
-        const formattedValues = {
-          ...values,
-          startDate: values.startDate.format("DD/MM/YYYY HH:mm:ss"),
-          endDate: values.endDate.format("DD/MM/YYYY HH:mm:ss"),
-        }
-
-        if (validateForm(formattedValues)) {
-          onConfirm(formattedValues)
-          form.resetFields()
-        }
-      })
-      .catch((info) => {
-        console.log("Validate Failed:", info)
-        messageApi.error({
-          content: "Vui lòng kiểm tra lại thông tin nhập vào",
-          className: "custom-message",
-          style: {
-            marginTop: "20vh",
-          },
-        })
-      })
   }
 
   return (
@@ -169,8 +79,6 @@ const AddCouponModal = ({ isOpen, onCancel, onConfirm, isLoading }) => {
         footer={[
           <Button
             key="cancel"
-            color="default"
-            variant="outlined"
             onClick={() => {
               form.resetFields()
               onCancel()
@@ -179,27 +87,19 @@ const AddCouponModal = ({ isOpen, onCancel, onConfirm, isLoading }) => {
           >
             Huỷ
           </Button>,
-          <Button
-            key="submit"
-            type="primary"
-            color="default"
-            variant="solid"
-            onClick={handleSubmit}
-            loading={isLoading}
-          >
+          <Button key="submit" type="primary" onClick={handleSubmit} loading={isLoading}>
             Thêm mã giảm giá
           </Button>,
         ]}
         width={600}
-        destroyOnClose={true}
       >
         <Form
           form={form}
           layout="vertical"
           name="addCouponForm"
-          preserve={false}
           initialValues={{
             isActive: true,
+            discountBasedOn: "Percentage",
           }}
         >
           <Form.Item
@@ -215,18 +115,9 @@ const AddCouponModal = ({ isOpen, onCancel, onConfirm, isLoading }) => {
             label="Mã giảm giá (CODE)"
             rules={[
               { required: true, message: "Hãy nhập mã giảm giá (CODE)" },
-              {
-                max: 8,
-                message: "Mã giảm giá không được vượt quá 8 ký tự",
-              },
-              {
-                min: 1,
-                message: "Mã giảm giá phải có ít nhất 1 ký tự",
-              },
-              {
-                pattern: /^[A-Z0-9]+$/,
-                message: "Mã giảm giá chỉ được chứa chữ in hoa và số",
-              },
+              { max: 8, message: "Mã giảm giá không được vượt quá 8 ký tự" },
+              { min: 1, message: "Mã giảm giá phải có ít nhất 1 ký tự" },
+              { pattern: /^[A-Z0-9]+$/, message: "Mã giảm giá chỉ được chứa chữ in hoa và số" },
             ]}
             normalize={(value) => (value ? value.toUpperCase() : value)}
           >
@@ -236,7 +127,6 @@ const AddCouponModal = ({ isOpen, onCancel, onConfirm, isLoading }) => {
               showCount
               onChange={(e) => {
                 const value = e.target.value
-                // Remove any characters that aren't uppercase letters or numbers
                 e.target.value = value.replace(/[^A-Z0-9]/g, "")
               }}
             />
@@ -248,10 +138,7 @@ const AddCouponModal = ({ isOpen, onCancel, onConfirm, isLoading }) => {
             rules={[{ required: true, message: "Hãy chọn thời gian bắt đầu kích hoạt" }]}
           >
             <DatePicker
-              showTime={{
-                format: "HH:mm:ss",
-                defaultValue: dayjs().startOf("day"),
-              }}
+              showTime={{ format: "HH:mm:ss", defaultValue: dayjs().startOf("day") }}
               style={{ width: "100%" }}
               format="DD/MM/YYYY HH:mm:ss"
               placeholder="01/01/2025 00:00:00"
@@ -270,15 +157,10 @@ const AddCouponModal = ({ isOpen, onCancel, onConfirm, isLoading }) => {
               { required: true, message: "Hãy chọn thời gian hết thúc của mã giảm giá" },
               ({ getFieldValue }) => ({
                 validator(_, value) {
-                  if (!value || !getFieldValue("startDate")) {
-                    return Promise.resolve()
-                  }
-
+                  if (!value || !getFieldValue("startDate")) return Promise.resolve()
                   const startDate = getFieldValue("startDate")
-                  // Convert to dayjs if not already
                   const endMoment = dayjs.isDayjs(value) ? value : dayjs(value)
                   const startMoment = dayjs.isDayjs(startDate) ? startDate : dayjs(startDate)
-
                   if (endMoment.isBefore(startMoment) || endMoment.isSame(startMoment)) {
                     return Promise.reject(new Error("Thời gian kết thúc phải sau thời gian bắt đầu"))
                   }
@@ -288,10 +170,7 @@ const AddCouponModal = ({ isOpen, onCancel, onConfirm, isLoading }) => {
             ]}
           >
             <DatePicker
-              showTime={{
-                format: "HH:mm:ss",
-                defaultValue: dayjs().endOf("day"),
-              }}
+              showTime={{ format: "HH:mm:ss", defaultValue: dayjs().endOf("day") }}
               style={{ width: "100%" }}
               format="DD/MM/YYYY HH:mm:ss"
               placeholder="31/01/2025 23:59:59"
@@ -330,27 +209,59 @@ const AddCouponModal = ({ isOpen, onCancel, onConfirm, isLoading }) => {
             </Radio.Group>
           </Form.Item>
 
-          <Form.Item name="amount" label="Giá trị" rules={[{ required: true, message: "Hãy nhập giá trị" }]}>
+          <Form.Item
+            name="amount"
+            label="Giá trị"
+            rules={[
+              { required: true, message: "Hãy nhập giá trị" },
+              {
+                validator: (_, value) => {
+                  if (value === null || value === undefined || value === "") return Promise.resolve()
+                  const numValue = Number(value)
+                  if (isNaN(numValue)) return Promise.reject("Giá trị phải là số")
+                  if (numValue <= 0) return Promise.reject("Giá trị phải lớn hơn 0")
+                  const discountType = form.getFieldValue("discountBasedOn")
+                  if (discountType === "Percentage") {
+                    if (numValue > 100) return Promise.reject("Phần trăm không được vượt quá 100%")
+                  } else if (discountType === "Fixed") {
+                    if (numValue > MAX_VALUE_LIMIT)
+                      return Promise.reject(`Giá trị không được vượt quá ${MAX_VALUE_LIMIT.toLocaleString()}đ`)
+                  }
+                  return Promise.resolve()
+                },
+              },
+            ]}
+          >
             <Input
               type="number"
               placeholder="10"
               min={0}
-              max={form.getFieldValue("discountBasedOn") === "Percentage" ? 100 : undefined}
+              max={form.getFieldValue("discountBasedOn") === "Percentage" ? 100 : MAX_VALUE_LIMIT}
             />
           </Form.Item>
 
-          <Form.Item name="maxDiscount" label="Giảm giá tối đa (không bắt buộc)">
-            <Input type="number" placeholder="1,000" min={0} />
+          <Form.Item
+            name="maxDiscount"
+            label="Giảm giá tối đa (không bắt buộc)"
+            rules={[
+              {
+                validator: (_, value) => {
+                  if (value === null || value === undefined || value === "") return Promise.resolve()
+                  const numValue = Number(value)
+                  if (isNaN(numValue)) return Promise.reject("Giá trị phải là số")
+                  if (numValue <= 0) return Promise.reject("Giá trị phải lớn hơn 0")
+                  if (numValue > MAX_VALUE_LIMIT)
+                    return Promise.reject(`Giá trị không được vượt quá ${MAX_VALUE_LIMIT.toLocaleString()}đ`)
+                  return Promise.resolve()
+                },
+              },
+            ]}
+          >
+            <Input type="number" placeholder="100,000" min={0} max={MAX_VALUE_LIMIT} />
           </Form.Item>
 
           <Form.Item name="isActive" valuePropName="checked">
-            <Checkbox
-              style={{
-                color: "#000000",
-              }}
-            >
-              Kích hoạt?
-            </Checkbox>
+            <Checkbox style={{ color: "#000000" }}>Kích hoạt?</Checkbox>
           </Form.Item>
         </Form>
       </Modal>

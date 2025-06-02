@@ -1,49 +1,50 @@
-import styles from "../coupon/Coupon.module.scss";
-import { MoreOutlined, FilterOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons";
-import { useState, useEffect } from "react";
-import { Dropdown, Input, Button, DatePicker, Tag, Table, message } from "antd";
-import debounce from "lodash/debounce";
-import dayjs from "dayjs";
-import isBetween from "dayjs/plugin/isBetween";
-import Filter from "../../components/Filter/Filter.jsx";
-import DeleteCouponModal from "./components/DeleteCouponModal.jsx";
-import AddCouponModal from "./components/AddCoupon/AddCouponModal.jsx";
+"use client"
+
+import styles from "../coupon/Coupon.module.scss"
+import { MoreOutlined, FilterOutlined, PlusOutlined, ReloadOutlined } from "@ant-design/icons"
+import { useState, useEffect } from "react"
+import { Dropdown, Input, Button, DatePicker, Tag, Table, message } from "antd"
+import debounce from "lodash/debounce"
+import dayjs from "dayjs"
+import isBetween from "dayjs/plugin/isBetween"
+import Filter from "../../components/Filter/Filter.jsx"
+import DeleteCouponModal from "./components/DeleteCouponModal.jsx"
+import AddCouponModal from "./components/AddCoupon/AddCouponModal.jsx"
 import {
   useGetCouponsQuery,
   useCreateCouponMutation,
   useUpdateCouponMutation,
   useDeleteCouponMutation,
-} from "../../redux/services/couponApi";
-import UpdateCouponModal from "./components/UpdateCoupon/UpdateCouponModal.jsx";
-import ViewCouponModal from "./components/ViewCoupon/ViewCouponModal.jsx";
-const { RangePicker } = DatePicker;
+} from "../../redux/services/couponApi"
+import UpdateCouponModal from "./components/UpdateCoupon/UpdateCouponModal.jsx"
+import ViewCouponModal from "./components/ViewCoupon/ViewCouponModal.jsx"
+const { RangePicker } = DatePicker
 
 export default function Coupon() {
-  dayjs.extend(isBetween);
-  const { data: coupons, isLoading, refetch } = useGetCouponsQuery();
-  const [createCoupon, { isLoading: isCreating }] = useCreateCouponMutation();
-  const [updateCoupon, { isLoading: isUpdating }] = useUpdateCouponMutation();
-  const [deleteCoupon, { isLoading: isDeleting }] = useDeleteCouponMutation();
+  dayjs.extend(isBetween)
+  const { data: coupons, isLoading, refetch } = useGetCouponsQuery()
+  const [createCoupon, { isLoading: isCreating }] = useCreateCouponMutation()
+  const [updateCoupon, { isLoading: isUpdating }] = useUpdateCouponMutation()
+  const [deleteCoupon, { isLoading: isDeleting }] = useDeleteCouponMutation()
   const [selectedValues, setSelectedValues] = useState({
     status: [],
     discountType: [],
-    dateRange: [], // Store the date range
-  });
-  const [searchTerm, setSearchTerm] = useState("");
-  const [filteredData, setFilteredData] = useState([]);
-  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
-  const [selectedCoupon, setSelectedCoupon] = useState(null);
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false);
-  const [isReloading, setIsReloading] = useState(false);
+    dateRange: [],
+  })
+  const [searchTerm, setSearchTerm] = useState("")
+  const [filteredData, setFilteredData] = useState([])
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false)
+  const [selectedCoupon, setSelectedCoupon] = useState(null)
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false)
+  const [isViewModalOpen, setIsViewModalOpen] = useState(false)
+  const [isUpdateModalOpen, setIsUpdateModalOpen] = useState(false)
+  const [isReloading, setIsReloading] = useState(false)
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 7,
     total: 0,
-  });
+  })
 
-  // Filter configuration
   const filterGroups = [
     {
       name: "discountBasedOn",
@@ -57,285 +58,176 @@ export default function Coupon() {
       name: "isActive",
       title: "Trạng thái",
       options: [
-        {
-          label: <Tag color="green">Đang hoạt động</Tag>,
-          value: true,
-        },
-        {
-          label: <Tag color="red">Hết hạn</Tag>,
-          value: false,
-        },
+        { label: <Tag color="green">Đang hoạt động</Tag>, value: true },
+        { label: <Tag color="red">Hết hạn</Tag>, value: false },
       ],
     },
-  ];
-
-  const items = [
-    {
-      key: "1",
-      label: "Xem chi tiết",
-    },
-    {
-      key: "2",
-      label: "Chỉnh sửa",
-    },
-    {
-      key: "3",
-      label: "Vô hiệu hoá",
-      danger: true,
-    },
-  ];
+  ]
 
   const handleAddCoupon = async (values) => {
     try {
-      await createCoupon(values).unwrap();
+      await createCoupon(values).unwrap()
       message.success({
-        content: 'Thêm mã giảm giá thành công',
-        className: 'custom-message',
-        style: {
-          marginTop: '20vh',
-        },
-      });
-      setIsAddModalOpen(false);
-      refetch(); // Refresh the coupons list
+        content: "Thêm mã giảm giá thành công",
+        className: "custom-message",
+        style: { marginTop: "20vh" },
+      })
+      setIsAddModalOpen(false)
+      refetch()
     } catch (error) {
       message.error({
-        content: error.data?.message || 'Có lỗi xảy ra khi thêm mã giảm giá',
-        className: 'custom-message',
-        style: {
-          marginTop: '20vh',
-        },
-      });
+        content: error.data?.message || "Có lỗi xảy ra khi thêm mã giảm giá",
+        className: "custom-message",
+        style: { marginTop: "20vh" },
+      })
+      throw error
     }
-  };
+  }
 
-  const handleUpdateCoupon = async (values) => {
+  const handleUpdateCoupon = async (valuesFromModal) => {
+    // valuesFromModal here will NOT contain couponCode due to the change in UpdateCouponModal's handleSubmit
     try {
-      const formattedValues = {
-        id: selectedCoupon.id,
-        name: values.name,
-        couponCode: values.couponCode,
-        discountBasedOn: values.discountBasedOn,
-        amount: Number(values.amount),
-        maxDiscount: values.maxDiscount ? Number(values.maxDiscount) : null,
-        startDate: values.startDate,
-        endDate: values.endDate,
-        isActive: values.isActive,
-      };
+      const payload = {
+        id: selectedCoupon.id, // Crucial: ensure ID is always sent
+        name: valuesFromModal.name,
+        discountBasedOn: valuesFromModal.discountBasedOn,
+        amount: Number(valuesFromModal.amount),
+        maxDiscount: valuesFromModal.maxDiscount ? Number(valuesFromModal.maxDiscount) : null,
+        startDate: valuesFromModal.startDate, // Already formatted by modal
+        endDate: valuesFromModal.endDate, // Already formatted by modal
+        isActive: valuesFromModal.isActive,
+        // couponCode is intentionally omitted from the payload
+      }
 
-      await updateCoupon(formattedValues).unwrap();
+      await updateCoupon(payload).unwrap()
 
       message.success({
         content: "Cập nhật mã giảm giá thành công",
         className: "custom-message",
-        style: {
-          marginTop: '20vh',
-        },
-      });
+        style: { marginTop: "20vh" },
+      })
 
-      setIsUpdateModalOpen(false);
-      setSelectedCoupon(null);
-      refetch(); // Refresh the coupons list
+      setIsUpdateModalOpen(false)
+      setSelectedCoupon(null)
+      refetch()
     } catch (error) {
       message.error({
-        content:
-          error.data?.message || "Có lỗi xảy ra khi cập nhật mã giảm giá",
+        content: error.data?.message || "Có lỗi xảy ra khi cập nhật mã giảm giá",
         className: "custom-message",
-        style: {
-          marginTop: '10vh',
-        },
-      });
+        style: { marginTop: "10vh" },
+      })
+      throw error
     }
-  };
+  }
 
   const handleAddCancel = () => {
-    setIsAddModalOpen(false);
-  };
-
-  const handleMenuClick = (key, record) => {
-    if (key === "3") {
-      // Vô hiệu hoá option
-      setSelectedCoupon(record);
-      setIsDeleteModalOpen(true);
-    }
-  };
+    setIsAddModalOpen(false)
+  }
 
   const handleDeleteConfirm = async () => {
     try {
-      await deleteCoupon(selectedCoupon.id).unwrap();
+      await deleteCoupon(selectedCoupon.id).unwrap()
       message.success({
-        content: 'Xóa mã giảm giá thành công',
-        className: 'custom-message',
-        style: {
-          marginTop: '10vh',
-        },
-      });
-      setIsDeleteModalOpen(false);
-      setSelectedCoupon(null);
-      refetch(); // Refresh the coupons list
+        content: "Xóa mã giảm giá thành công",
+        className: "custom-message",
+        style: { marginTop: "10vh" },
+      })
+      setIsDeleteModalOpen(false)
+      setSelectedCoupon(null)
+      refetch()
     } catch (error) {
       message.error({
         content: error.data?.message || "Có lỗi xảy ra khi xóa mã giảm giá",
         className: "custom-message",
-        style: {
-          marginTop: '10vh',
-        },
-      });
+        style: { marginTop: "10vh" },
+      })
     }
-  };
+  }
 
   const handleDeleteCancel = () => {
-    setIsDeleteModalOpen(false);
-    setSelectedCoupon(null);
-  };
-
-  // Handle filter changes
-  const applyFilters = (filters) => {
-    let filtered = [...coupons];
-
-    // Apply status filter
-    if (filters.isActive.length > 0) {
-      filtered = filtered.filter((item) =>
-        filters.isActive.some(
-          (status) => status.toLowerCase() === item.Status.toLowerCase()
-        )
-      );
-    }
-
-    // Apply discount type filter
-    if (filters.discountType.length > 0) {
-      filtered = filtered.filter((item) =>
-        filters.discountType.includes(item.DiscountType)
-      );
-    }
-
-    // Apply date range filter
-    if (filters.dateRange?.length === 2) {
-      const [start, end] = filters.dateRange;
-      filtered = filtered.filter((item) => {
-        const itemStart = new Date(item.StartTime);
-        const itemEnd = new Date(item.EndTime);
-        return itemStart >= new Date(start) && itemEnd <= new Date(end);
-      });
-    }
-
-    setFilteredData(filtered);
-  };
+    setIsDeleteModalOpen(false)
+    setSelectedCoupon(null)
+  }
 
   const handleFilterChange = (filterName, newValues) => {
-    const updatedValues = {
-      ...selectedValues,
-      [filterName]: newValues,
-    };
+    const updatedValues = { ...selectedValues, [filterName]: newValues }
+    setSelectedValues(updatedValues)
+  }
 
-    setSelectedValues(updatedValues); // Update state
-    applyFilters(updatedValues); // Use updated state
-  };
-
-  // Handle date range filter change
   const handleDateRangeChange = (dates, dateStrings) => {
-    setSelectedValues((prev) => ({
-      ...prev,
-      dateRange: dates ? dateStrings : [],
-    }));
-  };
+    setSelectedValues((prev) => ({ ...prev, dateRange: dates ? dateStrings : [] }))
+  }
 
-  // Handle search input change
   const debouncedSearch = debounce((value) => {
-    setSearchTerm(value);
-  }, 500);
+    setSearchTerm(value)
+  }, 500)
 
   const handleSearch = (e) => {
-    debouncedSearch(e.target.value);
-  };
+    debouncedSearch(e.target.value)
+  }
 
-  // Handle reload button click
   const handleReload = async () => {
     try {
-      setIsReloading(true);
-      await refetch();
+      setIsReloading(true)
+      await refetch()
       message.success({
-        content: 'Dữ liệu đã được làm mới',
-        className: 'custom-message',
-        style: {
-          marginTop: '10vh',
-        },
-      });
+        content: "Dữ liệu đã được làm mới",
+        className: "custom-message",
+        style: { marginTop: "10vh" },
+      })
     } catch (error) {
       message.error({
-        content: 'Làm mới dữ liệu thất bại',
-        className: 'custom-message',
-        style: {
-          marginTop: '10vh',
-        },
-      });
+        content: "Làm mới dữ liệu thất bại",
+        className: "custom-message",
+        style: { marginTop: "10vh" },
+      })
     } finally {
-      setIsReloading(false);
+      setIsReloading(false)
     }
-  };
+  }
 
-  // Filter data based on selected filters and search term
   useEffect(() => {
     if (!coupons) {
-      setFilteredData([]);
-      return;
+      setFilteredData([])
+      return
     }
-
-    let filtered = [...coupons];
-
+    const sortedCoupons = [...coupons].sort((a, b) =>
+      dayjs(b.startDate, "DD/MM/YYYY HH:mm:ss").diff(dayjs(a.startDate, "DD/MM/YYYY HH:mm:ss")),
+    )
+    let filtered = sortedCoupons
     if (searchTerm) {
-      filtered = filtered.filter((item) =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase())
-      );
+      filtered = filtered.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
     }
-
     if (selectedValues.isActive?.length > 0) {
-      filtered = filtered.filter((item) =>
-        selectedValues.isActive.includes(item.isActive)
-      );
+      filtered = filtered.filter((item) => selectedValues.isActive.includes(item.isActive))
     }
-
     if (selectedValues.discountBasedOn?.length > 0) {
-      filtered = filtered.filter((item) =>
-        selectedValues.discountBasedOn.includes(item.discountBasedOn)
-      );
+      filtered = filtered.filter((item) => selectedValues.discountBasedOn.includes(item.discountBasedOn))
     }
-
     if (selectedValues.dateRange?.length === 2) {
-      const [start, end] = selectedValues.dateRange;
-
+      const [start, end] = selectedValues.dateRange
       filtered = filtered.filter((item) => {
-        // Convert the selected range dates to dayjs objects
-        const rangeStart = dayjs(start, "DD/MM/YYYY");
-        const rangeEnd = dayjs(end, "DD/MM/YYYY").endOf("day");
-
-        // Convert the coupon dates to dayjs objects
-        const couponStart = dayjs(item.startDate, "DD/MM/YYYY HH:mm:ss");
-        const couponEnd = dayjs(item.endDate, "DD/MM/YYYY HH:mm:ss");
-
-        // Check if the coupon dates overlap with the selected range
-        const isOverlapping =
-          ((couponStart.isSame(rangeStart) ||
-            couponStart.isAfter(rangeStart)) &&
+        const rangeStart = dayjs(start, "DD/MM/YYYY")
+        const rangeEnd = dayjs(end, "DD/MM/YYYY").endOf("day")
+        const couponStart = dayjs(item.startDate, "DD/MM/YYYY HH:mm:ss")
+        const couponEnd = dayjs(item.endDate, "DD/MM/YYYY HH:mm:ss")
+        return (
+          ((couponStart.isSame(rangeStart) || couponStart.isAfter(rangeStart)) &&
             (couponStart.isSame(rangeEnd) || couponStart.isBefore(rangeEnd))) ||
           ((couponEnd.isSame(rangeStart) || couponEnd.isAfter(rangeStart)) &&
-            (couponEnd.isSame(rangeEnd) || couponEnd.isBefore(rangeEnd)));
-
-        return isOverlapping;
-      });
+            (couponEnd.isSame(rangeEnd) || couponEnd.isBefore(rangeEnd)))
+        )
+      })
     }
-
-    setFilteredData(filtered);
-  }, [searchTerm, selectedValues, coupons]);
+    setFilteredData(filtered)
+  }, [searchTerm, selectedValues, coupons])
 
   const tableColumn = [
     {
       title: "No.",
       dataIndex: "index",
       key: "index",
-      render: (_, __, index) => {
-        const { current, pageSize } = pagination;
-        return (current - 1) * pageSize + index + 1;
-      },
+      render: (_, __, index) => (pagination.current - 1) * pagination.pageSize + index + 1,
       width: "5%",
     },
     { title: "Mã giảm giá", dataIndex: "couponCode", key: "couponCode" },
@@ -349,21 +241,18 @@ export default function Coupon() {
       title: "Giá trị",
       dataIndex: "amount",
       key: "amount",
-      render: (value, record) => {
-        if (!value && value !== 0) return "-";
-        return record.discountBasedOn === "Percentage"
-          ? `${value}%`
-          : `${value.toLocaleString()}đ`;
-      },
+      render: (value, record) =>
+        !value && value !== 0
+          ? "-"
+          : record.discountBasedOn === "Percentage"
+            ? `${value}%`
+            : `${value.toLocaleString()}đ`,
     },
     {
       title: "Khuyến mãi tối đa",
       dataIndex: "maxDiscount",
       key: "maxDiscount",
-      render: (value) => {
-        if (!value && value !== 0) return "Không giới hạn";
-        return `${value.toLocaleString()}đ`;
-      },
+      render: (value) => (!value && value !== 0 ? "Không giới hạn" : `${value.toLocaleString()}đ`),
     },
     { title: "Ngày bắt đầu", dataIndex: "startDate", key: "startDate" },
     { title: "Ngày kết thúc", dataIndex: "endDate", key: "endDate" },
@@ -372,16 +261,11 @@ export default function Coupon() {
       dataIndex: "isActive",
       key: "isActive",
       align: "center",
-      render: (isActive) => {
-        return (
-          <span
-            className={`${styles.status} ${styles[isActive ? "active" : "inactive"]
-              }`}
-          >
-            {isActive ? "Đang hoạt động" : "Hết hạn"}
-          </span>
-        );
-      },
+      render: (isActive) => (
+        <span className={`${styles.status} ${styles[isActive ? "active" : "inactive"]}`}>
+          {isActive ? "Đang hoạt động" : "Hết hạn"}
+        </span>
+      ),
     },
     {
       title: "",
@@ -395,16 +279,16 @@ export default function Coupon() {
                 key: "1",
                 label: "Xem chi tiết",
                 onClick: () => {
-                  setSelectedCoupon(record);
-                  setIsViewModalOpen(true);
+                  setSelectedCoupon(record)
+                  setIsViewModalOpen(true)
                 },
               },
               {
                 key: "2",
                 label: "Chỉnh sửa",
                 onClick: () => {
-                  setSelectedCoupon(record);
-                  setIsUpdateModalOpen(true);
+                  setSelectedCoupon(record)
+                  setIsUpdateModalOpen(true)
                 },
               },
               {
@@ -412,8 +296,8 @@ export default function Coupon() {
                 label: "Vô hiệu hoá",
                 danger: true,
                 onClick: () => {
-                  setSelectedCoupon(record);
-                  setIsDeleteModalOpen(true);
+                  setSelectedCoupon(record)
+                  setIsDeleteModalOpen(true)
                 },
               },
             ],
@@ -424,7 +308,7 @@ export default function Coupon() {
         </Dropdown>
       ),
     },
-  ];
+  ]
 
   return (
     <div className={styles.contentContainer}>
@@ -433,24 +317,16 @@ export default function Coupon() {
       <div className={styles.contentTable}>
         <div className={styles.tool}>
           <div className={styles.searchFilter}>
-            {/* Search Input */}
             <Input
               placeholder="Tìm kiếm tên mã"
               onChange={handleSearch}
               style={{ width: "250px", marginRight: "10px" }}
             />
-
             <Dropdown
               trigger={["click"]}
               placement="bottomRight"
               dropdownRender={() => (
-                <div
-                  style={{
-                    background: "white",
-                    borderRadius: "8px",
-                    boxShadow: "0 2px 8px rgba(0,0,0,0.15)",
-                  }}
-                >
+                <div style={{ background: "white", borderRadius: "8px", boxShadow: "0 2px 8px rgba(0,0,0,0.15)" }}>
                   <Filter
                     filterGroups={filterGroups}
                     selectedValues={selectedValues}
@@ -462,20 +338,15 @@ export default function Coupon() {
             >
               <Button icon={<FilterOutlined />}>
                 Lọc
-                {Object.values(selectedValues).flat().length > 0 &&
-                  ` (${Object.values(selectedValues).flat().length})`}
+                {Object.values(selectedValues).flat().length > 0 && ` (${Object.values(selectedValues).flat().length})`}
               </Button>
             </Dropdown>
-
-           
-
             <DeleteCouponModal
               isOpen={isDeleteModalOpen}
               onCancel={handleDeleteCancel}
               onConfirm={handleDeleteConfirm}
               couponName={selectedCoupon?.name}
             />
-
             <DatePicker.RangePicker
               style={{ width: "300px", margin: "16px 0", marginLeft: 10 }}
               onChange={handleDateRangeChange}
@@ -483,14 +354,11 @@ export default function Coupon() {
               format="DD/MM/YYYY"
               value={
                 selectedValues.dateRange?.length === 2
-                  ? [
-                    dayjs(selectedValues.dateRange[0], "DD/MM/YYYY"),
-                    dayjs(selectedValues.dateRange[1], "DD/MM/YYYY"),
-                  ]
+                  ? [dayjs(selectedValues.dateRange[0], "DD/MM/YYYY"), dayjs(selectedValues.dateRange[1], "DD/MM/YYYY")]
                   : null
               }
             />
-             <Button
+            <Button
               icon={<ReloadOutlined spin={isReloading} />}
               onClick={handleReload}
               loading={isReloading}
@@ -499,21 +367,15 @@ export default function Coupon() {
               Làm mới
             </Button>
           </div>
-
           <Button
             type="default"
             className={styles.createButton}
             onClick={() => setIsAddModalOpen(true)}
             icon={<PlusOutlined />}
-            style={{
-              backgroundColor: '#fff',
-              borderColor: '#667085',
-              color: '#667085',
-            }}
+            style={{ backgroundColor: "#fff", borderColor: "#667085", color: "#667085" }}
           >
             Tạo mã giảm giá
           </Button>
-
           <AddCouponModal
             isOpen={isAddModalOpen}
             onCancel={handleAddCancel}
@@ -523,25 +385,22 @@ export default function Coupon() {
           <UpdateCouponModal
             isOpen={isUpdateModalOpen}
             onCancel={() => {
-              setIsUpdateModalOpen(false);
-              setSelectedCoupon(null);
+              setIsUpdateModalOpen(false)
+              setSelectedCoupon(null)
             }}
             onConfirm={handleUpdateCoupon}
             isLoading={isUpdating}
             initialData={selectedCoupon}
           />
-
           <ViewCouponModal
             isOpen={isViewModalOpen}
             onCancel={() => {
-              setIsViewModalOpen(false);
-              setSelectedCoupon(null);
+              setIsViewModalOpen(false)
+              setSelectedCoupon(null)
             }}
             couponData={selectedCoupon}
           />
         </div>
-
-        {/* Table */}
         <Table
           columns={tableColumn}
           dataSource={filteredData || []}
@@ -551,41 +410,30 @@ export default function Coupon() {
             total: filteredData?.length || 0,
             showSizeChanger: false,
             className: styles.customPagination,
-            onChange: (page) => {
-              setPagination((prev) => ({
-                ...prev,
-                current: page,
-              }));
-            },
+            onChange: (page) => setPagination((prev) => ({ ...prev, current: page })),
             itemRender: (page, type, originalElement) => {
-              const totalPages = Math.ceil((filteredData?.length || 0) / 7);
-
-              if (type === "prev") {
+              const totalPages = Math.ceil((filteredData?.length || 0) / pagination.pageSize)
+              if (type === "prev")
                 return (
-                  <button
-                    className={styles.paginationButton}
-                    disabled={page === 0}
-                  >
-                    « Trước
+                  <button className={styles.paginationButton} disabled={page === 0}>
+                    {" "}
+                    « Trước{" "}
                   </button>
-                );
-              }
-              if (type === "next") {
+                )
+              if (type === "next")
                 return (
-                  <button
-                    className={styles.paginationButton}
-                    disabled={page >= totalPages}
-                  >
-                    Tiếp »
+                  <button className={styles.paginationButton} disabled={page >= totalPages}>
+                    {" "}
+                    Tiếp »{" "}
                   </button>
-                );
-              }
-              return originalElement;
+                )
+              return originalElement
             },
           }}
           className={styles.couponTable}
         />
       </div>
     </div>
-  );
+  )
 }
+  
