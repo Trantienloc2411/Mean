@@ -6,11 +6,7 @@ import { useUpdateRentalLocationMutation } from "../../../../../../redux/service
 
 const { Dragger } = Upload;
 
-export default function ImageUploadModal({
-  open,
-  onClose,
-  rentalData,
-}) {
+export default function ImageUploadModal({ open, onClose, rentalData }) {
   const [uploading, setUploading] = useState(false);
   const [fileList, setFileList] = useState([]);
   const [updateRentalLocation, { isLoading: isUpdating }] =
@@ -83,12 +79,16 @@ export default function ImageUploadModal({
     }
     try {
       const imageUrls = fileList.map((file) => file.url);
+      const dataUpdate = {
+        ...rentalData,
+        image: imageUrls,
+      };
       await updateRentalLocation({
         id: rentalData.id,
-        updatedData: { image: imageUrls },
+        updatedData: dataUpdate,
       }).unwrap();
       message.success("Cập nhật hình ảnh thành công!");
-    //   onUploadSuccess(imageUrls);
+      //   onUploadSuccess(imageUrls);
       onClose();
     } catch (error) {
       message.error("Cập nhật thất bại, vui lòng thử lại!");
