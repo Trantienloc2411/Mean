@@ -18,7 +18,6 @@ export default function OverviewAccount({
         iconName={<FaUsers />}
         backgroundColorIcon="#d0cfff"
         colorIcon="#8280FF"
-        width="25%"
         height={120}
       />
       <CardDashboard
@@ -31,7 +30,6 @@ export default function OverviewAccount({
         iconName={<FaUserFriends />}
         backgroundColorIcon="#d0cfff"
         colorIcon="#8280FF"
-        width="25%"
         height={120}
       />
       <CardDashboard
@@ -42,7 +40,6 @@ export default function OverviewAccount({
         iconName={<FaUser />}
         backgroundColorIcon="#d0cfff"
         colorIcon="#8280FF"
-        width="25%"
         height={120}
       />
       <CardDashboard
@@ -53,7 +50,6 @@ export default function OverviewAccount({
         iconName={<FaUserTie />}
         backgroundColorIcon="#d0cfff"
         colorIcon="#8280FF"
-        width="25%"
         height={120}
       />
     </Flex>
