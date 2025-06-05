@@ -74,7 +74,7 @@ export default function Policy() {
     if (ownerData) {
       const ownerId = ownerData.id || ownerData._id;
       setEffectiveOwnerId(ownerId);
-      console.log("Owner ID set:", ownerId);
+      // console.log("Owner ID set:", ownerId);
     }
   }, [ownerData]);
 
@@ -95,15 +95,15 @@ export default function Policy() {
     useDeletePolicyOwnerMutation();
 
   useEffect(() => {
-    console.log("API Response:", {
-      policiesData,
-      isPoliciesLoading,
-      policiesError,
-    });
-    console.log("Raw API Response structure:", policiesData);
+    // console.log("API Response:", {
+    //   policiesData,
+    //   isPoliciesLoading,
+    //   policiesError,
+    // });
+    // console.log("Raw API Response structure:", policiesData);
 
     if (policiesData && policiesData.owners && policiesData.owners.length > 0) {
-      console.log("Processing API data with owners:", policiesData.owners);
+      // console.log("Processing API data with owners:", policiesData.owners);
       processData({ success: true, data: policiesData.owners });
     } else if (
       (!policiesData ||
@@ -111,7 +111,7 @@ export default function Policy() {
         policiesData.owners.length === 0) &&
       !isPoliciesLoading
     ) {
-      console.log("Using test data because API response is empty or invalid");
+      // console.log("Using test data because API response is empty or invalid");
       // const testData = {
       //   success: true,
       //   data: [
@@ -198,7 +198,7 @@ export default function Policy() {
   };
 
   const processData = (data) => {
-    console.log("Processing data:", data);
+    // console.log("Processing data:", data);
     if (!data || !data.data || !Array.isArray(data.data)) {
       console.error("Invalid data structure:", data);
       return;
@@ -206,7 +206,7 @@ export default function Policy() {
 
     try {
       const mappedData = data.data.map((item, index) => {
-        console.log("Processing item:", item);
+        // console.log("Processing item:", item);
 
         const ownerIdValue =
           typeof item.ownerId === "object" ? item.ownerId._id : item.ownerId;
@@ -232,11 +232,11 @@ export default function Policy() {
           _original: { ...item },
         };
 
-        console.log("Created table row:", tableRow);
+        // console.log("Created table row:", tableRow);
         return tableRow;
       });
 
-      console.log("Mapped data for table:", mappedData);
+      // console.log("Mapped data for table:", mappedData);
       setBaseData(mappedData);
       setFilteredData(mappedData);
     } catch (error) {
@@ -244,49 +244,57 @@ export default function Policy() {
     }
   };
 
-  const menuItems = [
-    {
-      key: "1",
-      label: "Chi tiết",
-      onClick: (record) => {
-        setSelectedPolicy(record);
-        setSelectedPolicyId(record._id || record.id);
-        setIsDetailModalOpen(true);
+  const getMenuItems = (record) => {
+    console.log(record);
+
+    const items = [
+      {
+        key: "1",
+        label: "Chi tiết",
+        onClick: () => {
+          setSelectedPolicy(record);
+          setSelectedPolicyId(record._id || record.id);
+          setIsDetailModalOpen(true);
+        },
       },
-    },
-    ...(canEdit
-      ? [
-          {
-            key: "2",
-            label: "Chỉnh sửa",
-            onClick: (record) => {
-              setSelectedPolicyId(record._id || record.id);
-              setIsUpdateModalOpen(true);
-            },
+    ];
+
+    if (canEdit) {
+      items.push({
+        key: "2",
+        label: "Chỉnh sửa",
+        onClick: () => {
+          setSelectedPolicyId(record._id || record.id);
+          setIsUpdateModalOpen(true);
+        },
+      });
+
+      if (record.Name !== "Preparing Room Policy" && canEdit) {
+        items.push({
+          key: "3",
+          label: "Xoá",
+          danger: true,
+          onClick: () => {
+            setSelectedPolicy(record);
+            setIsDeleteModalOpen(true);
           },
-          {
-            key: "3",
-            label: "Xoá",
-            danger: true,
-            onClick: (record) => {
-              setSelectedPolicy(record);
-              setIsDeleteModalOpen(true);
-            },
-          },
-        ]
-      : []),
-  ];
+        });
+      }
+    }
+
+    return items;
+  };
 
   const handleDeleteConfirm = async () => {
     try {
-      console.log("Attempting to delete policy with ID:", selectedPolicy._id);
+      // console.log("Attempting to delete policy with ID:", selectedPolicy._id);
       try {
         await deletePolicy(selectedPolicy._id).unwrap();
         message.success("Xóa chính sách thành công!");
         refetch();
       } catch (apiError) {
         console.error("API delete error:", apiError);
-        console.log("API call failed, using local state update");
+        // console.log("API call failed, using local state update");
         const newData = baseData.filter(
           (item) => item._id !== selectedPolicy._id
         );
@@ -329,7 +337,7 @@ export default function Policy() {
         updatedAt: dayjs().format("DD/MM/YYYY HH:mm:ss"),
       };
 
-      console.log("Creating new policy with data:", newPolicy);
+      // console.log("Creating new policy with data:", newPolicy);
       try {
         await createPolicy({
           ...formattedValues,
@@ -347,7 +355,7 @@ export default function Policy() {
           success: true,
           data: updatedBaseData,
         });
-        console.log("Updated data after add:", updatedBaseData);
+        // console.log("Updated data after add:", updatedBaseData);
       }
 
       message.success("Tạo chính sách mới thành công!");
@@ -376,7 +384,7 @@ export default function Policy() {
         status: values.Status,
       };
 
-      console.log("Updating policy with data:", updatedPolicyData);
+      // console.log("Updating policy with data:", updatedPolicyData);
 
       try {
         await updatePolicy(updatedPolicyData).unwrap();
@@ -461,8 +469,8 @@ export default function Policy() {
   useEffect(() => {
     if (!baseData || baseData.length === 0) return;
 
-    console.log("Applying filters:", { searchTerm, selectedValues });
-    console.log("Base data for filtering:", baseData);
+    // console.log("Applying filters:", { searchTerm, selectedValues });
+    // console.log("Base data for filtering:", baseData);
     let filtered = [...baseData];
     if (searchTerm) {
       filtered = filtered.filter((item) =>
@@ -483,7 +491,7 @@ export default function Policy() {
       });
     }
 
-    console.log("Filtered data after applying filters:", filtered);
+    // console.log("Filtered data after applying filters:", filtered);
     setFilteredData(filtered);
   }, [searchTerm, selectedValues, baseData]);
 
@@ -537,10 +545,7 @@ export default function Policy() {
         <Dropdown
           trigger={["click"]}
           menu={{
-            items: menuItems.map((item) => ({
-              ...item,
-              onClick: () => item.onClick(record),
-            })),
+            items: getMenuItems(record),
           }}
         >
           <MoreOutlined onClick={(e) => e.preventDefault()} />

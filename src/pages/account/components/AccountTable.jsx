@@ -1,20 +1,23 @@
-import { useState } from "react"
-import { useNavigate } from "react-router-dom"
-import { Table, message, Modal, Alert } from "antd"
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { Table, message, Modal, Alert } from "antd";
 import {
   ExclamationCircleOutlined,
   LockOutlined,
   UnlockOutlined,
   UserDeleteOutlined,
   CheckCircleOutlined,
-} from "@ant-design/icons"
-import styles from "../components/AccountTable.module.scss"
-import UserDetailModal from "./UserDetailModal"
-import { useActiveUserMutation, useBlockUserMutation } from "../../../redux/services/userApi"
-import { FaEye, FaLock, FaLockOpen } from "react-icons/fa"
-import OwnerDetailModal from "./OwnerDetailModal"
-import { useUpdateOwnerMutation } from "../../../redux/services/ownerApi"
-import dayjs from 'dayjs';
+} from "@ant-design/icons";
+import styles from "../components/AccountTable.module.scss";
+import UserDetailModal from "./UserDetailModal";
+import {
+  useActiveUserMutation,
+  useBlockUserMutation,
+} from "../../../redux/services/userApi";
+import { FaEye, FaLock, FaLockOpen } from "react-icons/fa";
+import OwnerDetailModal from "./OwnerDetailModal";
+import { useUpdateOwnerMutation } from "../../../redux/services/ownerApi";
+import dayjs from "dayjs";
 
 const StyledModalConfirm = ({
   open,
@@ -31,17 +34,17 @@ const StyledModalConfirm = ({
   const getIcon = () => {
     switch (type) {
       case "danger":
-        return <UserDeleteOutlined className={styles.dangerIcon} />
+        return <UserDeleteOutlined className={styles.dangerIcon} />;
       case "block":
-        return <LockOutlined className={styles.blockIcon} />
+        return <LockOutlined className={styles.blockIcon} />;
       case "unblock":
-        return <UnlockOutlined className={styles.unblockIcon} />
+        return <UnlockOutlined className={styles.unblockIcon} />;
       case "warning":
-        return <ExclamationCircleOutlined className={styles.warningIcon} />
+        return <ExclamationCircleOutlined className={styles.warningIcon} />;
       default:
-        return <CheckCircleOutlined className={styles.infoIcon} />
+        return <CheckCircleOutlined className={styles.infoIcon} />;
     }
-  }
+  };
 
   return (
     <Modal
@@ -60,11 +63,22 @@ const StyledModalConfirm = ({
           <h3 className={styles.title}>{title}</h3>
           <p className={styles.content}>{content}</p>
 
-          {error && <Alert message={error} type="error" showIcon className={styles.errorAlert} />}
+          {error && (
+            <Alert
+              message={error}
+              type="error"
+              showIcon
+              className={styles.errorAlert}
+            />
+          )}
         </div>
 
         <div className={styles.buttonGroup}>
-          <button onClick={onCancel} className={styles.cancelButton} disabled={loading}>
+          <button
+            onClick={onCancel}
+            className={styles.cancelButton}
+            disabled={loading}
+          >
             {cancelText}
           </button>
           <button
@@ -78,44 +92,44 @@ const StyledModalConfirm = ({
         </div>
       </div>
     </Modal>
-  )
-}
+  );
+};
 
 export default function AccountTable({ data, loading, refetch }) {
   const navigate = useNavigate();
   const [updateOwner] = useUpdateOwnerMutation();
 
-  const [selectedUser, setSelectedUser] = useState(null)
-  const [selectedUserOwner, setSelectedUserOwner] = useState(null)
-  const [isDetailOpen, setIsDetailOpen] = useState(false)
-  const [isDetailOpenOwner, setIsDetailOpenOwner] = useState(false)
-  const [activeUser] = useActiveUserMutation()
-  const [blockUser] = useBlockUserMutation()
+  const [selectedUser, setSelectedUser] = useState(null);
+  const [selectedUserOwner, setSelectedUserOwner] = useState(null);
+  const [isDetailOpen, setIsDetailOpen] = useState(false);
+  const [isDetailOpenOwner, setIsDetailOpenOwner] = useState(false);
+  const [activeUser] = useActiveUserMutation();
+  const [blockUser] = useBlockUserMutation();
   const [pagination, setPagination] = useState({
     current: 1,
     pageSize: 7,
     total: data.length,
-  })
+  });
 
-  const [isBlockModalOpen, setIsBlockModalOpen] = useState(false)
-  const [isUnblockModalOpen, setIsUnblockModalOpen] = useState(false)
-  const [userToBlock, setUserToBlock] = useState(null)
-  const [userToUnblock, setUserToUnblock] = useState(null)
-  const [actionLoading, setActionLoading] = useState(false)
-  const [actionError, setActionError] = useState(null)
+  const [isBlockModalOpen, setIsBlockModalOpen] = useState(false);
+  const [isUnblockModalOpen, setIsUnblockModalOpen] = useState(false);
+  const [userToBlock, setUserToBlock] = useState(null);
+  const [userToUnblock, setUserToUnblock] = useState(null);
+  const [actionLoading, setActionLoading] = useState(false);
+  const [actionError, setActionError] = useState(null);
 
   const formatDateTime = (dateString) => {
-    if (!dateString) return "N/A"
+    if (!dateString) return "N/A";
 
     try {
       if (typeof dateString === "string" && dateString.includes("/")) {
-        return dateString
+        return dateString;
       }
 
-      const date = new Date(dateString)
+      const date = new Date(dateString);
 
       if (isNaN(date.getTime())) {
-        return "N/A"
+        return "N/A";
       }
 
       return date.toLocaleString("vi-VN", {
@@ -125,12 +139,12 @@ export default function AccountTable({ data, loading, refetch }) {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
-      })
+      });
     } catch (error) {
-      console.error("Date formatting error:", error)
-      return "N/A"
+      console.error("Date formatting error:", error);
+      return "N/A";
     }
-  }
+  };
 
   const columns = [
     {
@@ -286,7 +300,7 @@ export default function AccountTable({ data, loading, refetch }) {
             <span
               className={styles.iconViewDetail}
               onClick={() => {
-                handleViewModelOwner(record)
+                handleViewModelOwner(record);
               }}
             >
               <FaEye />
@@ -295,7 +309,7 @@ export default function AccountTable({ data, loading, refetch }) {
             <span
               className={styles.iconViewDetail}
               onClick={() => {
-                handleViewModel(record)
+                handleViewModel(record);
               }}
             >
               <FaEye />
@@ -316,7 +330,7 @@ export default function AccountTable({ data, loading, refetch }) {
               <span
                 className={styles.iconViewDetail}
                 onClick={(e) => {
-                  handleBlockUser(record)
+                  handleBlockUser(record);
                 }}
               >
                 <FaLockOpen style={{ color: "green" }} />
@@ -325,7 +339,7 @@ export default function AccountTable({ data, loading, refetch }) {
               <span
                 className={styles.iconViewDetail}
                 onClick={(e) => {
-                  handleActiveUser(record)
+                  handleActiveUser(record);
                 }}
               >
                 <FaLock style={{ color: "red" }} />
@@ -334,73 +348,73 @@ export default function AccountTable({ data, loading, refetch }) {
         </>
       ),
     },
-  ]
+  ];
 
   const handleBlockUser = (user) => {
-    setUserToBlock(user)
-    setActionError(null)
-    setIsBlockModalOpen(true)
-  }
+    setUserToBlock(user);
+    setActionError(null);
+    setIsBlockModalOpen(true);
+  };
 
   const handleActiveUser = (user) => {
-    setUserToUnblock(user)
-    setActionError(null)
-    setIsUnblockModalOpen(true)
-  }
+    setUserToUnblock(user);
+    setActionError(null);
+    setIsUnblockModalOpen(true);
+  };
 
   const confirmBlockUser = async () => {
     try {
-      setActionLoading(true)
-      setActionError(null)
-      await blockUser(userToBlock._id).unwrap()
-      message.success("Khóa tài khoản thành công!")
-      setIsBlockModalOpen(false)
-      setUserToBlock(null)
+      setActionLoading(true);
+      setActionError(null);
+      await blockUser(userToBlock._id).unwrap();
+      message.success("Khóa tài khoản thành công!");
+      setIsBlockModalOpen(false);
+      setUserToBlock(null);
     } catch (error) {
-      const errorMessage = error.data?.message || "Lỗi khi khóa tài khoản!"
-      setActionError(errorMessage)
+      const errorMessage = error.data?.message || "Lỗi khi khóa tài khoản!";
+      setActionError(errorMessage);
     } finally {
-      setActionLoading(false)
+      setActionLoading(false);
     }
-  }
+  };
 
   const confirmUnblockUser = async () => {
     try {
-      setActionLoading(true)
-      setActionError(null)
-      await activeUser(userToUnblock._id).unwrap()
-      message.success("Cho phép hoạt động thành công!")
-      setIsUnblockModalOpen(false)
-      setUserToUnblock(null)
+      setActionLoading(true);
+      setActionError(null);
+      await activeUser(userToUnblock._id).unwrap();
+      message.success("Cho phép hoạt động thành công!");
+      setIsUnblockModalOpen(false);
+      setUserToUnblock(null);
     } catch (error) {
-      const errorMessage = error.data?.message || "Lỗi khi mở khóa tài khoản!"
-      setActionError(errorMessage)
+      const errorMessage = error.data?.message || "Lỗi khi mở khóa tài khoản!";
+      setActionError(errorMessage);
     } finally {
-      setActionLoading(false)
+      setActionLoading(false);
     }
-  }
+  };
 
   const cancelBlockUser = () => {
-    setIsBlockModalOpen(false)
-    setUserToBlock(null)
-    setActionError(null)
-  }
+    setIsBlockModalOpen(false);
+    setUserToBlock(null);
+    setActionError(null);
+  };
 
   const cancelUnblockUser = () => {
-    setIsUnblockModalOpen(false)
-    setUserToUnblock(null)
-    setActionError(null)
-  }
+    setIsUnblockModalOpen(false);
+    setUserToUnblock(null);
+    setActionError(null);
+  };
 
   const handleViewModel = (user) => {
-    setSelectedUser(user)
-    setIsDetailOpen(true)
-  }
+    setSelectedUser(user);
+    setIsDetailOpen(true);
+  };
 
   const handleViewModelOwner = async (user) => {
-    setSelectedUserOwner(user)
-    setIsDetailOpenOwner(true)
-  }
+    setSelectedUserOwner(user);
+    setIsDetailOpenOwner(true);
+  };
 
   return (
     <div style={{ marginTop: 10 }}>
@@ -434,7 +448,7 @@ export default function AccountTable({ data, loading, refetch }) {
                 >
                   « Trước
                 </button>
-              )
+              );
             }
 
             if (type === "next") {
@@ -451,15 +465,19 @@ export default function AccountTable({ data, loading, refetch }) {
                 >
                   Tiếp »
                 </button>
-              )
+              );
             }
-            return originalElement
+            return originalElement;
           },
         }}
         className={styles.accountTable}
       />
 
-      <UserDetailModal open={isDetailOpen} onClose={() => setIsDetailOpen(false)} user={selectedUser} />
+      <UserDetailModal
+        open={isDetailOpen}
+        onClose={() => setIsDetailOpen(false)}
+        user={selectedUser}
+      />
       <OwnerDetailModal
         open={isDetailOpenOwner}
         onClose={() => setIsDetailOpenOwner(false)}
@@ -496,5 +514,5 @@ export default function AccountTable({ data, loading, refetch }) {
         onCancel={cancelUnblockUser}
       />
     </div>
-  )
+  );
 }

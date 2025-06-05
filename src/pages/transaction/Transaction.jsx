@@ -13,6 +13,7 @@ import OverviewTransaction from "./components/OverviewTransaction";
 import styles from "./Transaction.module.scss";
 import { useGetAllTransactionQuery } from "../../redux/services/transactionApi";
 import { Dropdown } from "antd";
+import { Spin } from "antd";
 
 export default function Transaction() {
   const [searchValue, setSearchValue] = useState(""); // Tìm kiếm theo mã giao dịch hoặc mã đặt phòng
@@ -137,6 +138,21 @@ export default function Transaction() {
       (item) => item.typeTransaction.en === "MOMO_PAYMENT"
     ).length,
   };
+
+   if (isLoading) {
+    return (
+      <div
+        style={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   const transactionStatusInfo = (
     <div className={styles.statusDescriptionPopover}>

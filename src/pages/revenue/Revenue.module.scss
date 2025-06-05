@@ -1,5 +1,7 @@
 .paginationButton {
+  margin: 0px 20px;
   display: inline-flex;
+  gap: 10px;
   align-items: center;
   height: 100%;
   background: white;
@@ -19,5 +21,29 @@
     color: rgba(0, 0, 0, 0.25);
     border-color: #d9d9d9;
     cursor: not-allowed;
+  }
+}
+.statusTag {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 12px;
+  font-weight: 500;
+  display: inline-block;
+  text-align: center;
+  min-width: 120px;
+
+  &.ACTIVE {
+    background-color: #d1fae5;
+    color: #059669;
+  }
+
+  &.PENDING {
+    background-color: #fef3c7;
+    color: #d97706;
+  }
+
+  &.INACTIVE {
+    background-color: #fee2e2;
+    color: #dc2626;
   }
 }

@@ -181,6 +181,7 @@ export default function EditAddressModal({
         }
 
         const updatedData = {
+          ...addressData,
           address: values.address,
           ward: values.ward,
           district: values.district,
@@ -192,7 +193,7 @@ export default function EditAddressModal({
         const result = await updateRentalLocation({ id, updatedData }).unwrap();
 
         message.success("Cập nhật thành công!");
-        onUpdate((prev) => ({ ...prev, ...updatedData, id })); 
+        onUpdate((prev) => ({ ...prev, ...updatedData, id }));
 
         onClose();
       } catch (error) {

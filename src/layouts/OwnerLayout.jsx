@@ -20,8 +20,6 @@ const OwnerLayout = () => {
   const { id } = useParams(); // Lấy ID từ URL
   const userRole = localStorage.getItem("user_role"); // "admin" hoặc "owner"
 
-  console.log("id", id);
-
   const menuItems = [
     {
       key: `/owner/${id}/information`,

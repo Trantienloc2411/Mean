@@ -23,6 +23,7 @@ import {
 } from "../../redux/services/couponApi";
 import UpdateCouponModal from "./components/UpdateCoupon/UpdateCouponModal.jsx";
 import ViewCouponModal from "./components/ViewCoupon/ViewCouponModal.jsx";
+import { Spin } from "antd";
 const { RangePicker } = DatePicker;
 
 export default function Coupon() {
@@ -335,6 +336,20 @@ export default function Coupon() {
       ),
     },
   ];
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.contentContainer}>
