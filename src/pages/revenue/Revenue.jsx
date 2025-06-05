@@ -32,7 +32,7 @@ const Revenue = () => {
 
     const PLATFORM_FEE_PERCENTAGE = parseFloat(
       policyPrice?.data?.[0]?.values?.[0]?.val || "0.1"
-    );
+    ) / 100;
     const filteredOwners = ownerBookingData.owners.map((owner) => {
       // Lọc booking đã hoàn tất và đã thanh toán
       let filteredBookings = owner.bookings.filter(
