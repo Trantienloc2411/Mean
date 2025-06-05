@@ -1,8 +1,8 @@
 import { Card, Table, Input, Space } from "antd";
 import { useMemo, useState } from "react";
 import dayjs from "dayjs";
-import { Tag } from "antd";
 import customParseFormat from "dayjs/plugin/customParseFormat";
+import styles from "./OwnerRevenue.module.scss";
 import { Select } from "antd";
 dayjs.extend(customParseFormat);
 const DATE_FORMAT = "DD/MM/YYYY HH:mm:ss";
@@ -10,16 +10,16 @@ const DATE_FORMAT = "DD/MM/YYYY HH:mm:ss";
 const BOOKING_STATUS_LABELS = {
   8: { text: "Đang xử lý", color: "gold" },
   1: { text: "Đã xác nhận", color: "blue" },
-  // 2: { text: "Chờ nhận phòng", color: "processing" },
+  2: { text: "Chờ nhận phòng", color: "processing" },
   3: { text: "Đã nhận phòng", color: "geekblue" },
-  // 4: { text: "Chờ trả phòng", color: "orange" },
+  4: { text: "Chờ trả phòng", color: "orange" },
   5: { text: "Đã trả phòng", color: "cyan" },
   6: { text: "Đã hủy", color: "red" },
   7: { text: "Hoàn tất", color: "green" },
   9: { text: "Hoàn tiền", color: "volcano" },
 };
 const PAYMENT_STATUS_LABELS = {
-  // 1: { text: "Đã xác nhận", color: "blue" },
+  1: { text: "Đã xác nhận", color: "blue" },
   2: { text: "Chờ", color: "processing" },
   3: { text: "Đã Thanh toán", color: "geekblue" },
   4: { text: "Hoàn tiền", color: "orange" },
@@ -86,8 +86,11 @@ export default function BookingTable({ bookings = [], loading }) {
       align: "center",
       dataIndex: "status",
       render: (status) => {
-        const s = BOOKING_STATUS_LABELS[status];
-        return <Tag color={s?.color || "default"}>{s?.text || "Không rõ"}</Tag>;
+        const label = BOOKING_STATUS_LABELS[status]?.text || "Không rõ";
+        const className = status
+          ? `${styles.bookingStatus} ${styles[`status-${status}`]}`
+          : `${styles.bookingStatus} ${styles.unknown}`;
+        return <span className={className}>{label}</span>;
       },
     },
     {
@@ -95,8 +98,11 @@ export default function BookingTable({ bookings = [], loading }) {
       align: "center",
       dataIndex: "paymentStatus",
       render: (paymentStatus) => {
-        const s = PAYMENT_STATUS_LABELS[paymentStatus];
-        return <Tag color={s?.color || "default"}>{s?.text || "Không rõ"}</Tag>;
+        const label = PAYMENT_STATUS_LABELS[paymentStatus]?.text || "Không rõ";
+        const className = paymentStatus
+          ? `${styles.paymentStatus} ${styles[`status-${paymentStatus}`]}`
+          : `${styles.paymentStatus} ${styles.unknown}`;
+        return <span className={className}>{label}</span>;
       },
     },
   ];
