@@ -66,7 +66,13 @@ const transformPolicyOwnerData = (data) => {
     delete transformed.EndDate;
   }
   
-  delete transformed.Status;
+  if (transformed.Status === undefined) {
+    transformed.status = 1;
+  } else {
+    transformed.status = transformed.Status;
+    delete transformed.Status;
+  }
+  
   delete transformed.CreatedDate;
   delete transformed.No;
   

@@ -264,6 +264,7 @@ export default function Policy() {
         key: "2",
         label: "Chỉnh sửa",
         onClick: () => {
+          setSelectedPolicy(record);
           setSelectedPolicyId(record._id || record.id);
           setIsUpdateModalOpen(true);
         },
@@ -371,6 +372,10 @@ export default function Policy() {
 
   const handleUpdatePolicy = async (values) => {
     try {
+      if (!selectedPolicy || (!selectedPolicy._id && !selectedPolicy.id)) {
+        throw new Error("Không tìm thấy ID của chính sách");
+      }
+
       const formattedValues = {
         ...values,
         ApplyDate: values.ApplyDate ? values.ApplyDate : null,
@@ -378,65 +383,47 @@ export default function Policy() {
       };
 
       const updatedPolicyData = {
-        ...formattedValues,
-        id: selectedPolicy._id,
+        id: selectedPolicy._id || selectedPolicy.id,
         ownerId: selectedPolicy.ownerId || effectiveOwnerId,
-        status: values.Status,
+        policyTitle: formattedValues.Name,
+        policyDescription: formattedValues.Description,
+        startDate: formattedValues.ApplyDate
+          ? formattedValues.ApplyDate.format("DD/MM/YYYY HH:mm:ss")
+          : null,
+        endDate: formattedValues.EndDate
+          ? formattedValues.EndDate.format("DD/MM/YYYY HH:mm:ss")
+          : null,
+        status: values.Status || 1,
+        values: formattedValues.values?.filter(
+          (value) => value && (value.val || value.description)
+        ) || [],
+        isDelete: false,
+        updateBy: localStorage.getItem("user_id") || "",
       };
 
-      // console.log("Updating policy with data:", updatedPolicyData);
+      console.log("Updating policy with data:", updatedPolicyData);
 
       try {
-        await updatePolicy(updatedPolicyData).unwrap();
-        message.success("Cập nhật chính sách thành công!");
-        refetch();
+        const result = await updatePolicy(updatedPolicyData).unwrap();
+        console.log("Update result:", result);
+        if (result) {
+          message.success("Cập nhật chính sách thành công!");
+          await refetch();
+        }
       } catch (apiError) {
-        console.warn(
-          "API error during update, falling back to UI update:",
-          apiError
-        );
-        const updatedBaseData = baseData.map((item) => {
-          if (item._id === selectedPolicy._id) {
-            return {
-              ...item,
-              Name: formattedValues.Name,
-              Description: formattedValues.Description,
-              ApplyDate: formattedValues.ApplyDate
-                ? formattedValues.ApplyDate.format("HH:mm DD/MM/YYYY")
-                : item.ApplyDate,
-              EndDate: formattedValues.EndDate
-                ? formattedValues.EndDate.format("HH:mm DD/MM/YYYY")
-                : item.EndDate,
-              Status: formattedValues.Status,
-              _original: {
-                ...item._original,
-                policyTitle: formattedValues.Name,
-                policyDescription: formattedValues.Description,
-                status: formattedValues.Status,
-                startDate: formattedValues.ApplyDate
-                  ? formattedValues.ApplyDate.format("DD/MM/YYYY HH:mm:ss")
-                  : item._original.startDate,
-                endDate: formattedValues.EndDate
-                  ? formattedValues.EndDate.format("DD/MM/YYYY HH:mm:ss")
-                  : item._original.endDate,
-              },
-            };
-          }
-          return item;
-        });
-
-        setBaseData(updatedBaseData);
-        setFilteredData(updatedBaseData);
+        console.error("API error during update:", apiError);
+        throw new Error(apiError.data?.message || "Lỗi khi gọi API cập nhật");
       }
     } catch (error) {
       console.error("Error updating policy:", error);
       message.error(
         "Cập nhật chính sách thất bại: " +
-          (error.data?.message || "Đã xảy ra lỗi")
+          (error.message || "Đã xảy ra lỗi")
       );
     } finally {
       setIsUpdateModalOpen(false);
       setSelectedPolicy(null);
+      setSelectedPolicyId(null);
     }
   };
 
@@ -665,10 +652,11 @@ export default function Policy() {
           onCancel={() => {
             setIsUpdateModalOpen(false);
             setSelectedPolicyId(null);
+            setSelectedPolicy(null);
             setPolicyDetailForUpdate(null);
           }}
           onConfirm={handleUpdatePolicy}
-          initialValues={policyDetailForUpdate}
+          initialValues={updatePolicyDetail}
           isLoading={isLoadingUpdateDetail}
         />
 

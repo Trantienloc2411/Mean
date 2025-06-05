@@ -176,11 +176,11 @@ const DetailPolicyModal = ({
             <Descriptions.Item label="Ngày cập nhật">
               {formatDate(policyData.updatedAt) || 'Không có'}
             </Descriptions.Item>
-            <Descriptions.Item label="Trạng thái">
+            {/* <Descriptions.Item label="Trạng thái">
               <span className={`${styles.status} ${styles[getStatusClassName(policyData.status || policy?.Status)]}`}>
                 {getStatusText(policyData.status || policy?.Status)}
               </span>
-            </Descriptions.Item>
+            </Descriptions.Item> */}
           </Descriptions>
 
           {hasOwnerDetails && (

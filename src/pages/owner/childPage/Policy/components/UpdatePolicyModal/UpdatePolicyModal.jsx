@@ -189,8 +189,10 @@ const UpdatePolicyModal = ({
     if (!initialValues) return { values: [{}] };
 
     const policyData = initialValues.data || initialValues;
+    console.log("Initial policy data:", policyData);
 
     const processValues = (values) => {
+      if (!Array.isArray(values)) return [{}];
       return values.map((value) => ({
         val: value.val || "",
         description: value.description || "",
@@ -206,7 +208,7 @@ const UpdatePolicyModal = ({
       policyValues = processValues(policyData.values);
     }
 
-    return {
+    const formValues = {
       Name: policyData.policyTitle || "",
       Description: policyData.policyDescription || "",
       ApplyDate: policyData.startDate
@@ -218,9 +220,14 @@ const UpdatePolicyModal = ({
       Status: policyData.status || 1,
       values: policyValues.length > 0 ? policyValues : [{}],
     };
+
+    console.log("Formatted form values:", formValues);
+    return formValues;
   };
+
   useEffect(() => {
     if (!isLoading && initialValues) {
+      console.log("Setting form values with initialValues:", initialValues);
       const values = getInitialValues();
       form.setFieldsValue(values);
     }
@@ -230,6 +237,7 @@ const UpdatePolicyModal = ({
     try {
       setLoading(true);
       const values = await form.validateFields();
+      console.log("Form values to submit:", values);
 
       if (!values.ApplyDate || !values.EndDate) {
         throw new Error("Vui lòng chọn ngày bắt đầu và kết thúc hợp lệ");
@@ -237,21 +245,26 @@ const UpdatePolicyModal = ({
 
       const formattedValues = {
         ...values,
-        values:
-          values.values?.filter(
-            (value) => value && (value.val || value.description)
-          ) || [],
-        CreatedDate:
-          initialValues?.CreatedDate || dayjs().format("HH:mm DD/MM/YYYY"),
+        values: values.values?.filter(
+          (value) => value && (value.val || value.description)
+        ) || [],
+        CreatedDate: initialValues?.CreatedDate || dayjs().format("HH:mm DD/MM/YYYY"),
         Status: values.Status || initialValues?.Status || 1,
         isDelete: initialValues?.isDelete || false,
-        updateBy:
-          localStorage.getItem("user_id") || initialValues?.updateBy || "",
+        updateBy: localStorage.getItem("user_id") || initialValues?.updateBy || "",
+        id: initialValues?._id || initialValues?.id
       };
 
-      await onConfirm(formattedValues);
-      message.success("Cập nhật chính sách thành công");
-      onCancel();
+      console.log("Formatted values to submit:", formattedValues);
+
+      try {
+        await onConfirm(formattedValues);
+        message.success("Cập nhật chính sách thành công");
+        onCancel();
+      } catch (apiError) {
+        console.error("API error:", apiError);
+        throw new Error(apiError.message || "Lỗi khi gọi API cập nhật");
+      }
     } catch (error) {
       console.error("Error updating policy:", error);
       message.error(error.message || "Có lỗi xảy ra khi cập nhật chính sách");
