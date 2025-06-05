@@ -40,6 +40,7 @@ export default function Overview() {
   const [feedback, setFeedback] = useState([]);
   const [selectedRentalLocation, setSelectedRentalLocation] = useState("all");
   const [isRefreshing, setIsRefreshing] = useState(false);
+  const [countdown, setCountdown] = useState(90); // 90 seconds = 1.5 minutes
 
   const { data: ownerDetail } = useGetOwnerDetailByUserIdQuery(id);
   const { data: rentalLocations } = useGetRentalLocationByOwnerIdQuery(ownerDetail?.id, {
@@ -68,6 +69,20 @@ export default function Overview() {
       skip: !ownerDetail?.id,
     }
   );
+
+  // Countdown timer effect
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          return 90; // Reset to 90 without clearing interval
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   // Auto refresh every 1.5 minutes
   useEffect(() => {
@@ -99,6 +114,7 @@ export default function Overview() {
         refetchMonthlyRevenue(),
         refetchFeedback()
       ]);
+      setCountdown(90); // Reset countdown after manual refresh
     } finally {
       setIsRefreshing(false);
     }
@@ -229,35 +245,42 @@ export default function Overview() {
         />
       </div>
 
-      <h2 className={styles.sectionTitle}>
-        <RiseOutlined className={styles.sectionIcon} />
-        Đặt phòng hôm nay
-      </h2>
-
-      <div className={styles.filterContainer}>
-        <Select
-          className={styles.locationFilter}
-          value={selectedRentalLocation}
-          onChange={setSelectedRentalLocation}
-          style={{ width: 200 }}
-        >
-          <Select.Option value="all">Tất cả địa điểm</Select.Option>
-          {rentalLocations?.data?.filter(location => 
-            !location.isDeleted && location.status === 3 // 3 is ACTIVE status
-          ).map((location) => (
-            <Select.Option key={location._id} value={location._id}>
-              {location.name}
-            </Select.Option>
-          ))}
-        </Select>
-        <Button
-          icon={<ReloadOutlined spin={isRefreshing} />}
-          onClick={handleRefresh}
-          loading={isRefreshing}
-          style={{ marginLeft: 10 }}
-        >
-          Làm mới
-        </Button>
+      <div className={styles.sectionHeader}>
+        <div className={styles.sectionTitleContainer}>
+          <h2 className={styles.sectionTitle}>
+            <RiseOutlined className={styles.sectionIcon} />
+            Đặt phòng hôm nay
+          </h2>
+        </div>
+        <div className={styles.filterContainer}>
+          <Select
+            className={styles.locationFilter}
+            value={selectedRentalLocation}
+            onChange={setSelectedRentalLocation}
+            style={{ width: 200 }}
+          >
+            <Select.Option value="all">Tất cả địa điểm</Select.Option>
+            {rentalLocations?.data?.filter(location => 
+              !location.isDeleted && location.status === 3
+            ).map((location) => (
+              <Select.Option key={location._id} value={location._id}>
+                {location.name}
+              </Select.Option>
+            ))}
+          </Select>
+          <div className={styles.refreshContainer}>
+            <span className={styles.countdownText}>
+              Tự động làm mới sau: {Math.floor(countdown / 60)}:{(countdown % 60).toString().padStart(2, '0')}
+            </span>
+            <Button
+              icon={<ReloadOutlined spin={isRefreshing} />}
+              onClick={handleRefresh}
+              loading={isRefreshing}
+            >
+              Làm mới
+            </Button>
+          </div>
+        </div>
       </div>
 
       <div className={styles.bookingOverview}>
