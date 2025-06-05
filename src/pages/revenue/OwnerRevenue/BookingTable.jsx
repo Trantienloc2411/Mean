@@ -16,13 +16,13 @@ const BOOKING_STATUS_LABELS = {
   5: { text: "Đã trả phòng", color: "cyan" },
   6: { text: "Đã hủy", color: "red" },
   7: { text: "Hoàn tất", color: "green" },
-  9: { text: "Hoàn tiền", color: "volcano" },
+  9: { text: "Đã hoàn tiền", color: "volcano" },
 };
 const PAYMENT_STATUS_LABELS = {
   1: { text: "Đã xác nhận", color: "blue" },
   2: { text: "Chờ", color: "processing" },
   3: { text: "Đã Thanh toán", color: "geekblue" },
-  4: { text: "Hoàn tiền", color: "orange" },
+  4: { text: "Yêu cầu hoàn tiền", color: "orange" },
   5: { text: "Thất bại", color: "red" },
 };
 

@@ -88,7 +88,12 @@ export default function OwnerRevenuePage() {
     const end = date.endOf("month");
 
     const filtered = bookings.filter((b) =>
-      dayjs(b.checkIn).isBetween(start, end, null, "[]")
+      dayjs(b.createdAt, "DD/MM/YYYY HH:mm:ss").isBetween(
+        start,
+        end,
+        null,
+        "[]"
+      )
     );
 
     setFilteredBookings(filtered);
