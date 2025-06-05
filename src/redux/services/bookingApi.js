@@ -121,7 +121,7 @@ export const bookingApi = apiSlice.injectEndpoints({
 
     getBookingStatsMonthly: builder.query({
       query: (userId) => `/booking/stats/monthly-count/${userId}`,
-      transformResponse: (response) => response?.monthlyBookingCounts,
+      transformResponse: (response) => response?.dailyBookingCounts,
       providesTags: ["Booking"],
     }),
 
@@ -133,7 +133,7 @@ export const bookingApi = apiSlice.injectEndpoints({
 
     getStatsRevenueMonthly: builder.query({
       query: (userId) => `/booking/stats/monthly-revenue/${userId}`,
-      transformResponse: (response) => response?.monthlyRevenue,
+      transformResponse: (response) => response?.dailyRevenue,
       providesTags: ["Booking"],
     }),
   }),

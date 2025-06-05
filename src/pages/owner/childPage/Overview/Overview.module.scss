@@ -162,3 +162,17 @@
         }
     }
 }
+
+.filterContainer {
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: flex-end;
+}
+
+.locationFilter {
+    :global {
+        .ant-select-selector {
+            border-radius: 8px;
+        }
+    }
+}
