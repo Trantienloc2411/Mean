@@ -66,7 +66,9 @@ const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
     );
 
     if (inputValue) {
-      const formattedTag = inputValue.startsWith("#") ? inputValue : `#${inputValue}`;
+      const formattedTag = inputValue.startsWith("#")
+        ? inputValue
+        : `#${inputValue}`;
       if (!allOptions.includes(formattedTag)) {
         filtered.push(formattedTag);
       }
@@ -110,11 +112,37 @@ const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
         />
       );
     } else if (unit === "hour") {
-      return <Input placeholder={placeholder} suffix="h" type="number" min={0} max={24} step={0.5} />;
+      return (
+        <Input
+          placeholder={placeholder}
+          suffix="h"
+          type="number"
+          min={0}
+          max={24}
+          step={0.5}
+        />
+      );
     } else if (unit === "day") {
-      return <Input placeholder={placeholder} suffix="ngày" type="number" min={1} max={31} step={1} />;
+      return (
+        <Input
+          placeholder={placeholder}
+          suffix="ngày"
+          type="number"
+          min={1}
+          max={31}
+          step={1}
+        />
+      );
     } else if (unit === "vnd") {
-      return <Input placeholder={placeholder} suffix="đ" type="number" min={0} step={1000} />;
+      return (
+        <Input
+          placeholder={placeholder}
+          suffix="đ"
+          type="number"
+          min={0}
+          step={1000}
+        />
+      );
     } else if (unit === "min") {
       return (
         <Input
@@ -134,7 +162,9 @@ const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
   const handleFormValuesChange = (changedValues, allValues) => {
     if (changedValues.values) {
       const changedIndex = Object.keys(changedValues.values).find(
-        (index) => changedValues.values[index] && changedValues.values[index].unit !== undefined
+        (index) =>
+          changedValues.values[index] &&
+          changedValues.values[index].unit !== undefined
       );
 
       if (changedIndex) {
@@ -157,7 +187,10 @@ const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
 
       const formattedValues = {
         ...values,
-        values: values.values?.filter((value) => value && (value.val || value.description)) || [],
+        values:
+          values.values?.filter(
+            (value) => value && (value.val || value.description)
+          ) || [],
         CreatedDate: dayjs().format("HH:mm DD/MM/YYYY"),
         Status: 1,
         isDelete: false,
@@ -200,7 +233,12 @@ const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
         >
           Huỷ
         </Button>,
-        <Button key="submit" type="primary" loading={loading} onClick={handleSubmit}>
+        <Button
+          key="submit"
+          type="primary"
+          loading={loading}
+          onClick={handleSubmit}
+        >
           Thêm mới
         </Button>,
       ]}
@@ -242,9 +280,15 @@ const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
                 </Tooltip>
               </Space>
             }
-            rules={[{ required: true, message: "Vui lòng nhập tên chính sách" }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập tên chính sách" },
+            ]}
           >
-            <Input placeholder="Nhập tên chính sách" maxLength={100} showCount />
+            <Input
+              placeholder="Nhập tên chính sách"
+              maxLength={100}
+              showCount
+            />
           </Form.Item>
 
           <Form.Item
@@ -259,11 +303,16 @@ const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
             }
             rules={[{ required: true, message: "Vui lòng nhập mô tả" }]}
           >
-            <Input.TextArea rows={3} placeholder="Nhập mô tả cho chính sách" maxLength={500} showCount />
+            <Input.TextArea
+              rows={3}
+              placeholder="Nhập mô tả cho chính sách"
+              maxLength={500}
+              showCount
+            />
           </Form.Item>
         </Card>
 
-        <Card
+        {/* <Card
           className={styles.formSection}
           title={
             <div className={styles.sectionTitle}>
@@ -515,7 +564,7 @@ const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
               </>
             )}
           </Form.List>
-        </Card>
+        </Card> */}
 
         <Card
           className={styles.formSection}
@@ -547,7 +596,9 @@ const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
                     const now = dayjs().startOf("minute");
                     const selectedDate = dayjs(value);
                     if (selectedDate.isBefore(now)) {
-                      return Promise.reject(new Error("Ngày bắt đầu phải sau hiện tại"));
+                      return Promise.reject(
+                        new Error("Ngày bắt đầu phải sau hiện tại")
+                      );
                     }
                     return Promise.resolve();
                   },
@@ -578,11 +629,17 @@ const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
                 { required: true, message: "Vui lòng chọn ngày kết thúc" },
                 ({ getFieldValue }) => ({
                   validator(_, value) {
-                    if (!value || !getFieldValue("ApplyDate")) return Promise.resolve();
+                    if (!value || !getFieldValue("ApplyDate"))
+                      return Promise.resolve();
                     const startDate = dayjs(getFieldValue("ApplyDate"));
                     const endDate = dayjs(value);
-                    if (endDate.isBefore(startDate) || endDate.isSame(startDate)) {
-                      return Promise.reject(new Error("Ngày kết thúc phải sau ngày bắt đầu"));
+                    if (
+                      endDate.isBefore(startDate) ||
+                      endDate.isSame(startDate)
+                    ) {
+                      return Promise.reject(
+                        new Error("Ngày kết thúc phải sau ngày bắt đầu")
+                      );
                     }
                     return Promise.resolve();
                   },
@@ -596,8 +653,10 @@ const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
                 placeholder="Chọn ngày và giờ kết thúc"
                 disabledDate={(current) => {
                   const startDate = form.getFieldValue("ApplyDate");
-                  return current < dayjs().startOf("day") ||
-                    (startDate && current < dayjs(startDate).startOf("day"));
+                  return (
+                    current < dayjs().startOf("day") ||
+                    (startDate && current < dayjs(startDate).startOf("day"))
+                  );
                 }}
               />
             </Form.Item>

@@ -144,15 +144,16 @@ export default function PolicyCategory() {
       title: "Thao tác",
       key: "operation",
       width: 100,
-      render: (_, record) => (
-        <Button
-          type="link"
-          icon={<EditOutlined />}
-          onClick={() => handleEditCategory(record)}
-        >
-          Sửa
-        </Button>
-      ),
+      render: (_, record) =>
+        record.categoryName !== "System" && (
+          <Button
+            type="link"
+            icon={<EditOutlined />}
+            onClick={() => handleEditCategory(record)}
+          >
+            Sửa
+          </Button>
+        ),
     },
   ];
   if (isLoading) {
