@@ -123,7 +123,7 @@ export default function OwnerRevenuePage() {
 
       if (paymentStatusText === "PAID") {
         totalRevenue += b.totalPrice;
-        const fee = b.totalPrice * platformFee;
+        const fee = b.totalPrice * (platformFee / 100);
         ownerEarnings += b.totalPrice - fee;
         platformFeeTotal += fee;
         successCount += 1;
