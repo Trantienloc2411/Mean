@@ -1,7 +1,7 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import styles from "./Overview.module.scss";
 import CardDashboard from "../../../../components/Card/CardDashboard";
-import { Spin } from "antd";
+import { Spin, Select, Button } from "antd";
 import {
   TeamOutlined,
   CheckCircleOutlined,
@@ -10,6 +10,7 @@ import {
   CalendarOutlined,
   RiseOutlined,
   BarChartOutlined,
+  ReloadOutlined,
 } from "@ant-design/icons";
 import ReviewList from "./components/ReviewList.jsx";
 import CardListBooking from "./components/CardListBooking.jsx";
@@ -17,15 +18,13 @@ import { useGetBookingsByOwnerIdQuery } from "../../../../redux/services/booking
 import { useGetOwnerDetailByUserIdQuery } from "../../../../redux/services/ownerApi.js";
 import { useGetFeedbackByOwnerIdQuery } from "../../../../redux/services/feedbackApi.js";
 import { useGetBoookingStatsWeeklyQuery, useGetBookingStatsMonthlyQuery, useGetStatsRevenueWeeklyQuery, useGetStatsRevenueMonthlyQuery} from "../../../../redux/services/bookingApi.js"
+import { useGetRentalLocationByOwnerIdQuery } from "../../../../redux/services/rentalApi.js";
 import { useParams } from "react-router-dom";
 import {
   AreaChart,
   Area,
   BarChart,
   Bar,
-  PieChart,
-  Pie,
-  Cell,
   XAxis,
   YAxis,
   CartesianGrid,
@@ -33,39 +32,93 @@ import {
   Legend,
   ResponsiveContainer,
 } from "recharts";
-import { useEffect } from "react";
 
 export default function Overview() {
   const { id } = useParams();
   const [activeTab, setActiveTab] = useState("weekly");
   const [isLoading, setIsLoading] = useState(true);
   const [feedback, setFeedback] = useState([]);
+  const [selectedRentalLocation, setSelectedRentalLocation] = useState("all");
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [countdown, setCountdown] = useState(90); // 90 seconds = 1.5 minutes
 
   const { data: ownerDetail } = useGetOwnerDetailByUserIdQuery(id);
+  const { data: rentalLocations } = useGetRentalLocationByOwnerIdQuery(ownerDetail?.id, {
+    skip: !ownerDetail?.id
+  });
 
-  const { data: weeklyBookingStats, isLoading: isLoadingWeeklyStats } =
+  const { data: weeklyBookingStats, refetch: refetchWeeklyStats } =
     useGetBoookingStatsWeeklyQuery(id);
-  const { data: monthlyBookingStats, isLoading: isLoadingMonthlyStats } =
+  const { data: monthlyBookingStats, refetch: refetchMonthlyStats } =
     useGetBookingStatsMonthlyQuery(id);
-  const { data: weeklyRevenueStats, isLoading: isLoadingWeeklyRevenue } =
+  const { data: weeklyRevenueStats, refetch: refetchWeeklyRevenue } =
     useGetStatsRevenueWeeklyQuery(id);
-  const { data: monthlyRevenueStats, isLoading: isLoadingMonthlyRevenue } =
+  const { data: monthlyRevenueStats, refetch: refetchMonthlyRevenue } =
     useGetStatsRevenueMonthlyQuery(id);
 
-
-  const { data: bookingDetail } = useGetBookingsByOwnerIdQuery(
+  const { data: bookingDetail, refetch: refetchBookings } = useGetBookingsByOwnerIdQuery(
     ownerDetail?.id,
     {
       skip: !ownerDetail?.id,
     }
   );
 
-  const { data: feebackData, isLoadingFeedback } = useGetFeedbackByOwnerIdQuery(
+  const { data: feebackData, isLoadingFeedback, refetch: refetchFeedback } = useGetFeedbackByOwnerIdQuery(
     ownerDetail?.id,
     {
       skip: !ownerDetail?.id,
     }
   );
+
+  // Countdown timer effect
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setCountdown((prev) => {
+        if (prev <= 1) {
+          return 90; // Reset to 90 without clearing interval
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, []);
+
+  // Auto refresh every 1.5 minutes
+  useEffect(() => {
+    const refreshData = async () => {
+      await Promise.all([
+        refetchBookings(),
+        refetchWeeklyStats(),
+        refetchMonthlyStats(),
+        refetchWeeklyRevenue(),
+        refetchMonthlyRevenue(),
+        refetchFeedback()
+      ]);
+    };
+
+    const intervalId = setInterval(refreshData, 90000); // 1.5 minutes = 90000ms
+
+    return () => clearInterval(intervalId);
+  }, [refetchBookings, refetchWeeklyStats, refetchMonthlyStats, refetchWeeklyRevenue, refetchMonthlyRevenue, refetchFeedback]);
+
+  // Manual refresh handler
+  const handleRefresh = async () => {
+    setIsRefreshing(true);
+    try {
+      await Promise.all([
+        refetchBookings(),
+        refetchWeeklyStats(),
+        refetchMonthlyStats(),
+        refetchWeeklyRevenue(),
+        refetchMonthlyRevenue(),
+        refetchFeedback()
+      ]);
+      setCountdown(90); // Reset countdown after manual refresh
+    } finally {
+      setIsRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     if (isLoadingFeedback) {
@@ -83,9 +136,13 @@ export default function Overview() {
   };
 
   const filterDataBooking =
-    bookingDetail?.filter(
-      (booking) => parseDate(booking.checkInHour) > new Date()
-    ) || [];
+    bookingDetail?.filter((booking) => {
+      const isFuture = parseDate(booking.checkInHour) > new Date();
+      const matchLocation =
+        selectedRentalLocation === "all" ||
+        booking.accommodationId?.rentalLocationId?._id === selectedRentalLocation;
+      return isFuture && matchLocation;
+    }) || [];
 
   // Calculate statistics
   const totalBookings = bookingDetail?.length || 0;
@@ -102,28 +159,37 @@ export default function Overview() {
     ) || 0;
 
   const transformStatsData = (bookingStats, revenueStats) => {
-  const mergedData = [];
+    const mergedData = [];
 
-  for (const key in bookingStats || {}) {
-    mergedData.push({
-      name: key, 
-      bookings: bookingStats[key] || 0,
-      revenue: revenueStats?.[key] || 0,
-    });
-  }
+    if (activeTab === "weekly") {
+      for (const key in bookingStats || {}) {
+        mergedData.push({
+          name: key,
+          bookings: bookingStats[key] || 0,
+          revenue: revenueStats?.[key] || 0,
+        });
+      }
+    } else {
+      // Xử lý dữ liệu theo tháng
+      const daysInMonth = new Date(new Date().getFullYear(), new Date().getMonth() + 1, 0).getDate();
 
-  return mergedData;
-};
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayKey = `Ngày ${day}`;
+        mergedData.push({
+          name: dayKey,
+          bookings: bookingStats?.[dayKey] || 0,
+          revenue: revenueStats?.[dayKey] || 0,
+        });
+      }
+    }
 
-
-
-  const COLORS = ["#0088FE", "#00C49F", "#FFBB28", "#FF8042"];
+    return mergedData;
+  };
 
   const chartData =
-  activeTab === "weekly"
-    ? transformStatsData(weeklyBookingStats, weeklyRevenueStats)
-    : transformStatsData(monthlyBookingStats, monthlyRevenueStats);
-
+    activeTab === "weekly"
+      ? transformStatsData(weeklyBookingStats, weeklyRevenueStats)
+      : transformStatsData(monthlyBookingStats, monthlyRevenueStats);
 
   return (
     <div className={styles.contentContainer}>
@@ -179,10 +245,43 @@ export default function Overview() {
         />
       </div>
 
-      <h2 className={styles.sectionTitle}>
-        <RiseOutlined className={styles.sectionIcon} />
-        Đặt phòng hôm nay
-      </h2>
+      <div className={styles.sectionHeader}>
+        <div className={styles.sectionTitleContainer}>
+          <h2 className={styles.sectionTitle}>
+            <RiseOutlined className={styles.sectionIcon} />
+            Đặt phòng hôm nay
+          </h2>
+        </div>
+        <div className={styles.filterContainer}>
+          <Select
+            className={styles.locationFilter}
+            value={selectedRentalLocation}
+            onChange={setSelectedRentalLocation}
+            style={{ width: 200 }}
+          >
+            <Select.Option value="all">Tất cả địa điểm</Select.Option>
+            {rentalLocations?.data?.filter(location => 
+              !location.isDeleted && location.status === 3
+            ).map((location) => (
+              <Select.Option key={location._id} value={location._id}>
+                {location.name}
+              </Select.Option>
+            ))}
+          </Select>
+          <div className={styles.refreshContainer}>
+            <span className={styles.countdownText}>
+              Tự động làm mới sau: {Math.floor(countdown / 60)}:{(countdown % 60).toString().padStart(2, '0')}
+            </span>
+            <Button
+              icon={<ReloadOutlined spin={isRefreshing} />}
+              onClick={handleRefresh}
+              loading={isRefreshing}
+            >
+              Làm mới
+            </Button>
+          </div>
+        </div>
+      </div>
 
       <div className={styles.bookingOverview}>
         <CardListBooking
@@ -230,14 +329,25 @@ export default function Overview() {
 
       <div className={styles.chartsContainer}>
         <div className={styles.chartCard}>
-          <h3 className={styles.chartTitle}>Số lượng đặt phòng</h3>
+          <h3 className={styles.chartTitle}>
+            {activeTab === "weekly" ? "Số lượng đặt phòng theo tuần" : "Số lượng đặt phòng theo ngày trong tháng"}
+          </h3>
           <div className={styles.chartWrapper}>
             <ResponsiveContainer width="100%" height={300}>
               <BarChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
+                <XAxis 
+                  dataKey="name" 
+                  angle={-45}
+                  textAnchor="end"
+                  height={70}
+                  interval={activeTab === "monthly" ? 2 : 0}
+                />
                 <YAxis />
-                <Tooltip formatter={(value) => [`${value}`, "Đặt phòng"]} />
+                <Tooltip 
+                  formatter={(value) => [`${value}`, "Đặt phòng"]}
+                  labelStyle={{ color: "#1890ff" }}
+                />
                 <Legend />
                 <Bar dataKey="bookings" fill="#1890ff" name="Số đặt phòng" />
               </BarChart>
@@ -246,18 +356,27 @@ export default function Overview() {
         </div>
 
         <div className={styles.chartCard}>
-          <h3 className={styles.chartTitle}>Doanh thu</h3>
+          <h3 className={styles.chartTitle}>
+            {activeTab === "weekly" ? "Doanh thu theo tuần" : "Doanh thu theo ngày trong tháng"}
+          </h3>
           <div className={styles.chartWrapper}>
             <ResponsiveContainer width="100%" height={300}>
               <AreaChart data={chartData}>
                 <CartesianGrid strokeDasharray="3 3" />
-                <XAxis dataKey="name" />
+                <XAxis 
+                  dataKey="name"
+                  angle={-45}
+                  textAnchor="end"
+                  height={70}
+                  interval={activeTab === "monthly" ? 2 : 0}
+                />
                 <YAxis />
                 <Tooltip
                   formatter={(value) => [
                     `${value.toLocaleString("vi-VN")}đ`,
                     "Doanh thu",
                   ]}
+                  labelStyle={{ color: "#722ed1" }}
                 />
                 <Legend />
                 <Area
@@ -274,7 +393,6 @@ export default function Overview() {
       </div>
 
       <div className={styles.bottomSection}>
-
         <div className={styles.reviewsCard}>
           <h3 className={styles.chartTitle}>Đánh giá gần đây</h3>
           <div className={styles.reviewsWrapper}>

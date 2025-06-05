@@ -1,0 +1,196 @@
+.bookingDetailModal {
+    :global(.ant-modal-content) {
+      border-radius: 12px;
+      overflow: hidden;
+    }
+  
+    :global(.ant-modal-header) {
+      padding: 16px 24px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+  
+    :global(.ant-modal-body) {
+      padding: 0;
+    }
+  }
+  
+  .modalTitle {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    font-size: 18px;
+    font-weight: 600;
+  }
+  
+  // Status styles
+  .statusPending,
+  .statusComplete,
+  .statusCancel,
+  .statusProcessing {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 4px 12px;
+    font-size: 14px;
+    font-weight: 500;
+    color: white;
+    border-radius: 16px;
+  }
+  
+  .statusPending {
+    background-color: #f5a623;
+  }
+  
+  .statusComplete {
+    background-color: #52c41a;
+  }
+  
+  .statusCancel {
+    background-color: #f5222d;
+  }
+  
+  .statusProcessing {
+    background-color: #1890ff;
+  }
+  
+  .modalContent {
+    padding: 24px;
+  }
+  
+  .bookingHeader {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+  
+  .roomNumber {
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .roomLabel {
+    font-size: 14px;
+    color: #666;
+    margin-bottom: 4px;
+  }
+  
+  .roomValue {
+    font-size: 32px;
+    font-weight: 700;
+    color: #333;
+  }
+  
+  .bookingPrice {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 24px;
+    font-weight: 600;
+    color: #722ed1;
+  }
+  
+  .priceIcon {
+    font-size: 20px;
+  }
+  
+  .divider {
+    height: 1px;
+    background-color: #f0f0f0;
+    margin: 20px 0;
+  }
+  
+  .bookingInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+  }
+  
+  .infoSection {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .sectionTitle {
+    font-size: 16px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  
+  .infoGrid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 16px;
+  }
+  
+  .infoItem {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  
+  .infoLabel {
+    font-size: 14px;
+    color: #666;
+  }
+  
+  .infoValue {
+    font-size: 16px;
+    font-weight: 500;
+    color: #333;
+  }
+  
+  .notesBox {
+    background-color: #f9f9f9;
+    border-radius: 8px;
+    padding: 16px;
+    font-size: 14px;
+    color: #333;
+    border: 1px solid #f0f0f0;
+  }
+  
+  .actionButtons {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 24px;
+    gap: 12px;
+  }
+  
+  .closeButton {
+    padding: 8px 20px;
+    background-color: #f0f0f0;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s;
+  
+    &:hover {
+      background-color: #e0e0e0;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .infoGrid {
+      grid-template-columns: 1fr;
+    }
+    
+    .bookingHeader {
+      flex-direction: column;
+      align-items: flex-start;
+      gap: 12px;
+    }
+    
+    .bookingPrice {
+      align-self: flex-end;
+    }
+  }
+  

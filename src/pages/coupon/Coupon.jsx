@@ -1,3 +1,5 @@
+"use client";
+
 import styles from "../coupon/Coupon.module.scss";
 import {
   MoreOutlined,
@@ -21,14 +23,11 @@ import {
 } from "../../redux/services/couponApi";
 import UpdateCouponModal from "./components/UpdateCoupon/UpdateCouponModal.jsx";
 import ViewCouponModal from "./components/ViewCoupon/ViewCouponModal.jsx";
-import { Spin } from "antd";
 const { RangePicker } = DatePicker;
 
 export default function Coupon() {
   dayjs.extend(isBetween);
   const { data: coupons, isLoading, refetch } = useGetCouponsQuery();
-
-  const allCoupons = coupons?.coupons || [];
   const [createCoupon, { isLoading: isCreating }] = useCreateCouponMutation();
   const [updateCoupon, { isLoading: isUpdating }] = useUpdateCouponMutation();
   const [deleteCoupon, { isLoading: isDeleting }] = useDeleteCouponMutation();
@@ -199,11 +198,11 @@ export default function Coupon() {
   };
 
   useEffect(() => {
-    if (!allCoupons) {
+    if (!coupons) {
       setFilteredData([]);
       return;
     }
-    const sortedCoupons = [...allCoupons].sort((a, b) =>
+    const sortedCoupons = [...coupons.coupons].sort((a, b) =>
       dayjs(b.startDate, "DD/MM/YYYY HH:mm:ss").diff(
         dayjs(a.startDate, "DD/MM/YYYY HH:mm:ss")
       )
@@ -241,7 +240,7 @@ export default function Coupon() {
       });
     }
     setFilteredData(filtered);
-  }, [searchTerm, selectedValues, allCoupons]);
+  }, [searchTerm, selectedValues, coupons]);
 
   const tableColumn = [
     {

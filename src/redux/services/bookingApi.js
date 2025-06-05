@@ -113,34 +113,29 @@ export const bookingApi = apiSlice.injectEndpoints({
       ],
     }),
 
-    getBoookingStatsWeekly : builder.query({
+    getBoookingStatsWeekly: builder.query({
       query: (userId) => `/booking/stats/weekly-count/${userId}`,
       transformResponse: (response) => response?.weeklyBookingCounts,
-      providesTags: ["Booking"],  
-    }),
-
-    getBookingStatsMonthly : builder.query({
-      query: (userId) => `/booking/stats/monthly-count/${userId}`,
-      transformResponse: (response) => response?.monthlyBookingCounts,
       providesTags: ["Booking"],
     }),
 
-    getStatsRevenueWeekly : builder.query({
+    getBookingStatsMonthly: builder.query({
+      query: (userId) => `/booking/stats/monthly-count/${userId}`,
+      transformResponse: (response) => response?.dailyBookingCounts,
+      providesTags: ["Booking"],
+    }),
+
+    getStatsRevenueWeekly: builder.query({
       query: (userId) => `/booking/stats/weekly-revenue/${userId}`,
       transformResponse: (response) => response?.weeklyRevenue,
       providesTags: ["Booking"],
     }),
 
-    getStatsRevenueMonthly : builder.query({
+    getStatsRevenueMonthly: builder.query({
       query: (userId) => `/booking/stats/monthly-revenue/${userId}`,
-      transformResponse: (response) => response?.monthlyRevenue,
+      transformResponse: (response) => response?.dailyRevenue,
       providesTags: ["Booking"],
     }),
-
-
-
-    
-
   }),
 });
 

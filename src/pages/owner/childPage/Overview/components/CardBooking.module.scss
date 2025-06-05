@@ -6,6 +6,13 @@
   margin-bottom: 16px;
   overflow: hidden;
   width: 25vw;
+  cursor: pointer;
+  transition: transform 0.2s, box-shadow 0.2s;
+  
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  }
 }
 
 /* Status styles */
@@ -117,5 +124,9 @@
   
   .roomNumberSection {
     margin-right: 12px;
+  }
+  
+  .cardBooking {
+    width: 100%;
   }
 }
