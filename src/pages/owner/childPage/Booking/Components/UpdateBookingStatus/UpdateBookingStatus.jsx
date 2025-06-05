@@ -3,6 +3,7 @@ import { Modal, Select, Button, message, Input, Divider, Card, Typography, Tag }
 import { CreditCardOutlined, DollarOutlined, BankOutlined, WalletOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import styles from './UpdateBookingStatus.module.scss';
 import momoIcon from "../../../../../../../src/assets/momo.png" 
+import { useCreateNotificationMutation } from '../../../../../../../src/redux/services/notificationApi';
 
 const { TextArea } = Input;
 const { Text, Title } = Typography;
@@ -15,10 +16,11 @@ const UpdateBookingStatus = ({
   paymentStatusCodes,
   paymentMethodCodes,
   onStatusChange,
-  isLoading 
+  isLoading
 }) => {
   const [status, setStatus] = useState(null);
   const [cancelReason, setCancelReason] = useState('');
+  const [createNotification] = useCreateNotificationMutation();
 
   const getBookingStatusDisplay = (statusCode) => {
     const statusMap = {
@@ -95,12 +97,32 @@ const UpdateBookingStatus = ({
       return;
     }
     try {
+      // First update the booking status
       await onStatusChange(
         booking._originalBooking._id, 
         getBookingStatusDisplay(status),
         cancelReason 
       );
-      message.success('Đã cập nhật trạng thái thành công');
+
+      if (status === bookingStatusCodes.CONFIRMED) {
+        try {
+          await createNotification({
+            userId: booking._originalBooking.customerId.userId._id,
+            title: "Đặt phòng đã được xác nhận",
+            content: `Đơn đặt phòng ${booking._originalBooking.accommodationId.accommodationTypeId.name} - ${booking._originalBooking.accommodationId.roomNo} của bạn đã được xác nhận. Vui lòng kiểm tra thông tin và chuẩn bị cho chuyến đi của bạn.`,
+            type: 1,
+            bookingId: booking._originalBooking._id,
+            isRead: false
+          });
+          message.success('Đã cập nhật trạng thái và gửi thông báo thành công');
+        } catch (error) {
+          console.error("Error creating notification:", error);
+          message.warning('Cập nhật trạng thái thành công nhưng không thể gửi thông báo');
+        }
+      } else {
+        message.success('Đã cập nhật trạng thái thành công');
+      }
+
       onClose();
     } catch (error) {
       message.error(error?.data?.message || 'Cập nhật thất bại');

@@ -13,6 +13,7 @@ import { message } from "antd";
 import { useGetOwnerDetailByUserIdQuery } from "../../../redux/services/ownerApi";
 import { Spin } from "antd";
 import { useGetOwnerLogsByOwnerIdQuery } from "../../../redux/services/ownerLogApi";
+import { useCreateNotificationMutation } from "../../../redux/services/notificationApi";
 
 const { TabPane } = Tabs;
 
@@ -245,6 +246,7 @@ function ProfileInfo({
 }) {
   const [modalVisible, setModalVisible] = useState(false);
   const [reason, setReason] = useState("");
+  const [createNotification] = useCreateNotificationMutation();
 
   const parseDateString = (str) => {
     const [day, month, yearAndTime] = str.split("/");
@@ -265,7 +267,19 @@ function ProfileInfo({
           note: reason,
         },
       }).unwrap();
-      // message.success(" Đã phê duyệt chủ sở hữu!");
+
+      try {
+        await createNotification({
+          userId: owner.userId._id,
+          title: "Trạng thái chủ sở hữu đã được cập nhật",
+          content: "Tài khoản của bạn đã được phê duyệt. Bây giờ bạn có thể bắt đầu quản lý chỗ nghỉ của mình.",
+          type: 4,
+          isRead: false
+        });
+      } catch (error) {
+        console.error("Error creating notification:", error);
+      }
+
       setReason("");
       refetchLogs();
       refetchOwner();
@@ -290,7 +304,19 @@ function ProfileInfo({
           note: reason,
         },
       }).unwrap();
-      // message.success(" Đã từ chối phê duyệt!");
+
+      try {
+        await createNotification({
+          userId: owner.userId._id,
+          title: "Trạng thái chủ sở hữu đã được cập nhật",
+          content: `Tài khoản của bạn đã bị từ chối với lý do: ${reason}`,
+          type: 4,
+          isRead: false
+        });
+      } catch (error) {
+        console.error("Error creating notification:", error);
+      }
+
       setReason("");
       refetchLogs();
       refetchOwner();
