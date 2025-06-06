@@ -98,7 +98,7 @@ const PolicyApp = lazy(() => import("../pages/policyApp/PolicyApp"));
 const RentalLocation = lazy(() =>
   import("../pages/rentalLocation/RentalLocation")
 );
-const Messages = lazy(() => import("../pages/messeges/Messeges.jsx"));
+// const Messages = lazy(() => import("../pages/messeges/Messeges.jsx"));
 const OwnerMessage = lazy(() =>
   import("../pages/owner/childPage/messeges/Messeges.jsx")
 );
@@ -262,7 +262,7 @@ export const routes = [
         element: <AccommodationCreate />,
       },
       { path: "notification", element: <Notification /> },
-      { path: "messages", element: <Messages /> },
+      // { path: "messages", element: <Messages /> },
     ],
   },
   {

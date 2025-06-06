@@ -89,12 +89,12 @@ export default function TransactionModal({
         <p>
           🎯 <strong>Phí nền tảng: </strong>
           {(summary?.platformFeeTotal || 0).toLocaleString()} ₫ (
-          {policyPlatformFee?.policyPrice * 100}%)
+          {policyPlatformFee?.policyPrice}%)
         </p>
         <p>
           🎯 <strong>Thực nhận: </strong>
           {(summary?.ownerEarnings || 0).toLocaleString()} ₫ (
-          {100 - policyPlatformFee?.policyPrice * 100}%)
+          {100 - policyPlatformFee?.policyPrice}%)
         </p>
       </div>
 

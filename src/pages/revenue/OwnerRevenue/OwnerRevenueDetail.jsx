@@ -66,7 +66,6 @@ export default function OwnerRevenuePage() {
   );
 
   const { data: policyPrice } = useGetPolicyByHashtagQuery("phihethong");
-  console.log("policyPrice", policyPrice);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -129,7 +128,7 @@ export default function OwnerRevenuePage() {
 
       if (paymentStatusText === "PAID") {
         totalRevenue += b.totalPrice;
-        const fee = b.totalPrice * platformFee;
+        const fee = b.totalPrice * (platformFee / 100);
         ownerEarnings += b.totalPrice - fee;
         platformFeeTotal += fee;
         successCount += 1;
@@ -222,7 +221,7 @@ export default function OwnerRevenuePage() {
               message.success("Tải lại dữ liệu thành công!");
             }}
           >
-            Reload
+            Làm mới
           </Button>
           <Button
             type="primary"
