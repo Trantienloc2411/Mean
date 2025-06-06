@@ -7,9 +7,11 @@ import ChatList from "./ChatList";
 import ChatBox from "./ChatBox";
 import ChatInput from "./ChatInput";
 import { supabase } from "../../../../redux/services/supabase";
+import { useCreateNotificationMutation } from "../../../../redux/services/notificationApi";
 
 export default function Messages() {
   const chatInfo = JSON.parse(localStorage.getItem("chat_info"));
+  const [createNotification] = useCreateNotificationMutation();
 
   const [selectedChat, setSelectedChat] = useState(null);
   const [messages, setMessages] = useState([]);
@@ -263,8 +265,22 @@ export default function Messages() {
 
   const handleSendMessage = async ({ content, image_url }) => {
     if (!selectedChat || !chatInfo || (!content && !image_url)) return;
-
+    console.log(selectedChat.id)
+    console.log(chatInfo.id)
     try {
+      // Get receiver information
+      const { data: receiverData, error: receiverError } = await supabase
+        .from('chat_participants')
+        .select('user_id, profiles ( iduserplatform )')
+        .eq('chat_id', selectedChat.id)
+        .neq('user_id', chatInfo.id)
+        .maybeSingle();
+
+      if (receiverError) {
+        console.error("Error fetching receiver:", receiverError);
+        return;
+      }
+
       // Insert message into database (without image_url for now)
       const { data, error } = await supabase
         .from("messages")
@@ -281,6 +297,24 @@ export default function Messages() {
       if (error) {
         console.error("Error sending message:", error);
         return;
+      }
+
+      // Create notification for receiver
+      if (receiverData) {
+        try {
+          const notification = {
+            userId: receiverData.profiles.iduserplatform,
+            title: "New Message",
+            content: content || "You have received a new message",
+            isRead: false,
+            type: 6
+          };
+          
+          // Call notification API
+          await createNotification(notification).unwrap();
+        } catch (notificationError) {
+          console.error("Error creating notification:", notificationError);
+        }
       }
 
       // Optimistically update UI

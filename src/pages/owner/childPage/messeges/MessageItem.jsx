@@ -19,7 +19,7 @@ export default function MessageItem({ message, isCurrentUser }) {
   }
 
   // Debug the message object
-  console.log("Message in MessageItem:", message)
+
 
   return (
     <div className={`${styles.message} ${isCurrentUser ? styles.user : styles.other}`}>
