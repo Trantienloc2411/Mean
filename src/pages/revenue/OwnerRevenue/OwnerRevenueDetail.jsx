@@ -66,7 +66,6 @@ export default function OwnerRevenuePage() {
   );
 
   const { data: policyPrice } = useGetPolicyByHashtagQuery("phihethong");
-  console.log("policyPrice", policyPrice);
 
   const [isModalOpen, setIsModalOpen] = useState(false);
 
@@ -93,7 +92,12 @@ export default function OwnerRevenuePage() {
     const end = date.endOf("month");
 
     const filtered = bookings.filter((b) =>
-      dayjs(b.checkIn).isBetween(start, end, null, "[]")
+      dayjs(b.createdAt, "DD/MM/YYYY HH:mm:ss").isBetween(
+        start,
+        end,
+        null,
+        "[]"
+      )
     );
 
     setFilteredBookings(filtered);
@@ -124,7 +128,7 @@ export default function OwnerRevenuePage() {
 
       if (paymentStatusText === "PAID") {
         totalRevenue += b.totalPrice;
-        const fee = b.totalPrice * platformFee;
+        const fee = b.totalPrice * (platformFee / 100);
         ownerEarnings += b.totalPrice - fee;
         platformFeeTotal += fee;
         successCount += 1;
@@ -175,7 +179,6 @@ export default function OwnerRevenuePage() {
   //     setIsTransferring(false);
   //   }
   // };
-  console.log("summary", summary);
   return (
     <div
       style={{
@@ -218,7 +221,7 @@ export default function OwnerRevenuePage() {
               message.success("Tải lại dữ liệu thành công!");
             }}
           >
-            Reload
+            Làm mới
           </Button>
           <Button
             type="primary"
@@ -229,10 +232,10 @@ export default function OwnerRevenuePage() {
           </Button>
         </div>
       </div>
+      <RevenueSummary summary={summary} />
 
       <Tabs defaultActiveKey="1">
         <Tabs.TabPane tab="Giao dịch" key="1">
-          <RevenueSummary summary={summary} />
           <TransactionTable
             onUpdateStatus={updateTransaction}
             transactions={filterTransaction}
@@ -240,7 +243,6 @@ export default function OwnerRevenuePage() {
         </Tabs.TabPane>
 
         <Tabs.TabPane tab="Đơn đặt phòng" key="2">
-          <RevenueSummary summary={summary} />
           <BookingTable bookings={filteredBookings} loading={isLoading} />
         </Tabs.TabPane>
       </Tabs>
@@ -250,7 +252,19 @@ export default function OwnerRevenuePage() {
         open={isModalOpen}
         onCancel={() => setIsModalOpen(false)}
         onConfirm={async (values, resetForm) => {
+          const selectedMonth = date.month(); // 0-indexed
+          const selectedYear = date.year();
+          const now = dayjs();
+
+          const currentMonth = now.month();
+          const currentYear = now.year();
+
+          if (selectedMonth === currentMonth && selectedYear === currentYear) {
+            message.warning("Không thể tạo giao dịch trong tháng hiện tại!");
+            return;
+          }
           setIsTransferring(true);
+
           try {
             await createTransaction({
               ...values,

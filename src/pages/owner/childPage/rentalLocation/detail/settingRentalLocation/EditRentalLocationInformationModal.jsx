@@ -60,6 +60,8 @@ export default function EditRentalLocationModal({
       }
 
       const updatedData = {
+        ...rentalData,
+
         name: values.name,
         description: values.description,
         openHour: values.isOverNight

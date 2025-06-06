@@ -88,7 +88,12 @@ export default function OwnerRevenuePage() {
     const end = date.endOf("month");
 
     const filtered = bookings.filter((b) =>
-      dayjs(b.checkIn).isBetween(start, end, null, "[]")
+      dayjs(b.createdAt, "DD/MM/YYYY HH:mm:ss").isBetween(
+        start,
+        end,
+        null,
+        "[]"
+      )
     );
 
     setFilteredBookings(filtered);
@@ -118,7 +123,7 @@ export default function OwnerRevenuePage() {
 
       if (paymentStatusText === "PAID") {
         totalRevenue += b.totalPrice;
-        const fee = b.totalPrice * platformFee;
+        const fee = b.totalPrice * (platformFee / 100);
         ownerEarnings += b.totalPrice - fee;
         platformFeeTotal += fee;
         successCount += 1;
@@ -223,15 +228,14 @@ export default function OwnerRevenuePage() {
           </Button> */}
         </div>
       </div>
+      <RevenueSummary summary={summary} />
 
       <Tabs defaultActiveKey="1">
         <Tabs.TabPane tab="Giao dịch" key="1">
-          <RevenueSummary summary={summary} />
           <TransactionTable transactions={filterTransaction} />
         </Tabs.TabPane>
 
         <Tabs.TabPane tab="Đơn đặt phòng" key="2">
-          <RevenueSummary summary={summary} />
           <BookingTable bookings={filteredBookings} loading={isLoading} />
         </Tabs.TabPane>
       </Tabs>

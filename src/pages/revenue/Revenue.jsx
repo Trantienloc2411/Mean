@@ -13,7 +13,7 @@ const COMPLETED_STATUS = 7;
 
 const Revenue = () => {
   const navigate = useNavigate();
-  const [date, setDate] = useState(null); // chỉ 1 tháng được chọn
+  const [date, setDate] = useState(dayjs().startOf("month")); // mặc định là tháng hiện tại
 
   const {
     data: ownerBookingData,
@@ -32,7 +32,7 @@ const Revenue = () => {
 
     const PLATFORM_FEE_PERCENTAGE = parseFloat(
       policyPrice?.data?.[0]?.values?.[0]?.val || "0.1"
-    );
+    ) / 100;
     const filteredOwners = ownerBookingData.owners.map((owner) => {
       // Lọc booking đã hoàn tất và đã thanh toán
       let filteredBookings = owner.bookings.filter(
@@ -100,6 +100,21 @@ const Revenue = () => {
   useEffect(() => {
     refetch();
   }, [date, refetch]);
+
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
     <div

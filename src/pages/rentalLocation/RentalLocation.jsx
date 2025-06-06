@@ -1,6 +1,5 @@
 import { useState, useEffect } from "react";
-import { Input, Card, Button, message } from "antd";
-import { Flex } from "antd";
+import { Input, Card, Button, message, Spin } from "antd";
 import OverviewLocation from "./components/OverviewLocation";
 import { SearchOutlined, ReloadOutlined } from "@ant-design/icons";
 import RentalLocationTable from "./components/RentalLocationTable";
@@ -89,6 +88,21 @@ export default function RentalLocation() {
       setIsReloading(false);
     }
   };
+
+  if (isLoading) {
+    return (
+      <div
+        style={{
+          height: "100vh",
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+        }}
+      >
+        <Spin size="large" />
+      </div>
+    );
+  }
 
   return (
     <div className={styles.contentContainer}>

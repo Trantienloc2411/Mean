@@ -1,5 +1,6 @@
 import { Modal, Form, Input, InputNumber } from "antd";
 import { useEffect } from "react";
+import { useCreateNotificationMutation } from "../../../redux/services/notificationApi";
 
 export default function TransactionModal({
   open,
@@ -12,6 +13,7 @@ export default function TransactionModal({
   policyPlatformFee = {},
 }) {
   const [form] = Form.useForm();
+  const [createNotification] = useCreateNotificationMutation();
 
   useEffect(() => {
     if (open) {
@@ -37,8 +39,29 @@ export default function TransactionModal({
           content: `Bạn xác nhận đã chuyển ${values.amount.toLocaleString()}₫ cho ${
             ownerBankInfo.ownerName
           }?`,
-          onOk: () => {
-            onConfirm(values, form.resetFields);
+          onOk: async () => {
+            try {
+              await onConfirm(values, async () => {
+                await createNotification({
+                  userId: ownerId,
+                  title: `Thanh toán tháng ${new Date().toLocaleString(
+                    "vi-VN",
+                    { month: "2-digit", year: "numeric" }
+                  )} doanh thu từ hệ thống`,
+                  content: `Bạn đã nhận được ${values.amount.toLocaleString()}₫ từ giao dịch ${
+                    values.paymentCode
+                  }`,
+                  type: 3,
+                  isRead: false,
+                });
+                form.resetFields();
+              });
+            } catch (error) {
+              console.error(
+                "Error creating transaction or notification:",
+                error
+              );
+            }
           },
         });
       })
@@ -57,6 +80,9 @@ export default function TransactionModal({
       confirmLoading={isLoading}
       okText="Tạo giao dịch"
       cancelText="Hủy"
+      okButtonProps={{
+        disabled: !summary?.ownerEarnings || summary?.ownerEarnings <= 0,
+      }}
     >
       <div
         style={{
@@ -89,12 +115,12 @@ export default function TransactionModal({
         <p>
           🎯 <strong>Phí nền tảng: </strong>
           {(summary?.platformFeeTotal || 0).toLocaleString()} ₫ (
-          {policyPlatformFee?.policyPrice * 100}%)
+          {policyPlatformFee?.policyPrice}%)
         </p>
         <p>
           🎯 <strong>Thực nhận: </strong>
           {(summary?.ownerEarnings || 0).toLocaleString()} ₫ (
-          {100 - policyPlatformFee?.policyPrice * 100}%)
+          {100 - policyPlatformFee?.policyPrice}%)
         </p>
       </div>
 
@@ -105,7 +131,7 @@ export default function TransactionModal({
           rules={[{ required: true, message: "Vui lòng nhập mã giao dịch" }]}
           readOnly
         >
-          <Input />
+          <Input readOnly />
         </Form.Item>
 
         <Form.Item
@@ -113,7 +139,7 @@ export default function TransactionModal({
           name="description"
           rules={[{ required: true, message: "Vui lòng nhập mô tả" }]}
         >
-          <Input.TextArea />
+          <Input.TextArea readOnly />
         </Form.Item>
 
         <Form.Item

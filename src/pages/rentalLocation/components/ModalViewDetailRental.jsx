@@ -12,6 +12,7 @@ import { FaMapLocationDot } from "react-icons/fa6";
 import styles from "./RentalLocationTable.module.scss";
 import { useState } from "react";
 import { useUpdateRentalLocationMutation } from "../../../redux/services/rentalLocationApi";
+import { useCreateNotificationMutation } from "../../../redux/services/notificationApi";
 import { Space } from "antd";
 import { useEffect } from "react";
 import { Input } from "antd";
@@ -74,6 +75,7 @@ export default function ModalViewDetailRental({
   if (!data) return null;
   const [tab, setTab] = useState("info");
   const [updateStatus, { isLoading }] = useUpdateRentalLocationMutation();
+  const [createNotification] = useCreateNotificationMutation();
 
   const [selectedStatus, setSelectedStatus] = useState(data.status);
   const [note, setNote] = useState("");
@@ -94,6 +96,7 @@ export default function ModalViewDetailRental({
   };
 
   const businessInfo = data?.ownerId?.businessInformationId;
+  const userId = data?.ownerId?.userId?.id;
 
   const handleViewMap = () => {
     const url =
@@ -111,29 +114,41 @@ export default function ModalViewDetailRental({
       return;
     }
 
-    // if (selectedStatus !== data.status && !note.trim()) {
-    //   message.warning("Vui lòng nhập ghi chú cập nhật!");
-    //   return;
-    // }
     const updatedData = {
       status: selectedStatus,
       note: note.trim(),
     };
 
     try {
-      await updateStatus({
+      const result = await updateStatus({
         id: data.id,
         updatedData: updatedData,
       }).unwrap();
 
-      message.success("Cập nhật trạng thái thành công!");
-      onReload?.();
-      onClose();
-      setNote("");
-      refetchRentalLogs();
+      if (result?.success || result?.data) {
+        try {
+          await createNotification({
+            userId: userId,
+            title: "Cập nhật trạng thái địa điểm cho thuê",
+            content: `Địa điểm "${data.name}" của bạn đã được cập nhật sang trạng thái ${STATUS_LABELS[selectedStatus].label}${note.trim() ? `. Ghi chú: ${note.trim()}` : ''}`,
+            type: 5,
+            isRead: false
+          });
+        } catch (notificationError) {
+          console.error("Notification creation failed:", notificationError);
+        }
+
+        message.success("Cập nhật trạng thái thành công!");
+        onReload?.();
+        onClose();
+        setNote("");
+        refetchRentalLogs();
+      } else {
+        throw new Error("Update returned unsuccessful response");
+      }
     } catch (error) {
-      console.error(error);
-      message.error("Cập nhật trạng thái thất bại!");
+      console.error("Update failed:", error);
+      message.error(error?.data?.message || "Cập nhật trạng thái thất bại!");
     }
   };
 
