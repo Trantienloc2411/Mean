@@ -165,7 +165,6 @@ export default function BankInfo({ bankData, refetch }) {
           ]}
         >
           <Input
-            readOnly={!isEditing}
             onChange={(e) => {
               const value = e.target.value
                 .normalize("NFD")

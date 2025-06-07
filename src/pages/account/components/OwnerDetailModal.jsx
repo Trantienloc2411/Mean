@@ -276,6 +276,7 @@ function ProfileInfo({
           type: 4,
           isRead: false
         });
+        message.success("Cập nhật trạng thái thành công!");
       } catch (error) {
         console.error("Error creating notification:", error);
       }

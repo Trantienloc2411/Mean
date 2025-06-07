@@ -106,7 +106,9 @@ export default function Account() {
             matchesVerified &&
             matchesOwnerApproved
           );
-        });
+        })
+        .sort((a, b) => new Date(b.updatedAt) - new Date(a.updatedAt)); // Sắp xếp mới nhất lên đầu
+
       setFilteredUsers(filtered);
     }
   }, [users, searchValue, selectedFilters, roleMap]);
