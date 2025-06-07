@@ -4,11 +4,12 @@ import OverviewLocation from "./components/OverviewLocation";
 import { SearchOutlined, ReloadOutlined } from "@ant-design/icons";
 import RentalLocationTable from "./components/RentalLocationTable";
 import FilterRentalLocation from "./components/FilterRentalLocation";
-import { useGetAllRentalLocationQuery } from "../../redux/services/rentalApi";
+// import { useGetAllRentalLocationQuery } from "../../redux/services/rentalApi";
 import styles from "./RentalLocation.module.scss";
+import { useGetAllRentalLocationsQuery } from "../../redux/services/rentalLocationApi";
 
 export default function RentalLocation() {
-  const { data, isLoading, refetch } = useGetAllRentalLocationQuery();
+  const { data, isLoading, refetch } = useGetAllRentalLocationsQuery();
   const allLocations = data?.success ? data.data : [];
 
   const [searchValue, setSearchValue] = useState("");
@@ -103,8 +104,6 @@ export default function RentalLocation() {
       </div>
     );
   }
-
-  
 
   return (
     <div className={styles.contentContainer}>

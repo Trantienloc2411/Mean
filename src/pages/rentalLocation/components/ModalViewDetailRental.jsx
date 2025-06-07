@@ -11,7 +11,10 @@ import {
 import { FaMapLocationDot } from "react-icons/fa6";
 import styles from "./RentalLocationTable.module.scss";
 import { useState } from "react";
-import { useUpdateRentalLocationMutation } from "../../../redux/services/rentalLocationApi";
+import {
+  useGetRentalLocationByIdQuery,
+  useUpdateRentalLocationMutation,
+} from "../../../redux/services/rentalLocationApi";
 import { useCreateNotificationMutation } from "../../../redux/services/notificationApi";
 import { Space } from "antd";
 import { useEffect } from "react";
@@ -72,6 +75,8 @@ export default function ModalViewDetailRental({
   onViewFullDetail,
   onReload,
 }) {
+  console.log(data);
+
   if (!data) return null;
   const [tab, setTab] = useState("info");
   const [updateStatus, { isLoading }] = useUpdateRentalLocationMutation();
@@ -83,7 +88,13 @@ export default function ModalViewDetailRental({
     useGetRentalLogsByRentalIdQuery(data?.id, {
       skip: !data?.id,
     });
-  console.log(rentalLogs);
+  const {
+    data: rental,
+    isLoading: isLoadingRental,
+    error: rentalError,
+  } = useGetRentalLocationByIdQuery(data?.id, {
+    skip: !data?.id,
+  });
 
   useEffect(() => {
     setSelectedStatus(data.status);
@@ -115,6 +126,7 @@ export default function ModalViewDetailRental({
     }
 
     const updatedData = {
+      ...rental.data,
       status: selectedStatus,
       note: note.trim(),
     };
@@ -124,15 +136,20 @@ export default function ModalViewDetailRental({
         id: data.id,
         updatedData: updatedData,
       }).unwrap();
+      console.log(result);
 
       if (result?.success || result?.data) {
         try {
           await createNotification({
             userId: userId,
             title: "Cập nhật trạng thái địa điểm cho thuê",
-            content: `Địa điểm "${data.name}" của bạn đã được cập nhật sang trạng thái ${STATUS_LABELS[selectedStatus].label}${note.trim() ? `. Ghi chú: ${note.trim()}` : ''}`,
+            content: `Địa điểm "${
+              data.name
+            }" của bạn đã được cập nhật sang trạng thái ${
+              STATUS_LABELS[selectedStatus].label
+            }${note.trim() ? `. Ghi chú: ${note.trim()}` : ""}`,
             type: 5,
-            isRead: false
+            isRead: false,
           });
         } catch (notificationError) {
           console.error("Notification creation failed:", notificationError);

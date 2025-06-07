@@ -51,7 +51,6 @@ const STATUS_LABELS = {
 };
 
 export default function SettingInformation({ rentalData, canEdit }) {
-  console.log(rentalData);
 
   const [isInfoModalOpen, setIsInfoModalOpen] = useState(false);
   const [isMapModalOpen, setIsMapModalOpen] = useState(false);
