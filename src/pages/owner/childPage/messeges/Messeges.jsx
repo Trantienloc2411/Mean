@@ -116,21 +116,27 @@ export default function Messages() {
 
       const chatIds = participantData.map((participant) => participant.chat_id);
 
-      // Fetch chats
+      // Fetch chats with participant details including username from profiles
       const { data: chatData, error: chatError } = await supabase
         .from("chats")
         .select(
           `
           id,
-          name,
           created_at,
+          updated_at,
           chat_participants (
-            user_id(id, username, is_online, last_seen)
+            user_id,
+            profiles (
+              id,
+              username,
+              is_online,
+              last_seen
+            )
           )
         `
         )
         .in("id", chatIds)
-        .order("created_at", { ascending: false });
+        .order("updated_at", { ascending: false });
 
       if (chatError) {
         console.error("Error fetching chat data:", chatError.message);
@@ -139,13 +145,13 @@ export default function Messages() {
 
       const formattedChatData = chatData.map((chat) => ({
         id: chat.id,
-        name: chat.name,
         created_at: chat.created_at,
+        updated_at: chat.updated_at,
         participants: chat.chat_participants.map((participant) => ({
-          id: participant.user_id.id,
-          username: participant.user_id.username,
-          is_online: participant.user_id.is_online,
-          last_seen: participant.user_id.last_seen,
+          id: participant.user_id,
+          username: participant.profiles.username,
+          is_online: participant.profiles.is_online,
+          last_seen: participant.profiles.last_seen,
         })),
       }));
 
@@ -299,6 +305,16 @@ export default function Messages() {
         return;
       }
 
+      // Update chat's updated_at timestamp
+      const { error: updateError } = await supabase
+        .from("chats")
+        .update({ updated_at: new Date().toISOString() })
+        .eq("id", selectedChat.id);
+
+      if (updateError) {
+        console.error("Error updating chat timestamp:", updateError);
+      }
+
       // Create notification for receiver
       if (receiverData) {
         try {
@@ -356,8 +372,10 @@ export default function Messages() {
         { event: "INSERT", schema: "public", table: "messages" },
         (payload) => {
           console.log("New message received:", payload);
-          // Always fetch messages for the current chat when a new message arrives
-          if (selectedChat && payload.new.chat_id === selectedChat.id) {
+          // Only fetch messages if the new message is not from the current user
+          if (selectedChat && 
+              payload.new.chat_id === selectedChat.id && 
+              payload.new.user_id !== chatInfo.id) {
             fetchMessages(selectedChat.id);
           }
         }
