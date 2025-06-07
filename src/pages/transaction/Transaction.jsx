@@ -61,6 +61,10 @@ export default function Transaction() {
     switch (typeCode) {
       case 1:
         return { en: "MOMO_PAYMENT", vi: "Thanh toán MoMo" };
+      case 2:
+        return { en: "PayOS_PAYMENT", vi: "Thanh toán PayOS" };
+      case 3:
+        return { en: "Banking", vi: "Chuyển khoản" };
       default:
         return { en: "unknown", vi: "Không xác định" };
     }
@@ -90,19 +94,18 @@ export default function Transaction() {
     const isTypeMatch =
       filters.transactionTypes.length === 0 ||
       filters.transactionTypes.includes(item.typeTransaction.en);
-      
+
     const searchLower = searchValue.toLowerCase();
     const searchTrimmed = searchValue.trim().toLowerCase();
-    const transactionCode = (item.transactionCode || '').toLowerCase();
-    const bookingCode = (item.bookingCode || '').toLowerCase();
-    
+    const transactionCode = (item.transactionCode || "").toLowerCase();
+    const bookingCode = (item.bookingCode || "").toLowerCase();
+
     const isSearchMatch =
       transactionCode.includes(searchLower) ||
       bookingCode.includes(searchLower) ||
-      (searchTrimmed && (
-        transactionCode.includes(searchTrimmed) ||
-        bookingCode.includes(searchTrimmed)
-      ));
+      (searchTrimmed &&
+        (transactionCode.includes(searchTrimmed) ||
+          bookingCode.includes(searchTrimmed)));
 
     return isStatusMatch && isTypeMatch && isSearchMatch;
   });
@@ -149,7 +152,7 @@ export default function Transaction() {
     ).length,
   };
 
-   if (isLoading) {
+  if (isLoading) {
     return (
       <div
         style={{
@@ -223,6 +226,15 @@ export default function Transaction() {
             <div className={styles.descriptionTitle}>REFUND</div>
             <div className={styles.descriptionText}>
               Hệ thống hoàn tiền cho khách hàng.
+            </div>
+          </div>
+        </div>
+        <div className={styles.descriptionItem}>
+          <span className={`${styles.statusDot} ${styles.refund}`} />
+          <div>
+            <div className={styles.descriptionTitle}>Khác</div>
+            <div className={styles.descriptionText}>
+              Thanh toán PAY OS
             </div>
           </div>
         </div>
