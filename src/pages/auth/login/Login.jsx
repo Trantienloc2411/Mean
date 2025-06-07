@@ -72,13 +72,20 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateEmail(email)) {
+    const trimmedEmail = email.trim();
+    
+    if (!validateEmail(trimmedEmail)) {
       message.error("Email không hợp lệ!");
       return;
     }
     
-    if (!password.trim()) {
+    if (!password) {
       message.error("Vui lòng nhập mật khẩu!");
+      return;
+    }
+
+    if (password.includes(' ')) {
+      message.error("Mật khẩu không được chứa khoảng trắng!");
       return;
     }
     
@@ -86,7 +93,7 @@ const Login = () => {
 
     try {
       const formLogin = {
-        email: email.toLowerCase().trim(),
+        email: trimmedEmail.toLowerCase(),
         password: password,
       };
       const loginResult = await login({ data: formLogin }).unwrap();
@@ -185,8 +192,14 @@ const Login = () => {
                 type="email"
                 placeholder="Email"
                 className={`${styles.formInput} ${getEmailValidationClass()}`}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                value={email.trim().toLowerCase()}
+                onChange={(e) => setEmail(e.target.value.trim().toLowerCase())}
+                onBlur={(e) => setEmail(e.target.value.trim().toLowerCase())}
+                onPaste={(e) => {
+                  e.preventDefault();
+                  const value = e.clipboardData.getData('text').trim().toLowerCase();
+                  setEmail(value);
+                }}
               />
               {email && !validateEmail(email) && (
                 <span className={styles.errorText}>Email không hợp lệ</span>
@@ -200,7 +213,7 @@ const Login = () => {
                   placeholder="Password"
                   className={styles.formInput}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={(e) => setPassword(e.target.value.replace(/\s/g, ''))}
                 />
                 <button
                   type="button"

@@ -1,15 +1,19 @@
 import { useState } from "react";
 import { EyeInvisibleFilled, EyeFilled } from "@ant-design/icons";
-import { message } from "antd";
+import { message, Modal } from "antd";
 import ImageCarousel from "../../../components/ImageCarousel/ImageCarousel";
 import styles from "./Signup.module.scss";
 import { useCreateUserMutation } from "../../../redux/services/userApi";
 import { useNavigate } from "react-router-dom";
+import { useGetPolicyByHashtagQuery } from "../../../redux/services/policySystemApi";
 
 const Signup = () => {
   const [acceptTerms, setAcceptTerms] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [currentPolicy, setCurrentPolicy] = useState({ title: "", content: "", type: "" });
+  const [modalAcceptTerms, setModalAcceptTerms] = useState(false);
   const [formData, setFormData] = useState({
     fullName: "",
     email: "",
@@ -22,6 +26,25 @@ const Signup = () => {
   
   const navigate = useNavigate();
   const [createUser, { isLoading }] = useCreateUserMutation();
+
+  const handleShowPolicy = async (type) => {
+    setCurrentPolicy({ ...currentPolicy, type });
+    setIsModalVisible(true);
+  };
+
+  const { data: termsData } = useGetPolicyByHashtagQuery('termandpolicy');
+
+  const handleModalClose = () => {
+    setIsModalVisible(false);
+    setCurrentPolicy({ title: "", content: "", type: "" });
+    setModalAcceptTerms(false);
+  };
+
+  const handleModalAccept = () => {
+    setAcceptTerms(true);
+    setModalAcceptTerms(true);
+    setIsModalVisible(false);
+  };
 
   // Validation functions
   const validateEmail = (email) =>
@@ -49,6 +72,7 @@ const Signup = () => {
   
   const validatePassword = (password) => {
     if (password.length < 8) return false;
+    if (password.includes(' ')) return false; // Không cho phép khoảng trắng
     
     const hasUppercase = /[A-Z]/.test(password);
     const hasLowercase = /[a-z]/.test(password);
@@ -71,21 +95,42 @@ const Signup = () => {
   };
 
   const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
+    const { name, value } = e.target;
+    let newValue = value;
+    
+    // Prevent whitespace in password fields
+    if (name === 'password' || name === 'confirmPassword') {
+      newValue = value.replace(/\s/g, '');
+    } else if (name === 'email') {
+      // Trim both ends for email while typing
+      newValue = value.trim().toLowerCase();
+    } else {
+      newValue = value.trimStart(); // Only trim start while typing for other fields
+    }
+    
+    setFormData({ ...formData, [name]: newValue });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (!validateEmail(formData.email))
+    // Trim all values except password fields before submission
+    const trimmedData = {
+      ...formData,
+      fullName: formData.fullName.trim(),
+      email: formData.email.toLowerCase().trim(),
+      phone: formData.phone.trim()
+    };
+    
+    if (!validateEmail(trimmedData.email))
       return message.error("Email không hợp lệ!");
-    if (!validatePhone(formData.phone))
+    if (!validatePhone(trimmedData.phone))
       return message.error("Số điện thoại phải có 10 số!");
-    if (!validateDateOfBirth(formData.doB))
+    if (!validateDateOfBirth(trimmedData.doB))
       return message.error("Ngày sinh không hợp lệ! Bạn phải từ 18 tuổi trở lên và không quá 100 tuổi!");
-    if (!validatePassword(formData.password))
-      return message.error("Mật khẩu phải có ít nhất 8 ký tự, bao gồm: 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt!");
-    if (formData.password !== formData.confirmPassword)
+    if (!validatePassword(trimmedData.password))
+      return message.error("Mật khẩu phải có ít nhất 8 ký tự, không chứa khoảng trắng, bao gồm: 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt!");
+    if (trimmedData.password !== trimmedData.confirmPassword)
       return message.error("Mật khẩu nhập lại không khớp!");
     if (!acceptTerms)
       return message.error(
@@ -94,16 +139,15 @@ const Signup = () => {
 
     try {
       const response = await createUser({
-        ...formData,
-        email: formData.email.toLowerCase().trim(),
+        ...trimmedData,
         avatarUrl: [],
       }).unwrap();
       message.success("Đăng ký thành công!");
       console.log(response);
       navigate("/login", { 
         state: { 
-          email: formData.email.toLowerCase().trim(),
-          password: formData.password 
+          email: trimmedData.email,
+          password: trimmedData.password 
         } 
       });
     } catch (error) {
@@ -154,6 +198,10 @@ const Signup = () => {
                 name="fullName"
                 value={formData.fullName}
                 onChange={handleChange}
+                onBlur={(e) => {
+                  const value = e.target.value.trim();
+                  setFormData(prev => ({...prev, fullName: value}));
+                }}
                 placeholder="Họ và tên"
                 className={`${styles.formInput} ${formData.fullName.trim() === '' && formData.fullName !== '' ? styles.invalid : ''}`}
                 required
@@ -166,6 +214,15 @@ const Signup = () => {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
+                onBlur={(e) => {
+                  const value = e.target.value.trim().toLowerCase();
+                  setFormData(prev => ({...prev, email: value}));
+                }}
+                onPaste={(e) => {
+                  e.preventDefault();
+                  const value = e.clipboardData.getData('text').trim().toLowerCase();
+                  setFormData(prev => ({...prev, email: value}));
+                }}
                 placeholder="Nhập email của bạn"
                 className={`${styles.formInput} ${getFieldValidationClass('email')}`}
                 required
@@ -181,6 +238,10 @@ const Signup = () => {
                 name="phone"
                 value={formData.phone}
                 onChange={handleChange}
+                onBlur={(e) => {
+                  const value = e.target.value.trim();
+                  setFormData(prev => ({...prev, phone: value}));
+                }}
                 placeholder="0987654321"
                 className={`${styles.formInput} ${getFieldValidationClass('phone')}`}
                 required
@@ -231,7 +292,7 @@ const Signup = () => {
               </div>
               {formData.password && !validatePassword(formData.password) && (
                 <span className={styles.errorText}>
-                  Mật khẩu phải có ít nhất 8 ký tự, bao gồm: 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt
+                  Mật khẩu phải có ít nhất 8 ký tự, không chứa khoảng trắng, bao gồm: 1 chữ hoa, 1 chữ thường, 1 số và 1 ký tự đặc biệt
                 </span>
               )}
             </div>
@@ -272,11 +333,11 @@ const Signup = () => {
               />
               <label htmlFor="terms">
                 Tôi đồng ý với{" "}
-                <a href="/terms" target="_blank">
+                <a href="#" onClick={(e) => { e.preventDefault(); handleShowPolicy('termandpolicy'); }}>
                   Điều khoản dịch vụ
                 </a>{" "}
                 và{" "}
-                <a href="/privacy" target="_blank">
+                <a href="#" onClick={(e) => { e.preventDefault(); handleShowPolicy('termandpolicy'); }}>
                   Chính sách quyền riêng tư
                 </a>
               </label>
@@ -296,6 +357,68 @@ const Signup = () => {
           <div className={styles.copyright}>Copyright © Mean 2025</div>
         </div>
       </div>
+
+      <Modal
+        open={isModalVisible}
+        onCancel={handleModalClose}
+        footer={null}
+        width={800}
+        centered
+        maskStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.45)', backdropFilter: 'blur(4px)' }}
+      >
+        <div className={styles.policyContent}>
+          {termsData?.data ? (
+            <div>
+              <h2>{termsData.data[0]?.name}</h2>
+              <div 
+                style={{ whiteSpace: 'pre-line' }}
+                dangerouslySetInnerHTML={{ 
+                  __html: termsData.data[0]?.description
+                    .replace(/\n/g, '<br/>')
+                    .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+                }} 
+              />
+              <div className={styles.modalCheckboxContainer}>
+                <label className={styles.modalCheckboxLabel}>
+                  <input
+                    type="checkbox"
+                    checked={modalAcceptTerms}
+                    onChange={() => setModalAcceptTerms(!modalAcceptTerms)}
+                    className={styles.modalCheckboxInput}
+                  />
+                  <span>Tôi đã đọc và đồng ý với các điều khoản trên</span>
+                </label>
+                <button 
+                  className={`${styles.modalAcceptButton} ${!modalAcceptTerms ? styles.disabled : ''}`}
+                  onClick={handleModalAccept}
+                  disabled={!modalAcceptTerms}
+                >
+                  Xác nhận
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div style={{ 
+              textAlign: 'center', 
+              padding: '40px 20px',
+              color: '#4a4a4a'
+            }}>
+              <div style={{ 
+                fontSize: '18px',
+                marginBottom: '8px'
+              }}>
+                Đang tải nội dung...
+              </div>
+              <div style={{
+                fontSize: '14px',
+                color: '#666'
+              }}>
+                Vui lòng đợi trong giây lát
+              </div>
+            </div>
+          )}
+        </div>
+      </Modal>
     </div>
   );
 };
