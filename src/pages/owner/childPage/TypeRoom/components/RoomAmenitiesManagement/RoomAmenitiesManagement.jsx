@@ -229,24 +229,23 @@ const RoomAmenitiesManagement = ({ isOwner }) => {
       ellipsis: true,
       width: "40%",
     },
-    {
-      title: "Trạng thái",
-      dataIndex: "status",
-      key: "status",
-      align: "center",
-      render: (status) => {
-        const isActive = status === "Active";
-        return (
-          <span
-            className={`${styles.status} ${
-              isActive ? styles.active : styles.inactive
-            }`}
-          >
-            {isActive ? "Đang hoạt động" : "Không hoạt động"}
-          </span>
-        );
-      },
-    },
+    // {
+    //   title: "Trạng thái",
+    //   dataIndex: "status",
+    //   key: "status",
+    //   align: "center",
+    //   render: (status) => {
+    //     const isActive = status === "Active";
+    //     return (
+    //       <span
+    //         className={`${styles.status} ${isActive ? styles.active : styles.inactive
+    //           }`}
+    //       >
+    //         {isActive ? "Đang hoạt động" : "Không hoạt động"}
+    //       </span>
+    //     );
+    //   },
+    // },
     {
       title: "",
       key: "operation",
@@ -276,10 +275,19 @@ const RoomAmenitiesManagement = ({ isOwner }) => {
           <div className={styles.searchFilter}>
             <Input
               placeholder="Tìm kiếm tên dịch vụ"
-              onChange={(e) => debouncedSearch(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value.trimStart();
+                e.target.value = value;
+                debouncedSearch(value);
+              }}
+              onBlur={(e) => {
+                const value = e.target.value.trim();
+                e.target.value = value;
+                debouncedSearch(value);
+              }}
               style={{ width: "250px" }}
             />
-            <Dropdown
+            {/* <Dropdown
               trigger={["click"]}
               dropdownRender={() => (
                 <Filter
@@ -293,7 +301,7 @@ const RoomAmenitiesManagement = ({ isOwner }) => {
                 Lọc
                 {getActiveFiltersCount() > 0 && ` (${getActiveFiltersCount()})`}
               </Button>
-            </Dropdown>
+            </Dropdown> */}
 
             <Button
               icon={<ReloadOutlined spin={isReloading} />}

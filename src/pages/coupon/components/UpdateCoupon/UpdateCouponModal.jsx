@@ -101,9 +101,25 @@ const UpdateCouponModal = ({ isOpen, onCancel, onConfirm, isLoading, initialData
           <Form.Item
             name="name"
             label="Tên mã giảm giá"
-            rules={[{ required: true, message: "Hãy nhập tên mã giảm giá" }]}
+            rules={[
+              { required: true, message: "Hãy nhập tên mã giảm giá" },
+              {
+                validator: (_, value) => {
+                  if (value && !value.trim()) {
+                    return Promise.reject(new Error('Tên mã giảm giá không được chỉ chứa khoảng trắng!'));
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
           >
-            <Input placeholder="Săn hè đón sale ngay" />
+            <Input 
+              placeholder="Săn hè đón sale ngay" 
+              onBlur={(e) => {
+                const value = e.target.value.trim();
+                form.setFieldsValue({ name: value });
+              }}
+            />
           </Form.Item>
 
           <Form.Item name="couponCode" label="Mã giảm giá (CODE)">

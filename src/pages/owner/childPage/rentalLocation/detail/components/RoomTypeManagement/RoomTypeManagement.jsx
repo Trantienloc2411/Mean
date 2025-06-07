@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react"
+import { useState, useEffect, useMemo } from "react"
 import { Table, Button, Input, Dropdown, message, Tooltip, Tag, Modal, Alert } from "antd"
 import {
   MoreOutlined,
@@ -95,7 +95,7 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId, canEdit }) => 
 
   const [selectedValues, setSelectedValues] = useState({
     maxOccupancy: [],
-    priceRange: [],
+    priceRange: { min: null, max: null },
     serviceTypes: [],
   })
   const [searchTerm, setSearchTerm] = useState("")
@@ -271,88 +271,125 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId, canEdit }) => 
       : []),
   ]
 
-  const filterGroups = [
-    {
-      name: "maxOccupancy",
-      title: "Số người tối đa",
-      options: [
-        { label: "2 người", value: 2 },
-        { label: "4 người", value: 4 },
-        { label: "6 người", value: 6 },
-        { label: "8 người", value: 8 },
-        { label: "10 người", value: 10 },
-      ],
-    },
-    {
-      name: "priceRange",
-      title: "Khoảng giá",
-      options: [
-        { label: "Dưới 100.000đ", value: "0-100000" },
-        { label: "100.000đ - 200.000đ", value: "100000-200000" },
-        { label: "200.000đ - 300.000đ", value: "200000-300000" },
-        { label: "300.000đ - 500.000đ", value: "300000-500000" },
-        { label: "Trên 500.000đ", value: "500000" },
-      ],
-    },
-    {
-      name: "serviceTypes",
-      title: "Loại dịch vụ",
-      options: services.map((service) => ({
-        label: service.name,
-        value: service._id,
-      })),
-    },
-  ]
+  const filterGroups = useMemo(() => {
+    if (!roomTypes.length) return [];
+
+    const uniqueMaxPeople = [...new Set(roomTypes.map(room => room.maxPeopleNumber))]
+      .filter(num => num != null)
+      .sort((a, b) => a - b)
+      .map(num => ({
+        label: `${num} người`,
+        value: num
+      }));
+
+    const uniqueServices = [...new Set(roomTypes.flatMap(room => 
+      room.serviceIds?.map(service => JSON.stringify({ id: service._id, name: service.name })) || []
+    ))]
+      .map(serviceStr => {
+        const service = JSON.parse(serviceStr);
+        return {
+          label: service.name,
+          value: service.id
+        };
+      });
+
+    return [
+      {
+        name: "maxOccupancy",
+        title: "Số người tối đa",
+        type: "checkbox",
+        options: uniqueMaxPeople,
+      },
+      {
+        name: "priceRange",
+        title: "Khoảng giá",
+        type: "range",
+      },
+      {
+        name: "serviceTypes",
+        title: "Loại dịch vụ",
+        type: "checkbox",
+        options: uniqueServices,
+      },
+    ];
+  }, [roomTypes]);
 
   const handleFilterChange = (filterType, value) => {
     setSelectedValues((prev) => ({
       ...prev,
       [filterType]: value,
-    }))
-  }
+    }));
+  };
 
   const getActiveFiltersCount = () => {
-    return Object.values(selectedValues).flat().length
-  }
+    let count = 0;
+    count += selectedValues.maxOccupancy.length;
+    count += selectedValues.serviceTypes.length;
+    if (selectedValues.priceRange.min || selectedValues.priceRange.max) {
+      count += 1;
+    }
+    return count;
+  };
 
   const debouncedSearch = debounce((value) => {
-    setSearchTerm(value)
+    setSearchTerm(value.trim())
   }, 500)
 
   useEffect(() => {
     if (!roomTypes.length) {
-      setFilteredData([])
-      return
+      setFilteredData([]);
+      return;
     }
 
-    let filtered = [...roomTypes]
+    let filtered = [...roomTypes];
 
     if (searchTerm) {
-      filtered = filtered.filter((item) => item.name.toLowerCase().includes(searchTerm.toLowerCase()))
+      filtered = filtered.filter((item) => 
+        item.name.toLowerCase().includes(searchTerm.toLowerCase().trim())
+      );
     }
 
     if (selectedValues.maxOccupancy.length > 0) {
-      filtered = filtered.filter((item) => selectedValues.maxOccupancy.includes(item.maxPeopleNumber))
+      filtered = filtered.filter((item) => 
+        selectedValues.maxOccupancy.includes(item.maxPeopleNumber)
+      );
     }
 
-    if (selectedValues.priceRange.length > 0) {
+    if (selectedValues.priceRange.min !== null || selectedValues.priceRange.max !== null) {
       filtered = filtered.filter((item) => {
-        return selectedValues.priceRange.some((range) => {
-          const [min, max] = range.split("-").map(Number)
-          if (max === undefined) return item.basePrice >= min
-          return item.basePrice >= min && item.basePrice <= max
-        })
-      })
+        const price = item.basePrice;
+        const min = selectedValues.priceRange.min;
+        const max = selectedValues.priceRange.max;
+
+        if (min !== null && max !== null) {
+          return price >= min && price <= max;
+        } else if (min !== null) {
+          return price >= min;
+        } else if (max !== null) {
+          return price <= max;
+        }
+        return true;
+      });
     }
 
     if (selectedValues.serviceTypes.length > 0) {
-      filtered = filtered.filter((item) =>
-        (item.serviceIds || [item.serviceId])?.some((id) => selectedValues.serviceTypes.includes(id)),
-      )
+      filtered = filtered.filter((item) => {
+        if (item.serviceIds && Array.isArray(item.serviceIds)) {
+          const serviceIdsInRoom = item.serviceIds.map(service =>
+            typeof service === 'string' ? service : service._id
+          );
+          return selectedValues.serviceTypes.some(id =>
+            serviceIdsInRoom.includes(id)
+          );
+        } else if (item.serviceId) {
+          return selectedValues.serviceTypes.includes(item.serviceId);
+        }
+        return false;
+      });
     }
 
-    setFilteredData(filtered)
-  }, [searchTerm, selectedValues, roomTypes])
+    setFilteredData(filtered);
+  }, [searchTerm, selectedValues, roomTypes]);
 
   const customTagStyle = {
     borderRadius: "16px",
@@ -478,7 +515,20 @@ const RoomTypeManagement = ({ isOwner, ownerId, rentalLocationId, canEdit }) => 
           <div className={styles.searchFilter}>
             <Input
               placeholder="Tìm kiếm tên loại phòng"
-              onChange={(e) => debouncedSearch(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                // If input is only whitespace, set empty string
+                if (value.trim() === '') {
+                  debouncedSearch('');
+                } else {
+                  debouncedSearch(value);
+                }
+              }}
+              onBlur={(e) => {
+                const trimmedValue = e.target.value.trim();
+                e.target.value = trimmedValue;
+                debouncedSearch(trimmedValue);
+              }}
               style={{ width: "250px" }}
             />
             <Dropdown

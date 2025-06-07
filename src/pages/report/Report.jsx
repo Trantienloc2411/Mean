@@ -242,8 +242,16 @@ export default function Report() {
   ];
 
   const handleSearch = debounce((value) => {
-    setSearchTerm(value);
+    if (value.trim() || value === '') {
+      setSearchTerm(value.trim());
+    }
   }, 500);
+
+  const handleSearchBlur = (e) => {
+    const value = e.target.value;
+    e.target.value = value.trim();
+    setSearchTerm(value.trim());
+  };
 
   const handleFilterChange = (filterName, newValue) => {
     setSelectedValues((prev) => ({
@@ -338,6 +346,7 @@ export default function Report() {
             prefix={<SearchOutlined />}
             placeholder="Tìm kiếm theo booking ID hoặc lý do"
             onChange={(e) => handleSearch(e.target.value)}
+            onBlur={handleSearchBlur}
             style={{ width: 250, marginRight: 20 }}
           />
 

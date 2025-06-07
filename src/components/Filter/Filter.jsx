@@ -122,7 +122,7 @@ export default function Filter({
       <Divider className={styles.divider} />
 
       <div className={styles.filterGroup}>
-        <h4>Ngày và Giờ</h4>
+        <h4>Ngày và Giờ Check-in</h4>
         <div className={styles.dateTimeContainer}>
           <div className={styles.datePickerWrapper}>
             <div className={styles.filterLabel}>Ngày:</div>
@@ -142,7 +142,34 @@ export default function Filter({
               value={dateTime.timeRange}
               onChange={handleTimeRangeChange}
               className={styles.timePicker}
-              placeholder={['Giờ check-in', 'Giờ check-out']}
+              placeholder={['Từ', 'đến']}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className={styles.filterGroup}>
+        <h4>Ngày và Giờ Check-out</h4>
+        <div className={styles.dateTimeContainer}>
+          <div className={styles.datePickerWrapper}>
+            <div className={styles.filterLabel}>Ngày:</div>
+            <DatePicker
+              placeholder="Chọn ngày"
+              format="DD/MM/YYYY"
+              value={dateTime.date}
+              onChange={handleDateChange}
+              className={styles.datePicker}
+            />
+          </div>
+          
+          <div className={styles.timePickerWrapper}>
+            <div className={styles.filterLabel}>Thời gian:</div>
+            <RangePicker
+              format="HH:mm"
+              value={dateTime.timeRange}
+              onChange={handleTimeRangeChange}
+              className={styles.timePicker}
+              placeholder={['Từ', 'đến']}
             />
           </div>
         </div>

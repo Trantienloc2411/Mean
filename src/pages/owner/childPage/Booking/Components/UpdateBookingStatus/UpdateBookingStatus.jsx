@@ -23,17 +23,20 @@ const UpdateBookingStatus = ({
   const [createNotification] = useCreateNotificationMutation();
 
   const getBookingStatusDisplay = (statusCode) => {
+    console.log('Status code received:', statusCode);
     const statusMap = {
-      [bookingStatusCodes.CONFIRMED]: "Đã xác nhận",
+      [bookingStatusCodes.CONFIRMED]: "Xác nhận",
       [bookingStatusCodes.PENDING]: "Đang chờ",
       [bookingStatusCodes.NEEDCHECKIN]: "Cần check-in",
       [bookingStatusCodes.CHECKEDIN]: "Đã check-in",
       [bookingStatusCodes.NEEDCHECKOUT]: "Cần check-out",
       [bookingStatusCodes.CHECKEDOUT]: "Đã check-out",
-      [bookingStatusCodes.CANCELLED]: "Đã hủy",
+      [bookingStatusCodes.CANCELLED]: "Hủy",
       [bookingStatusCodes.COMPLETED]: "Hoàn thành",
       [bookingStatusCodes.REFUND]: "Đã hoàn tiền" 
     };
+    console.log('Status map:', statusMap);
+    console.log('Mapped status:', statusMap[statusCode]);
     return statusMap[statusCode] || "Không xác định";
   };
 
@@ -97,11 +100,17 @@ const UpdateBookingStatus = ({
       return;
     }
     try {
-      // First update the booking status
+      const payload = {
+        status: status
+      };
+      
+      if (status === bookingStatusCodes.CANCELLED) {
+        payload.note = cancelReason;
+      }
+
       await onStatusChange(
-        booking._originalBooking._id, 
-        getBookingStatusDisplay(status),
-        cancelReason 
+        booking._originalBooking._id,
+        payload
       );
 
       if (status === bookingStatusCodes.CONFIRMED) {
@@ -150,7 +159,7 @@ const UpdateBookingStatus = ({
   const availableStatuses = currentStatus ? getAvailableNextStatuses(currentStatus) : [];
 
   const statusOptions = Object.entries(bookingStatusCodes)
-    .filter(([_, value]) => availableStatuses.includes(value))
+    .filter(([_, value]) => availableStatuses.includes(value) && value !== currentStatus)
     .map(([key, value]) => ({
       label: getBookingStatusDisplay(value),
       value: value,
@@ -322,11 +331,17 @@ const UpdateBookingStatus = ({
 
         <Card className={styles.statusCard}>
           <div className={styles.statusSelectContainer}>
+            <div className={styles.infoLabel}>Trạng thái hiện tại:</div>
+            <div style={{ marginTop: 8, marginBottom: 16 }}>
+              {booking?._originalBooking?.status && (
+                <Text>{getBookingStatusDisplay(booking._originalBooking.status)}</Text>
+              )}
+            </div>
             <div className={styles.infoLabel}>Chọn Trạng Thái Mới:</div>
             <Select
               style={{ width: '100%', marginTop: 8, marginBottom: 16 }}
               placeholder="Chọn trạng thái mới"
-              value={status}
+              value={getBookingStatusDisplay(status)}
               onChange={handleStatusChange}
               options={statusOptions}
             />
@@ -339,7 +354,13 @@ const UpdateBookingStatus = ({
                 rows={4}
                 placeholder="Nhập lý do hủy đặt phòng"
                 value={cancelReason}
-                onChange={handleCancelReasonChange}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setCancelReason(value);
+                }}
+                onBlur={(e) => {
+                  setCancelReason(e.target.value.trim());
+                }}
                 style={{ marginTop: 8 }}
                 className={styles.cancelTextarea}
               />

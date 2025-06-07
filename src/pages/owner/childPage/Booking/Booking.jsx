@@ -172,36 +172,28 @@ export default function Booking() {
     setSelectedLocation(locationId);
   };
 
-  const handleStatusChange = async (bookingId, newStatusDisplay, cancelReason = '') => {
+  const handleStatusChange = async (bookingId, payload) => {
     try {
-      const statusCodeKey = Object.keys(BOOKING_STATUS).find(
-        key => getBookingStatusDisplay(BOOKING_STATUS[key]) === newStatusDisplay
-      );
-      const statusCode = BOOKING_STATUS[statusCodeKey];
-  
       const currentBooking = bookings.find(
         b => b._originalBooking._id === bookingId
       );
   
       const updateData = {
         id: bookingId,
-        status: statusCode,
-        ...(statusCode === BOOKING_STATUS.CANCELLED && { 
-          note: cancelReason,
-          ...(currentBooking?._originalBooking.paymentStatus === PAYMENT_STATUS.PAID && {
-            paymentStatus: PAYMENT_STATUS.REFUND
-          })
+        ...payload,
+        ...(payload.status === BOOKING_STATUS.CANCELLED && {
+          paymentStatus: currentBooking?._originalBooking.paymentStatus === PAYMENT_STATUS.PAID 
+            ? PAYMENT_STATUS.REFUND 
+            : currentBooking?._originalBooking.paymentStatus === PAYMENT_STATUS.PENDING 
+            ? PAYMENT_STATUS.FAILED 
+            : undefined
         })
       };
-
-      console.log('====================================');
-      console.log(updateData);
-      console.log('====================================');
   
       await updateBooking(updateData).unwrap();
       refetchBookings();
       
-      const successMessage = statusCode === BOOKING_STATUS.CANCELLED 
+      const successMessage = payload.status === BOOKING_STATUS.CANCELLED 
         ? `Đã hủy booking${currentBooking?._originalBooking.paymentStatus === PAYMENT_STATUS.PAID ? ' và yêu cầu hoàn tiền' : ''}`
         : "Cập nhật trạng thái thành công";
       

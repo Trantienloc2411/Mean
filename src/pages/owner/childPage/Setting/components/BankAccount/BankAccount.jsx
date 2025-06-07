@@ -136,10 +136,21 @@ export default function BankInfo({ bankData, refetch }) {
               required: true,
               pattern: /^[0-9]+$/,
               message: "Số tài khoản chỉ được chứa số!",
-            },
+            }
           ]}
         >
-          <Input readOnly={!isEditing} />
+          <Input 
+            readOnly={!isEditing} 
+            onChange={(e) => {
+              const value = e.target.value;
+              const trimmedValue = value.replace(/\s+/g, ' ');
+              form.setFieldsValue({ bankNo: trimmedValue });
+            }}
+            onBlur={(e) => {
+              const trimmedValue = e.target.value.trim();
+              form.setFieldsValue({ bankNo: trimmedValue });
+            }}
+          />
         </Form.Item>
 
         <Form.Item
@@ -150,17 +161,22 @@ export default function BankInfo({ bankData, refetch }) {
             {
               pattern: /^[A-Z\s]+$/,
               message: "Chỉ được nhập chữ in hoa không dấu!",
-            },
+            }
           ]}
         >
           <Input
             readOnly={!isEditing}
             onChange={(e) => {
               const value = e.target.value
-                .normalize("NFD") // Tách dấu ra khỏi ký tự
-                .replace(/[\u0300-\u036f]/g, "") // Xóa dấu
-                .toUpperCase(); // Chuyển thành in hoa
-              form.setFieldsValue({ bankAccountName: value });
+                .normalize("NFD")
+                .replace(/[\u0300-\u036f]/g, "")
+                .toUpperCase();
+              const trimmedValue = value.replace(/\s+/g, ' ');
+              form.setFieldsValue({ bankAccountName: trimmedValue });
+            }}
+            onBlur={(e) => {
+              const trimmedValue = e.target.value.trim();
+              form.setFieldsValue({ bankAccountName: trimmedValue });
             }}
           />
         </Form.Item>
@@ -277,12 +293,21 @@ function NotHaveBank({ ownerId, createBank, refetch }) {
               {
                 pattern: /^[0-9]+$/,
                 message: "Số tài khoản chỉ được chứa chữ số!",
-              },
+              }
             ]}
           >
-            <Input />
+            <Input 
+              onChange={(e) => {
+                const value = e.target.value;
+                const trimmedValue = value.replace(/\s+/g, ' ');
+                form.setFieldsValue({ accountNumber: trimmedValue });
+              }}
+              onBlur={(e) => {
+                const trimmedValue = e.target.value.trim();
+                form.setFieldsValue({ accountNumber: trimmedValue });
+              }}
+            />
           </Form.Item>
-          {console.log("aaa")}
           <Form.Item
             label="Tên chủ tài khoản"
             name="accountHolder"
@@ -291,10 +316,23 @@ function NotHaveBank({ ownerId, createBank, refetch }) {
               {
                 pattern: /^[A-Z\s]+$/,
                 message: "Chỉ được nhập chữ in hoa không dấu và không có số!",
-              },
+              }
             ]}
           >
-            <Input />
+            <Input
+              onChange={(e) => {
+                const value = e.target.value
+                  .normalize("NFD")
+                  .replace(/[\u0300-\u036f]/g, "")
+                  .toUpperCase();
+                const trimmedValue = value.replace(/\s+/g, ' ');
+                form.setFieldsValue({ accountHolder: trimmedValue });
+              }}
+              onBlur={(e) => {
+                const trimmedValue = e.target.value.trim();
+                form.setFieldsValue({ accountHolder: trimmedValue });
+              }}
+            />
           </Form.Item>
         </Form>
       </Modal>
