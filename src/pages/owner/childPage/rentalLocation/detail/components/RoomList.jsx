@@ -142,8 +142,9 @@ export default function RoomList(canEdit) {
       const matchesSearch =
         item.accommodationTypeId?.name
           ?.toLowerCase()
-          ?.includes(searchText.toLowerCase()) ||
-        item.roomNo?.toLowerCase()?.includes(searchText.toLowerCase()) ||
+          ?.includes(searchText.toLowerCase().trim()) ||
+        item.roomNo?.toLowerCase()
+          ?.includes(searchText.toLowerCase().trim()) ||
         false;
 
       const matchesRoomType =

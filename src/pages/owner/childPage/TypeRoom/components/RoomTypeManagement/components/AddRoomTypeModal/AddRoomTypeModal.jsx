@@ -273,7 +273,17 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
         <Form.Item
           name="name"
           label="Tên loại phòng"
-          rules={[{ required: true, message: 'Vui lòng nhập tên loại phòng' }]}
+          rules={[
+            { required: true, message: 'Vui lòng nhập tên loại phòng' },
+            {
+              validator: (_, value) => {
+                if (value && !value.trim()) {
+                  return Promise.reject(new Error('Tên loại phòng không được chỉ chứa khoảng trắng!'));
+                }
+                return Promise.resolve();
+              }
+            }
+          ]}
           validateStatus={nameError ? 'error' : ''}
           help={nameError}
         >
@@ -281,14 +291,35 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
             placeholder="Nhập tên loại phòng" 
             onChange={handleNameChange}
             style={nameError ? { borderColor: '#ff4d4f' } : {}}
+            onBlur={(e) => {
+              const value = e.target.value.trim();
+              form.setFieldsValue({ name: value });
+            }}
           />
         </Form.Item>
 
         <Form.Item
           name="description"
           label="Mô tả"
+          rules={[
+            {
+              validator: (_, value) => {
+                if (value && !value.trim()) {
+                  return Promise.reject(new Error('Mô tả không được chỉ chứa khoảng trắng!'));
+                }
+                return Promise.resolve();
+              }
+            }
+          ]}
         >
-          <TextArea rows={4} placeholder="Nhập mô tả cho loại phòng" />
+          <TextArea 
+            rows={4} 
+            placeholder="Nhập mô tả cho loại phòng" 
+            onBlur={(e) => {
+              const value = e.target.value.trim();
+              form.setFieldsValue({ description: value });
+            }}
+          />
         </Form.Item>
 
         <div className={styles.formRow}>

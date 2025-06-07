@@ -255,16 +255,35 @@ const UpdateRoomTypeModal = ({
         <Form.Item
           name="name"
           label="Tên loại phòng"
-          rules={[{ required: true, message: 'Vui lòng nhập tên loại phòng' }]}
+          rules={[
+            { required: true, message: 'Vui lòng nhập tên loại phòng' },
+            { whitespace: true, message: 'Tên loại phòng không được chỉ chứa khoảng trắng' }
+          ]}
         >
-          <Input placeholder="Nhập tên loại phòng" />
+          <Input 
+            placeholder="Nhập tên loại phòng" 
+            onBlur={(e) => {
+              const trimmedValue = e.target.value.trim();
+              form.setFieldsValue({ name: trimmedValue });
+            }}
+          />
         </Form.Item>
 
         <Form.Item
           name="description"
           label="Mô tả"
+          rules={[
+            { whitespace: true, message: 'Mô tả không được chỉ chứa khoảng trắng' }
+          ]}
         >
-          <TextArea rows={4} placeholder="Nhập mô tả cho loại phòng" />
+          <TextArea 
+            rows={4} 
+            placeholder="Nhập mô tả cho loại phòng" 
+            onBlur={(e) => {
+              const trimmedValue = e.target.value.trim();
+              form.setFieldsValue({ description: trimmedValue });
+            }}
+          />
         </Form.Item>
 
         <div className={styles.formRow}>
@@ -309,22 +328,25 @@ const UpdateRoomTypeModal = ({
 
         <Form.Item
           name="numberOfPasswordRoom"
-          label="Mật khẩu loại phòng gồm mấy số?"
+          label="Độ dài mật khẩu phòng (số ký tự)"
+          tooltip="Nhập số từ 1-10 cho độ dài mật khẩu, hoặc 0 nếu không cần mật khẩu"
           rules={[{
             required: true,
-            message: 'Vui lòng chọn độ dài mật khẩu'
+            message: 'Vui lòng nhập độ dài mật khẩu'
+          }, {
+            type: 'number',
+            min: 0,
+            max: 10,
+            message: 'Độ dài mật khẩu phải từ 1 đến 10, hoặc 0 nếu không dùng mật khẩu'
           }]}
         >
-          <Select
-            placeholder="Chọn độ dài mật khẩu"
+          <InputNumber
+            min={0}
+            max={10}
+            precision={0}
+            placeholder="Độ dài mật khẩu (1-10)"
             style={{ width: '100%' }}
-          >
-            <Option value={0}>0 số (Không có mật khẩu)</Option>
-            <Option value={1}>2 số</Option>
-            <Option value={2}>4 số</Option>
-            <Option value={3}>6 số</Option>
-            <Option value={4}>8 số</Option>
-          </Select>
+          />
         </Form.Item>
 
         <Form.Item label={`Hình ảnh loại phòng (${fileList.length}/${MAX_IMAGES})`}>

@@ -44,25 +44,55 @@ const UpdateAmenityModal = ({ isOpen, onCancel, onConfirm, initialValues, isLoad
           <Form.Item
             name="name"
             label="Tên dịch vụ"
-            rules={[{ required: true, message: 'Vui lòng nhập tên dịch vụ' }]}
+            rules={[
+              { required: true, message: 'Vui lòng nhập tên dịch vụ' },
+              {
+                validator: (_, value) => {
+                  if (value && !value.trim()) {
+                    return Promise.reject(new Error('Tên dịch vụ không được chỉ chứa khoảng trắng!'));
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
           >
-            <Input placeholder="Nhập tên dịch vụ" />
+            <Input 
+              placeholder="Nhập tên dịch vụ" 
+              onBlur={(e) => {
+                const value = e.target.value.trim();
+                form.setFieldsValue({ name: value });
+              }}
+            />
           </Form.Item>
 
           <Form.Item
             name="description"
             label="Mô tả"
-            rules={[{ required: true, message: 'Vui lòng nhập mô tả' }]}
+            rules={[
+              { required: true, message: 'Vui lòng nhập mô tả' },
+              {
+                validator: (_, value) => {
+                  if (value && !value.trim()) {
+                    return Promise.reject(new Error('Mô tả không được chỉ chứa khoảng trắng!'));
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
           >
             <Input.TextArea
               placeholder="Nhập mô tả"
               rows={4}
               maxLength={200}
               showCount
+              onBlur={(e) => {
+                const value = e.target.value.trim();
+                form.setFieldsValue({ description: value });
+              }}
             />
           </Form.Item>
 
-          <Form.Item
+          {/* <Form.Item
             name="status"
             label="Trạng thái"
             rules={[{ required: true, message: 'Vui lòng chọn trạng thái' }]}
@@ -71,7 +101,7 @@ const UpdateAmenityModal = ({ isOpen, onCancel, onConfirm, initialValues, isLoad
               <Option value="Active">Đang hoạt động</Option>
               <Option value="Inactive">Không hoạt động</Option>
             </Select>
-          </Form.Item>
+          </Form.Item> */}
         </Form>
       </Spin>
     </Modal>

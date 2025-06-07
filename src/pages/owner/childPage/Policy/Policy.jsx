@@ -559,7 +559,19 @@ export default function Policy() {
           <div className={styles.searchFilter}>
             <Input
               placeholder="Tìm kiếm tên chính sách"
-              onChange={(e) => setSearchTerm(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value;
+                // Only update if value is not all whitespace
+                if (value.trim() || value === '') {
+                  setSearchTerm(value.trim());
+                }
+              }}
+              onBlur={(e) => {
+                const value = e.target.value;
+                // Trim on blur
+                e.target.value = value.trim();
+                setSearchTerm(value.trim());
+              }}
               style={{ width: "250px", marginRight: "10px" }}
             />
             <Dropdown

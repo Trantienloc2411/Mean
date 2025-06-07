@@ -351,6 +351,14 @@ const UpdatePolicyModal = ({
               }
               rules={[
                 { required: true, message: "Vui lòng nhập tên chính sách" },
+                {
+                  validator: (_, value) => {
+                    if (value && !value.trim()) {
+                      return Promise.reject(new Error('Tên chính sách không được chỉ chứa khoảng trắng!'));
+                    }
+                    return Promise.resolve();
+                  }
+                }
               ]}
             >
               <Input
@@ -358,6 +366,10 @@ const UpdatePolicyModal = ({
                 maxLength={100}
                 showCount
                 disabled={disabledInput}
+                onBlur={(e) => {
+                  const value = e.target.value.trim();
+                  form.setFieldsValue({ Name: value });
+                }}
               />
             </Form.Item>
 
@@ -371,7 +383,17 @@ const UpdatePolicyModal = ({
                   </Tooltip>
                 </Space>
               }
-              rules={[{ required: true, message: "Vui lòng nhập mô tả" }]}
+              rules={[
+                { required: true, message: "Vui lòng nhập mô tả" },
+                {
+                  validator: (_, value) => {
+                    if (value && !value.trim()) {
+                      return Promise.reject(new Error('Mô tả không được chỉ chứa khoảng trắng!'));
+                    }
+                    return Promise.resolve();
+                  }
+                }
+              ]}
             >
               <Input.TextArea
                 rows={3}
@@ -379,6 +401,10 @@ const UpdatePolicyModal = ({
                 maxLength={500}
                 disabled={disabledInput}
                 showCount
+                onBlur={(e) => {
+                  const value = e.target.value.trim();
+                  form.setFieldsValue({ Description: value });
+                }}
               />
             </Form.Item>
 

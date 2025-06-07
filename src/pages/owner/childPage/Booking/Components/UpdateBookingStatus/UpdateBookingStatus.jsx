@@ -354,7 +354,13 @@ const UpdateBookingStatus = ({
                 rows={4}
                 placeholder="Nhập lý do hủy đặt phòng"
                 value={cancelReason}
-                onChange={handleCancelReasonChange}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  setCancelReason(value);
+                }}
+                onBlur={(e) => {
+                  setCancelReason(e.target.value.trim());
+                }}
                 style={{ marginTop: 8 }}
                 className={styles.cancelTextarea}
               />

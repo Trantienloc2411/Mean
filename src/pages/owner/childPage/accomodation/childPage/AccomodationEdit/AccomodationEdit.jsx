@@ -345,10 +345,13 @@ export default function AccommodationEdit({
                   },
                   {
                     validator: (_, value) => {
+                      if (!value || !value.trim()) {
+                        return Promise.reject(new Error('Không được để trống số phòng!'));
+                      }
                       if (value && parseInt(value) < 0) {
                         return Promise.reject(new Error('Không được nhập số âm!'));
                       }
-                      if (existingRoomNumbers.includes(value) && value !== accommodationData?.roomNo) {
+                      if (existingRoomNumbers.includes(value.trim()) && value.trim() !== accommodationData?.roomNo) {
                         return Promise.reject(new Error('Số phòng này đã tồn tại!'));
                       }
                       return Promise.resolve();
@@ -361,12 +364,16 @@ export default function AccommodationEdit({
                   size="large"
                   className={styles.inputField}
                   onChange={(e) => {
-                    const value = e.target.value;
+                    const value = e.target.value.trim();
                     if (existingRoomNumbers.includes(value) && value !== accommodationData?.roomNo) {
                       setDuplicateWarning(`Số phòng "${value}" đã tồn tại!`);
                     } else {
                       setDuplicateWarning(null);
                     }
+                  }}
+                  onBlur={(e) => {
+                    const value = e.target.value.trim();
+                    form.setFieldsValue({ roomNo: value });
                   }}
                 />
               </Form.Item>
@@ -384,6 +391,16 @@ export default function AccommodationEdit({
               <Form.Item 
                 name="description" 
                 label={<Text strong>Mô tả</Text>}
+                rules={[
+                  {
+                    validator: (_, value) => {
+                      if (value && !value.trim()) {
+                        return Promise.reject(new Error('Mô tả không được chỉ chứa khoảng trắng!'));
+                      }
+                      return Promise.resolve();
+                    }
+                  }
+                ]}
               >
                 <TextArea
                   rows={4}
@@ -391,6 +408,10 @@ export default function AccommodationEdit({
                   maxLength={255}
                   showCount
                   className={styles.textArea}
+                  onBlur={(e) => {
+                    const value = e.target.value.trim();
+                    form.setFieldsValue({ description: value });
+                  }}
                 />
               </Form.Item>
 

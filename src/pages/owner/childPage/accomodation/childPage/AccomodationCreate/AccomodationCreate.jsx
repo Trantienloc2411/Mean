@@ -380,12 +380,15 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess, exis
                   },
                   {
                     validator: (_, value) => {
+                      if (!value || !value.trim()) {
+                        return Promise.reject(new Error('Không được để trống số phòng!'));
+                      }
                       // Kiểm tra số âm
                       if (value && parseInt(value) < 0) {
                         return Promise.reject(new Error('Không được nhập số âm!'));
                       }
                       // Kiểm tra trùng lặp
-                      if (existingRoomNumbers.includes(value)) {
+                      if (existingRoomNumbers.includes(value.trim())) {
                         return Promise.reject(new Error('Số phòng này đã tồn tại!'));
                       }
                       return Promise.resolve();
@@ -398,12 +401,16 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess, exis
                   size="large"
                   className={styles.inputField}
                   onChange={(e) => {
-                    const value = e.target.value;
+                    const value = e.target.value.trim();
                     if (existingRoomNumbers.includes(value)) {
                       setDuplicateWarning(`Số phòng "${value}" đã tồn tại!`);
                     } else {
                       setDuplicateWarning(null);
                     }
+                  }}
+                  onBlur={(e) => {
+                    const value = e.target.value.trim();
+                    form.setFieldsValue({ roomNo: value });
                   }}
                 />
               </Form.Item>
@@ -420,6 +427,9 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess, exis
                     },
                     {
                       validator: (_, value) => {
+                        if (!value || !value.trim()) {
+                          return Promise.reject(new Error('Không được để trống số phòng!'));
+                        }
                         const numValue = parseInt(value, 10);
                         if (numValue < 0) {
                           return Promise.reject(new Error('Không được nhập số âm!'));
@@ -458,6 +468,9 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess, exis
                     },
                     {
                       validator: (_, value) => {
+                        if (!value || !value.trim()) {
+                          return Promise.reject(new Error('Không được để trống số phòng!'));
+                        }
                         const start = form.getFieldValue('startRoom');
                         const numValue = parseInt(value, 10);
                         if (numValue < 0) {
@@ -520,6 +533,16 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess, exis
             <Form.Item
               name="description"
               label={<Text strong>Mô tả</Text>}
+              rules={[
+                {
+                  validator: (_, value) => {
+                    if (value && !value.trim()) {
+                      return Promise.reject(new Error('Mô tả không được chỉ chứa khoảng trắng!'));
+                    }
+                    return Promise.resolve();
+                  }
+                }
+              ]}
             >
               <TextArea
                 rows={4}
@@ -527,6 +550,10 @@ export default function AccommodationCreate({ visible, onCancel, onSuccess, exis
                 maxLength={255}
                 showCount
                 className={styles.textArea}
+                onBlur={(e) => {
+                  const value = e.target.value.trim();
+                  form.setFieldsValue({ description: value });
+                }}
               />
             </Form.Item>
           </div>

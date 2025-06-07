@@ -282,12 +282,24 @@ const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
             }
             rules={[
               { required: true, message: "Vui lòng nhập tên chính sách" },
+              {
+                validator: (_, value) => {
+                  if (value && !value.trim()) {
+                    return Promise.reject(new Error('Tên chính sách không được chỉ chứa khoảng trắng!'));
+                  }
+                  return Promise.resolve();
+                }
+              }
             ]}
           >
             <Input
               placeholder="Nhập tên chính sách"
               maxLength={100}
               showCount
+              onBlur={(e) => {
+                const value = e.target.value.trim();
+                form.setFieldsValue({ Name: value });
+              }}
             />
           </Form.Item>
 
@@ -301,13 +313,27 @@ const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
                 </Tooltip>
               </Space>
             }
-            rules={[{ required: true, message: "Vui lòng nhập mô tả" }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập mô tả" },
+              {
+                validator: (_, value) => {
+                  if (value && !value.trim()) {
+                    return Promise.reject(new Error('Mô tả không được chỉ chứa khoảng trắng!'));
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
           >
             <Input.TextArea
               rows={3}
               placeholder="Nhập mô tả cho chính sách"
               maxLength={500}
               showCount
+              onBlur={(e) => {
+                const value = e.target.value.trim();
+                form.setFieldsValue({ Description: value });
+              }}
             />
           </Form.Item>
         </Card>
