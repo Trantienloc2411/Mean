@@ -97,11 +97,17 @@ const UpdateBookingStatus = ({
       return;
     }
     try {
-      // First update the booking status
+      const payload = {
+        status: status
+      };
+      
+      if (status === bookingStatusCodes.CANCELLED) {
+        payload.note = cancelReason;
+      }
+
       await onStatusChange(
-        booking._originalBooking._id, 
-        getBookingStatusDisplay(status),
-        cancelReason 
+        booking._originalBooking._id,
+        payload
       );
 
       if (status === bookingStatusCodes.CONFIRMED) {
