@@ -491,7 +491,15 @@ export default function Policy() {
   const columns = [
     { title: "No.", dataIndex: "No", key: "No" },
     { title: "Tên chính sách", dataIndex: "Name", key: "Name" },
-    { title: "Mô tả", dataIndex: "Description", key: "Description" },
+    { 
+      title: "Mô tả", 
+      dataIndex: "Description", 
+      key: "Description",
+      render: (desc) => {
+        if (!desc) return "N/A";
+        return desc.length > 50 ? `${desc.substring(0, 50)}...` : desc;
+      },
+    },
     { title: "Ngày tạo", dataIndex: "CreatedDate", key: "CreatedDate" },
     { title: "Ngày áp dụng", dataIndex: "ApplyDate", key: "ApplyDate" },
     { title: "Ngày kết thúc", dataIndex: "EndDate", key: "EndDate" },

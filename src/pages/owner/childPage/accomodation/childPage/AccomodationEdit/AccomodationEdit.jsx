@@ -216,11 +216,18 @@ export default function AccommodationEdit({
     }
   };
 
-  const statusOptions = Object.entries(ACCOMMODATION_STATUS).map(([label, value]) => ({
-    label: getStatusLabel(label),
-    value,
-    color: getStatusColor(value)
-  }));
+  const statusOptions = [
+    {
+      label: getStatusLabel('AVAILABLE'),
+      value: ACCOMMODATION_STATUS.AVAILABLE,
+      color: getStatusColor(ACCOMMODATION_STATUS.AVAILABLE)
+    },
+    {
+      label: getStatusLabel('MAINTENANCE'),
+      value: ACCOMMODATION_STATUS.MAINTENANCE,
+      color: getStatusColor(ACCOMMODATION_STATUS.MAINTENANCE)
+    }
+  ];
 
   const formatPrice = (price) => {
     return price?.toLocaleString('vi-VN') || 0;

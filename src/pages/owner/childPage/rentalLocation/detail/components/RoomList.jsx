@@ -177,7 +177,7 @@ export default function RoomList({ canEdit }) {
       <div className={styles.contentContainer}>
         <div className={styles.headerContainer}>
           <h2>Danh Sách Phòng</h2>
-          <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <div className={styles.headerActions}>
             <SearchAndFilter
               onSearch={handleSearch}
               onFilterChange={setFilterStatus}

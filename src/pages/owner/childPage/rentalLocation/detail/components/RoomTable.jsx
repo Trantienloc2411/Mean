@@ -1,5 +1,6 @@
 import { Tag, Dropdown } from "antd";
 import { MoreOutlined } from "@ant-design/icons";
+import styles from "./RoomTable.module.scss";
 
 // Enum
 const STATUS_MAP = {
@@ -51,29 +52,51 @@ export default function RoomTableColumns({
       title: "Số phòng",
       dataIndex: "roomNo",
       key: "roomNo",
-      render: (text) => text || "N/A",
+      render: (text) => (
+        <div className={styles.roomNumber}>
+          {text || "N/A"}
+        </div>
+      ),
     },
     {
       title: "Loại phòng",
       dataIndex: ["accommodationTypeId", "name"],
       key: "type",
+      render: (text) => (
+        <div className={styles.roomType}>
+          {text}
+        </div>
+      ),
     },
     {
       title: "Số người tối đa",
       dataIndex: ["accommodationTypeId", "maxPeopleNumber"],
       key: "maxPeople",
+      render: (number) => (
+        <div className={styles.maxPeople}>
+          {number}
+        </div>
+      ),
     },
     {
       title: "Giá ban đầu",
       dataIndex: ["accommodationTypeId", "basePrice"],
       key: "initialPrice",
-      render: (price) => `${price?.toLocaleString() || 0} VND`,
+      render: (price) => (
+        <div className={styles.price}>
+          {`${price?.toLocaleString() || 0} VND`}
+        </div>
+      ),
     },
     {
       title: "Giá theo giờ",
       dataIndex: ["accommodationTypeId", "overtimeHourlyPrice"],
       key: "hourlyPrice",
-      render: (price) => `${price?.toLocaleString() || 0} VND/giờ`,
+      render: (price) => (
+        <div className={styles.price}>
+          {`${price?.toLocaleString() || 0} VND/giờ`}
+        </div>
+      ),
     },
     {
       title: "Số lượng dịch vụ",
@@ -82,14 +105,7 @@ export default function RoomTableColumns({
       render: (serviceIds) => {
         const count = serviceIds?.length || 0;
         return (
-          <div
-            style={{
-              display: "flex",
-              alignItems: "flex-start",
-              gap: "5px",
-              justifyContent: "flex-start",
-            }}
-          >
+          <div className={styles.serviceCount}>
             {count} dịch vụ
           </div>
         );
@@ -104,7 +120,11 @@ export default function RoomTableColumns({
           label: "Không xác định",
           color: "default",
         };
-        return <Tag color={statusInfo.color}>{statusInfo.label}</Tag>;
+        return (
+          <Tag color={statusInfo.color} className={styles.statusTag}>
+            {statusInfo.label}
+          </Tag>
+        );
       },
     },
     {
@@ -119,8 +139,9 @@ export default function RoomTableColumns({
               onClick: () => item.onClick(record),
             })),
           }}
+          className={styles.actionDropdown}
         >
-          <MoreOutlined onClick={(e) => e.preventDefault()} />
+          <MoreOutlined className={styles.actionIcon} onClick={(e) => e.preventDefault()} />
         </Dropdown>
       ),
     },

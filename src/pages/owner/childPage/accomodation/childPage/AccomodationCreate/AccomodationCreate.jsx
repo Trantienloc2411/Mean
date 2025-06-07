@@ -32,6 +32,7 @@ import AddRoomTypeModal from "../../../TypeRoom/components/RoomTypeManagement/co
 import { useCreateAccommodationTypeMutation } from "../../../../../../redux/services/accommodationTypeApi";
 import { useGetOwnerDetailByUserIdQuery } from "../../../../../../redux/services/ownerApi";
 import { useParams } from "react-router-dom";
+import { useUpdateRentalLocationMutation } from "../../../../../../redux/services/rentalLocationApi";
 
 const { Title, Text } = Typography;
 const { Option } = Select;
@@ -64,6 +65,7 @@ export default function AccommodationCreate({
   const { data: existingAccommodations } =
     useGetAccommodationsByRentalLocationQuery(rentalLocationId);
   const { data: ownerDetailData } = useGetOwnerDetailByUserIdQuery(id);
+  const [updateRentalLocation] = useUpdateRentalLocationMutation();
 
   const ownerId = ownerDetailData?.id;
 
@@ -229,13 +231,30 @@ export default function AccommodationCreate({
         rentalLocationId: rentalLocationId,
       };
 
-      await createAccommodationType(valuesWithLocation).unwrap();
+      // Create new room type
+      const response = await createAccommodationType(valuesWithLocation).unwrap();
+      const createdRoomType = response.data;
+
+      // Get current accommodation type IDs from the rental location
+      const currentTypeIds = accommodationTypes?.data
+        ?.map(type => type.id)
+        .filter(id => id) || [];
+
+      // Update rental location with new room type
+      await updateRentalLocation({
+        id: rentalLocationId,
+        updatedData: {
+          accommodationTypeIds: [...currentTypeIds, createdRoomType.id]
+        }
+      }).unwrap();
+
       message.success("Loại phòng đã được thêm thành công!");
 
       setIsAddTypeModalOpen(false);
 
       await accommodationTypesRefetch();
     } catch (error) {
+      console.error("Error adding room type:", error);
       message.error("Thêm loại phòng thất bại!");
     }
   };

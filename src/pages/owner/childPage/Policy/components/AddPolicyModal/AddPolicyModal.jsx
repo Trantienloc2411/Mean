@@ -328,7 +328,7 @@ const AddPolicyModal = ({ isOpen, onCancel, onConfirm }) => {
             <Input.TextArea
               rows={3}
               placeholder="Nhập mô tả cho chính sách"
-              maxLength={500}
+              maxLength={3000}
               showCount
               onBlur={(e) => {
                 const value = e.target.value.trim();
