@@ -181,8 +181,12 @@ export default function Booking() {
       const updateData = {
         id: bookingId,
         ...payload,
-        ...(payload.status === BOOKING_STATUS.CANCELLED && currentBooking?._originalBooking.paymentStatus === PAYMENT_STATUS.PAID && {
-          paymentStatus: PAYMENT_STATUS.REFUND
+        ...(payload.status === BOOKING_STATUS.CANCELLED && {
+          paymentStatus: currentBooking?._originalBooking.paymentStatus === PAYMENT_STATUS.PAID 
+            ? PAYMENT_STATUS.REFUND 
+            : currentBooking?._originalBooking.paymentStatus === PAYMENT_STATUS.PENDING 
+            ? PAYMENT_STATUS.FAILED 
+            : undefined
         })
       };
   

@@ -24,13 +24,13 @@ const UpdateBookingStatus = ({
 
   const getBookingStatusDisplay = (statusCode) => {
     const statusMap = {
-      [bookingStatusCodes.CONFIRMED]: "Đã xác nhận",
+      [bookingStatusCodes.CONFIRMED]: "Xác nhận",
       [bookingStatusCodes.PENDING]: "Đang chờ",
       [bookingStatusCodes.NEEDCHECKIN]: "Cần check-in",
       [bookingStatusCodes.CHECKEDIN]: "Đã check-in",
       [bookingStatusCodes.NEEDCHECKOUT]: "Cần check-out",
       [bookingStatusCodes.CHECKEDOUT]: "Đã check-out",
-      [bookingStatusCodes.CANCELLED]: "Đã hủy",
+      [bookingStatusCodes.CANCELLED]: "Hủy",
       [bookingStatusCodes.COMPLETED]: "Hoàn thành",
       [bookingStatusCodes.REFUND]: "Đã hoàn tiền" 
     };
@@ -156,7 +156,7 @@ const UpdateBookingStatus = ({
   const availableStatuses = currentStatus ? getAvailableNextStatuses(currentStatus) : [];
 
   const statusOptions = Object.entries(bookingStatusCodes)
-    .filter(([_, value]) => availableStatuses.includes(value))
+    .filter(([_, value]) => availableStatuses.includes(value) && value !== currentStatus)
     .map(([key, value]) => ({
       label: getBookingStatusDisplay(value),
       value: value,
