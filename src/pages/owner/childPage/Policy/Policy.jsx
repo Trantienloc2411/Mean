@@ -388,10 +388,10 @@ export default function Policy() {
         policyTitle: formattedValues.Name,
         policyDescription: formattedValues.Description,
         startDate: formattedValues.ApplyDate
-          ? formattedValues.ApplyDate.format("DD/MM/YYYY HH:mm:ss")
+          ? formattedValues.ApplyDate.toISOString()
           : null,
         endDate: formattedValues.EndDate
-          ? formattedValues.EndDate.format("DD/MM/YYYY HH:mm:ss")
+          ? formattedValues.EndDate.toISOString()
           : null,
         status: values.Status || 1,
         values: formattedValues.values?.filter(
