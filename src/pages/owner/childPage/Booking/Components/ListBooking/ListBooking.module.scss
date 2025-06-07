@@ -737,3 +737,38 @@
   }
 }
 
+.indexCell {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.urgentWarningIcon {
+  color: #fa8c16;
+  font-size: 16px;
+  animation: pulse 2s infinite;
+}
+
+.warningTooltip {
+  max-width: 500px;
+}
+
+@keyframes pulse {
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 1;
+  }
+}
+
+.urgentWarningRow {
+  background-color: #fff7e6;
+  &:hover {
+    background-color: #fff1d6 !important;
+  }
+}
+

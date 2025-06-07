@@ -23,6 +23,7 @@ const UpdateBookingStatus = ({
   const [createNotification] = useCreateNotificationMutation();
 
   const getBookingStatusDisplay = (statusCode) => {
+    console.log('Status code received:', statusCode);
     const statusMap = {
       [bookingStatusCodes.CONFIRMED]: "Xác nhận",
       [bookingStatusCodes.PENDING]: "Đang chờ",
@@ -34,6 +35,8 @@ const UpdateBookingStatus = ({
       [bookingStatusCodes.COMPLETED]: "Hoàn thành",
       [bookingStatusCodes.REFUND]: "Đã hoàn tiền" 
     };
+    console.log('Status map:', statusMap);
+    console.log('Mapped status:', statusMap[statusCode]);
     return statusMap[statusCode] || "Không xác định";
   };
 
@@ -328,11 +331,17 @@ const UpdateBookingStatus = ({
 
         <Card className={styles.statusCard}>
           <div className={styles.statusSelectContainer}>
+            <div className={styles.infoLabel}>Trạng thái hiện tại:</div>
+            <div style={{ marginTop: 8, marginBottom: 16 }}>
+              {booking?._originalBooking?.status && (
+                <Text>{getBookingStatusDisplay(booking._originalBooking.status)}</Text>
+              )}
+            </div>
             <div className={styles.infoLabel}>Chọn Trạng Thái Mới:</div>
             <Select
               style={{ width: '100%', marginTop: 8, marginBottom: 16 }}
               placeholder="Chọn trạng thái mới"
-              value={status}
+              value={getBookingStatusDisplay(status)}
               onChange={handleStatusChange}
               options={statusOptions}
             />

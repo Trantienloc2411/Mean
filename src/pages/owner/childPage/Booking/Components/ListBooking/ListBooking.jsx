@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Dropdown, Input, Button, message, Table, Select } from "antd"
+import { Dropdown, Input, Button, message, Table, Select, Tooltip } from "antd"
 import {
   FilterOutlined,
   SearchOutlined,
@@ -8,6 +8,7 @@ import {
   SortAscendingOutlined,
   InfoCircleOutlined,
   ReloadOutlined,
+  ExclamationCircleFilled,
 } from "@ant-design/icons"
 import debounce from "lodash/debounce"
 import Filter from "../../../../../../components/Filter/Filter"
@@ -309,7 +310,16 @@ export default function ListBooking({
     {
       title: <span className={styles.tableHeader}>Mã Đặt Phòng</span>,
       render: (_, record) => (
-        <div>
+        <div className={styles.indexCell}>
+          {record._originalBooking.status === bookingStatusCodes.PENDING && (
+            <Tooltip
+              title="Đơn đặt phòng cần xác nhận!"
+              color="#fa8c16"
+              overlayClassName={styles.warningTooltip}
+            >
+              <ExclamationCircleFilled className={styles.urgentWarningIcon} />
+            </Tooltip>
+          )}
           <div className={styles.mobileValue}>
             <strong>{record._originalBooking?._id}</strong>
           </div>
@@ -560,6 +570,11 @@ export default function ListBooking({
             dataSource={filteredData}
             rowKey={(record) => record._originalBooking?._id || Math.random()}
             loading={isUpdating || isReloading}
+            rowClassName={(record) => 
+              record._originalBooking.status === bookingStatusCodes.PENDING
+                ? styles.urgentWarningRow
+                : ""
+            }
             pagination={{
               ...pagination,
               total: filteredData.length,
