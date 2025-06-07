@@ -116,6 +116,28 @@ export default function TransactionTable({ data, loading }) {
           >
             {typeTransaction.vi}
           </span>
+        ) : typeTransaction.en == "PayOS_PAYMENT" ? (
+          <span
+            style={{
+              background: "#6352f7",
+              color: "#fff",
+              borderRadius: 20,
+              padding: "4px 12px",
+            }}
+          >
+            {typeTransaction.vi}
+          </span>
+        ) : typeTransaction.en == "Banking" ? (
+          <span
+            style={{
+              background: "#77c308",
+              color: "#fff",
+              borderRadius: 20,
+              padding: "4px 12px",
+            }}
+          >
+            {typeTransaction.vi}
+          </span>
         ) : (
           <span
             style={{

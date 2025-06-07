@@ -21,7 +21,7 @@ const BOOKING_STATUS = Object.freeze({
   CANCELLED: 6,
   COMPLETED: 7,
   PENDING: 8,
-  REFUND: 9
+  REFUND: 9,
 });
 
 const PAYMENT_STATUS = Object.freeze({
@@ -42,7 +42,7 @@ const getBookingStatusDisplay = (statusCode) => {
     [BOOKING_STATUS.CHECKEDOUT]: "Đã check-out",
     [BOOKING_STATUS.CANCELLED]: "Đã huỷ",
     [BOOKING_STATUS.COMPLETED]: "Hoàn tất",
-    [BOOKING_STATUS.REFUND]: "Đã hoàn tiền"
+    [BOOKING_STATUS.REFUND]: "Đã hoàn tiền",
   };
   return statusMap[statusCode] || "Trạng thái không xác định";
 };
@@ -60,6 +60,7 @@ const getPaymentStatusDisplay = (statusCode) => {
 
 const PAYMENT_METHOD = Object.freeze({
   MOMO: 1,
+  PAYOS: 2,
 });
 
 export default function Booking() {
@@ -175,28 +176,37 @@ export default function Booking() {
   const handleStatusChange = async (bookingId, payload) => {
     try {
       const currentBooking = bookings.find(
-        b => b._originalBooking._id === bookingId
+        (b) => b._originalBooking._id === bookingId
       );
-  
+
       const updateData = {
         id: bookingId,
         ...payload,
         ...(payload.status === BOOKING_STATUS.CANCELLED && {
-          paymentStatus: currentBooking?._originalBooking.paymentStatus === PAYMENT_STATUS.PAID 
-            ? PAYMENT_STATUS.REFUND 
-            : currentBooking?._originalBooking.paymentStatus === PAYMENT_STATUS.PENDING 
-            ? PAYMENT_STATUS.FAILED 
-            : undefined
-        })
+          paymentStatus:
+            currentBooking?._originalBooking.paymentStatus ===
+            PAYMENT_STATUS.PAID
+              ? PAYMENT_STATUS.REFUND
+              : currentBooking?._originalBooking.paymentStatus ===
+                PAYMENT_STATUS.PENDING
+              ? PAYMENT_STATUS.FAILED
+              : undefined,
+        }),
       };
-  
+
       await updateBooking(updateData).unwrap();
       refetchBookings();
-      
-      const successMessage = payload.status === BOOKING_STATUS.CANCELLED 
-        ? `Đã hủy booking${currentBooking?._originalBooking.paymentStatus === PAYMENT_STATUS.PAID ? ' và yêu cầu hoàn tiền' : ''}`
-        : "Cập nhật trạng thái thành công";
-      
+
+      const successMessage =
+        payload.status === BOOKING_STATUS.CANCELLED
+          ? `Đã hủy booking${
+              currentBooking?._originalBooking.paymentStatus ===
+              PAYMENT_STATUS.PAID
+                ? " và yêu cầu hoàn tiền"
+                : ""
+            }`
+          : "Cập nhật trạng thái thành công";
+
       message.success(successMessage);
     } catch (error) {
       message.error(error?.data?.message || "Cập nhật thất bại");
@@ -230,7 +240,7 @@ export default function Booking() {
             bookings={filteredBookings}
             bookingStatusCodes={BOOKING_STATUS}
             paymentStatusCodes={PAYMENT_STATUS}
-            paymentMethodCodes={PAYMENT_METHOD} 
+            paymentMethodCodes={PAYMENT_METHOD}
             onStatusChange={handleStatusChange}
             isUpdating={isUpdating}
             bookingDetailData={bookingDetailData}

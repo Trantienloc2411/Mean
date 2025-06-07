@@ -271,7 +271,7 @@ export default function OwnerRevenuePage() {
               ownerId: id,
               transactionStatus: 2,
               transactionEndDate: null,
-              typeTransaction: 1,
+              typeTransaction: 3,
             }).unwrap();
             message.success("Tạo giao dịch thành công!");
             setIsModalOpen(false);
