@@ -59,9 +59,16 @@ export default function ChangePassword() {
             name="currentPassword"
             rules={[
               { required: true, message: "Vui lòng nhập mật khẩu hiện tại!" },
+              { pattern: /^\S*$/, message: "Mật khẩu không được chứa khoảng trắng!" }
             ]}
           >
-            <Input.Password placeholder="Nhập mật khẩu hiện tại" />
+            <Input.Password 
+              placeholder="Nhập mật khẩu hiện tại" 
+              onBlur={(e) => {
+                const value = e.target.value.trim();
+                form.setFieldsValue({ currentPassword: value });
+              }}
+            />
           </Form.Item>
 
           <Form.Item
@@ -71,13 +78,19 @@ export default function ChangePassword() {
               { required: true, message: "Vui lòng nhập mật khẩu mới!" },
               { min: 8, message: "Mật khẩu mới phải ít nhất 8 ký tự!" },
               {
-                pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])/,
+                pattern: /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^A-Za-z0-9])(?!.*\s)/,
                 message:
-                  "Mật khẩu cần có chữ hoa, chữ thường, số và ký tự đặc biệt!",
+                  "Mật khẩu cần có chữ hoa, chữ thường, số và ký tự đặc biệt, không chứa khoảng trắng!",
               },
             ]}
           >
-            <Input.Password placeholder="Nhập mật khẩu mới" />
+            <Input.Password 
+              placeholder="Nhập mật khẩu mới"
+              onBlur={(e) => {
+                const value = e.target.value.trim();
+                form.setFieldsValue({ newPassword: value });
+              }}
+            />
           </Form.Item>
 
           <Form.Item
@@ -86,6 +99,7 @@ export default function ChangePassword() {
             dependencies={["newPassword"]}
             rules={[
               { required: true, message: "Vui lòng xác nhận mật khẩu mới!" },
+              { pattern: /^\S*$/, message: "Mật khẩu không được chứa khoảng trắng!" },
               ({ getFieldValue }) => ({
                 validator(_, value) {
                   if (!value || getFieldValue("newPassword") === value) {
@@ -98,7 +112,13 @@ export default function ChangePassword() {
               }),
             ]}
           >
-            <Input.Password placeholder="Xác nhận mật khẩu mới" />
+            <Input.Password 
+              placeholder="Xác nhận mật khẩu mới"
+              onBlur={(e) => {
+                const value = e.target.value.trim();
+                form.setFieldsValue({ confirmNewPassword: value });
+              }}
+            />
           </Form.Item>
 
           <Form.Item>

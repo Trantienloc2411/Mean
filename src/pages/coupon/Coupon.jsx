@@ -175,7 +175,8 @@ export default function Coupon() {
   }, 500);
 
   const handleSearch = (e) => {
-    debouncedSearch(e.target.value);
+    const value = e.target.value;
+    setSearchTerm(value);
   };
 
   const handleReload = async () => {
@@ -210,8 +211,11 @@ export default function Coupon() {
     );
     let filtered = sortedCoupons;
     if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      const searchTrimmed = searchTerm.trim().toLowerCase();
       filtered = filtered.filter((item) =>
-        item.name.toLowerCase().includes(searchTerm.toLowerCase())
+        item.couponCode.toLowerCase().includes(searchLower) || 
+        (searchTrimmed && item.couponCode.toLowerCase().includes(searchTrimmed))
       );
     }
     if (selectedValues.isActive?.length > 0) {
@@ -361,6 +365,13 @@ export default function Coupon() {
             <Input
               placeholder="Tìm kiếm tên mã"
               onChange={handleSearch}
+              value={searchTerm}
+              onBlur={(e) => {
+                const value = e.target.value.trim();
+                if (value || !e.target.value) {
+                  setSearchTerm(value);
+                }
+              }}
               style={{ width: "250px", marginRight: "10px" }}
             />
             <Dropdown

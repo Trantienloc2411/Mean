@@ -470,7 +470,16 @@ const RoomTypeManagement = ({ isOwner }) => {
           <div className={styles.searchFilter}>
             <Input
               placeholder="Tìm kiếm tên loại phòng"
-              onChange={(e) => debouncedSearch(e.target.value)}
+              onChange={(e) => {
+                const value = e.target.value.trimStart();
+                e.target.value = value;
+                debouncedSearch(value);
+              }}
+              onBlur={(e) => {
+                const value = e.target.value.trim();
+                e.target.value = value;
+                debouncedSearch(value);
+              }}
               style={{ width: "250px" }}
             />
             <Dropdown

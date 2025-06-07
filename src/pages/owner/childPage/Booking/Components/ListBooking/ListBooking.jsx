@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react"
-import { Dropdown, Input, Button, message, Table, Select } from "antd"
+import { Dropdown, Input, Button, message, Table, Select, Tooltip } from "antd"
 import {
   FilterOutlined,
   SearchOutlined,
@@ -8,6 +8,7 @@ import {
   SortAscendingOutlined,
   InfoCircleOutlined,
   ReloadOutlined,
+  ExclamationCircleFilled,
 } from "@ant-design/icons"
 import debounce from "lodash/debounce"
 import Filter from "../../../../../../components/Filter/Filter"
@@ -151,31 +152,33 @@ export default function ListBooking({
   const parseDateTime = (dateTimeStr) => dayjs(dateTimeStr, "DD/MM/YYYY HH:mm:ss")
 
   const matchesDateTimeFilter = (booking, dateFilter) => {
-    if (!dateFilter) return true
-    const checkInDateTime = parseDateTime(booking._originalBooking.checkInHour)
-    const checkOutDateTime = parseDateTime(booking._originalBooking.checkOutHour)
-    if (!checkInDateTime || !checkOutDateTime) return false
+    if (!dateFilter) return true;
+    if (!booking || !booking._originalBooking) return false;
 
+    const checkInDateTime = parseDateTime(booking._originalBooking.checkInHour);
+    if (!checkInDateTime) return false;
+
+    // Check-in date filter
     if (dateFilter.date) {
-      const filterDate = dateFilter.date.format("DD/MM/YYYY")
-      const bookingDate = checkInDateTime.format("DD/MM/YYYY")
-      if (filterDate !== bookingDate) return false
+      const filterDate = dateFilter.date.format("DD/MM/YYYY");
+      const bookingCheckInDate = checkInDateTime.format("DD/MM/YYYY");
+      if (filterDate !== bookingCheckInDate) return false;
     }
 
-    if (dateFilter.timeRange) {
-      const [filterStartTime, filterEndTime] = dateFilter.timeRange
-      const checkInTime = checkInDateTime.hour() * 60 + checkInDateTime.minute()
-      const checkOutTime = checkOutDateTime.hour() * 60 + checkOutDateTime.minute()
-      const filterStartMinutes = filterStartTime.hour() * 60 + filterStartTime.minute()
-      const filterEndMinutes = filterEndTime.hour() * 60 + filterEndTime.minute()
+    // Check-in time range filter
+    if (dateFilter.timeRange && dateFilter.timeRange.length === 2) {
+      const [filterStartTime, filterEndTime] = dateFilter.timeRange;
+      const checkInTime = checkInDateTime.hour() * 60 + checkInDateTime.minute(); // Convert to minutes
+      const filterStartMinutes = filterStartTime.hour() * 60 + filterStartTime.minute();
+      const filterEndMinutes = filterEndTime.hour() * 60 + filterEndTime.minute();
 
-      const checkInInRange = checkInTime >= filterStartMinutes && checkInTime <= filterEndMinutes
-      const checkOutInRange = checkOutTime >= filterStartMinutes && checkOutTime <= filterEndMinutes
-      const bookingSpansFilterRange = checkInTime <= filterStartMinutes && checkOutTime >= filterEndMinutes
-
-      return checkInInRange || checkOutInRange || bookingSpansFilterRange
+      // Check if check-in time falls within the filter range
+      if (checkInTime < filterStartMinutes || checkInTime > filterEndMinutes) {
+        return false;
+      }
     }
-    return true
+
+    return true;
   }
 
   const applyFilters = (filters) => {
@@ -244,8 +247,8 @@ export default function ListBooking({
         break
       default:
         sortedData.sort((a, b) => {
-          const dateA = dayjs(a._originalBooking.checkInHour, "DD/MM/YYYY HH:mm:ss")
-          const dateB = dayjs(b._originalBooking.checkInHour, "DD/MM/YYYY HH:mm:ss")
+          const dateA = dayjs(a._originalBooking.createdAt, "DD/MM/YYYY HH:mm:ss")
+          const dateB = dayjs(b._originalBooking.createdAt, "DD/MM/YYYY HH:mm:ss")
           return dateB.valueOf() - dateA.valueOf()
         })
     }
@@ -310,17 +313,40 @@ export default function ListBooking({
       title: <span className={styles.tableHeader}>Mã Đặt Phòng</span>,
       render: (_, record) => (
         <div className={styles.indexCell}>
-          <strong>{record._originalBooking?._id}</strong>
+          {record._originalBooking.status === bookingStatusCodes.PENDING && (
+            <Tooltip
+              title="Đơn đặt phòng cần xác nhận!"
+              color="#fa8c16"
+              overlayClassName={styles.warningTooltip}
+            >
+              <ExclamationCircleFilled className={styles.urgentWarningIcon} />
+            </Tooltip>
+          )}
+          <div className={styles.mobileValue}>
+            <strong>{record._originalBooking?._id}</strong>
+          </div>
         </div>
       ),
     },
     {
       title: <span className={styles.tableHeader}>Khách Hàng</span>,
-      render: (_, record) => record._originalBooking.customerId.userId?.fullName || "Không xác định",
+      render: (_, record) => (
+        <div>
+          <div className={styles.mobileValue}>
+            {record._originalBooking.customerId.userId?.fullName || "Không xác định"}
+          </div>
+        </div>
+      ),
     },
     {
       title: <span className={styles.tableHeader}>Loại Phòng</span>,
-      render: (_, record) => record._originalBooking.accommodationId.accommodationTypeId?.name || "Không xác định",
+      render: (_, record) => (
+        <div>
+          <div className={styles.mobileValue}>
+            {record._originalBooking.accommodationId.accommodationTypeId?.name || "Không xác định"}
+          </div>
+        </div>
+      ),
     },
     {
       title: <span className={styles.tableHeader}>Check-in / Check-out</span>,
@@ -328,10 +354,10 @@ export default function ListBooking({
         const ci = parseDateTime(record._originalBooking.checkInHour)
         const co = parseDateTime(record._originalBooking.checkOutHour)
         return (
-          <div className={styles.timeInfo}>
-            <div>{ci?.format("DD/MM/YYYY")}</div>
-            <div>
-              {ci?.format("HH:mm")} - {co?.format("HH:mm")}
+          <div>
+            <div className={styles.timeInfo}>
+              <div>In: {ci?.format("DD/MM/YYYY HH:mm")}</div>
+              <div>Out: {co?.format("DD/MM/YYYY HH:mm")}</div>
             </div>
           </div>
         )
@@ -340,9 +366,11 @@ export default function ListBooking({
     {
       title: <span className={styles.tableHeader}>Số Người</span>,
       render: (_, record) => (
-        <div className={styles.peopleInfo}>
-          <span>NL: {record._originalBooking.adultNumber}</span>
-          <span>TE: {record._originalBooking.childNumber}</span>
+        <div>
+          <div className={styles.peopleInfo}>
+            <span>NL: {record._originalBooking.adultNumber}</span>
+            <span>TE: {record._originalBooking.childNumber}</span>
+          </div>
         </div>
       ),
     },
@@ -351,12 +379,14 @@ export default function ListBooking({
       render: (_, record) => {
         const paymentStatus = getPaymentStatusDisplay(record._originalBooking.paymentStatus)
         return (
-          <div className={styles.paymentInfo}>
-            <div className={styles.method}>
-              {getPaymentIcon(record._originalBooking.paymentMethod)}
-              {getPaymentMethod(record._originalBooking.paymentMethod)}
+          <div>
+            <div className={styles.paymentInfo}>
+              <div className={styles.method}>
+                {getPaymentIcon(record._originalBooking.paymentMethod)}
+                {getPaymentMethod(record._originalBooking.paymentMethod)}
+              </div>
+              <span className={`${styles.paymentTag} ${styles[getPaymentClass(paymentStatus)]}`}>{paymentStatus}</span>
             </div>
-            <span className={`${styles.paymentTag} ${styles[getPaymentClass(paymentStatus)]}`}>{paymentStatus}</span>
           </div>
         )
       },
@@ -365,30 +395,38 @@ export default function ListBooking({
       title: <span className={styles.tableHeader}>Trạng Thái</span>,
       render: (_, record) => {
         const status = getBookingStatusDisplay(record._originalBooking.status)
-        return <span className={`${styles.statusTag} ${styles[getStatusClass(status)]}`}>{status}</span>
+        return (
+          <div>
+            <div className={styles.mobileValue}>
+              <span className={`${styles.statusTag} ${styles[getStatusClass(status)]}`}>{status}</span>
+            </div>
+          </div>
+        )
       },
     },
     {
       title: "",
       render: (_, record) => (
-        <Dropdown
-          menu={{
-            items: [
-              { key: "1", label: "Xem Chi Tiết", onClick: () => handleViewDetails(record) },
-              ...(record._originalBooking.status === bookingStatusCodes.PENDING
-                ? [
-                  {
-                    key: "2",
-                    label: "Cập Nhật Trạng Thái",
-                    onClick: () => handleStatusUpdate(record),
-                  },
-                ]
-                : []),
-            ],
-          }}
-        >
-          <MoreOutlined style={{ fontSize: 18, cursor: "pointer" }} />
-        </Dropdown>
+        <div>
+          <Dropdown
+            menu={{
+              items: [
+                { key: "1", label: "Xem Chi Tiết", onClick: () => handleViewDetails(record) },
+                ...(record._originalBooking.status === bookingStatusCodes.PENDING
+                  ? [
+                    {
+                      key: "2",
+                      label: "Cập Nhật Trạng Thái",
+                      onClick: () => handleStatusUpdate(record),
+                    },
+                  ]
+                  : []),
+              ],
+            }}
+          >
+            <MoreOutlined style={{ fontSize: 18, cursor: "pointer" }} />
+          </Dropdown>
+        </div>
       ),
     },
   ]
@@ -532,6 +570,11 @@ export default function ListBooking({
             dataSource={filteredData}
             rowKey={(record) => record._originalBooking?._id || Math.random()}
             loading={isUpdating || isReloading}
+            rowClassName={(record) => 
+              record._originalBooking.status === bookingStatusCodes.PENDING
+                ? styles.urgentWarningRow
+                : ""
+            }
             pagination={{
               ...pagination,
               total: filteredData.length,
@@ -545,7 +588,6 @@ export default function ListBooking({
               },
             }}
             className={styles.bookingTable}
-            scroll={{ x: "max-content" }}
           />
         </div>
       </div>

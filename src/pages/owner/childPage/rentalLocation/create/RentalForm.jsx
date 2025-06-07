@@ -371,7 +371,7 @@ export default function RentalForm({ ownerId, refetch }) {
                   ]}
                   style={formItemStyle}
                 >
-                  <Input placeholder="Nhập tên địa điểm" size="large" />
+                  <Input placeholder="Nhập tên địa điểm" size="large" onBlur={(e) => form.setFieldsValue({ rentalName: e.target.value.trim() })} />
                 </Form.Item>
               </Col>
               <Col span={24}>
@@ -385,6 +385,7 @@ export default function RentalForm({ ownerId, refetch }) {
                     rows={4}
                     placeholder="Nhập mô tả chi tiết về địa điểm"
                     size="large"
+                    onBlur={(e) => form.setFieldsValue({ description: e.target.value.trim() })}
                   />
                 </Form.Item>
               </Col>
@@ -478,7 +479,7 @@ export default function RentalForm({ ownerId, refetch }) {
                   style={formItemStyle}
                 >
                   <Flex align="center" gap={8}>
-                    <Input placeholder="Nhập số nhà, đường, khu vực" size="large" />
+                    <Input placeholder="Nhập số nhà, đường, khu vực" size="large" onBlur={(e) => form.setFieldsValue({ address: e.target.value.trim() })} />
                     <Button
                       type="primary"
                       icon={<EnvironmentOutlined />}

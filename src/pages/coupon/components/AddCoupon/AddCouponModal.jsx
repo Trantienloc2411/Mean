@@ -105,9 +105,25 @@ const AddCouponModal = ({ isOpen, onCancel, onConfirm, isLoading }) => {
           <Form.Item
             name="name"
             label="Tên mã giảm giá"
-            rules={[{ required: true, message: "Hãy nhập tên mã giảm giá" }]}
+            rules={[
+              { required: true, message: "Hãy nhập tên mã giảm giá" },
+              {
+                validator: (_, value) => {
+                  if (value && !value.trim()) {
+                    return Promise.reject(new Error('Tên mã giảm giá không được chỉ chứa khoảng trắng!'));
+                  }
+                  return Promise.resolve();
+                }
+              }
+            ]}
           >
-            <Input placeholder="Deal 10% cho bạn mới" />
+            <Input 
+              placeholder="Deal 10% cho bạn mới" 
+              onBlur={(e) => {
+                const value = e.target.value.trim();
+                form.setFieldsValue({ name: value });
+              }}
+            />
           </Form.Item>
 
           <Form.Item
@@ -118,8 +134,16 @@ const AddCouponModal = ({ isOpen, onCancel, onConfirm, isLoading }) => {
               { max: 8, message: "Mã giảm giá không được vượt quá 8 ký tự" },
               { min: 1, message: "Mã giảm giá phải có ít nhất 1 ký tự" },
               { pattern: /^[A-Z0-9]+$/, message: "Mã giảm giá chỉ được chứa chữ in hoa và số" },
+              {
+                validator: (_, value) => {
+                  if (value && !value.trim()) {
+                    return Promise.reject(new Error('Mã giảm giá không được chỉ chứa khoảng trắng!'));
+                  }
+                  return Promise.resolve();
+                }
+              }
             ]}
-            normalize={(value) => (value ? value.toUpperCase() : value)}
+            normalize={(value) => (value ? value.toUpperCase().trim() : value)}
           >
             <Input
               placeholder="DEAL10P"

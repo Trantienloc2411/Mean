@@ -4,6 +4,45 @@ import { useGetPolicySystemCategoryByIdQuery } from '../../../../redux/services/
 
 const { TextArea } = Input;
 
+const modalStyles = {
+  header: {
+    padding: '20px 24px',
+    marginBottom: 0,
+    borderBottom: '1px solid #f0f0f0'
+  },
+  content: {
+    padding: 0,
+    borderRadius: '8px'
+  },
+  body: {
+    padding: '24px'
+  },
+  input: {
+    borderRadius: '6px'
+  },
+  buttonGroup: {
+    display: 'flex',
+    justifyContent: 'flex-end',
+    gap: '12px',
+    marginTop: '24px'
+  },
+  button: {
+    minWidth: '100px',
+    height: '36px',
+    borderRadius: '6px',
+    fontWeight: 500
+  },
+  title: {
+    fontSize: '18px',
+    fontWeight: 600,
+    color: '#1a1a1a'
+  },
+  label: {
+    fontWeight: 500,
+    color: '#262626'
+  }
+};
+
 const PolicyCategoryModal = ({
   visible,
   isEditing,
@@ -50,23 +89,46 @@ const PolicyCategoryModal = ({
       width={600}
       closable={!isLoadingSubmit}
       forceRender
+      maskClosable={false}
+      centered
+      styles={{
+        header: modalStyles.header,
+        content: modalStyles.content,
+        body: modalStyles.body,
+        title: modalStyles.title
+      }}
     >
       <Form
         form={form}
         layout="vertical"
         onFinish={handleSubmit}
         initialValues={initialValues}
-        style={{ marginTop: 20 }}
       >
         <Form.Item
           label="Mã danh mục"
           name="categoryKey"
           rules={[
             { required: true, message: 'Vui lòng nhập mã danh mục!' },
-            { max: 50, message: 'Mã danh mục không được vượt quá 50 ký tự!' }
+            { max: 50, message: 'Mã danh mục không được vượt quá 50 ký tự!' },
+            {
+              validator: (_, value) => {
+                if (value && !value.trim()) {
+                  return Promise.reject(new Error('Mã danh mục không được chỉ chứa khoảng trắng!'));
+                }
+                return Promise.resolve();
+              }
+            }
           ]}
+          labelCol={{ style: modalStyles.label }}
         >
-          <Input placeholder="Nhập mã danh mục" />
+          <Input 
+            placeholder="Nhập mã danh mục" 
+            style={modalStyles.input}
+            onBlur={(e) => {
+              const value = e.target.value.trim();
+              form.setFieldsValue({ categoryKey: value });
+            }}
+          />
         </Form.Item>
 
         <Form.Item
@@ -74,32 +136,62 @@ const PolicyCategoryModal = ({
           name="categoryName"
           rules={[
             { required: true, message: 'Vui lòng nhập tên danh mục!' },
-            { max: 100, message: 'Tên danh mục không được vượt quá 100 ký tự!' }
+            { max: 100, message: 'Tên danh mục không được vượt quá 100 ký tự!' },
+            {
+              validator: (_, value) => {
+                if (value && !value.trim()) {
+                  return Promise.reject(new Error('Tên danh mục không được chỉ chứa khoảng trắng!'));
+                }
+                return Promise.resolve();
+              }
+            }
           ]}
+          labelCol={{ style: modalStyles.label }}
         >
-          <Input placeholder="Nhập tên danh mục" />
+          <Input 
+            placeholder="Nhập tên danh mục" 
+            style={modalStyles.input}
+            onBlur={(e) => {
+              const value = e.target.value.trim();
+              form.setFieldsValue({ categoryName: value });
+            }}
+          />
         </Form.Item>
 
         <Form.Item
           label="Mô tả"
           name="categoryDescription"
           rules={[
-            { max: 500, message: 'Mô tả không được vượt quá 500 ký tự!' }
+            { max: 500, message: 'Mô tả không được vượt quá 500 ký tự!' },
+            {
+              validator: (_, value) => {
+                if (value && !value.trim()) {
+                  return Promise.reject(new Error('Mô tả không được chỉ chứa khoảng trắng!'));
+                }
+                return Promise.resolve();
+              }
+            }
           ]}
+          labelCol={{ style: modalStyles.label }}
         >
           <TextArea 
             rows={4} 
             placeholder="Nhập mô tả danh mục"
             showCount
             maxLength={500}
+            style={modalStyles.input}
+            onBlur={(e) => {
+              const value = e.target.value.trim();
+              form.setFieldsValue({ categoryDescription: value });
+            }}
           />
         </Form.Item>
 
-        <Form.Item style={{ marginBottom: 0, textAlign: 'right' }}>
+        <div style={modalStyles.buttonGroup}>
           <Button 
             onClick={onCancel}
-            style={{ marginRight: 8 }}
             disabled={isLoadingSubmit}
+            style={modalStyles.button}
           >
             Hủy
           </Button>
@@ -107,10 +199,11 @@ const PolicyCategoryModal = ({
             type="primary" 
             htmlType="submit"
             loading={isLoadingSubmit}
+            style={modalStyles.button}
           >
             {isEditing ? 'Cập nhật' : 'Tạo mới'}
           </Button>
-        </Form.Item>
+        </div>
       </Form>
     </Modal>
   );

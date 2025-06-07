@@ -44,6 +44,7 @@ function PolicySystem() {
     dateRange: [],
   });
   const [searchTerm, setSearchTerm] = useState("");
+  const [displaySearchTerm, setDisplaySearchTerm] = useState("");
   const [filteredData, setFilteredData] = useState([]);
   const [selectedPolicy, setSelectedPolicy] = useState(null);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
@@ -242,7 +243,7 @@ function PolicySystem() {
   };
 
   const debouncedSearch = debounce((value) => {
-    setSearchTerm(value);
+    setSearchTerm(value.trim());
   }, 500);
 
   useEffect(() => {
@@ -254,7 +255,9 @@ function PolicySystem() {
       filtered = filtered.filter(
         (item) =>
           item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          item.description?.toLowerCase().includes(searchTerm.toLowerCase())
+          item.name.toLowerCase().includes(displaySearchTerm.toLowerCase()) ||
+          item.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          item.description?.toLowerCase().includes(displaySearchTerm.toLowerCase())
       );
     }
 
@@ -416,7 +419,17 @@ function PolicySystem() {
           <div className={styles.searchFilter}>
             <Input
               placeholder="Tìm kiếm tên chính sách"
-              onChange={(e) => debouncedSearch(e.target.value)}
+              value={displaySearchTerm}
+              onChange={(e) => {
+                const value = e.target.value;
+                setDisplaySearchTerm(value);
+                debouncedSearch(value);
+              }}
+              onBlur={(e) => {
+                const value = e.target.value;
+                setDisplaySearchTerm(value.trim());
+                setSearchTerm(value.trim());
+              }}
               style={{ width: "250px", marginRight: "10px" }}
             />
             <Dropdown

@@ -212,10 +212,14 @@ const UpdatePolicyModal = ({
       Name: policyData.policyTitle || "",
       Description: policyData.policyDescription || "",
       ApplyDate: policyData.startDate
-        ? dayjs(policyData.startDate, "DD/MM/YYYY HH:mm:ss")
+        ? dayjs(policyData.startDate).isValid()
+          ? dayjs(policyData.startDate)
+          : dayjs(policyData.startDate, "DD/MM/YYYY HH:mm:ss")
         : dayjs(),
       EndDate: policyData.endDate
-        ? dayjs(policyData.endDate, "DD/MM/YYYY HH:mm:ss")
+        ? dayjs(policyData.endDate).isValid()
+          ? dayjs(policyData.endDate)
+          : dayjs(policyData.endDate, "DD/MM/YYYY HH:mm:ss")
         : dayjs().add(1, "month"),
       Status: policyData.status || 1,
       values: policyValues.length > 0 ? policyValues : [{}],
@@ -252,14 +256,16 @@ const UpdatePolicyModal = ({
         Status: values.Status || initialValues?.Status || 1,
         isDelete: initialValues?.isDelete || false,
         updateBy: localStorage.getItem("user_id") || initialValues?.updateBy || "",
-        id: initialValues?._id || initialValues?.id
+        id: initialValues?._id || initialValues?.id,
+        startDate: values.ApplyDate ? dayjs(values.ApplyDate).format("DD/MM/YYYY HH:mm:ss") : null,
+        endDate: values.EndDate ? dayjs(values.EndDate).format("DD/MM/YYYY HH:mm:ss") : null
       };
 
       console.log("Formatted values to submit:", formattedValues);
 
       try {
         await onConfirm(formattedValues);
-        message.success("Cập nhật chính sách thành công");
+        // message.success("Cập nhật chính sách thành công");
         onCancel();
       } catch (apiError) {
         console.error("API error:", apiError);
@@ -345,6 +351,14 @@ const UpdatePolicyModal = ({
               }
               rules={[
                 { required: true, message: "Vui lòng nhập tên chính sách" },
+                {
+                  validator: (_, value) => {
+                    if (value && !value.trim()) {
+                      return Promise.reject(new Error('Tên chính sách không được chỉ chứa khoảng trắng!'));
+                    }
+                    return Promise.resolve();
+                  }
+                }
               ]}
             >
               <Input
@@ -352,6 +366,10 @@ const UpdatePolicyModal = ({
                 maxLength={100}
                 showCount
                 disabled={disabledInput}
+                onBlur={(e) => {
+                  const value = e.target.value.trim();
+                  form.setFieldsValue({ Name: value });
+                }}
               />
             </Form.Item>
 
@@ -365,7 +383,17 @@ const UpdatePolicyModal = ({
                   </Tooltip>
                 </Space>
               }
-              rules={[{ required: true, message: "Vui lòng nhập mô tả" }]}
+              rules={[
+                { required: true, message: "Vui lòng nhập mô tả" },
+                {
+                  validator: (_, value) => {
+                    if (value && !value.trim()) {
+                      return Promise.reject(new Error('Mô tả không được chỉ chứa khoảng trắng!'));
+                    }
+                    return Promise.resolve();
+                  }
+                }
+              ]}
             >
               <Input.TextArea
                 rows={3}
@@ -373,6 +401,10 @@ const UpdatePolicyModal = ({
                 maxLength={500}
                 disabled={disabledInput}
                 showCount
+                onBlur={(e) => {
+                  const value = e.target.value.trim();
+                  form.setFieldsValue({ Description: value });
+                }}
               />
             </Form.Item>
 
@@ -753,19 +785,6 @@ const UpdatePolicyModal = ({
                 style={{ flex: 1 }}
                 rules={[
                   { required: true, message: "Vui lòng chọn ngày bắt đầu" },
-                  ({ getFieldValue }) => ({
-                    validator(_, value) {
-                      if (!value) return Promise.resolve();
-                      const now = dayjs().startOf("minute");
-                      const selectedDate = dayjs(value);
-                      if (selectedDate.isBefore(now)) {
-                        return Promise.reject(
-                          new Error("Ngày bắt đầu phải sau hiện tại")
-                        );
-                      }
-                      return Promise.resolve();
-                    },
-                  }),
                 ]}
               >
                 <DatePicker
@@ -773,7 +792,6 @@ const UpdatePolicyModal = ({
                   format="HH:mm DD/MM/YYYY"
                   showTime={{ format: "HH:mm" }}
                   placeholder="Chọn ngày và giờ bắt đầu"
-                  disabledDate={(current) => current < dayjs().startOf("day")}
                 />
               </Form.Item>
 

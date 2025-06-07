@@ -43,15 +43,21 @@ export default function RentalLocation() {
     setSearchValue(e.target.value);
   };
 
+  const handleBlur = (e) => {
+    setSearchValue(e.target.value.trim());
+  };
+
   const handleFilterChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
   const applyFilters = (search, filterValues, data) => {
+    const searchTerm = search.trim().toLowerCase();
+    
     const filtered = data.filter((location) => {
-      const matchesSearch = location.name
+      const matchesSearch = searchTerm === "" || location.name
         .toLowerCase()
-        .includes(search.toLowerCase());
+        .includes(searchTerm);
       const matchesStatus =
         filterValues.statuses.length === 0 ||
         filterValues.statuses.includes(location.status);
@@ -104,6 +110,7 @@ export default function RentalLocation() {
               placeholder="Tìm kiếm địa điểm..."
               value={searchValue}
               onChange={handleSearch}
+              onBlur={handleBlur}
               style={{ width: 300 }}
             />
             <FilterRentalLocation
