@@ -22,6 +22,8 @@ export default function EditRentalLocationModal({
   rentalData,
   onUpdate,
 }) {
+  console.log(rentalData);
+
   const [form] = Form.useForm();
   const [updateRentalLocation, { isLoading }] =
     useUpdateRentalLocationMutation();
@@ -32,6 +34,7 @@ export default function EditRentalLocationModal({
       const isOverNight = rentalData.isOverNight;
       setIsOverNightChecked(isOverNight);
       form.setFieldsValue({
+        ...rentalData,
         name: rentalData.name,
         description: rentalData.description,
         openHour: isOverNight
@@ -61,7 +64,6 @@ export default function EditRentalLocationModal({
 
       const updatedData = {
         ...rentalData,
-
         name: values.name,
         description: values.description,
         openHour: values.isOverNight
@@ -71,13 +73,17 @@ export default function EditRentalLocationModal({
           ? "23:59"
           : values.closeHour.format("HH:mm"),
         isOverNight: values.isOverNight,
-        status: values.status,
+        status: values.status || rentalData.status,
         note: "Cập nhật trạng thái",
       };
 
       await updateRentalLocation({ id, updatedData }).unwrap();
       message.success("Cập nhật thành công!");
-      onUpdate((prev) => ({ ...prev, ...updatedData, id }));
+      onUpdate((prev) => ({
+        ...prev,
+        ...updatedData,
+        id,
+      }));
       onClose();
     } catch (error) {
       message.error("Cập nhật thất bại, vui lòng thử lại!");

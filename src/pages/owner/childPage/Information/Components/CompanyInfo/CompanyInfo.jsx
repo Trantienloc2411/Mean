@@ -91,7 +91,7 @@ const CompanyInfo = ({ companyInfo, onUpdate }) => {
 
       let businessLicensesFile = defaultData.file;
 
-      // Upload file if exists
+      // Upload file nếu có
       if (fileList.length > 0) {
         const file = fileList[0].originFileObj;
         const fileExt = file.name.split(".").pop();
@@ -111,7 +111,6 @@ const CompanyInfo = ({ companyInfo, onUpdate }) => {
           throw error;
         }
 
-        // Get public URL
         const { data: urlData } = supabase.storage
           .from("business")
           .getPublicUrl(filePath);
@@ -119,7 +118,6 @@ const CompanyInfo = ({ companyInfo, onUpdate }) => {
         businessLicensesFile = urlData.publicUrl;
       }
 
-      // Prepare the business data
       const businessData = {
         companyName: values.companyName,
         representativeName: values.representativeName,
@@ -129,7 +127,6 @@ const CompanyInfo = ({ companyInfo, onUpdate }) => {
         businessLicensesFile: businessLicensesFile,
       };
 
-      // Check if business information exists
       const businessInfoExists =
         companyInfo &&
         (companyInfo.companyName ||
@@ -139,30 +136,43 @@ const CompanyInfo = ({ companyInfo, onUpdate }) => {
           companyInfo.taxCode ||
           companyInfo.businessLicensesFile);
 
-      // Use the appropriate mutation based on whether business info exists
       if (businessInfoExists) {
-        // Get the business information ID
-        const businessInformationId = companyInfo.id; // Assuming the ID is stored in the companyInfo object
-
-        // For update, we send the ID and the updated business data
-        await updateBusiness({
-          id: businessInformationId,
-          updatedBusiness: businessData,
-        });
-
-        // message.success("Thông tin doanh nghiệp đã được cập nhật thành công!");
+        // UPDATE
+        try {
+          const businessInformationId = companyInfo.id;
+          await updateBusiness({
+            id: businessInformationId,
+            updatedBusiness: businessData,
+          }).unwrap();
+          message.success(
+            "Thông tin doanh nghiệp đã được cập nhật thành công!"
+          );
+        } catch (error) {
+          console.error("Error updating business:", error);
+          message.error("Có lỗi xảy ra khi cập nhật thông tin doanh nghiệp!");
+          return;
+        }
       } else {
-        // For create, we send the data with the owner ID
-        await createBusiness({
-          data: {
-            ...businessData,
-            ownerId: companyInfo.ownerId,
-          },
-        });
-        message.success("Thông tin doanh nghiệp đã được tạo thành công!");
+        // CREATE
+        try {
+          await createBusiness({
+            data: {
+              ...businessData,
+              ownerId: companyInfo.ownerId,
+            },
+          }).unwrap();
+          message.success("Thông tin doanh nghiệp đã được tạo thành công!");
+        } catch (error) {
+          console.error("Error creating business:", error);
+          // Notification.error({
+          //   message: "Có lỗi xảy ra khi tạo thông tin doanh nghiệp!",
+          //   description: error.data.message,
+          // });
+          message.error(error.data.message);
+          return;
+        }
       }
 
-      // If you have an onUpdate callback, call it with the updated data
       if (onUpdate) {
         onUpdate({
           ...companyInfo,
@@ -178,8 +188,12 @@ const CompanyInfo = ({ companyInfo, onUpdate }) => {
       setIsEditing(false);
       setFileList([]);
     } catch (error) {
-      console.error("Error updating company info:", error);
-      message.error("Có lỗi xảy ra khi cập nhật thông tin doanh nghiệp!");
+      console.error("Validation or Upload error:", error);
+      // message.error("Có lỗi xảy ra! Vui lòng kiểm tra lại thông tin.");
+      Notification.error({
+        message: error.data.message,
+        description: error.message || "Vui lòng kiểm tra lại thông tin.",
+      });
     } finally {
       setLoading(false);
     }

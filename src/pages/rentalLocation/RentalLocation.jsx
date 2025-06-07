@@ -104,6 +104,8 @@ export default function RentalLocation() {
     );
   }
 
+  
+
   return (
     <div className={styles.contentContainer}>
       <h1 className={styles.sectionTitle}>Quản lý địa điểm</h1>

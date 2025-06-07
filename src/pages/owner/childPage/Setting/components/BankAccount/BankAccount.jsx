@@ -154,7 +154,6 @@ export default function BankInfo({ bankData, refetch }) {
           ]}
         >
           <Input
-            readOnly={!isEditing}
             onChange={(e) => {
               const value = e.target.value
                 .normalize("NFD") // Tách dấu ra khỏi ký tự
@@ -294,7 +293,15 @@ function NotHaveBank({ ownerId, createBank, refetch }) {
               },
             ]}
           >
-            <Input />
+            <Input
+              onChange={(e) => {
+                const value = e.target.value
+                  .normalize("NFD") // Tách dấu ra khỏi ký tự
+                  .replace(/[\u0300-\u036f]/g, "") // Xóa dấu
+                  .toUpperCase(); // Chuyển thành in hoa
+                form.setFieldsValue({ bankAccountName: value });
+              }}
+            />
           </Form.Item>
         </Form>
       </Modal>
