@@ -244,8 +244,8 @@ export default function ListBooking({
         break
       default:
         sortedData.sort((a, b) => {
-          const dateA = dayjs(a._originalBooking.checkInHour, "DD/MM/YYYY HH:mm:ss")
-          const dateB = dayjs(b._originalBooking.checkInHour, "DD/MM/YYYY HH:mm:ss")
+          const dateA = dayjs(a._originalBooking.createdAt, "DD/MM/YYYY HH:mm:ss")
+          const dateB = dayjs(b._originalBooking.createdAt, "DD/MM/YYYY HH:mm:ss")
           return dateB.valueOf() - dateA.valueOf()
         })
     }
