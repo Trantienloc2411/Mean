@@ -5,8 +5,15 @@
     background-color: #f8f9fa;
     min-height: calc(100vh - 64px);
     
+    @media (max-width: 1024px) {
+      padding: 16px;
+      gap: 16px;
+    }
+    
     @media (max-width: 768px) {
       flex-direction: column;
+      padding: 12px;
+      gap: 12px;
     }
   }
   
