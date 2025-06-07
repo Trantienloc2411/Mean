@@ -90,9 +90,19 @@ export default function Transaction() {
     const isTypeMatch =
       filters.transactionTypes.length === 0 ||
       filters.transactionTypes.includes(item.typeTransaction.en);
+      
+    const searchLower = searchValue.toLowerCase();
+    const searchTrimmed = searchValue.trim().toLowerCase();
+    const transactionCode = (item.transactionCode || '').toLowerCase();
+    const bookingCode = (item.bookingCode || '').toLowerCase();
+    
     const isSearchMatch =
-      item.transactionCode.toLowerCase().includes(searchValue.toLowerCase()) ||
-      item.bookingCode.toLowerCase().includes(searchValue.toLowerCase());
+      transactionCode.includes(searchLower) ||
+      bookingCode.includes(searchLower) ||
+      (searchTrimmed && (
+        transactionCode.includes(searchTrimmed) ||
+        bookingCode.includes(searchTrimmed)
+      ));
 
     return isStatusMatch && isTypeMatch && isSearchMatch;
   });
@@ -239,6 +249,12 @@ export default function Transaction() {
                 className={styles.searchInput}
                 value={searchValue}
                 onChange={(e) => setSearchValue(e.target.value)}
+                onBlur={(e) => {
+                  const value = e.target.value.trim();
+                  if (value || !e.target.value) {
+                    setSearchValue(value);
+                  }
+                }}
               />
               <Button onClick={openFilterModal}>
                 <FilterOutlined />

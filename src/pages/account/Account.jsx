@@ -84,7 +84,7 @@ export default function Account() {
         }))
         .filter((user) => {
           const matchesSearch =
-            user.phone?.toLowerCase().includes(searchValue.toLowerCase()) ??
+            user.phone?.toLowerCase().includes(searchValue.trim().toLowerCase()) ??
             false;
           const matchesRole =
             selectedFilters.roles.length === 0 ||
@@ -182,7 +182,15 @@ export default function Account() {
                 placeholder="Tìm kiếm bằng số điện thoại"
                 className={styles.searchInput}
                 value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
+                onChange={(e) => {
+                  const displayValue = e.target.value;
+                  setSearchValue(displayValue);
+                }}
+                onBlur={(e) => {
+                  const value = e.target.value.trim();
+                  e.target.value = value;
+                  setSearchValue(value);
+                }}
               />
               <FilterAccount
                 users={users}

@@ -138,40 +138,46 @@ export default function ListBooking({
   }
 
   const matchesDateTimeFilter = (booking, dateFilter) => {
-    if (!dateFilter) return true
-    if (!booking || !booking._originalBooking) return false
+    if (!dateFilter) return true;
+    if (!booking || !booking._originalBooking) return false;
 
-    const checkInDateTime = parseDateTime(booking._originalBooking.checkInHour)
-    const checkOutDateTime = parseDateTime(booking._originalBooking.checkOutHour)
+    const checkInDateTime = parseDateTime(booking._originalBooking.checkInHour);
+    const checkOutDateTime = parseDateTime(booking._originalBooking.checkOutHour);
+    if (!checkInDateTime || !checkOutDateTime) return false;
 
-    if (!checkInDateTime || !checkOutDateTime) return false
-
-    if (dateFilter.date) {
-      const filterDate = dateFilter.date.format("DD/MM/YYYY")
-      const bookingDate = checkInDateTime.format("DD/MM/YYYY")
-
-      if (filterDate !== bookingDate) return false
+    // Check-in date filter
+    if (dateFilter.checkIn?.date) {
+      const filterDate = dateFilter.checkIn.date.format("DD/MM/YYYY");
+      const bookingCheckInDate = checkInDateTime.format("DD/MM/YYYY");
+      if (filterDate !== bookingCheckInDate) return false;
     }
 
-    if (dateFilter.timeRange) {
-      const [filterStartTime, filterEndTime] = dateFilter.timeRange
-
-      const checkInTime = checkInDateTime.hour() * 60 + checkInDateTime.minute()
-      const checkOutTime = checkOutDateTime.hour() * 60 + checkOutDateTime.minute()
-
-      const filterStartMinutes = filterStartTime.hour() * 60 + filterStartTime.minute()
-      const filterEndMinutes = filterEndTime.hour() * 60 + filterEndTime.minute()
-
-      const checkInInRange = checkInTime >= filterStartMinutes && checkInTime <= filterEndMinutes
-      const checkOutInRange = checkOutTime >= filterStartMinutes && checkOutTime <= filterEndMinutes
-      const bookingSpansFilterRange = checkInTime <= filterStartMinutes && checkOutTime >= filterEndMinutes
-
-      if (!(checkInInRange || checkOutInRange || bookingSpansFilterRange)) {
-        return false
-      }
+    // Check-in time filter
+    if (dateFilter.checkIn?.time) {
+      const checkInTime = checkInDateTime.hour() * 60 + checkInDateTime.minute();
+      const filterTime = dateFilter.checkIn.time.hour() * 60 + dateFilter.checkIn.time.minute();
+      
+      // Allow 30 minutes buffer before and after the selected time
+      if (Math.abs(checkInTime - filterTime) > 30) return false;
     }
 
-    return true
+    // Check-out date filter
+    if (dateFilter.checkOut?.date) {
+      const filterDate = dateFilter.checkOut.date.format("DD/MM/YYYY");
+      const bookingCheckOutDate = checkOutDateTime.format("DD/MM/YYYY");
+      if (filterDate !== bookingCheckOutDate) return false;
+    }
+
+    // Check-out time filter
+    if (dateFilter.checkOut?.time) {
+      const checkOutTime = checkOutDateTime.hour() * 60 + checkOutDateTime.minute();
+      const filterTime = dateFilter.checkOut.time.hour() * 60 + dateFilter.checkOut.time.minute();
+      
+      // Allow 30 minutes buffer before and after the selected time
+      if (Math.abs(checkOutTime - filterTime) > 30) return false;
+    }
+
+    return true;
   }
 
   const applyFilters = () => {
@@ -191,10 +197,14 @@ export default function ListBooking({
 
     if (searchTerm) {
       filtered = filtered.filter((item) => {
-        const customerName = item._originalBooking.customerId?.userId?.fullName?.toLowerCase() || ""
-        const bookingId = item._originalBooking?._id?.toLowerCase() || ""
-        return customerName.includes(searchTerm.toLowerCase()) ||
-          bookingId.includes(searchTerm.toLowerCase())
+        const searchLower = searchTerm.toLowerCase();
+        const customerName = item._originalBooking.customerId?.userId?.fullName?.toLowerCase() || "";
+        const bookingId = item._originalBooking?._id?.toLowerCase() || "";
+        const trimmedSearch = searchLower.trim();
+        
+        return customerName.includes(searchLower) || 
+               bookingId.includes(searchLower) ||
+               (trimmedSearch && (customerName.includes(trimmedSearch) || bookingId.includes(trimmedSearch)));
       })
     }
 
@@ -209,7 +219,36 @@ export default function ListBooking({
     }
 
     if (selectedValues.dateFilter) {
-      filtered = filtered.filter((item) => matchesDateTimeFilter(item, selectedValues.dateFilter))
+      filtered = filtered.filter((item) => {
+        if (!item._originalBooking) return false;
+
+        const checkInDateTime = parseDateTime(item._originalBooking.checkInHour);
+        const checkOutDateTime = parseDateTime(item._originalBooking.checkOutHour);
+        if (!checkInDateTime || !checkOutDateTime) return false;
+
+        const dateFilter = selectedValues.dateFilter;
+        
+        // Check-in filter
+        if (dateFilter.date) {
+          const filterDate = dateFilter.date.format("DD/MM/YYYY");
+          const bookingCheckInDate = checkInDateTime.format("DD/MM/YYYY");
+          if (filterDate !== bookingCheckInDate) return false;
+        }
+
+        if (dateFilter.timeRange && dateFilter.timeRange.length === 2) {
+          const [filterStartTime, filterEndTime] = dateFilter.timeRange;
+          const checkInTime = checkInDateTime.hour() * 60 + checkInDateTime.minute();
+          
+          const filterStartMinutes = filterStartTime.hour() * 60 + filterStartTime.minute();
+          const filterEndMinutes = filterEndTime.hour() * 60 + filterEndTime.minute();
+
+          if (checkInTime < filterStartMinutes || checkInTime > filterEndMinutes) {
+            return false;
+          }
+        }
+
+        return true;
+      });
     }
 
     // Apply sorting based on selected option
@@ -310,9 +349,9 @@ export default function ListBooking({
   }, 500)
 
   const handleSearch = (e) => {
-    const value = e.target.value
-    debouncedSearch(value)
-  }
+    const value = e.target.value;
+    setSearchTerm(value);
+  };
 
   useEffect(() => {
     return () => {
@@ -498,9 +537,11 @@ export default function ListBooking({
 
         return (
           <div className={styles.timeInfo}>
-            <div>{checkInDateTime.format("DD/MM/YYYY")}</div>
             <div>
-              {checkInDateTime.format("HH:mm")} - {checkOutDateTime.format("HH:mm")}
+              In: {checkInDateTime.format("DD/MM/YYYY HH:mm")}
+            </div>
+            <div>
+              Out: {checkOutDateTime.format("DD/MM/YYYY HH:mm")}
             </div>
           </div>
         )
@@ -591,11 +632,16 @@ export default function ListBooking({
       <div className={styles.listBooking}>
         <div className={styles.filterContainer}>
           <Input
-            placeholder="Tìm kiếm tên khách hàng hoặc mã đặt phòng"
+            prefix={<SearchOutlined />}
+            placeholder="Tìm kiếm theo tên khách hàng hoặc mã đặt phòng"
             onChange={handleSearch}
-            className={styles.searchInput}
-            prefix={<SearchOutlined style={{ color: "#9ca3af" }} />}
-            allowClear
+            onBlur={(e) => {
+              const value = e.target.value.trim();
+              e.target.value = value;
+              setSearchTerm(value);
+              handleSearch({ target: { value } });
+            }}
+            style={{ width: "300px" }}
           />
 
           <Select

@@ -32,7 +32,7 @@ const RevenueSummary = ({ summary }) => {
             precision={0}
             valueStyle={{ color: "#faad14", fontWeight: "bold" }}
             suffix="VND"
-            prefix={<PercentageOutlined />}
+            prefix={<DollarOutlined />}
             formatter={(value) => value.toLocaleString()}
           />
         </Card>

@@ -152,31 +152,33 @@ export default function ListBooking({
   const parseDateTime = (dateTimeStr) => dayjs(dateTimeStr, "DD/MM/YYYY HH:mm:ss")
 
   const matchesDateTimeFilter = (booking, dateFilter) => {
-    if (!dateFilter) return true
-    const checkInDateTime = parseDateTime(booking._originalBooking.checkInHour)
-    const checkOutDateTime = parseDateTime(booking._originalBooking.checkOutHour)
-    if (!checkInDateTime || !checkOutDateTime) return false
+    if (!dateFilter) return true;
+    if (!booking || !booking._originalBooking) return false;
 
+    const checkInDateTime = parseDateTime(booking._originalBooking.checkInHour);
+    if (!checkInDateTime) return false;
+
+    // Check-in date filter
     if (dateFilter.date) {
-      const filterDate = dateFilter.date.format("DD/MM/YYYY")
-      const bookingDate = checkInDateTime.format("DD/MM/YYYY")
-      if (filterDate !== bookingDate) return false
+      const filterDate = dateFilter.date.format("DD/MM/YYYY");
+      const bookingCheckInDate = checkInDateTime.format("DD/MM/YYYY");
+      if (filterDate !== bookingCheckInDate) return false;
     }
 
-    if (dateFilter.timeRange) {
-      const [filterStartTime, filterEndTime] = dateFilter.timeRange
-      const checkInTime = checkInDateTime.hour() * 60 + checkInDateTime.minute()
-      const checkOutTime = checkOutDateTime.hour() * 60 + checkOutDateTime.minute()
-      const filterStartMinutes = filterStartTime.hour() * 60 + filterStartTime.minute()
-      const filterEndMinutes = filterEndTime.hour() * 60 + filterEndTime.minute()
+    // Check-in time range filter
+    if (dateFilter.timeRange && dateFilter.timeRange.length === 2) {
+      const [filterStartTime, filterEndTime] = dateFilter.timeRange;
+      const checkInTime = checkInDateTime.hour() * 60 + checkInDateTime.minute(); // Convert to minutes
+      const filterStartMinutes = filterStartTime.hour() * 60 + filterStartTime.minute();
+      const filterEndMinutes = filterEndTime.hour() * 60 + filterEndTime.minute();
 
-      const checkInInRange = checkInTime >= filterStartMinutes && checkInTime <= filterEndMinutes
-      const checkOutInRange = checkOutTime >= filterStartMinutes && checkOutTime <= filterEndMinutes
-      const bookingSpansFilterRange = checkInTime <= filterStartMinutes && checkOutTime >= filterEndMinutes
-
-      return checkInInRange || checkOutInRange || bookingSpansFilterRange
+      // Check if check-in time falls within the filter range
+      if (checkInTime < filterStartMinutes || checkInTime > filterEndMinutes) {
+        return false;
+      }
     }
-    return true
+
+    return true;
   }
 
   const applyFilters = (filters) => {
@@ -354,10 +356,8 @@ export default function ListBooking({
         return (
           <div>
             <div className={styles.timeInfo}>
-              <div>{ci?.format("DD/MM/YYYY")}</div>
-              <div>
-                {ci?.format("HH:mm")} - {co?.format("HH:mm")}
-              </div>
+              <div>In: {ci?.format("DD/MM/YYYY HH:mm")}</div>
+              <div>Out: {co?.format("DD/MM/YYYY HH:mm")}</div>
             </div>
           </div>
         )
