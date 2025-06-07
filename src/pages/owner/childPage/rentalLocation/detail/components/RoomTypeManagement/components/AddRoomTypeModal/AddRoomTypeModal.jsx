@@ -3,6 +3,7 @@ import { Modal, Form, Select, Button, Spin, message, Alert } from "antd"
 import {
   useGetAccommodationTypesByOwnerQuery,
   useGetAllAccommodationTypesQuery,
+  useCreateAccommodationTypeMutation,
 } from "../../../../../../../../../redux/services/accommodationTypeApi"
 import { useUpdateRentalLocationMutation } from "../../../../../../../../../redux/services/rentalApi"
 import { PlusOutlined, HomeOutlined, AppstoreAddOutlined } from "@ant-design/icons"
@@ -35,7 +36,8 @@ const AddRoomTypeModal = ({
     skip: !rentalLocationId,
   })
 
-  const [updateRentalLocation, { isLoading: isUpdating, error: updateError }] = useUpdateRentalLocationMutation()
+  const [updateRentalLocation, { isLoading: isUpdating }] = useUpdateRentalLocationMutation()
+  const [createAccommodationType] = useCreateAccommodationTypeMutation()
 
   useEffect(() => {
     if (isOpen) {
@@ -81,21 +83,12 @@ const AddRoomTypeModal = ({
       await refetchAllAccommodationTypes()
 
       message.success("Thêm loại phòng thành công")
-
-      // Close the modal
       onCancel()
     } catch (error) {
       console.error("Error updating rental location:", error)
-
-      if (error.errorFields) {
-        message.error("Vui lòng kiểm tra lại thông tin nhập")
-      } else if (error.data?.message) {
-        setErrorMessage(error.data.message)
-      } else if (error.message) {
-        setErrorMessage(error.message)
-      } else {
-        setErrorMessage("Đã xảy ra lỗi khi thêm loại phòng")
-      }
+      const errorMsg = error.data?.message || error.message || "Đã xảy ra lỗi khi thêm loại phòng"
+      setErrorMessage(errorMsg)
+      message.error(errorMsg)
     } finally {
       setLocalSubmitting(false)
     }
@@ -103,19 +96,38 @@ const AddRoomTypeModal = ({
 
   const handleAddNewRoomType = async (newRoomTypeData) => {
     try {
+      setLocalSubmitting(true)
+      setErrorMessage("")
+
+      // Create the new room type
+      const response = await createAccommodationType({
+        ...newRoomTypeData,
+        ownerId,
+      }).unwrap()
+
+      const createdRoomType = response.data;
+
+      // Refetch to update the room types list
       await refetchAccommodationTypes()
-      if (newRoomTypeData && newRoomTypeData._id) {
-        const currentSelectedIds = form.getFieldValue("accommodationTypeIds") || []
-        form.setFieldsValue({
-          accommodationTypeIds: [...currentSelectedIds, newRoomTypeData._id],
-        })
-      }
+
+      // Get current selected values
+      const currentValues = form.getFieldValue('accommodationTypeIds') || []
+      
+      // Add the new room type ID to selection
+      form.setFieldsValue({
+        accommodationTypeIds: [...currentValues, createdRoomType.id]
+      })
 
       message.success("Tạo loại phòng mới thành công")
       setIsAddNewRoomTypeModalOpen(false)
+      return Promise.resolve(createdRoomType)
     } catch (error) {
-      message.error("Đã xảy ra lỗi khi tạo loại phòng mới")
       console.error("Error adding new room type:", error)
+      const errorMsg = error.data?.message || error.message || "Đã xảy ra lỗi khi tạo loại phòng mới"
+      message.error(errorMsg)
+      return Promise.reject(error)
+    } finally {
+      setLocalSubmitting(false)
     }
   }
 

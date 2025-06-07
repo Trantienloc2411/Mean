@@ -331,36 +331,7 @@ input[type="number"] {
   }
 }
 
-// Add styles for the modal
-:global(.ant-modal-content) {
-  border-radius: 12px !important;
-  box-shadow: 0 4px 24px rgba(0, 0, 0, 0.1) !important;
-}
 
-:global(.ant-modal-header) {
-  border-radius: 12px 12px 0 0 !important;
-  background-color: #18243C !important;
-  padding: 20px 24px !important;
-  border-bottom: none !important;
-}
-
-:global(.ant-modal-title) {
-  color: white !important;
-  font-size: 20px !important;
-  font-weight: 500 !important;
-}
-
-:global(.ant-modal-close) {
-  color: white !important;
-  
-  &:hover {
-    background-color: rgba(255, 255, 255, 0.1) !important;
-  }
-}
-
-:global(.ant-modal-body) {
-  padding: 0 !important;
-}
 
 @media (max-width: 768px) {
     .signupContainer {

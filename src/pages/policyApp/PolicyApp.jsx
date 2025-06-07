@@ -308,7 +308,10 @@ function PolicySystem() {
       title: "Mô tả",
       dataIndex: "description",
       key: "description",
-      render: (desc) => desc || "N/A",
+      render: (desc) => {
+        if (!desc) return "N/A";
+        return desc.length > 50 ? `${desc.substring(0, 50)}...` : desc;
+      },
     },
     {
       title: "Danh mục",

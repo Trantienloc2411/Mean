@@ -54,11 +54,19 @@ const NotificationDetailModal = ({ visible, notification, onClose, loading, onUp
       case 6:
         navigate(`/owner/${ownerId}/chat`);
         break;
-      case 1:
-      case 2:
-      case 3:
-      case 4:
       case 5:
+        navigate(`/owner/${ownerId}/rental-location`);
+        break;
+      case 4:
+        navigate(`/owner/${ownerId}/information`);
+        break;
+      case 3:
+        navigate(`/owner/${ownerId}/revenue`);
+        break;
+      case 2:
+        navigate(`/rental-location/${notification.rentalId}`);
+        break;
+      case 1:
         navigate(`/owner/${ownerId}/booking`);
         break;
       default:
@@ -75,7 +83,12 @@ const NotificationDetailModal = ({ visible, notification, onClose, loading, onUp
       onCancel={onClose}
       footer={[
         <Button key="navigate" type="primary" onClick={handleNavigate} style={{ marginRight: 8 }}>
-          {notification?.type === 6 ? 'Đi đến tin nhắn' : 'Đi đến đặt phòng'}
+          {notification?.type === 6 ? 'Đi đến tin nhắn' : 
+           notification?.type === 5 ? 'Đi đến nơi cho thuê' :
+           notification?.type === 4 ? 'Đi đến thông tin' :
+           notification?.type === 3 ? 'Đi đến doanh thu' :
+           notification?.type === 2 ? 'Đi đến đánh giá' :
+           'Đi đến đặt phòng'}
         </Button>,
         <Button key="close" onClick={onClose}>
           Đóng

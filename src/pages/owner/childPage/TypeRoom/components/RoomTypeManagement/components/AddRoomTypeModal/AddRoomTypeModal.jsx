@@ -57,7 +57,7 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
       .then((values) => {
         if (!ownerId) {
           message.error("Không tìm thấy thông tin chủ nhà!");
-          return;
+          return Promise.reject("Missing ownerId");
         }
 
         const formattedValues = {
@@ -70,28 +70,25 @@ const AddRoomTypeModal = ({ isOpen, onCancel, onConfirm }) => {
 
         setNameError(null);
         
-        onConfirm(formattedValues)
+        return onConfirm(formattedValues)
           .then(() => {
             form.resetFields();
             setFileList([]);
             setNameError(null);
-          })
-          .catch((error) => {
-            if (error?.data?.message?.includes('already exists for this owner') || 
-                error?.message?.includes('already exists for this owner')) {
-              setNameError('Tên loại phòng đã tồn tại, vui lòng nhập tên khác');
-              form.setFields([{
-                name: 'name',
-                errors: ['Tên loại phòng đã tồn tại, vui lòng nhập tên khác']
-              }]);
-              form.getFieldInstance('name')?.focus();
-            } else {
-              message.error(error?.data?.message || error?.message || "Thêm loại phòng thất bại");
-            }
           });
       })
-      .catch((info) => {
-        console.log('Validate Failed:', info);
+      .catch((error) => {
+        if (error?.data?.message?.includes('already exists for this owner') || 
+            error?.message?.includes('already exists for this owner')) {
+          setNameError('Tên loại phòng đã tồn tại, vui lòng nhập tên khác');
+          form.setFields([{
+            name: 'name',
+            errors: ['Tên loại phòng đã tồn tại, vui lòng nhập tên khác']
+          }]);
+          form.getFieldInstance('name')?.focus();
+        } else if (error !== "Missing ownerId") {
+          message.error(error?.data?.message || error?.message || "Thêm loại phòng thất bại");
+        }
       });
   };
 

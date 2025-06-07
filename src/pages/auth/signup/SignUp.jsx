@@ -364,7 +364,6 @@ const Signup = () => {
         footer={null}
         width={800}
         centered
-        maskStyle={{ backgroundColor: 'rgba(0, 0, 0, 0.45)', backdropFilter: 'blur(4px)' }}
       >
         <div className={styles.policyContent}>
           {termsData?.data ? (

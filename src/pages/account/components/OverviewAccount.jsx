@@ -35,7 +35,7 @@ export default function OverviewAccount({
       <CardDashboard
         title="Chủ cho thuê"
         value={
-          countAdmin > 1000 ? `${(countAdmin / 1000).toFixed(1)}K` : countAdmin
+          countOwner > 1000 ? `${(countOwner / 1000).toFixed(1)}K` : countOwner
         }
         iconName={<FaUser />}
         backgroundColorIcon="#d0cfff"
@@ -45,7 +45,7 @@ export default function OverviewAccount({
       <CardDashboard
         title="Quản trị viên"
         value={
-          countOwner > 1000 ? `${(countOwner / 1000).toFixed(1)}K` : countOwner
+          countAdmin > 1000 ? `${(countAdmin / 1000).toFixed(1)}K` : countAdmin
         }
         iconName={<FaUserTie />}
         backgroundColorIcon="#d0cfff"

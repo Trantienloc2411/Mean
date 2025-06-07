@@ -1,0 +1,56 @@
+.roomNumber {
+  font-weight: 500;
+  color: #2d3748;
+  font-size: 0.875rem;
+}
+
+.roomType {
+  font-size: 0.875rem;
+  color: #4a5568;
+}
+
+.maxPeople {
+  font-size: 0.875rem;
+  color: #4a5568;
+  text-align: center;
+}
+
+.price {
+  font-size: 0.875rem;
+  color: #2d3748;
+  font-weight: 500;
+}
+
+.serviceCount {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.875rem;
+  color: #4a5568;
+}
+
+.statusTag {
+  padding: 4px 12px;
+  border-radius: 16px;
+  font-size: 0.75rem;
+  font-weight: 500;
+}
+
+.actionDropdown {
+  display: flex;
+  justify-content: center;
+}
+
+.actionIcon {
+  font-size: 18px;
+  color: #4a5568;
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: all 0.2s;
+  
+  &:hover {
+    background-color: #f7fafc;
+    color: #3182ce;
+  }
+} 

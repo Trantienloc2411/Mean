@@ -195,7 +195,13 @@ function NotHaveBusiness({ refetch, createBusiness, ownerId }) {
           <Form.Item
             label="Mã số thuế"
             name="taxID"
-            rules={[{ required: true, message: "Vui lòng nhập mã số thuế!" }]}
+            rules={[
+              { required: true, message: "Vui lòng nhập mã số thuế!" },
+              {
+                pattern: /^[A-Z0-9]+$/,
+                message: "Mã số thuế chỉ được chứa chữ in hoa và số!"
+              }
+            ]}
           >
             <Input />
           </Form.Item>

@@ -296,7 +296,13 @@ const CompanyInfo = ({ companyInfo, onUpdate }) => {
       <Form.Item
         name="taxCode"
         label="Mã số thuế  "
-        rules={[{ required: true, message: "Vui lòng nhập mã số thuế!" }]}
+        rules={[
+          { required: true, message: "Vui lòng nhập mã số thuế!" },
+          {
+            pattern: /^[A-Z0-9]+$/,
+            message: "Mã số thuế chỉ được chứa chữ in hoa và số!"
+          }
+        ]}
       >
         <Input placeholder="Nhập mã số thuế" />
       </Form.Item>
